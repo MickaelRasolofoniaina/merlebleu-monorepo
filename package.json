@@ -1,0 +1,22 @@
+{
+  "name": "merlebleu-monorepo",
+  "version": "1.0.0",
+  "description": "Merlebleu Monorepo - Shared, API, and App",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "build": "npm run build --workspaces",
+    "build:shared": "npm run build -w merlebleu-shared",
+    "build:api": "npm run build -w merlebleu-api",
+    "build:app": "npm run build -w merlebleu-app",
+    "start:api": "npm start -w merlebleu-api",
+    "start:app": "npm start -w merlebleu-app",
+    "test": "npm test --workspaces",
+    "lint": "npm run lint --workspaces"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.3"
+  }
+}

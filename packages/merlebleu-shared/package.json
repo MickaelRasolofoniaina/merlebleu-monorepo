@@ -1,0 +1,12 @@
+{
+  "name": "@merlebleu/shared",
+  "version": "1.0.0",
+  "description": "Shared types, interfaces, and classes for Merlebleu",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch"
+  },
+  "dependencies": {}
+}
