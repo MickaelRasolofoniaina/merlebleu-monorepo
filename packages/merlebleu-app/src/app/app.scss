@@ -1,0 +1,40 @@
+header {
+  background-color: white;
+  padding: 16px;
+  margin-bottom: 15px;
+  h1 {
+    margin: 0;
+    font-size: 20px;
+    color: #1a237e;
+  }
+}
+
+.main {
+  display: flex;
+  flex-direction: row;
+  padding: 0 16px;
+  gap: 16px;
+}
+
+.sidebar {
+  width: 250px;
+  min-height: calc(100vh - 85px);
+  .menu {
+    display: block;
+    height: 100%;
+    div {
+      height: 100%;
+    }
+  }
+}
+
+.p-menu {
+  height: 100%;
+}
+
+.content {
+  padding: 12px 16px;
+  background-color: white;
+  border-radius: var(--p-menu-border-radius);
+  flex: 1;
+}

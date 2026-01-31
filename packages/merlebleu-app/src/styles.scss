@@ -1,0 +1,24 @@
+body {
+  background-color: #f1f5f9;
+  margin: 0;
+  padding: 0;
+}
+
+h2 {
+  margin-top: 0;
+  font-size: 20px;
+}
+
+.flex-row {
+  display: flex;
+  flex-direction: row;
+  gap: 16px;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+@for $i from 1 through 12 {
+  .col-#{$i} {
+    width: calc(100% / 12 * #{$i});
+  }
+}

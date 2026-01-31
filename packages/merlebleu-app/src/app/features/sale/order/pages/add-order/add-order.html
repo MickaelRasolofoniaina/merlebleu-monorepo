@@ -1,0 +1,114 @@
+<h2>Nouvelle commande</h2>
+<div class="flex-row">
+  <p-iftalabel class="col-3">
+    <p-datepicker [(ngModel)]="order.orderDate" dateFormat="dd/mm/yy" inputId="order-date" fluid />
+    <label for="order-date"> Date commande </label>
+  </p-iftalabel>
+  <p-iftalabel class="col-4">
+    <input type="text" pInputText [(ngModel)]="order.customer" inputId="customer" fluid />
+    <label for="customer"> Client </label>
+  </p-iftalabel>
+  <p-iftalabel class="col-4">
+    <input type="text" pInputText [(ngModel)]="order.contact" inputId="contact" fluid />
+    <label for="contact"> Contact </label>
+  </p-iftalabel>
+</div>
+<div class="flex-row">
+  <p-iftalabel class="col-11">
+    <textarea
+      rows="5"
+      cols="30"
+      pTextarea
+      [(ngModel)]="order.description"
+      inputId="description"
+      fluid
+    ></textarea>
+    <label for="description"> Description de la commande </label>
+  </p-iftalabel>
+</div>
+<div class="flex-row">
+  <p-iftalabel class="col-3">
+    <p-datepicker
+      [(ngModel)]="order.deliveryDate"
+      dateFormat="dd/mm/yy"
+      inputId="delivery-date"
+      fluid
+    />
+    <label for="delivery-date"> Date livraison </label>
+  </p-iftalabel>
+  <p-iftalabel class="col-6">
+    <input
+      type="text"
+      pInputText
+      [(ngModel)]="order.deliveryAddress"
+      inputId="delivery-address"
+      fluid
+    />
+    <label for="delivery-address"> Adresse de livraison </label>
+  </p-iftalabel>
+</div>
+<div class="flex-row">
+  <div class="col-3" style="display: flex; align-items: center">
+    <p-toggleswitch inputId="from-facebook" [(ngModel)]="order.isFromFacebook" />
+    <label for="from-facebook" class="ml-2" style="margin-left: 10px">
+      Commande depuis Facebook
+    </label>
+  </div>
+  @if (order.isFromFacebook) {
+    <p-iftalabel class="col-4">
+      <input
+        type="text"
+        pInputText
+        [(ngModel)]="order.facebookAccount"
+        inputId="facebook-account"
+        fluid
+      />
+      <label for="facebook-account"> Compte Facebook </label>
+    </p-iftalabel>
+  }
+</div>
+<div class="flex-row">
+  <p-iftalabel class="col-11">
+    <textarea
+      rows="5"
+      cols="30"
+      pTextarea
+      [(ngModel)]="order.remarks"
+      inputId="remarks"
+      fluid
+    ></textarea>
+    <label for="remarks"> Remarques </label>
+  </p-iftalabel>
+</div>
+<div class="flex-row">
+  <p-iftalabel class="col-3">
+    <p-inputNumber
+      [(ngModel)]="order.totalAmount"
+      [showClear]="true"
+      inputId="total-amount"
+      fluid
+    ></p-inputNumber>
+    <label for="total-amount"> Montant total </label>
+  </p-iftalabel>
+  <p-iftalabel class="col-3">
+    <p-inputNumber
+      [(ngModel)]="order.paidAmount"
+      [showClear]="true"
+      inputId="paid-amount"
+      fluid
+    ></p-inputNumber>
+    <label for="paid-amount"> Montant payé </label>
+  </p-iftalabel>
+  <p-iftalabel class="col-3">
+    <p-inputNumber
+      [(ngModel)]="order.remainingAmount"
+      inputId="remaining-amount"
+      fluid
+    ></p-inputNumber>
+    <label for="remaining-amount"> Montant restant </label>
+  </p-iftalabel>
+</div>
+<div class="flex-row">
+  <p-button label="Valider" severity="success" icon="pi pi-save" iconPos="right" />
+  <p-button label="Annuler" severity="danger" icon="pi pi-trash" iconPos="right" />
+</div>

@@ -1,0 +1,74 @@
+import { Component } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { RouterOutlet } from '@angular/router';
+import { MenuItem } from 'primeng/api';
+import { MenuModule } from 'primeng/menu';
+import { BadgeModule } from 'primeng/badge';
+import { RippleModule } from 'primeng/ripple';
+import { AvatarModule } from 'primeng/avatar';
+
+@Component({
+  selector: 'app-root',
+  imports: [CommonModule, RouterOutlet, MenuModule, BadgeModule, RippleModule, AvatarModule],
+  templateUrl: './app.html',
+  styleUrl: './app.scss',
+})
+export class App {
+  protected items: MenuItem[] = [
+    {
+      label: 'Ventes',
+      items: [
+        {
+          label: 'Journalier',
+          icon: 'pi pi-plus',
+        },
+        {
+          label: 'Commande',
+          icon: 'pi pi-cart-minus',
+        },
+        {
+          label: 'Caisse',
+          icon: 'pi pi-dollar',
+        },
+      ],
+    },
+    {
+      label: 'Dépenses',
+      items: [
+        {
+          label: 'Ingrédients',
+          icon: 'pi pi-truck',
+        },
+        {
+          label: 'Salaires',
+          icon: 'pi pi-wallet',
+        },
+        {
+          label: 'Autres',
+          icon: 'pi pi-receipt',
+        },
+      ],
+    },
+    {
+      label: 'Paramètres',
+      items: [
+        {
+          label: 'Utilisateurs',
+          icon: 'pi pi-user',
+        },
+        {
+          label: 'Notifications',
+          icon: 'pi pi-bell',
+        },
+        {
+          label: 'Autres',
+          icon: 'pi pi-wrench',
+        },
+        {
+          label: 'Déconnexion',
+          icon: 'pi pi-sign-out',
+        },
+      ],
+    },
+  ];
+}
