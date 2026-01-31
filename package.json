@@ -8,11 +8,13 @@
   ],
   "scripts": {
     "build": "npm run build --workspaces",
-    "build:shared": "npm run build -w merlebleu-shared",
+    "build:shared": "npm run build -w @merlebleu/shared",
     "build:api": "npm run build -w merlebleu-api",
     "build:app": "npm run build -w merlebleu-app",
     "start:api": "npm start -w merlebleu-api",
     "start:app": "npm start -w merlebleu-app",
+    "start:all": "npm run start:api && npm run start:app",
+    "generate:barrels": "npm run barrels -w @merlebleu/shared",
     "test": "npm test --workspaces",
     "lint": "npm run lint --workspaces"
   },

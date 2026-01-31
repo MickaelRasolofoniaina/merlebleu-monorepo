@@ -5,8 +5,12 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
+    "barrels": "barrelsby -d src -o src -l all",
     "build": "tsc",
     "dev": "tsc --watch"
   },
-  "dependencies": {}
+  "dependencies": {},
+  "devDependencies": {
+    "barrelsby": "^2.2.1"
+  }
 }
