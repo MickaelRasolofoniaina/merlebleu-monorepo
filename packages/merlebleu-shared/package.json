@@ -5,7 +5,7 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
-    "barrels": "barrelsby --delete",
+    "barrels": "barrelsby --delete --directory src",
     "build": "tsc",
     "dev": "tsc --watch"
   },
