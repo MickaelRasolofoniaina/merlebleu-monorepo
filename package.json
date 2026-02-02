@@ -9,6 +9,7 @@
   "scripts": {
     "build": "npm run build --workspaces",
     "build:shared": "npm run build -w @merlebleu/shared",
+    "dev:shared": "npm run dev -w @merlebleu/shared",
     "build:api": "npm run build -w merlebleu-api",
     "build:app": "npm run build -w merlebleu-app",
     "start:api": "npm start -w merlebleu-api",
