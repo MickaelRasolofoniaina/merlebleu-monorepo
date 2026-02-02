@@ -9,7 +9,7 @@ export const PaymentMethodSchema = new EntitySchema<PaymentMethod>({
     id: {
       type: 'uuid',
       primary: true,
-      generated: true,
+      generated: 'uuid',
     },
     name: {
       type: 'varchar',

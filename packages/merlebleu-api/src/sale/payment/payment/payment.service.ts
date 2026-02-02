@@ -11,8 +11,9 @@ export class PaymentService {
   ) {}
 
   async addPaymentMethod(paymentMethod: PaymentMethod): Promise<PaymentMethod> {
-    const paymentMethodEntity =
-      this.paymentMethodRepository.create(paymentMethod);
+    const paymentMethodEntity = this.paymentMethodRepository.create({
+      name: paymentMethod.name,
+    });
     return this.paymentMethodRepository.save(paymentMethodEntity);
   }
 

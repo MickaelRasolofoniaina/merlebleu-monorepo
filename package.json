@@ -12,7 +12,7 @@
     "dev:shared": "npm run dev -w @merlebleu/shared",
     "build:api": "npm run build -w @merlebleu/api",
     "build:app": "npm run build -w @merlebleu/ui",
-    "start:api": "npm start -w @merlebleu/api",
+    "start:api": "npm run start:dev -w @merlebleu/api",
     "start:app": "npm start -w @merlebleu/ui",
     "start:all": "npm run start:api && npm run start:app",
     "generate:barrels": "npm run barrels -w @merlebleu/shared",
