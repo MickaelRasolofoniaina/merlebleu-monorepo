@@ -12,14 +12,6 @@
     "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true,
     "baseUrl": ".",
-    "paths": {
-      "@merlebleu/shared": ["packages/merlebleu-shared/src"],
-      "@merlebleu/shared/*": ["packages/merlebleu-shared/src/*"],
-      "@merlebleu/api": ["packages/merlebleu-api/src"],
-      "@merlebleu/api/*": ["packages/merlebleu-api/src/*"],
-      "@merlebleu/app": ["packages/merlebleu-app/src"],
-      "@merlebleu/app/*": ["packages/merlebleu-app/src/*"]
-    },
     "composite": true
   },
   "include": ["packages/*/src/**/*"],
