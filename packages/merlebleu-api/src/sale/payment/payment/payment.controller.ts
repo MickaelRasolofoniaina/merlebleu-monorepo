@@ -1,4 +1,12 @@
-import { Body, Controller, Get, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Post,
+  Put,
+} from '@nestjs/common';
 import { PaymentService } from './payment.service';
 import { PaymentMethod } from '@merlebleu/shared';
 
@@ -14,5 +22,15 @@ export class PaymentController {
   @Get()
   getAllPaymentMethods() {
     return this.paymentService.getAllPaymentMethods();
+  }
+
+  @Put(':id')
+  updatePaymentMethod(@Param('id') id: string, @Body() body: PaymentMethod) {
+    return this.paymentService.updatePaymentMethod(id, body);
+  }
+
+  @Delete(':id')
+  deletePaymentMethod(@Param('id') id: string) {
+    return this.paymentService.deletePaymentMethod(id);
   }
 }
