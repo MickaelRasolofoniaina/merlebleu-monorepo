@@ -57,6 +57,11 @@ export class App {
           icon: 'pi pi-user',
         },
         {
+          label: 'Méthode de paiement',
+          icon: 'pi pi-credit-card',
+          routerLink: ['/sale/payment'],
+        },
+        {
           label: 'Notifications',
           icon: 'pi pi-bell',
         },
