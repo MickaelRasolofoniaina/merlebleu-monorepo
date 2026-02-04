@@ -9,7 +9,9 @@
     "build": "tsc",
     "dev": "tsc --watch"
   },
-  "dependencies": {},
+  "dependencies": {
+    "zod": "^4.1.13"
+  },
   "devDependencies": {
     "barrelsby": "^2.2.1"
   }
