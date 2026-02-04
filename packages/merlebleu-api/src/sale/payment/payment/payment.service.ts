@@ -33,7 +33,8 @@ export class PaymentService {
       throw new NotFoundException(`Payment method with id ${id} not found`);
     }
 
-    existingPaymentMethod.name = paymentMethod.name;
+    const { id: _ignoredId, ...updatableFields } = paymentMethod;
+    Object.assign(existingPaymentMethod, updatableFields);
 
     return this.paymentMethodRepository.save(existingPaymentMethod);
   }
