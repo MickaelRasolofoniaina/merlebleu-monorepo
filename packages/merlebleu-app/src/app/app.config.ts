@@ -5,7 +5,7 @@ import {
 } from '@angular/core';
 import { provideHttpClient } from '@angular/common/http';
 import { providePrimeNG } from 'primeng/config';
-import Lara from '@primeuix/themes/lara';
+import Preset from '@primeuix/themes/material';
 import { provideRouter } from '@angular/router';
 import { provideAnimations } from '@angular/platform-browser/animations';
 
@@ -20,7 +20,7 @@ export const appConfig: ApplicationConfig = {
     provideHttpClient(),
     providePrimeNG({
       theme: {
-        preset: Lara,
+        preset: Preset,
         options: { darkModeSelector: 'none' },
       },
     }),
