@@ -20,6 +20,7 @@ import { PaymentService } from './payment.service';
 export class Payment implements OnInit {
   private readonly paymentService = inject(PaymentService);
   paymentMethods: PaymentMethod[] = [];
+  isLoadingPayments = false;
   displayModal = false;
   displayEditModal = false;
   displayDeleteModal = false;
@@ -37,11 +38,14 @@ export class Payment implements OnInit {
   }
 
   loadPaymentMethods(): void {
+    this.isLoadingPayments = true;
     this.paymentService.getAllPaymentMethods().subscribe({
       next: (data) => {
         this.paymentMethods = data;
+        this.isLoadingPayments = false;
       },
       error: (error) => {
+        this.isLoadingPayments = false;
         console.error('Error loading payment methods:', error);
       },
     });

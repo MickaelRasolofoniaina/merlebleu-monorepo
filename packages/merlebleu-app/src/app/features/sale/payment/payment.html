@@ -6,7 +6,11 @@
     <p-button label="Ajouter" icon="pi pi-plus" (onClick)="addPaymentMethod()" />
   </div>
 
-  <p-table [value]="paymentMethods" [tableStyle]="{ 'min-width': '50rem' }">
+  <p-table
+    [value]="paymentMethods"
+    [loading]="isLoadingPayments"
+    [tableStyle]="{ 'min-width': '50rem' }"
+  >
     <ng-template #header>
       <tr>
         <th>Nom</th>
