@@ -4,7 +4,11 @@ import { ButtonModule } from 'primeng/button';
 import { DialogModule } from 'primeng/dialog';
 import { InputTextModule } from 'primeng/inputtext';
 import { FormsModule } from '@angular/forms';
-import { PaymentMethod, createPaymentMethodSchema } from '@merlebleu/shared';
+import {
+  PaymentMethod,
+  createPaymentMethodSchema,
+  updatePaymentMethodSchema,
+} from '@merlebleu/shared';
 import { PaymentService } from './payment.service';
 
 @Component({
@@ -17,8 +21,16 @@ export class Payment implements OnInit {
   private readonly paymentService = inject(PaymentService);
   paymentMethods: PaymentMethod[] = [];
   displayModal = false;
+  displayEditModal = false;
+  displayDeleteModal = false;
   newPaymentMethodName = '';
+  editPaymentMethodName = '';
+  editPaymentMethodId: string | null = null;
+  deletePaymentMethodName = '';
+  deletePaymentMethodId: string | null = null;
   validationError = '';
+  editValidationError = '';
+  deleteValidationError = '';
 
   ngOnInit(): void {
     this.loadPaymentMethods();
@@ -48,9 +60,6 @@ export class Payment implements OnInit {
       name: this.newPaymentMethodName,
     });
 
-    console.log(this.newPaymentMethodName, 'methode de paiement');
-    console.log(validation, 'validation');
-
     if (!validation.success) {
       this.validationError = validation.error.issues.map((issue) => issue.message).join(', ');
       return;
@@ -75,13 +84,86 @@ export class Payment implements OnInit {
     this.validationError = '';
   }
 
-  editPaymentMethod(payment: PaymentMethod): void {
-    console.log('Edit payment method:', payment);
-    // TODO: Open dialog to edit payment method
+  editPaymentMethod(id: string, editPaymentMethodName: string): void {
+    this.editPaymentMethodId = id;
+    this.editPaymentMethodName = editPaymentMethodName;
+    this.editValidationError = '';
+    this.displayEditModal = true;
   }
 
-  deletePaymentMethod(payment: PaymentMethod): void {
-    console.log('Delete payment method:', payment);
-    // TODO: Implement delete functionality
+  confirmUpdatePaymentMethod(): void {
+    this.editValidationError = '';
+
+    const validation = updatePaymentMethodSchema.safeParse({
+      name: this.editPaymentMethodName,
+    });
+
+    if (!validation.success) {
+      this.editValidationError = validation.error.issues.map((issue) => issue.message).join(', ');
+      return;
+    }
+
+    if (!this.editPaymentMethodId) {
+      this.editValidationError = 'Identifiant de méthode de paiement manquant';
+      return;
+    }
+
+    this.paymentService
+      .updatePaymentMethod(this.editPaymentMethodId, { name: this.editPaymentMethodName })
+      .subscribe({
+        next: () => {
+          this.loadPaymentMethods();
+          this.displayEditModal = false;
+          this.editPaymentMethodName = '';
+          this.editPaymentMethodId = null;
+          this.editValidationError = '';
+        },
+        error: (error) => {
+          console.error('Error updating payment method:', error);
+        },
+      });
+  }
+
+  cancelEditPaymentMethod(): void {
+    this.displayEditModal = false;
+    this.editPaymentMethodName = '';
+    this.editPaymentMethodId = null;
+    this.editValidationError = '';
+  }
+
+  deletePaymentMethod(id: string, name: string): void {
+    this.deletePaymentMethodId = id;
+    this.deletePaymentMethodName = name;
+    this.deleteValidationError = '';
+    this.displayDeleteModal = true;
+  }
+
+  confirmDeletePaymentMethod(): void {
+    this.deleteValidationError = '';
+
+    if (!this.deletePaymentMethodId) {
+      this.deleteValidationError = 'Identifiant de méthode de paiement manquant';
+      return;
+    }
+
+    this.paymentService.deletePaymentMethod(this.deletePaymentMethodId).subscribe({
+      next: () => {
+        this.loadPaymentMethods();
+        this.displayDeleteModal = false;
+        this.deletePaymentMethodName = '';
+        this.deletePaymentMethodId = null;
+        this.deleteValidationError = '';
+      },
+      error: (error) => {
+        console.error('Error deleting payment method:', error);
+      },
+    });
+  }
+
+  cancelDeletePaymentMethod(): void {
+    this.displayDeleteModal = false;
+    this.deletePaymentMethodName = '';
+    this.deletePaymentMethodId = null;
+    this.deleteValidationError = '';
   }
 }
