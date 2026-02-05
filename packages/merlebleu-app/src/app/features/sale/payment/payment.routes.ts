@@ -1,5 +1,5 @@
 import { Routes } from '@angular/router';
-import { Payment } from './pages/payment';
+import { Payment } from './payment';
 
 export const PAYMENT_ROUTES: Routes = [
   {
