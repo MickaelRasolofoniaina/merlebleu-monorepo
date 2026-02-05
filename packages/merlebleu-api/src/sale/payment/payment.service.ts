@@ -1,30 +1,36 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { PaymentMethod } from '@merlebleu/shared';
+import { PaymentMethodEntity } from './payment.entity';
+import {
+  CreatePaymentMethodDto,
+  UpdatePaymentMethodDto,
+} from '@merlebleu/shared';
 
 @Injectable()
 export class PaymentService {
   constructor(
-    @InjectRepository(PaymentMethod)
-    private paymentMethodRepository: Repository<PaymentMethod>,
+    @InjectRepository(PaymentMethodEntity)
+    private paymentMethodRepository: Repository<PaymentMethodEntity>,
   ) {}
 
-  async addPaymentMethod(paymentMethod: PaymentMethod): Promise<PaymentMethod> {
+  async addPaymentMethod(
+    paymentMethod: CreatePaymentMethodDto,
+  ): Promise<PaymentMethodEntity> {
     const paymentMethodEntity = this.paymentMethodRepository.create({
       name: paymentMethod.name,
     });
     return this.paymentMethodRepository.save(paymentMethodEntity);
   }
 
-  async getAllPaymentMethods(): Promise<PaymentMethod[]> {
+  async getAllPaymentMethods(): Promise<PaymentMethodEntity[]> {
     return this.paymentMethodRepository.find();
   }
 
   async updatePaymentMethod(
     id: string,
-    paymentMethod: PaymentMethod,
-  ): Promise<PaymentMethod> {
+    paymentMethod: UpdatePaymentMethodDto,
+  ): Promise<PaymentMethodEntity> {
     const existingPaymentMethod = await this.paymentMethodRepository.findOneBy({
       id,
     });
@@ -33,8 +39,7 @@ export class PaymentService {
       throw new NotFoundException(`Payment method with id ${id} not found`);
     }
 
-    const { id: _ignoredId, ...updatableFields } = paymentMethod;
-    Object.assign(existingPaymentMethod, updatableFields);
+    Object.assign(existingPaymentMethod, paymentMethod);
 
     return this.paymentMethodRepository.save(existingPaymentMethod);
   }

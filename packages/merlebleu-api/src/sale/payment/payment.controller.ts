@@ -8,14 +8,14 @@ import {
   Put,
 } from '@nestjs/common';
 import { PaymentService } from './payment.service';
-import { PaymentMethod } from '@merlebleu/shared';
+import { CreatePaymentMethodDto, UpdatePaymentMethodDto } from './payment.dto';
 
 @Controller('payment')
 export class PaymentController {
   constructor(private paymentService: PaymentService) {}
 
   @Post()
-  addPaymentMethod(@Body() body: PaymentMethod) {
+  addPaymentMethod(@Body() body: CreatePaymentMethodDto) {
     return this.paymentService.addPaymentMethod(body);
   }
 
@@ -25,7 +25,10 @@ export class PaymentController {
   }
 
   @Put(':id')
-  updatePaymentMethod(@Param('id') id: string, @Body() body: PaymentMethod) {
+  updatePaymentMethod(
+    @Param('id') id: string,
+    @Body() body: UpdatePaymentMethodDto,
+  ) {
     return this.paymentService.updatePaymentMethod(id, body);
   }
 

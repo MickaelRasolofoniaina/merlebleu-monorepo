@@ -1,10 +1,15 @@
 import { EntitySchema } from 'typeorm';
 import { PaymentMethod } from '@merlebleu/shared';
 
-export const PaymentMethodSchema = new EntitySchema<PaymentMethod>({
-  name: 'PaymentMethod',
+export class PaymentMethodEntity implements PaymentMethod {
+  id: string;
+  name: string;
+}
+
+export const PaymentMethodSchema = new EntitySchema<PaymentMethodEntity>({
+  name: 'PaymentMethodEntity',
   tableName: 'payment_methods',
-  target: PaymentMethod,
+  target: PaymentMethodEntity,
   columns: {
     id: {
       type: 'uuid',
