@@ -32,6 +32,15 @@ header {
   height: 100%;
 }
 
+:host ::ng-deep .p-menu-item-link-active {
+  background-color: var(--p-button-primary-background) !important;
+  color: var(--p-button-primary-color) !important;
+}
+
+:host ::ng-deep .p-menu-item-link-active .p-menu-item-icon {
+  color: var(--p-button-primary-color) !important;
+}
+
 .content {
   padding: 12px 16px;
   background-color: white;
