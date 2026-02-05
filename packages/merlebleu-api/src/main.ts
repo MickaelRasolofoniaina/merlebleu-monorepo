@@ -6,6 +6,12 @@ import { ZodValidationPipe } from 'nestjs-zod';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
+  // Enable CORS
+  app.enableCors({
+    origin: 'http://localhost:4200', // Angular dev server
+    credentials: true,
+  });
+
   // Enable Zod validation globally
   app.useGlobalPipes(new ZodValidationPipe());
 
