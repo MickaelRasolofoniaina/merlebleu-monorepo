@@ -33,7 +33,7 @@ header {
 }
 
 :host ::ng-deep .p-menu-item-link-active {
-  background-color: var(--p-button-primary-background) !important;
+  background-color: var(--p-button-warn-background) !important;
   color: var(--p-button-primary-color) !important;
 }
 
