@@ -30,9 +30,11 @@
     "@angular/router": "^20.2.0",
     "@merlebleu/shared": "*",
     "@primeuix/themes": "^2.0.2",
+    "@tailwindcss/postcss": "^4.1.18",
     "primeicons": "^7.0.0",
     "primeng": "^20.4.0",
     "rxjs": "~7.8.0",
+    "tailwindcss": "^4.1.18",
     "tslib": "^2.3.0",
     "zone.js": "~0.15.0"
   },
