@@ -6,10 +6,21 @@ import { MenuModule } from 'primeng/menu';
 import { BadgeModule } from 'primeng/badge';
 import { RippleModule } from 'primeng/ripple';
 import { AvatarModule } from 'primeng/avatar';
+import { Button } from 'primeng/button';
+import { OverlayBadgeModule } from 'primeng/overlaybadge';
 
 @Component({
   selector: 'app-root',
-  imports: [CommonModule, RouterOutlet, MenuModule, BadgeModule, RippleModule, AvatarModule],
+  imports: [
+    CommonModule,
+    RouterOutlet,
+    MenuModule,
+    BadgeModule,
+    RippleModule,
+    AvatarModule,
+    Button,
+    OverlayBadgeModule,
+  ],
   templateUrl: './app.html',
   styleUrl: './app.scss',
 })
@@ -72,10 +83,6 @@ export class App {
         {
           label: 'Autres',
           icon: 'pi pi-wrench',
-        },
-        {
-          label: 'Déconnexion',
-          icon: 'pi pi-sign-out',
         },
       ],
     },
