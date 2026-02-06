@@ -2,7 +2,8 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { SaleModule } from './sale/sale.module';
+import { SaleModule } from './features/sale/sale.module';
+import { IdentityModule } from './features/identity/identity.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { SaleModule } from './sale/sale.module';
       autoLoadEntities: true,
     }),
     SaleModule,
+    IdentityModule,
   ],
   controllers: [AppController],
   providers: [AppService],
