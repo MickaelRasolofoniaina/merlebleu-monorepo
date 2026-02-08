@@ -16,9 +16,11 @@ export const httpErrorInterceptor: HttpInterceptorFn = (req, next) => {
       const detail =
         error.status === 400
           ? (error.error?.message ?? error.error?.error ?? error.message)
-          : error.status === 401
-            ? "Vous n'avez pas l'autorisation nécessaire"
-            : "Veuillez réessayer plus tard ou contacter l'administrateur si le problème persiste.";
+          : "Veuillez réessayer plus tard ou contacter l'administrateur si le problème persiste.";
+
+      if (error.status === 401) {
+        return throwError(() => error);
+      }
 
       messageService.add({
         severity: 'error',

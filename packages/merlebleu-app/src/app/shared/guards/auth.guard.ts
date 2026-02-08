@@ -9,8 +9,10 @@ export const authGuard: CanActivateChildFn = () => {
 
   return authService.getSession().pipe(
     map(() => true),
-    catchError(() => {
-      void router.navigate(['/identity/login']);
+    catchError((error) => {
+      if (error?.status === 401) {
+        void router.navigate(['/identity/login']);
+      }
       return of(false);
     }),
   );
