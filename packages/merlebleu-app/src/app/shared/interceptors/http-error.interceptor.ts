@@ -8,13 +8,11 @@ export const httpErrorInterceptor: HttpInterceptorFn = (req, next) => {
 
   return next(req).pipe(
     catchError((error: HttpErrorResponse) => {
-      const detail =
-        error.error?.message ?? error.error?.error ?? error.message ?? 'Unexpected error occurred.';
-
       messageService.add({
         severity: 'error',
-        summary: "Une erreur est survenue durant l'opération",
-        detail,
+        summary: "Une erreur s'est produite!",
+        detail:
+          "Veuillez réessayer plus tard ou contacter l'administrateur si le problème persiste.",
         life: 5000,
       });
 
