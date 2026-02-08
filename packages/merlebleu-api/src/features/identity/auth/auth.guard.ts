@@ -17,18 +17,20 @@ export class AuthGuard implements CanActivate {
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    // const isPublic = this.reflector.getAllAndOverride<boolean>(SKIP_AUTH_KEY, [
-    //   context.getHandler(),
-    //   context.getClass(),
-    // ]);
-    const isPublic = true;
+    const isPublic = this.reflector.getAllAndOverride<boolean>(SKIP_AUTH_KEY, [
+      context.getHandler(),
+      context.getClass(),
+    ]);
+
+    // const isPublic = true;
+
     if (isPublic) {
       // 💡 See this condition
       return true;
     }
 
     const request = context.switchToHttp().getRequest();
-    const token = this.extractTokenFromHeader(request);
+    const token = this.extractTokenFromCookie(request);
     if (!token) {
       throw new UnauthorizedException();
     }
@@ -45,8 +47,20 @@ export class AuthGuard implements CanActivate {
     return true;
   }
 
-  private extractTokenFromHeader(request: Request): string | undefined {
-    const [type, token] = request.headers.authorization?.split(' ') ?? [];
-    return type === 'Bearer' ? token : undefined;
+  private extractTokenFromCookie(request: Request): string | undefined {
+    const rawCookie = request.headers.cookie;
+    if (!rawCookie) {
+      return undefined;
+    }
+
+    const cookies = rawCookie.split(';').map((cookie) => cookie.trim());
+    const accessToken = cookies.find((cookie) =>
+      cookie.startsWith('access_token='),
+    );
+    if (!accessToken) {
+      return undefined;
+    }
+
+    return accessToken.split('=')[1];
   }
 }

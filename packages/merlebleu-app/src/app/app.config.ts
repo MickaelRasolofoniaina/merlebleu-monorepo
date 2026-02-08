@@ -11,6 +11,7 @@ import { provideAnimations } from '@angular/platform-browser/animations';
 import { MessageService } from 'primeng/api';
 
 import { routes } from './app.routes';
+import { credentialsInterceptor } from './shared/interceptors/credentials.interceptor';
 import { httpErrorInterceptor } from './shared/interceptors/http-error.interceptor';
 
 export const appConfig: ApplicationConfig = {
@@ -19,7 +20,7 @@ export const appConfig: ApplicationConfig = {
     provideZoneChangeDetection({ eventCoalescing: true }),
     provideRouter(routes),
     provideAnimations(),
-    provideHttpClient(withInterceptors([httpErrorInterceptor])),
+    provideHttpClient(withInterceptors([credentialsInterceptor, httpErrorInterceptor])),
     MessageService,
     providePrimeNG({
       theme: {
