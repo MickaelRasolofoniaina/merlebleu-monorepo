@@ -13,4 +13,10 @@ export class AuthService {
   getSession(): Observable<unknown> {
     return this.http.get<unknown>(`${this.apiUrl}/me`, { withCredentials: true });
   }
+
+  logout(): Observable<{ success: boolean }> {
+    return this.http.post<{ success: boolean }>(`${this.apiUrl}/logout`, null, {
+      withCredentials: true,
+    });
+  }
 }

@@ -49,6 +49,18 @@ export class AuthController {
     return this.authService.verifyAccessToken(token);
   }
 
+  @HttpCode(HttpStatus.OK)
+  @Post('logout')
+  async logout(@Res({ passthrough: true }) res: express.Response) {
+    res.clearCookie('access_token', {
+      httpOnly: true,
+      sameSite: 'lax',
+      secure: process.env.NODE_ENV === 'production',
+    });
+
+    return { success: true };
+  }
+
   private extractTokenFromCookie(request: express.Request): string | undefined {
     const rawCookie = request.headers.cookie;
     if (!rawCookie) {

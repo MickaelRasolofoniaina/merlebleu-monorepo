@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterOutlet } from '@angular/router';
 import { MenuItem } from 'primeng/api';
@@ -8,6 +8,8 @@ import { RippleModule } from 'primeng/ripple';
 import { AvatarModule } from 'primeng/avatar';
 import { Button } from 'primeng/button';
 import { OverlayBadgeModule } from 'primeng/overlaybadge';
+import { Router } from '@angular/router';
+import { AuthService } from './shared/services/auth.service';
 
 @Component({
   selector: 'app-layout',
@@ -25,6 +27,9 @@ import { OverlayBadgeModule } from 'primeng/overlaybadge';
   styleUrl: './app-layout.scss',
 })
 export class AppLayout {
+  private readonly authService = inject(AuthService);
+  private readonly router = inject(Router);
+
   protected items: MenuItem[] = [
     {
       label: 'Ventes',
@@ -88,4 +93,15 @@ export class AppLayout {
       ],
     },
   ];
+
+  logout(): void {
+    this.authService.logout().subscribe({
+      next: () => {
+        void this.router.navigate(['/identity/login']);
+      },
+      error: () => {
+        void this.router.navigate(['/identity/login']);
+      },
+    });
+  }
 }
