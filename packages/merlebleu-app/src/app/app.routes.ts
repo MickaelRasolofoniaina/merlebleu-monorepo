@@ -6,8 +6,8 @@ export const routes: Routes = [
     loadChildren: () => import('./features/sale/sale.routes').then((m) => m.SALE_ROUTES),
   },
   {
-    path: '',
-    redirectTo: '/sale',
-    pathMatch: 'full',
+    path: 'identity',
+    loadChildren: () =>
+      import('./features/identity/identity.routes').then((m) => m.IDENTITY_ROUTES),
   },
 ];

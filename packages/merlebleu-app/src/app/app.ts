@@ -68,6 +68,7 @@ export class App {
         {
           label: 'Utilisateurs',
           icon: 'pi pi-user',
+          routerLink: ['/identity/user'],
         },
         {
           label: 'Rôles',

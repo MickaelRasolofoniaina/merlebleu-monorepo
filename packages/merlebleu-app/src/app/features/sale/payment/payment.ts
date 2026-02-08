@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit, signal } from '@angular/core';
 import { TableModule } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
 import { DialogModule } from 'primeng/dialog';
@@ -19,7 +19,7 @@ import { PaymentService } from './payment.service';
 })
 export class Payment implements OnInit {
   private readonly paymentService = inject(PaymentService);
-  paymentMethods: PaymentMethod[] = [];
+  paymentMethods = signal<PaymentMethod[]>([]);
   isLoadingPayments = false;
   displayModal = false;
   displayEditModal = false;
@@ -41,7 +41,7 @@ export class Payment implements OnInit {
     this.isLoadingPayments = true;
     this.paymentService.getAllPaymentMethods().subscribe({
       next: (data) => {
-        this.paymentMethods = data;
+        this.paymentMethods.set(data);
         this.isLoadingPayments = false;
       },
       error: (error) => {

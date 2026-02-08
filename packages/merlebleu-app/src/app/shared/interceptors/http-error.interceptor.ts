@@ -8,11 +8,15 @@ export const httpErrorInterceptor: HttpInterceptorFn = (req, next) => {
 
   return next(req).pipe(
     catchError((error: HttpErrorResponse) => {
+      const detail =
+        error.status === 400
+          ? error.error?.message ?? error.error?.error ?? error.message
+          : "Veuillez réessayer plus tard ou contacter l'administrateur si le problème persiste.";
+
       messageService.add({
         severity: 'error',
         summary: "Une erreur s'est produite!",
-        detail:
-          "Veuillez réessayer plus tard ou contacter l'administrateur si le problème persiste.",
+        detail,
         life: 5000,
       });
 

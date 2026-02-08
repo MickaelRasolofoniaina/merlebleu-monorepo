@@ -19,6 +19,10 @@ export const createUserSchema = z.object({
 
 export const updateUserSchema = z.object({
   name: z.string().min(1, "Veuillez remplir le nom de l'utilisateur"),
+  email: z
+    .string()
+    .min(1, "Veuillez remplir l'e-mail de l'utilisateur")
+    .regex(/^[^\s@]+@[^\s@]+\.[^\s@]+$/, "Format d'e-mail invalide"),
   password: z
     .string()
     .min(1, "Veuillez remplir le mot de passe de l'utilisateur")

@@ -36,7 +36,9 @@ export class UserService {
       return userDto;
     } catch (error) {
       if (error.code === '23505') {
-        throw new BadRequestException('Email already exists');
+        throw new BadRequestException(
+          'Un utilisateur avec cet e-mail existe déjà.',
+        );
       }
 
       console.error('Error creating user:', error);
