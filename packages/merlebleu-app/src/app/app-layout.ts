@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterOutlet } from '@angular/router';
 import { MenuItem } from 'primeng/api';
@@ -29,6 +29,7 @@ import { AuthService } from './shared/services/auth.service';
 export class AppLayout {
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
+  userInitials = '';
 
   protected items: MenuItem[] = [
     {
@@ -93,6 +94,21 @@ export class AppLayout {
       ],
     },
   ];
+
+  ngOnInit(): void {
+    this.authService.getSession().subscribe({
+      next: (session) => {
+        const name = this.getUserLabel(session);
+        this.userInitials = name.slice(0, 2).toUpperCase();
+      },
+    });
+  }
+
+  private getUserLabel(session: unknown): string {
+    const payload = session as { name?: string; email?: string };
+    const raw = (payload.name ?? payload.email ?? '').trim();
+    return raw.length > 0 ? raw : '??';
+  }
 
   logout(): void {
     this.authService.logout().subscribe({
