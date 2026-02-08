@@ -8,6 +8,7 @@ import { RippleModule } from 'primeng/ripple';
 import { AvatarModule } from 'primeng/avatar';
 import { Button } from 'primeng/button';
 import { OverlayBadgeModule } from 'primeng/overlaybadge';
+import { ToastModule } from 'primeng/toast';
 
 @Component({
   selector: 'app-root',
@@ -20,6 +21,7 @@ import { OverlayBadgeModule } from 'primeng/overlaybadge';
     AvatarModule,
     Button,
     OverlayBadgeModule,
+    ToastModule,
   ],
   templateUrl: './app.html',
   styleUrl: './app.scss',

@@ -1,0 +1,14 @@
+{
+  "folders": [
+    {
+      "path": "packages/merlebleu-app",
+    },
+    {
+      "path": "packages/merlebleu-api",
+    },
+    {
+      "path": "packages/merlebleu-shared",
+    },
+  ],
+  "settings": {},
+}
