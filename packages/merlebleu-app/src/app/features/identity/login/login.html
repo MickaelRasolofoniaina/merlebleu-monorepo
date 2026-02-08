@@ -47,10 +47,33 @@
           <small class="text-red-500 mt-1 block">{{ getSignInFieldError('password') }}</small>
         }
       </div>
+      <button
+        type="button"
+        class="text-sm font-semibold text-[#1b4fb6] hover:underline cursor-pointer self-end"
+        (click)="openForgotPassword()"
+      >
+        Mot de passe oublié?
+      </button>
       @if (loginError) {
         <small class="text-red-500 -mt-1">{{ loginError }}</small>
       }
+
       <p-button label="Se connecter" class="w-full" (onClick)="signIn()" />
     </div>
   </div>
 </div>
+
+<p-dialog
+  [(visible)]="displayForgotPassword"
+  [modal]="true"
+  [style]="{ width: '450px' }"
+  header="Mot de passe oublié?"
+>
+  <p>Veuillez contacter l'administrateur si vous avez une difficulté à se connecter</p>
+
+  <ng-template pTemplate="footer">
+    <div class="flex justify-end">
+      <p-button label="Fermer" severity="danger" (onClick)="closeForgotPassword()" />
+    </div>
+  </ng-template>
+</p-dialog>

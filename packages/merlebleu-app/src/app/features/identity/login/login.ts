@@ -4,13 +4,21 @@ import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
 import { InputGroupModule } from 'primeng/inputgroup';
 import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
+import { DialogModule } from 'primeng/dialog';
 import { signInUserSchema, SignInUserDto } from '@merlebleu/shared';
 import { LoginService } from './login.service';
 import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-login',
-  imports: [FormsModule, ButtonModule, InputTextModule, InputGroupModule, InputGroupAddonModule],
+  imports: [
+    FormsModule,
+    ButtonModule,
+    InputTextModule,
+    InputGroupModule,
+    InputGroupAddonModule,
+    DialogModule,
+  ],
   templateUrl: './login.html',
   styleUrl: './login.scss',
 })
@@ -24,6 +32,7 @@ export class Login {
   showPassword = false;
   signInValidationError: ReturnType<typeof signInUserSchema.safeParse>['error'] | null = null;
   loginError = '';
+  displayForgotPassword = false;
 
   togglePasswordVisibility(): void {
     this.showPassword = !this.showPassword;
@@ -56,5 +65,13 @@ export class Login {
     return (
       this.signInValidationError?.issues.find((issue) => issue.path[0] === field)?.message ?? ''
     );
+  }
+
+  openForgotPassword(): void {
+    this.displayForgotPassword = true;
+  }
+
+  closeForgotPassword(): void {
+    this.displayForgotPassword = false;
   }
 }
