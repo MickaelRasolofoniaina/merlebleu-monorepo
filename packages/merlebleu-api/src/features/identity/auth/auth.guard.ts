@@ -11,12 +11,22 @@ import { SKIP_AUTH_KEY } from 'src/shared/auth/public';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
+  private readonly bypassAuth: boolean;
+
   constructor(
     private jwtService: JwtService,
     private reflector: Reflector,
-  ) {}
+  ) {
+    this.bypassAuth =
+      (process.env.BYPASS_AUTH ?? 'false').toLowerCase() === 'true';
+    console.log(`AuthGuard initialized with bypassAuth=${this.bypassAuth}`);
+  }
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
+    if (this.bypassAuth) {
+      return true;
+    }
+
     const isPublic = this.reflector.getAllAndOverride<boolean>(SKIP_AUTH_KEY, [
       context.getHandler(),
       context.getClass(),
