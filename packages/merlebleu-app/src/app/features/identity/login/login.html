@@ -1,0 +1,56 @@
+<div
+  class="min-h-screen flex items-center justify-center px-4 py-8 bg-gradient-to-br from-[#1b4fb6] via-[#2f7edb] to-[#3fa0ff]"
+>
+  <div class="w-full max-w-[420px] bg-white rounded-2xl p-8 shadow-[0_20px_40px_rgba(0,0,0,0.18)]">
+    <h1 class="text-[28px] font-bold text-[#0f1f3d] tracking-[0.3px] mb-6 text-center">
+      Connexion | Merlebleu
+    </h1>
+    <div class="flex flex-col gap-5">
+      <div class="flex flex-col gap-2">
+        <label for="loginEmail" class="text-sm font-semibold text-[#1a2b4a]">Email</label>
+        <input
+          id="loginEmail"
+          type="email"
+          pInputText
+          [(ngModel)]="signInUserDto.email"
+          class="w-full"
+          placeholder="Entrez votre email"
+        />
+        @if (getSignInFieldError('email')) {
+          <small class="text-red-500 mt-1 block">{{ getSignInFieldError('email') }}</small>
+        }
+      </div>
+      <div class="flex flex-col gap-2">
+        <label for="loginPassword" class="text-sm font-semibold text-[#1a2b4a]">
+          Mot de passe
+        </label>
+        <p-inputgroup class="w-full">
+          <input
+            id="loginPassword"
+            [type]="showPassword ? 'text' : 'password'"
+            pInputText
+            [(ngModel)]="signInUserDto.password"
+            class="w-full"
+            placeholder="Entrez votre mot de passe"
+          />
+          <p-inputgroup-addon>
+            <p-button
+              type="button"
+              [icon]="showPassword ? 'pi pi-eye-slash' : 'pi pi-eye'"
+              [text]="true"
+              severity="secondary"
+              (onClick)="togglePasswordVisibility()"
+            />
+          </p-inputgroup-addon>
+        </p-inputgroup>
+        @if (getSignInFieldError('password')) {
+          <small class="text-red-500 mt-1 block">{{ getSignInFieldError('password') }}</small>
+        }
+      </div>
+      @if (loginError) {
+        <small class="text-red-500 -mt-1">{{ loginError }}</small>
+      }
+      <p-button label="Se connecter" class="w-full" (onClick)="signIn()" />
+    </div>
+  </div>
+</div>
