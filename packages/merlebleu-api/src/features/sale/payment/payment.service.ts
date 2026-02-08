@@ -24,7 +24,7 @@ export class PaymentService {
   }
 
   async getAllPaymentMethods(): Promise<PaymentMethodEntity[]> {
-    return this.paymentMethodRepository.find();
+    return this.paymentMethodRepository.find({ order: { name: 'ASC' } });
   }
 
   async updatePaymentMethod(
