@@ -281,12 +281,14 @@
           <label for="paymentMethodId" class="font-semibold text-slate-900">
             Methode de paiement
           </label>
-          <p-dropdown
+          <p-select
             inputId="paymentMethodId"
             name="paymentMethodId"
-            [options]="paymentMethodOptions"
             [(ngModel)]="order.paymentMethodId"
-            placeholder="Selectionner"
+            [options]="paymentMethods"
+            optionLabel="name"
+            optionValue="id"
+            placeholder="Selectionnez une methode de paiement"
             class="w-full"
           />
           @if (errorFor('paymentMethodId')) {

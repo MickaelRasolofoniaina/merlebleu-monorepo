@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 
@@ -9,10 +9,11 @@ import { ToggleSwitchModule } from 'primeng/toggleswitch';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { ButtonModule } from 'primeng/button';
 import { FieldsetModule } from 'primeng/fieldset';
-import { DropdownModule } from 'primeng/dropdown';
+import { SelectModule } from 'primeng/select';
 
-import { CreateOrderDto, OrderItemDto, createOrderSchema } from '@merlebleu/shared';
+import { CreateOrderDto, OrderItemDto, PaymentMethod, createOrderSchema } from '@merlebleu/shared';
 import { buildZodErrorMap } from '@shared/utils/zod-errors';
+import { PaymentService } from '@features/sale/payment/payment.service';
 
 @Component({
   selector: 'add-order',
@@ -25,13 +26,13 @@ import { buildZodErrorMap } from '@shared/utils/zod-errors';
     InputNumberModule,
     ButtonModule,
     FieldsetModule,
-    DropdownModule,
+    SelectModule,
     CommonModule,
   ],
   templateUrl: './add-order.html',
   styleUrl: './add-order.scss',
 })
-export class AddOrder {
+export class AddOrder implements OnInit {
   protected order: CreateOrderDto = {
     orderDate: new Date(),
     customerName: '',
@@ -50,11 +51,19 @@ export class AddOrder {
 
   protected validationErrors: Record<string, string> = {};
 
-  protected paymentMethodOptions = [
-    { label: 'Especes', value: 'cash' },
-    { label: 'Mobile money', value: 'mobile_money' },
-    { label: 'Carte bancaire', value: 'card' },
-  ];
+  protected paymentMethods: PaymentMethod[] = [];
+
+  constructor(private paymentService: PaymentService) {}
+
+  ngOnInit(): void {
+    this.loadPaymentMethods();
+  }
+
+  protected loadPaymentMethods(): void {
+    this.paymentService.getAllPaymentMethods().subscribe((methods) => {
+      this.paymentMethods = methods;
+    });
+  }
 
   protected addOrderItem(): void {
     this.order.orderItems.push(this.buildOrderItem());
