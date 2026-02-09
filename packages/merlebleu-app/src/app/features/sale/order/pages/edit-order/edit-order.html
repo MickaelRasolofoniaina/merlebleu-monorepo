@@ -1,0 +1,22 @@
+<div class="p-6 flex flex-col gap-6">
+  <div class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+    <div>
+      <h2 class="text-2xl font-semibold">Modifier commande</h2>
+      <p class="text-slate-500">
+        Modifiez les informations du client, la livraison et les articles.
+      </p>
+    </div>
+  </div>
+
+  @if (order) {
+    <order-form
+      [orderData]="order"
+      (orderSubmit)="handleSubmit($event)"
+      (orderReset)="handleReset()"
+    />
+  } @else {
+    <div class="flex items-center justify-center p-8">
+      <p class="text-slate-500">Chargement de la commande...</p>
+    </div>
+  }
+</div>
