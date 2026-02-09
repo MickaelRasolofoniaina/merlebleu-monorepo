@@ -5,6 +5,7 @@
 export * from "./domain/identity/auth/auth.dto";
 export * from "./domain/identity/user/user.dto";
 export * from "./domain/identity/user/user";
+export * from "./domain/sale/order/order.dto";
 export * from "./domain/sale/order/order";
 export * from "./domain/sale/payment/payment.dto";
 export * from "./domain/sale/payment/payment";

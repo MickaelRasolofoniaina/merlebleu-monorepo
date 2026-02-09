@@ -2,18 +2,21 @@ import { PaymentMethod } from "../payment/payment";
 
 export interface OrderItem {
   description: string;
+  size: number;
   totalAmount: number;
+  remarks?: string;
+  photos?: string[];
 }
 
 export interface Order {
   orderDate: Date;
   customerName: string;
   customerPhoneNumber: string;
-  orderItems: OrderItem[];
+  customerFacebookName?: string;
   deliveryDate: Date;
   deliveryAddress: string;
   isFromFacebook: boolean;
-  facebookMessageLink?: string;
+  orderItems: OrderItem[];
   remarks?: string;
   totalAmount: number;
   paidAmount: number;
