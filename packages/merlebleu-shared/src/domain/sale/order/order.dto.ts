@@ -52,3 +52,5 @@ export const updateOrderSchema = createOrderSchema;
 
 export type CreateOrderDto = z.infer<typeof createOrderSchema>;
 export type UpdateOrderDto = z.infer<typeof updateOrderSchema>;
+
+export type OrderItemDto = z.infer<typeof createOrderItemSchema>;

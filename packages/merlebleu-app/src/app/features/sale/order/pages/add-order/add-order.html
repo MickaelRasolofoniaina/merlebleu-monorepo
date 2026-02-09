@@ -1,114 +1,309 @@
-<h2>Nouvelle commande</h2>
-<div class="flex-row">
-  <p-iftalabel class="col-3">
-    <p-datepicker [(ngModel)]="order.orderDate" dateFormat="dd/mm/yy" inputId="order-date" fluid />
-    <label for="order-date"> Date commande </label>
-  </p-iftalabel>
-  <p-iftalabel class="col-4">
-    <input type="text" pInputText [(ngModel)]="order.customer" inputId="customer" fluid />
-    <label for="customer"> Client </label>
-  </p-iftalabel>
-  <p-iftalabel class="col-4">
-    <input type="text" pInputText [(ngModel)]="order.contact" inputId="contact" fluid />
-    <label for="contact"> Contact </label>
-  </p-iftalabel>
-</div>
-<div class="flex-row">
-  <p-iftalabel class="col-11">
-    <textarea
-      rows="5"
-      cols="30"
-      pTextarea
-      [(ngModel)]="order.description"
-      inputId="description"
-      fluid
-    ></textarea>
-    <label for="description"> Description de la commande </label>
-  </p-iftalabel>
-</div>
-<div class="flex-row">
-  <p-iftalabel class="col-3">
-    <p-datepicker
-      [(ngModel)]="order.deliveryDate"
-      dateFormat="dd/mm/yy"
-      inputId="delivery-date"
-      fluid
-    />
-    <label for="delivery-date"> Date livraison </label>
-  </p-iftalabel>
-  <p-iftalabel class="col-6">
-    <input
-      type="text"
-      pInputText
-      [(ngModel)]="order.deliveryAddress"
-      inputId="delivery-address"
-      fluid
-    />
-    <label for="delivery-address"> Adresse de livraison </label>
-  </p-iftalabel>
-</div>
-<div class="flex-row">
-  <div class="col-3" style="display: flex; align-items: center">
-    <p-toggleswitch inputId="from-facebook" [(ngModel)]="order.isFromFacebook" />
-    <label for="from-facebook" class="ml-2" style="margin-left: 10px">
-      Commande depuis Facebook
-    </label>
+<div class="p-6 flex flex-col gap-6">
+  <div class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+    <div>
+      <h2 class="text-2xl font-semibold">Nouvelle commande</h2>
+      <p class="text-slate-500">
+        Renseignez les informations du client, la livraison et les articles.
+      </p>
+    </div>
   </div>
-  @if (order.isFromFacebook) {
-    <p-iftalabel class="col-4">
-      <input
-        type="text"
-        pInputText
-        [(ngModel)]="order.facebookAccount"
-        inputId="facebook-account"
-        fluid
+
+  <form class="flex flex-col gap-6">
+    <p-fieldset
+      legend="Informations commande"
+      styleClass="border border-dashed border-slate-200 rounded-xl"
+    >
+      <p class="text-slate-500 mb-4">
+        Renseignez les informations du client, la livraison et les articles.
+      </p>
+      <div class="grid gap-4 [grid-template-columns:repeat(auto-fit,minmax(240px,1fr))]">
+        <div class="flex flex-col gap-2">
+          <label for="orderDate" class="font-semibold text-slate-900"> Date de commande </label>
+          <p-datepicker
+            inputId="orderDate"
+            name="orderDate"
+            [(ngModel)]="order.orderDate"
+            [showIcon]="true"
+            dateFormat="dd/mm/yy"
+            class="w-full"
+          />
+          @if (errorFor('orderDate')) {
+            <small class="text-red-500">{{ errorFor('orderDate') }}</small>
+          }
+        </div>
+        <div class="flex flex-col gap-2">
+          <label for="deliveryDate" class="font-semibold text-slate-900"> Date de livraison </label>
+          <p-datepicker
+            inputId="deliveryDate"
+            name="deliveryDate"
+            [(ngModel)]="order.deliveryDate"
+            [showIcon]="true"
+            dateFormat="dd/mm/yy"
+            class="w-full"
+          />
+          @if (errorFor('deliveryDate')) {
+            <small class="text-red-500">{{ errorFor('deliveryDate') }}</small>
+          }
+        </div>
+        <div class="flex flex-col gap-2">
+          <label for="customerName" class="font-semibold text-slate-900"> Nom du client </label>
+          <input
+            id="customerName"
+            name="customerName"
+            type="text"
+            pInputText
+            [(ngModel)]="order.customerName"
+            placeholder="Nom complet"
+            class="w-full"
+          />
+          @if (errorFor('customerName')) {
+            <small class="text-red-500">{{ errorFor('customerName') }}</small>
+          }
+        </div>
+        <div class="flex flex-col gap-2">
+          <label for="customerPhoneNumber" class="font-semibold text-slate-900">
+            Numéro de téléphone
+          </label>
+          <input
+            id="customerPhoneNumber"
+            name="customerPhoneNumber"
+            type="text"
+            pInputText
+            [(ngModel)]="order.customerPhoneNumber"
+            placeholder="034xxxxxxx 032xxxxxxx"
+            class="w-full"
+          />
+          <small class="text-slate-500"> Un ou plusieurs numeros separes par un espace. </small>
+          @if (errorFor('customerPhoneNumber')) {
+            <small class="text-red-500">{{ errorFor('customerPhoneNumber') }}</small>
+          }
+        </div>
+        <div class="flex flex-col gap-2">
+          <label for="customerFacebookName" class="font-semibold text-slate-900">
+            Compte Facebook
+          </label>
+          <input
+            id="customerFacebookName"
+            name="customerFacebookName"
+            type="text"
+            pInputText
+            [(ngModel)]="order.customerFacebookName"
+            placeholder="Compte Facebook (optionnel)"
+            class="w-full"
+          />
+          @if (errorFor('customerFacebookName')) {
+            <small class="text-red-500">{{ errorFor('customerFacebookName') }}</small>
+          }
+        </div>
+        <div class="flex flex-col gap-2">
+          <label for="deliveryAddress" class="font-semibold text-slate-900">
+            Adresse de livraison
+          </label>
+          <input
+            id="deliveryAddress"
+            name="deliveryAddress"
+            type="text"
+            pInputText
+            [(ngModel)]="order.deliveryAddress"
+            placeholder="Adresse complete"
+            class="w-full"
+          />
+          @if (errorFor('deliveryAddress')) {
+            <small class="text-red-500">{{ errorFor('deliveryAddress') }}</small>
+          }
+        </div>
+        <div class="flex flex-col gap-2 items-start">
+          <label for="isFromFacebook" class="font-semibold text-slate-900">
+            Commande via Facebook
+          </label>
+          <p-toggleSwitch
+            inputId="isFromFacebook"
+            name="isFromFacebook"
+            [(ngModel)]="order.isFromFacebook"
+          />
+          @if (errorFor('isFromFacebook')) {
+            <small class="text-red-500">{{ errorFor('isFromFacebook') }}</small>
+          }
+        </div>
+        <div class="flex flex-col gap-2 col-span-full">
+          <label for="remarks" class="font-semibold text-slate-900"> Remarques </label>
+          <textarea
+            id="remarks"
+            name="remarks"
+            pTextarea
+            [(ngModel)]="order.remarks"
+            rows="3"
+            placeholder="Remarques sur la commande"
+            class="w-full"
+          ></textarea>
+          @if (errorFor('remarks')) {
+            <small class="text-red-500">{{ errorFor('remarks') }}</small>
+          }
+        </div>
+      </div>
+    </p-fieldset>
+
+    <p-fieldset legend="Commandes" styleClass="border border-dashed border-slate-200 rounded-xl">
+      <div class="mb-4 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+        <p class="text-slate-500">Ajoutez un ou plusieurs commandes.</p>
+        <p-button label="Ajouter une commande" icon="pi pi-plus" (onClick)="addOrderItem()" />
+      </div>
+      @if (errorFor('orderItems')) {
+        <small class="text-red-500">{{ errorFor('orderItems') }}</small>
+      }
+
+      <div
+        class="border border-slate-200 rounded-xl p-4 mb-4 flex flex-col gap-4"
+        *ngFor="let item of order.orderItems; let i = index; trackBy: trackByIndex"
+      >
+        <div class="flex items-center justify-between">
+          <h4 class="text-base font-semibold">Commande numéro {{ i + 1 }}</h4>
+          <p-button
+            icon="pi pi-trash"
+            severity="danger"
+            [outlined]="true"
+            [disabled]="order.orderItems.length === 1"
+            (onClick)="removeOrderItem(i)"
+          />
+        </div>
+        <div class="grid gap-4 [grid-template-columns:repeat(auto-fit,minmax(240px,1fr))]">
+          <div class="flex flex-col gap-2">
+            <label for="description-{{ i }}" class="font-semibold text-slate-900">
+              Description
+            </label>
+            <input
+              id="description-{{ i }}"
+              name="description-{{ i }}"
+              type="text"
+              pInputText
+              [(ngModel)]="item.description"
+              placeholder="Ex: Forêt noire "
+              class="w-full"
+            />
+            @if (errorFor('orderItems.' + i + '.description')) {
+              <small class="text-red-500">{{ errorFor('orderItems.' + i + '.description') }}</small>
+            }
+          </div>
+          <div class="flex flex-col gap-2">
+            <label for="size-{{ i }}" class="font-semibold text-slate-900"> Personne </label>
+            <p-inputNumber
+              inputId="size-{{ i }}"
+              name="size-{{ i }}"
+              [(ngModel)]="item.size"
+              [min]="0"
+              class="w-full"
+            />
+            @if (errorFor('orderItems.' + i + '.size')) {
+              <small class="text-red-500">{{ errorFor('orderItems.' + i + '.size') }}</small>
+            }
+          </div>
+          <div class="flex flex-col gap-2">
+            <label for="itemTotal-{{ i }}" class="font-semibold text-slate-900"> Montant </label>
+            <p-inputNumber
+              inputId="itemTotal-{{ i }}"
+              name="itemTotal-{{ i }}"
+              [(ngModel)]="item.totalAmount"
+              [min]="0"
+              class="w-full"
+              (ngModelChange)="syncTotalFromItems()"
+            />
+            @if (errorFor('orderItems.' + i + '.totalAmount')) {
+              <small class="text-red-500">{{ errorFor('orderItems.' + i + '.totalAmount') }}</small>
+            }
+          </div>
+          <div class="flex flex-col gap-2 col-span-full">
+            <label for="itemRemarks-{{ i }}" class="font-semibold text-slate-900">
+              Remarques
+            </label>
+            <textarea
+              id="itemRemarks-{{ i }}"
+              name="itemRemarks-{{ i }}"
+              pTextarea
+              [(ngModel)]="item.remarks"
+              rows="2"
+              placeholder="Details supplementaires"
+              class="w-full"
+            ></textarea>
+            @if (errorFor('orderItems.' + i + '.remarks')) {
+              <small class="text-red-500">{{ errorFor('orderItems.' + i + '.remarks') }}</small>
+            }
+          </div>
+        </div>
+      </div>
+    </p-fieldset>
+
+    <p-fieldset legend="Paiement" styleClass="border border-dashed border-slate-200 rounded-xl">
+      <div class="grid gap-4 [grid-template-columns:repeat(auto-fit,minmax(240px,1fr))]">
+        <div class="flex flex-col gap-2">
+          <label for="totalAmount" class="font-semibold text-slate-900"> Montant total </label>
+          <p-inputNumber
+            inputId="totalAmount"
+            name="totalAmount"
+            [(ngModel)]="order.totalAmount"
+            [min]="0"
+            class="w-full"
+            (ngModelChange)="updateBalanceAmount()"
+            disabled=""
+          />
+          @if (errorFor('totalAmount')) {
+            <small class="text-red-500">{{ errorFor('totalAmount') }}</small>
+          }
+        </div>
+        <div class="flex flex-col gap-2">
+          <label for="paidAmount" class="font-semibold text-slate-900"> Montant paye </label>
+          <p-inputNumber
+            inputId="paidAmount"
+            name="paidAmount"
+            [(ngModel)]="order.paidAmount"
+            [min]="0"
+            class="w-full"
+            (ngModelChange)="updateBalanceAmount()"
+          />
+          @if (errorFor('paidAmount')) {
+            <small class="text-red-500">{{ errorFor('paidAmount') }}</small>
+          }
+        </div>
+        <div class="flex flex-col gap-2">
+          <label for="balanceAmount" class="font-semibold text-slate-900"> Solde </label>
+          <p-inputNumber
+            inputId="balanceAmount"
+            name="balanceAmount"
+            [(ngModel)]="order.balanceAmount"
+            [min]="0"
+            class="w-full"
+            disabled=""
+          />
+          @if (errorFor('balanceAmount')) {
+            <small class="text-red-500">{{ errorFor('balanceAmount') }}</small>
+          }
+        </div>
+        <div class="flex flex-col gap-2">
+          <label for="paymentMethodId" class="font-semibold text-slate-900">
+            Methode de paiement
+          </label>
+          <p-dropdown
+            inputId="paymentMethodId"
+            name="paymentMethodId"
+            [options]="paymentMethodOptions"
+            [(ngModel)]="order.paymentMethodId"
+            placeholder="Selectionner"
+            class="w-full"
+          />
+          @if (errorFor('paymentMethodId')) {
+            <small class="text-red-500">{{ errorFor('paymentMethodId') }}</small>
+          }
+        </div>
+      </div>
+    </p-fieldset>
+
+    <div class="flex flex-col gap-3 lg:flex-row lg:justify-end lg:items-center">
+      <p-button label="Enregistrer" icon="pi pi-check" (onClick)="submit()" />
+      <p-button
+        label="Reinitialiser"
+        icon="pi pi-refresh"
+        severity="secondary"
+        (onClick)="reset()"
       />
-      <label for="facebook-account"> Compte Facebook </label>
-    </p-iftalabel>
-  }
-</div>
-<div class="flex-row">
-  <p-iftalabel class="col-11">
-    <textarea
-      rows="5"
-      cols="30"
-      pTextarea
-      [(ngModel)]="order.remarks"
-      inputId="remarks"
-      fluid
-    ></textarea>
-    <label for="remarks"> Remarques </label>
-  </p-iftalabel>
-</div>
-<div class="flex-row">
-  <p-iftalabel class="col-3">
-    <p-inputNumber
-      [(ngModel)]="order.totalAmount"
-      [showClear]="true"
-      inputId="total-amount"
-      fluid
-    ></p-inputNumber>
-    <label for="total-amount"> Montant total </label>
-  </p-iftalabel>
-  <p-iftalabel class="col-3">
-    <p-inputNumber
-      [(ngModel)]="order.paidAmount"
-      [showClear]="true"
-      inputId="paid-amount"
-      fluid
-    ></p-inputNumber>
-    <label for="paid-amount"> Montant payé </label>
-  </p-iftalabel>
-  <p-iftalabel class="col-3">
-    <p-inputNumber
-      [(ngModel)]="order.remainingAmount"
-      inputId="remaining-amount"
-      fluid
-    ></p-inputNumber>
-    <label for="remaining-amount"> Montant restant </label>
-  </p-iftalabel>
-</div>
-<div class="flex-row">
-  <p-button label="Valider" severity="success" icon="pi pi-save" iconPos="right" />
-  <p-button label="Annuler" severity="danger" icon="pi pi-trash" iconPos="right" />
+    </div>
+  </form>
 </div>
