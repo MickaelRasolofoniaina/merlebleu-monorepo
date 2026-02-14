@@ -51,4 +51,14 @@ export class PaymentService {
       throw new NotFoundException(`Payment method with id ${id} not found`);
     }
   }
+
+  async getPaymentMethod(id: string): Promise<PaymentMethodEntity> {
+    const paymentMethod = await this.paymentMethodRepository.findOneBy({ id });
+
+    if (!paymentMethod) {
+      throw new NotFoundException(`Payment method with id ${id} not found`);
+    }
+
+    return paymentMethod;
+  }
 }
