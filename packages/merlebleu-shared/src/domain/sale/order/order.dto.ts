@@ -13,7 +13,7 @@ export const createOrderItemSchema = z.object({
 });
 
 export const createOrderSchema = z.object({
-  orderDate: z.date(),
+  orderDate: z.string().datetime(),
   customerName: z.string().min(1, "Veuillez remplir le nom du client"),
   customerPhoneNumber: z
     .string()
@@ -23,11 +23,15 @@ export const createOrderSchema = z.object({
       "Le numéro de téléphone doit commencer par 034, 032, 033, 038 ou 036 et contenir exactement 10 chiffres (séparés par des espaces si plusieurs)",
     ),
   customerFacebookName: z.string().optional(),
-  deliveryDate: z.date().refine((value) => {
-    const startOfToday = new Date();
-    startOfToday.setHours(0, 0, 0, 0);
-    return value >= startOfToday;
-  }, "La date de livraison doit être aujourd'hui ou une date future"),
+  deliveryDate: z
+    .string()
+    .datetime()
+    .refine((value) => {
+      const deliveryDate = new Date(value);
+      const startOfToday = new Date();
+      startOfToday.setHours(0, 0, 0, 0);
+      return deliveryDate >= startOfToday;
+    }, "La date de livraison doit être aujourd'hui ou une date future"),
   deliveryAddress: z.string().min(1, "Veuillez remplir l'adresse de livraison"),
   isFromFacebook: z.boolean(),
   orderItems: z
