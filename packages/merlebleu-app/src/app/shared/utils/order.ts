@@ -1,6 +1,7 @@
 import { OrderStatus } from '@merlebleu/shared';
 
 export interface OrderStatusConfig {
+  index: number;
   value: OrderStatus;
   label: string;
   icon: string;
@@ -12,6 +13,7 @@ export interface OrderStatusConfig {
 
 export const ORDER_STATUSES: OrderStatusConfig[] = [
   {
+    index: 0,
     value: OrderStatus.TODO,
     label: 'À faire',
     icon: 'pi pi-clock',
@@ -21,6 +23,7 @@ export const ORDER_STATUSES: OrderStatusConfig[] = [
     badgeSeverity: 'contrast',
   },
   {
+    index: 1,
     value: OrderStatus.INPROGRESS,
     label: 'En cours',
     icon: 'pi pi-spinner',
@@ -30,6 +33,7 @@ export const ORDER_STATUSES: OrderStatusConfig[] = [
     badgeSeverity: 'info',
   },
   {
+    index: 2,
     value: OrderStatus.TODELIVER,
     label: 'À livrer',
     icon: 'pi pi-truck',
@@ -39,6 +43,7 @@ export const ORDER_STATUSES: OrderStatusConfig[] = [
     badgeSeverity: 'warn',
   },
   {
+    index: 3,
     value: OrderStatus.DELIVERED,
     label: 'Livré',
     icon: 'pi pi-check-circle',
@@ -48,6 +53,7 @@ export const ORDER_STATUSES: OrderStatusConfig[] = [
     badgeSeverity: 'success',
   },
   {
+    index: 4,
     value: OrderStatus.CANCELLED,
     label: 'Annulé',
     icon: 'pi pi-times-circle',

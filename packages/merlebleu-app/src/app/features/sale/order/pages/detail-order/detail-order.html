@@ -13,7 +13,7 @@
   </div>
 
   @if (order) {
-    <div class="bg-white rounded-lg p-6">
+    <!-- <div class="bg-white rounded-lg p-6">
       <div class="flex items-center justify-between gap-4">
         @for (status of orderStatuses; track status.value; let index = $index; let last = $last) {
           <div class="flex items-center flex-1">
@@ -34,7 +34,16 @@
           </div>
         }
       </div>
-    </div>
+    </div> -->
+    <p-stepper [value]="activeStepIndex" [linear]="true">
+      <p-step-list>
+        @for (status of orderStatuses; track status.value; let index = $index; let last = $last) {
+          @if (!last) {
+            <p-step [value]="status.index">{{ status.label }}</p-step>
+          }
+        }
+      </p-step-list>
+    </p-stepper>
   }
 
   @if (isLoading) {

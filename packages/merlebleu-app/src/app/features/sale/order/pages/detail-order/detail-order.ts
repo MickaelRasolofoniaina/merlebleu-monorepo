@@ -5,13 +5,14 @@ import { finalize } from 'rxjs';
 import { PanelModule } from 'primeng/panel';
 import { ButtonModule } from 'primeng/button';
 import { MessageService } from 'primeng/api';
-import { Order, OrderStatus } from '@merlebleu/shared';
+import { Stepper, StepList, Step } from 'primeng/stepper';
+import { Order } from '@merlebleu/shared';
 import { OrderService } from '../../order.service';
 import { ORDER_STATUSES } from '@shared/utils/order';
 
 @Component({
   selector: 'detail-order',
-  imports: [CommonModule, RouterLink, PanelModule, ButtonModule],
+  imports: [CommonModule, RouterLink, PanelModule, ButtonModule, Stepper, StepList, Step],
   templateUrl: './detail-order.html',
   styleUrl: './detail-order.scss',
 })
