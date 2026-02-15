@@ -1,5 +1,5 @@
 import { Component, inject } from '@angular/core';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { finalize } from 'rxjs';
 import { CreateOrderDto } from '@merlebleu/shared';
 import { OrderForm } from '../../components/order-form/order-form';
@@ -7,7 +7,7 @@ import { OrderService } from '../../order.service';
 
 @Component({
   selector: 'add-order',
-  imports: [OrderForm],
+  imports: [OrderForm, RouterLink],
   templateUrl: './add-order.html',
   styleUrl: './add-order.scss',
 })

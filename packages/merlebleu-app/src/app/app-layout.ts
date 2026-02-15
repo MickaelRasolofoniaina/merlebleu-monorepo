@@ -42,7 +42,7 @@ export class AppLayout {
         {
           label: 'Commande',
           icon: 'pi pi-cart-minus',
-          routerLink: ['/sale/order/add'],
+          routerLink: ['/sale/order/'],
         },
         {
           label: 'Caisse',

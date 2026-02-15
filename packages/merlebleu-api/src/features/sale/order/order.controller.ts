@@ -27,6 +27,11 @@ export class OrderController {
     return this.orderService.listOrders(pageNumber, limitNumber);
   }
 
+  @Get(':id')
+  getOrderById(@Param('id') id: string) {
+    return this.orderService.getOrderById(id);
+  }
+
   @Put(':id')
   updateOrder(@Param('id') id: string, @Body() body: UpdateOrderDto) {
     return this.orderService.updateOrder(id, body);

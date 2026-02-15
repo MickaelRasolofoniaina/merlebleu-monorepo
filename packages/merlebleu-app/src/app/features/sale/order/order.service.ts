@@ -32,6 +32,10 @@ export class OrderService {
     }>(`${this.apiUrl}?page=${page}&limit=${limit}`);
   }
 
+  getOrderById(id: string): Observable<Order> {
+    return this.http.get<Order>(`${this.apiUrl}/${id}`);
+  }
+
   updateOrder(id: string, order: UpdateOrderDto): Observable<Order> {
     return this.http.put<Order>(`${this.apiUrl}/${id}`, order);
   }

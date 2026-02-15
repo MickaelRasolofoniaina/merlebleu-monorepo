@@ -135,11 +135,11 @@ export class OrderForm implements OnInit, OnChanges {
 
   private buildDefaultOrder(): CreateOrderDto {
     return {
-      orderDate: new Date(),
+      orderDate: new Date().toISOString(),
       customerName: '',
       customerPhoneNumber: '',
       customerFacebookName: '',
-      deliveryDate: new Date(),
+      deliveryDate: new Date().toISOString(),
       deliveryAddress: '',
       isFromFacebook: false,
       orderItems: [this.buildOrderItem()],
@@ -164,9 +164,6 @@ export class OrderForm implements OnInit, OnChanges {
   private deepCopyOrder(dto: CreateOrderDto | UpdateOrderDto): CreateOrderDto | UpdateOrderDto {
     return {
       ...dto,
-      orderDate: typeof dto.orderDate === 'string' ? new Date(dto.orderDate) : dto.orderDate,
-      deliveryDate:
-        typeof dto.deliveryDate === 'string' ? new Date(dto.deliveryDate) : dto.deliveryDate,
       orderItems: dto.orderItems.map((item) => ({ ...item })),
     };
   }

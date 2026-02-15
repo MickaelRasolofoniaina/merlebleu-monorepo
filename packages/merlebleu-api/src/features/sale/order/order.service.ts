@@ -51,6 +51,19 @@ export class OrderService {
     };
   }
 
+  async getOrderById(id: string): Promise<OrderEntity> {
+    const order = await this.orderRepository.findOne({
+      where: { id },
+      relations: { orderItems: true, paymentMethod: true },
+    });
+
+    if (!order) {
+      throw new NotFoundException(`Order with id ${id} not found`);
+    }
+
+    return this.sanitizeOrder(order);
+  }
+
   async updateOrder(id: string, order: UpdateOrderDto): Promise<OrderEntity> {
     const existingOrder = await this.orderRepository.findOne({
       where: { id },
@@ -105,10 +118,18 @@ export class OrderService {
   }
 
   private splitOrderInput(order: CreateOrderDto | UpdateOrderDto) {
-    const { paymentMethodId, orderItems, ...orderData } = order;
+    const {
+      paymentMethodId,
+      orderItems,
+      orderDate,
+      deliveryDate,
+      ...orderData
+    } = order;
 
     return {
-      orderData,
+      orderData: {
+        ...orderData,
+      },
       orderItems,
     };
   }

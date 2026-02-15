@@ -9,11 +9,11 @@ export interface OrderItem {
 }
 
 export interface Order {
-  orderDate: Date;
+  orderDate: string;
   customerName: string;
   customerPhoneNumber: string;
   customerFacebookName?: string;
-  deliveryDate: Date;
+  deliveryDate: string;
   deliveryAddress: string;
   isFromFacebook: boolean;
   orderItems: OrderItem[];

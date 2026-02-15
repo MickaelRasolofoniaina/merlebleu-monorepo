@@ -17,7 +17,7 @@ export class OrderEntity implements Order {
   customerName: string;
   customerPhoneNumber: string;
   customerFacebookName?: string | undefined;
-  deliveryDate: Date;
+  deliveryDate: string;
   deliveryAddress: string;
   isFromFacebook: boolean;
   orderItems: OrderItemEntity[];
@@ -26,7 +26,7 @@ export class OrderEntity implements Order {
   paidAmount: number;
   balanceAmount: number;
   paymentMethod: PaymentMethodEntity;
-  orderDate: Date;
+  orderDate: string;
 }
 
 // OrderItem schema
@@ -47,7 +47,7 @@ export const OrderItemSchema = new EntitySchema<OrderItemEntity>({
       type: 'int',
     },
     totalAmount: {
-      type: 'decimal',
+      type: 'integer',
     },
     remarks: {
       type: 'varchar',
@@ -101,13 +101,13 @@ export const OrderSchema = new EntitySchema<OrderEntity>({
       type: 'boolean',
     },
     totalAmount: {
-      type: 'decimal',
+      type: 'integer',
     },
     paidAmount: {
-      type: 'decimal',
+      type: 'integer',
     },
     balanceAmount: {
-      type: 'decimal',
+      type: 'integer',
     },
     orderDate: {
       type: 'timestamp',
