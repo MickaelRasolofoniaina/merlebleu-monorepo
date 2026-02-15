@@ -12,7 +12,8 @@
         <p-datepicker
           inputId="orderDate"
           name="orderDate"
-          [(ngModel)]="order.orderDate"
+          [ngModel]="orderDateValue"
+          (ngModelChange)="onOrderDateChange($event)"
           [showIcon]="true"
           dateFormat="dd/mm/yy"
           class="w-full"
@@ -26,7 +27,8 @@
         <p-datepicker
           inputId="deliveryDate"
           name="deliveryDate"
-          [(ngModel)]="order.deliveryDate"
+          [ngModel]="deliveryDateValue"
+          (ngModelChange)="onDeliveryDateChange($event)"
           [showIcon]="true"
           dateFormat="dd/mm/yy"
           class="w-full"

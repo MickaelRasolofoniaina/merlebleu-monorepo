@@ -54,6 +54,9 @@ export class OrderForm implements OnInit, OnChanges {
 
   protected order: CreateOrderDto | UpdateOrderDto = this.buildDefaultOrder();
 
+  protected orderDateValue: Date | null = null;
+  protected deliveryDateValue: Date | null = null;
+
   protected validationErrors: Record<string, string> = {};
 
   protected paymentMethods: PaymentMethod[] = [];
@@ -62,11 +65,13 @@ export class OrderForm implements OnInit, OnChanges {
 
   ngOnInit(): void {
     this.loadPaymentMethods();
+    this.syncDateValuesFromOrder();
   }
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['orderData'] && this.orderData) {
       this.order = this.deepCopyOrder(this.orderData);
+      this.syncDateValuesFromOrder();
     }
   }
 
@@ -121,8 +126,19 @@ export class OrderForm implements OnInit, OnChanges {
     } else {
       this.order = this.buildDefaultOrder();
     }
+    this.syncDateValuesFromOrder();
     this.validationErrors = {};
     this.orderReset.emit();
+  }
+
+  protected onOrderDateChange(value: Date | null): void {
+    this.orderDateValue = value;
+    this.order.orderDate = this.formatIsoDate(value);
+  }
+
+  protected onDeliveryDateChange(value: Date | null): void {
+    this.deliveryDateValue = value;
+    this.order.deliveryDate = this.formatIsoDate(value);
   }
 
   protected trackByIndex(index: number): number {
@@ -166,5 +182,23 @@ export class OrderForm implements OnInit, OnChanges {
       ...dto,
       orderItems: dto.orderItems.map((item) => ({ ...item })),
     };
+  }
+
+  private syncDateValuesFromOrder(): void {
+    this.orderDateValue = this.parseIsoDate(this.order.orderDate);
+    this.deliveryDateValue = this.parseIsoDate(this.order.deliveryDate);
+  }
+
+  private parseIsoDate(value?: string): Date | null {
+    if (!value) {
+      return null;
+    }
+
+    const parsed = new Date(value);
+    return Number.isNaN(parsed.getTime()) ? null : parsed;
+  }
+
+  private formatIsoDate(value: Date | null): string {
+    return value ? value.toISOString() : '';
   }
 }
