@@ -13,6 +13,7 @@ import { DatePickerModule } from 'primeng/datepicker';
 import { SelectModule } from 'primeng/select';
 import { formatDate } from '@shared/utils/date';
 import { getPageFromFirstRows } from '@shared/utils/pagination';
+import { ORDER_STATUSES, getOrderStatusLabel, getOrderStatusColor } from '@shared/utils/order';
 
 @Component({
   selector: 'list-order',
@@ -46,13 +47,10 @@ export class ListOrder implements OnInit {
     orderStatus: '',
   };
 
-  protected statusOptions = [
-    { label: 'À faire', value: OrderStatus.TODO },
-    { label: 'En cours', value: OrderStatus.INPROGRESS },
-    { label: 'À livrer', value: OrderStatus.TODELIVER },
-    { label: 'Livré', value: OrderStatus.DELIVERED },
-    { label: 'Annulé', value: OrderStatus.CANCELLED },
-  ];
+  protected statusOptions = ORDER_STATUSES.map((s) => ({
+    label: s.label,
+    value: s.value,
+  }));
 
   ngOnInit(): void {
     this.loadOrders();
@@ -114,46 +112,13 @@ export class ListOrder implements OnInit {
   }
 
   protected getStatus(orderStatus: OrderStatus | undefined): string {
-    if (!orderStatus) {
-      return '-';
-    }
-
-    switch (orderStatus) {
-      case OrderStatus.TODO:
-        return 'À faire';
-      case OrderStatus.INPROGRESS:
-        return 'En cours';
-      case OrderStatus.TODELIVER:
-        return 'À livrer';
-      case OrderStatus.DELIVERED:
-        return 'Livré';
-      case OrderStatus.CANCELLED:
-        return 'Annulé';
-      default:
-        return '-';
-    }
+    return getOrderStatusLabel(orderStatus);
   }
 
   protected getStatusColor(
     orderStatus: OrderStatus | undefined,
-  ): 'info' | 'success' | 'warn' | 'danger' | 'contrast' | undefined | null {
-    if (!orderStatus) {
-      return 'contrast';
-    }
-    switch (orderStatus) {
-      case OrderStatus.TODO:
-        return 'contrast';
-      case OrderStatus.INPROGRESS:
-        return 'info';
-      case OrderStatus.TODELIVER:
-        return 'warn';
-      case OrderStatus.DELIVERED:
-        return 'success';
-      case OrderStatus.CANCELLED:
-        return 'danger';
-      default:
-        return 'contrast';
-    }
+  ): 'info' | 'success' | 'warn' | 'danger' | 'contrast' {
+    return getOrderStatusColor(orderStatus);
   }
 
   protected getDescription(order: Order): string {

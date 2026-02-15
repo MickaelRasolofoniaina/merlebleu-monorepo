@@ -129,6 +129,23 @@ export class OrderService {
     return this.sanitizeOrder(savedOrder);
   }
 
+  async updateOrderStatus(id: string, status: OrderStatus): Promise<boolean> {
+    const existingOrder = await this.orderRepository.findOne({
+      where: { id },
+      relations: { orderItems: false, paymentMethod: false },
+    });
+
+    if (!existingOrder) {
+      throw new NotFoundException(`Order with id ${id} not found`);
+    }
+
+    existingOrder.orderStatus = status;
+
+    await this.orderRepository.save(existingOrder);
+
+    return true;
+  }
+
   async deleteOrder(id: string): Promise<void> {
     const deleteResult = await this.orderRepository.delete(id);
 

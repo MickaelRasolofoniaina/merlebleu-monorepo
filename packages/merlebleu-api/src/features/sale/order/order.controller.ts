@@ -9,7 +9,11 @@ import {
   Query,
 } from '@nestjs/common';
 import { OrderService } from './order.service';
-import { CreateOrderDto, UpdateOrderDto } from './order.dto';
+import {
+  CreateOrderDto,
+  UpdateOrderDto,
+  UpdateOrderStatusDto,
+} from './order.dto';
 import { OrderStatus } from '@merlebleu/shared';
 
 @Controller('order')
@@ -48,6 +52,14 @@ export class OrderController {
   @Put(':id')
   updateOrder(@Param('id') id: string, @Body() body: UpdateOrderDto) {
     return this.orderService.updateOrder(id, body);
+  }
+
+  @Put(':id/status')
+  updateOrderStatus(
+    @Param('id') id: string,
+    @Body() body: UpdateOrderStatusDto,
+  ) {
+    return this.orderService.updateOrderStatus(id, body.status);
   }
 
   @Delete(':id')

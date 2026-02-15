@@ -2,7 +2,7 @@ import { inject, Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
-import { CreateOrderDto, UpdateOrderDto, Order } from '@merlebleu/shared';
+import { CreateOrderDto, UpdateOrderDto, Order, OrderStatus } from '@merlebleu/shared';
 
 @Injectable({
   providedIn: 'root',
@@ -49,6 +49,10 @@ export class OrderService {
 
   updateOrder(id: string, order: UpdateOrderDto): Observable<Order> {
     return this.http.put<Order>(`${this.apiUrl}/${id}`, order);
+  }
+
+  updateOrderStatus(id: string, status: OrderStatus): Observable<Order> {
+    return this.http.put<Order>(`${this.apiUrl}/${id}/status`, { status });
   }
 
   deleteOrder(id: string): Observable<void> {
