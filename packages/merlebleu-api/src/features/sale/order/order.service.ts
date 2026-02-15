@@ -12,8 +12,6 @@ export class OrderService {
   constructor(
     @InjectRepository(OrderEntity)
     private orderRepository: Repository<OrderEntity>,
-    @InjectRepository(OrderItemEntity)
-    private orderItemRepository: Repository<OrderItemEntity>,
     private paymentService: PaymentService,
   ) {}
 
@@ -23,14 +21,16 @@ export class OrderService {
     );
 
     const { orderData, orderItems } = this.splitOrderInput(order);
-    const orderEntity = this.orderRepository.create({
+    const orderEntity = {
       ...orderData,
       paymentMethod,
-    });
+    } as OrderEntity;
 
     orderEntity.orderItems = this.buildOrderItems(orderItems, orderEntity);
 
-    return this.orderRepository.save(orderEntity);
+    const savedOrder = await this.orderRepository.save(orderEntity);
+
+    return this.sanitizeOrder(savedOrder);
   }
 
   async listOrders(page = 1, limit = 20) {
@@ -44,7 +44,7 @@ export class OrderService {
     });
 
     return {
-      data,
+      data: data.map((order) => this.sanitizeOrder(order)),
       total,
       page: pagination.page,
       limit: pagination.limit,
@@ -74,7 +74,9 @@ export class OrderService {
 
     existingOrder.orderItems = this.buildOrderItems(orderItems, existingOrder);
 
-    return this.orderRepository.save(existingOrder);
+    const savedOrder = await this.orderRepository.save(existingOrder);
+
+    return this.sanitizeOrder(savedOrder);
   }
 
   async deleteOrder(id: string): Promise<void> {
@@ -89,15 +91,16 @@ export class OrderService {
     items: OrderItemDto[],
     order: OrderEntity,
   ): OrderItemEntity[] {
-    return items.map((item) =>
-      this.orderItemRepository.create({
-        description: item.description,
-        size: item.size,
-        totalAmount: item.totalAmount,
-        remarks: item.remarks,
-        photos: item.photos,
-        order,
-      }),
+    return items.map(
+      (item) =>
+        ({
+          description: item.description,
+          size: item.size,
+          totalAmount: item.totalAmount,
+          remarks: item.remarks,
+          photos: item.photos,
+          order,
+        }) as OrderItemEntity,
     );
   }
 
@@ -108,5 +111,12 @@ export class OrderService {
       orderData,
       orderItems,
     };
+  }
+
+  private sanitizeOrder(order: OrderEntity): OrderEntity {
+    return {
+      ...order,
+      orderItems: (order.orderItems ?? []).map(({ order: _, ...item }) => item),
+    } as OrderEntity;
   }
 }

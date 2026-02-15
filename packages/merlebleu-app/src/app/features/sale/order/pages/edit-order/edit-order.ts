@@ -1,8 +1,9 @@
-import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
-
+import { Component, OnInit, inject } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
+import { finalize } from 'rxjs';
 import { UpdateOrderDto } from '@merlebleu/shared';
 import { OrderForm } from '../../components/order-form/order-form';
+import { OrderService } from '../../order.service';
 
 @Component({
   selector: 'edit-order',
@@ -11,12 +12,14 @@ import { OrderForm } from '../../components/order-form/order-form';
   styleUrl: './edit-order.scss',
 })
 export class EditOrder implements OnInit {
-  protected order?: UpdateOrderDto;
+  private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
+  private readonly orderService = inject(OrderService);
 
-  constructor(private route: ActivatedRoute) {}
+  protected order?: UpdateOrderDto;
+  protected isLoading = false;
 
   ngOnInit(): void {
-    // TODO: Get order ID from route params and fetch the order
     const orderId = this.route.snapshot.paramMap.get('id');
     if (orderId) {
       this.loadOrder(orderId);
@@ -59,19 +62,31 @@ export class EditOrder implements OnInit {
   }
 
   protected handleSubmit(order: UpdateOrderDto): void {
-    // TODO: Implement order update logic
-    console.log('Updating order:', order);
-    // Example:
-    // const orderId = this.route.snapshot.paramMap.get('id');
-    // if (orderId) {
-    //   this.orderService.updateOrder(orderId, order).subscribe(() => {
-    //     // Navigate back or show success message
-    //   });
-    // }
+    const orderId = this.route.snapshot.paramMap.get('id');
+    if (!orderId) {
+      return;
+    }
+
+    this.isLoading = true;
+
+    this.orderService
+      .updateOrder(orderId, order)
+      .pipe(
+        finalize(() => {
+          this.isLoading = false;
+        }),
+      )
+      .subscribe({
+        next: () => {
+          this.router.navigate(['/orders']);
+        },
+        error: (err) => {
+          console.error('Error updating order:', err);
+        },
+      });
   }
 
   protected handleReset(): void {
-    // TODO: Implement any additional reset logic if needed
     console.log('Form reset');
   }
 }

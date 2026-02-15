@@ -11,6 +11,7 @@
   @if (order) {
     <order-form
       [orderData]="order"
+      [isLoading]="isLoading"
       (orderSubmit)="handleSubmit($event)"
       (orderReset)="handleReset()"
     />

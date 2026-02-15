@@ -8,5 +8,9 @@
     </div>
   </div>
 
-  <order-form (orderSubmit)="handleSubmit($event)" (orderReset)="handleReset()" />
+  <order-form
+    [isLoading]="isLoading"
+    (orderSubmit)="handleSubmit($event)"
+    (orderReset)="handleReset()"
+  />
 </div>

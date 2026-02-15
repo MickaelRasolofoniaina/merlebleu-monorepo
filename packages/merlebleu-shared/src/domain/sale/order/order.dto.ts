@@ -13,7 +13,9 @@ export const createOrderItemSchema = z.object({
 });
 
 export const createOrderSchema = z.object({
-  orderDate: z.string().datetime(),
+  orderDate: z.coerce.date(
+    "La date de commande doit être une date/heure valide",
+  ),
   customerName: z.string().min(1, "Veuillez remplir le nom du client"),
   customerPhoneNumber: z
     .string()
@@ -23,9 +25,8 @@ export const createOrderSchema = z.object({
       "Le numéro de téléphone doit commencer par 034, 032, 033, 038 ou 036 et contenir exactement 10 chiffres (séparés par des espaces si plusieurs)",
     ),
   customerFacebookName: z.string().optional(),
-  deliveryDate: z
-    .string()
-    .datetime()
+  deliveryDate: z.coerce
+    .date("La date de livraison doit être une date/heure valide")
     .refine((value) => {
       const deliveryDate = new Date(value);
       const startOfToday = new Date();

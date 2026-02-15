@@ -48,6 +48,7 @@ import { PaymentService } from '@features/sale/payment/payment.service';
 })
 export class OrderForm implements OnInit, OnChanges {
   @Input() orderData?: CreateOrderDto | UpdateOrderDto;
+  @Input() isLoading = false;
   @Output() orderSubmit = new EventEmitter<CreateOrderDto | UpdateOrderDto>();
   @Output() orderReset = new EventEmitter<void>();
 
@@ -163,8 +164,9 @@ export class OrderForm implements OnInit, OnChanges {
   private deepCopyOrder(dto: CreateOrderDto | UpdateOrderDto): CreateOrderDto | UpdateOrderDto {
     return {
       ...dto,
-      orderDate: new Date(dto.orderDate),
-      deliveryDate: new Date(dto.deliveryDate),
+      orderDate: typeof dto.orderDate === 'string' ? new Date(dto.orderDate) : dto.orderDate,
+      deliveryDate:
+        typeof dto.deliveryDate === 'string' ? new Date(dto.deliveryDate) : dto.deliveryDate,
       orderItems: dto.orderItems.map((item) => ({ ...item })),
     };
   }

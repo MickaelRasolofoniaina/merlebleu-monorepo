@@ -167,7 +167,6 @@
             type="text"
             pInputText
             [(ngModel)]="item.description"
-            placeholder="Ex: Forêt noire "
             class="w-full"
           />
           @if (errorFor('orderItems.' + i + '.description')) {
@@ -287,7 +286,19 @@
   </p-fieldset>
 
   <div class="flex flex-col gap-3 lg:flex-row lg:justify-end lg:items-center">
-    <p-button label="Enregistrer" icon="pi pi-check" (onClick)="submit()" />
-    <p-button label="Reinitialiser" icon="pi pi-refresh" severity="secondary" (onClick)="reset()" />
+    <p-button
+      label="Enregistrer"
+      icon="pi pi-check"
+      [disabled]="isLoading"
+      [loading]="isLoading"
+      (onClick)="submit()"
+    />
+    <p-button
+      label="Reinitialiser"
+      icon="pi pi-refresh"
+      severity="secondary"
+      [disabled]="isLoading"
+      (onClick)="reset()"
+    />
   </div>
 </form>

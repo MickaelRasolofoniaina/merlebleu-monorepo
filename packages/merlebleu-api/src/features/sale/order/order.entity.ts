@@ -61,7 +61,7 @@ export const OrderItemSchema = new EntitySchema<OrderItemEntity>({
   relations: {
     order: {
       type: 'many-to-one',
-      target: OrderEntity,
+      target: () => OrderEntity,
       joinColumn: {
         name: 'orderId',
         referencedColumnName: 'id',
@@ -116,13 +116,13 @@ export const OrderSchema = new EntitySchema<OrderEntity>({
   relations: {
     orderItems: {
       type: 'one-to-many',
-      target: OrderItemEntity,
+      target: () => OrderItemEntity,
       inverseSide: 'order',
       cascade: true,
     },
     paymentMethod: {
       type: 'many-to-one',
-      target: PaymentMethodEntity,
+      target: () => PaymentMethodEntity,
       joinColumn: {
         name: 'paymentMethodId',
         referencedColumnName: 'id',
