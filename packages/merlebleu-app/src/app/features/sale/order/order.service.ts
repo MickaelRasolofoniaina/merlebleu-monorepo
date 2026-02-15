@@ -18,18 +18,29 @@ export class OrderService {
   listOrders(
     page = 1,
     limit = 20,
+    filters?: Record<string, unknown>,
   ): Observable<{
     data: Order[];
     total: number;
     page: number;
     limit: number;
   }> {
+    let queryString = `${this.apiUrl}?page=${page}&limit=${limit}`;
+
+    if (filters) {
+      Object.entries(filters).forEach(([key, value]) => {
+        if (value !== null && value !== undefined && value !== '') {
+          queryString += `&${key}=${encodeURIComponent(String(value))}`;
+        }
+      });
+    }
+
     return this.http.get<{
       data: Order[];
       total: number;
       page: number;
       limit: number;
-    }>(`${this.apiUrl}?page=${page}&limit=${limit}`);
+    }>(queryString);
   }
 
   getOrderById(id: string): Observable<Order> {

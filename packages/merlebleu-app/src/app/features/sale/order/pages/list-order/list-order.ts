@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, inject, signal } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { finalize } from 'rxjs';
 import { TableModule } from 'primeng/table';
@@ -7,10 +8,23 @@ import { Order, OrderStatus } from '@merlebleu/shared';
 import { OrderService } from '../../order.service';
 import { Button } from 'primeng/button';
 import { BadgeModule } from 'primeng/badge';
+import { InputTextModule } from 'primeng/inputtext';
+import { DatePickerModule } from 'primeng/datepicker';
+import { SelectModule } from 'primeng/select';
+import { formatDate } from '@shared/utils/date';
 
 @Component({
   selector: 'list-order',
-  imports: [CommonModule, TableModule, Button, BadgeModule],
+  imports: [
+    CommonModule,
+    FormsModule,
+    TableModule,
+    Button,
+    BadgeModule,
+    InputTextModule,
+    DatePickerModule,
+    SelectModule,
+  ],
   templateUrl: './list-order.html',
   styleUrl: './list-order.scss',
 })
@@ -21,6 +35,21 @@ export class ListOrder implements OnInit {
   protected orders = signal<Order[]>([]);
   protected isLoading = false;
 
+  protected filters = {
+    orderDate: null as Date | null,
+    deliveryDate: null as Date | null,
+    customerName: '',
+    orderStatus: '',
+  };
+
+  protected statusOptions = [
+    { label: 'À faire', value: OrderStatus.TODO },
+    { label: 'En cours', value: OrderStatus.INPROGRESS },
+    { label: 'À livrer', value: OrderStatus.TODELIVER },
+    { label: 'Livré', value: OrderStatus.DELIVERED },
+    { label: 'Annulé', value: OrderStatus.CANCELLED },
+  ];
+
   ngOnInit(): void {
     this.loadOrders();
   }
@@ -28,8 +57,23 @@ export class ListOrder implements OnInit {
   protected loadOrders(page = 1, limit = 20): void {
     this.isLoading = true;
 
+    const filterParams: Record<string, unknown> = {};
+    console.log('Filters:', this.filters);
+    if (this.filters.orderDate) {
+      filterParams['orderDate'] = formatDate(this.filters.orderDate);
+    }
+    if (this.filters.deliveryDate) {
+      filterParams['deliveryDate'] = formatDate(this.filters.deliveryDate);
+    }
+    if (this.filters.customerName) {
+      filterParams['customerName'] = this.filters.customerName;
+    }
+    if (this.filters.orderStatus) {
+      filterParams['status'] = this.filters.orderStatus;
+    }
+
     this.orderService
-      .listOrders(page, limit)
+      .listOrders(page, limit, filterParams)
       .pipe(
         finalize(() => {
           this.isLoading = false;
@@ -40,6 +84,20 @@ export class ListOrder implements OnInit {
           this.orders.set(response.data);
         },
       });
+  }
+
+  protected applyFilters(): void {
+    this.loadOrders(1);
+  }
+
+  protected resetFilters(): void {
+    this.filters = {
+      orderDate: null,
+      deliveryDate: null,
+      customerName: '',
+      orderStatus: '',
+    };
+    this.loadOrders(1);
   }
 
   protected getStatus(orderStatus: OrderStatus | undefined): string {

@@ -5,6 +5,69 @@
   <p-button label="Ajouter" icon="pi pi-plus" (onClick)="goToAddOrder()" />
 </div>
 
+<div class="border border-dashed border-slate-200 rounded-xl p-5 mb-6">
+  <h3 class="text-lg font-semibold mb-4">Filtres</h3>
+  <div class="mb-4">
+    <div class="flex flex-col gap-2">
+      <label class="font-semibold text-slate-900">Nom du client</label>
+      <input
+        pInputText
+        [(ngModel)]="filters.customerName"
+        placeholder="Contient..."
+        class="w-full"
+      />
+    </div>
+  </div>
+  <div class="grid gap-4 [grid-template-columns:repeat(auto-fit,minmax(200px,1fr))]">
+    <div class="flex flex-col gap-2">
+      <label class="font-semibold text-slate-900">Date de commande</label>
+      <p-datepicker
+        [(ngModel)]="filters.orderDate"
+        [showIcon]="true"
+        dateFormat="dd/mm/yy"
+        class="w-full"
+      />
+    </div>
+    <div class="flex flex-col gap-2">
+      <label class="font-semibold text-slate-900">Date de livraison</label>
+      <p-datepicker
+        [(ngModel)]="filters.deliveryDate"
+        [showIcon]="true"
+        dateFormat="dd/mm/yy"
+        class="w-full"
+      />
+    </div>
+    <div class="flex flex-col gap-2">
+      <label class="font-semibold text-slate-900">Statut</label>
+      <p-select
+        [(ngModel)]="filters.orderStatus"
+        [options]="statusOptions"
+        optionLabel="label"
+        optionValue="value"
+        placeholder="Tous les statuts"
+        class="w-full"
+        [showClear]="true"
+      />
+    </div>
+  </div>
+  <div class="flex gap-3 mt-4">
+    <p-button
+      label="Filtrer"
+      icon="pi pi-search"
+      (onClick)="applyFilters()"
+      [disabled]="isLoading"
+    />
+    <p-button
+      label="Réinitialiser"
+      icon="pi pi-refresh"
+      severity="secondary"
+      [outlined]="true"
+      (onClick)="resetFilters()"
+      [disabled]="isLoading"
+    />
+  </div>
+</div>
+
 <p-table
   [value]="orders()"
   [loading]="isLoading"

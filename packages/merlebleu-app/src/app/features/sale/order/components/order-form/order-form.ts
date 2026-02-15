@@ -28,6 +28,7 @@ import {
   createOrderSchema,
 } from '@merlebleu/shared';
 import { buildZodErrorMap } from '@shared/utils/zod-errors';
+import { formatDate, parseDate } from '@shared/utils/date';
 import { PaymentService } from '@features/sale/payment/payment.service';
 
 @Component({
@@ -144,12 +145,12 @@ export class OrderForm implements OnInit, OnChanges {
 
   protected onOrderDateChange(value: Date | null): void {
     this.orderDateValue = value;
-    this.order.orderDate = this.formatIsoDate(value);
+    this.order.orderDate = formatDate(value);
   }
 
   protected onDeliveryDateChange(value: Date | null): void {
     this.deliveryDateValue = value;
-    this.order.deliveryDate = this.formatIsoDate(value);
+    this.order.deliveryDate = formatDate(value);
   }
 
   protected trackByIndex(index: number): number {
@@ -162,11 +163,11 @@ export class OrderForm implements OnInit, OnChanges {
 
   private buildDefaultOrder(): CreateOrderDto {
     return {
-      orderDate: new Date().toISOString(),
+      orderDate: formatDate(new Date()),
       customerName: '',
       customerPhoneNumber: '',
       customerFacebookName: '',
-      deliveryDate: new Date().toISOString(),
+      deliveryDate: formatDate(new Date()),
       deliveryAddress: '',
       isFromFacebook: false,
       orderItems: [this.buildOrderItem()],
@@ -196,20 +197,7 @@ export class OrderForm implements OnInit, OnChanges {
   }
 
   private syncDateValuesFromOrder(): void {
-    this.orderDateValue = this.parseIsoDate(this.order.orderDate);
-    this.deliveryDateValue = this.parseIsoDate(this.order.deliveryDate);
-  }
-
-  private parseIsoDate(value?: string): Date | null {
-    if (!value) {
-      return null;
-    }
-
-    const parsed = new Date(value);
-    return Number.isNaN(parsed.getTime()) ? null : parsed;
-  }
-
-  private formatIsoDate(value: Date | null): string {
-    return value ? value.toISOString() : '';
+    this.orderDateValue = parseDate(this.order.orderDate);
+    this.deliveryDateValue = parseDate(this.order.deliveryDate);
   }
 }

@@ -33,15 +33,50 @@ export class OrderService {
     return this.sanitizeOrder(savedOrder);
   }
 
-  async listOrders(page = 1, limit = 20) {
+  async listOrders(
+    page = 1,
+    limit = 20,
+    filters?: {
+      orderDate?: string;
+      deliveryDate?: string;
+      customerName?: string;
+      status?: string;
+    },
+  ) {
     const pagination = getPaginationParams({ page, limit });
 
-    const [data, total] = await this.orderRepository.findAndCount({
-      relations: { orderItems: true, paymentMethod: true },
-      order: { orderDate: 'DESC' },
-      take: pagination.limit,
-      skip: pagination.skip,
-    });
+    const query = this.orderRepository
+      .createQueryBuilder('order')
+      .leftJoinAndSelect('order.orderItems', 'orderItems')
+      .leftJoinAndSelect('order.paymentMethod', 'paymentMethod')
+      .orderBy('order.orderDate', 'DESC');
+
+    // Apply filters
+    if (filters?.orderDate) {
+      query.andWhere('order.orderDate = :orderDate', {
+        orderDate: filters.orderDate,
+      });
+    }
+
+    if (filters?.deliveryDate) {
+      query.andWhere('order.deliveryDate = :deliveryDate', {
+        deliveryDate: filters.deliveryDate,
+      });
+    }
+
+    if (filters?.customerName) {
+      query.andWhere('order.customerName ILIKE :customerName', {
+        customerName: `%${filters.customerName}%`,
+      });
+    }
+
+    if (filters?.status) {
+      query.andWhere('order.status = :status', { status: filters.status });
+    }
+
+    query.take(pagination.limit).skip(pagination.skip);
+
+    const [data, total] = await query.getManyAndCount();
 
     return {
       data: data.map((order) => this.sanitizeOrder(order)),

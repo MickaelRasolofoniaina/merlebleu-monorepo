@@ -93,7 +93,7 @@ export const OrderSchema = new EntitySchema<OrderEntity>({
       nullable: true,
     },
     deliveryDate: {
-      type: 'timestamp',
+      type: 'date',
     },
     deliveryAddress: {
       type: 'varchar',
@@ -111,7 +111,7 @@ export const OrderSchema = new EntitySchema<OrderEntity>({
       type: 'integer',
     },
     orderDate: {
-      type: 'timestamp',
+      type: 'date',
     },
     remarks: {
       type: 'varchar',

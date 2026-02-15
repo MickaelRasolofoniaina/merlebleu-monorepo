@@ -21,10 +21,22 @@ export class OrderController {
   }
 
   @Get()
-  listOrders(@Query('page') page?: string, @Query('limit') limit?: string) {
+  listOrders(
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
+    @Query('orderDate') orderDate?: string,
+    @Query('deliveryDate') deliveryDate?: string,
+    @Query('customerName') customerName?: string,
+    @Query('status') status?: string,
+  ) {
     const pageNumber = page ? Number.parseInt(page, 10) : 1;
     const limitNumber = limit ? Number.parseInt(limit, 10) : 20;
-    return this.orderService.listOrders(pageNumber, limitNumber);
+    return this.orderService.listOrders(pageNumber, limitNumber, {
+      orderDate,
+      deliveryDate,
+      customerName,
+      status,
+    });
   }
 
   @Get(':id')
