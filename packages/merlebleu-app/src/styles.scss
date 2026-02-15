@@ -24,3 +24,7 @@ h2 {
     width: calc(100% / 12 * #{$i});
   }
 }
+
+.text-center-important {
+  text-align: center !important;
+}
