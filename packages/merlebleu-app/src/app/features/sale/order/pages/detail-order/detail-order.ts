@@ -2,13 +2,13 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit, inject } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { finalize } from 'rxjs';
-import { Button } from 'primeng/button';
+import { PanelModule } from 'primeng/panel';
 import { Order } from '@merlebleu/shared';
 import { OrderService } from '../../order.service';
 
 @Component({
   selector: 'detail-order',
-  imports: [CommonModule, RouterLink, Button],
+  imports: [CommonModule, RouterLink, PanelModule],
   templateUrl: './detail-order.html',
   styleUrl: './detail-order.scss',
 })
