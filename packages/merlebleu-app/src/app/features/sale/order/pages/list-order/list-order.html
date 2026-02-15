@@ -83,20 +83,20 @@
 >
   <ng-template #header>
     <tr>
+      <th>Commande</th>
       <th>Date de commande</th>
       <th>Date de livraison</th>
       <th>Client</th>
-      <th>Commande</th>
       <th>Status</th>
       <th style="width: 10rem">Actions</th>
     </tr>
   </ng-template>
   <ng-template #body let-order>
     <tr>
+      <td>{{ getDescription(order) }}</td>
       <td>{{ order.orderDate | date: 'dd/MM/yyyy' }}</td>
       <td>{{ order.deliveryDate | date: 'dd/MM/yyyy' }}</td>
       <td>{{ order.customerName }}</td>
-      <td>{{ getDescription(order) }}</td>
       <td>
         <p-badge
           [value]="getStatus(order.orderStatus)"
