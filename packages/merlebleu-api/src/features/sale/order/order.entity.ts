@@ -1,4 +1,4 @@
-import { Order, OrderItem } from '@merlebleu/shared';
+import { Order, OrderItem, OrderStatus } from '@merlebleu/shared';
 import { EntitySchema } from 'typeorm';
 import { PaymentMethodEntity } from '../payment/payment.entity';
 
@@ -27,6 +27,7 @@ export class OrderEntity implements Order {
   balanceAmount: number;
   paymentMethod: PaymentMethodEntity;
   orderDate: string;
+  orderStatus?: OrderStatus;
 }
 
 // OrderItem schema
@@ -115,6 +116,11 @@ export const OrderSchema = new EntitySchema<OrderEntity>({
     remarks: {
       type: 'varchar',
       nullable: true,
+    },
+    orderStatus: {
+      type: 'enum',
+      enum: ['TODO', 'INPROGRESS', 'TODELIVER', 'DELIVERED', 'CANCELLED'],
+      default: 'TODO',
     },
   },
   relations: {

@@ -1,5 +1,13 @@
 import { PaymentMethod } from "../payment/payment";
 
+export enum OrderStatus {
+  TODO = "TODO",
+  INPROGRESS = "INPROGRESS",
+  TODELIVER = "TODELIVER",
+  DELIVERED = "DELIVERED",
+  CANCELLED = "CANCELLED",
+}
+
 export interface OrderItem {
   description: string;
   size: number;
@@ -22,4 +30,5 @@ export interface Order {
   paidAmount: number;
   balanceAmount: number;
   paymentMethod: PaymentMethod;
+  orderStatus?: OrderStatus;
 }

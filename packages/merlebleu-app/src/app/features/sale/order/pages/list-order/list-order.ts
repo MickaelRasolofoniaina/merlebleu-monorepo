@@ -3,13 +3,14 @@ import { Component, OnInit, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { finalize } from 'rxjs';
 import { TableModule } from 'primeng/table';
-import { Order } from '@merlebleu/shared';
+import { Order, OrderStatus } from '@merlebleu/shared';
 import { OrderService } from '../../order.service';
 import { Button } from 'primeng/button';
+import { BadgeModule } from 'primeng/badge';
 
 @Component({
   selector: 'list-order',
-  imports: [CommonModule, TableModule, Button],
+  imports: [CommonModule, TableModule, Button, BadgeModule],
   templateUrl: './list-order.html',
   styleUrl: './list-order.scss',
 })
@@ -41,14 +42,65 @@ export class ListOrder implements OnInit {
       });
   }
 
-  protected getFirstDescription(order: Order): string {
-    const description = order.orderItems?.[0]?.description ?? '';
+  protected getStatus(orderStatus: OrderStatus | undefined): string {
+    if (!orderStatus) {
+      return '-';
+    }
+
+    switch (orderStatus) {
+      case OrderStatus.TODO:
+        return 'À faire';
+      case OrderStatus.INPROGRESS:
+        return 'En cours';
+      case OrderStatus.TODELIVER:
+        return 'À livrer';
+      case OrderStatus.DELIVERED:
+        return 'Livré';
+      case OrderStatus.CANCELLED:
+        return 'Annulé';
+      default:
+        return '-';
+    }
+  }
+
+  protected getStatusColor(
+    orderStatus: OrderStatus | undefined,
+  ): 'info' | 'success' | 'warn' | 'danger' | 'contrast' | undefined | null {
+    if (!orderStatus) {
+      return 'contrast';
+    }
+    switch (orderStatus) {
+      case OrderStatus.TODO:
+        return 'contrast';
+      case OrderStatus.INPROGRESS:
+        return 'info';
+      case OrderStatus.TODELIVER:
+        return 'warn';
+      case OrderStatus.DELIVERED:
+        return 'success';
+      case OrderStatus.CANCELLED:
+        return 'danger';
+      default:
+        return 'contrast';
+    }
+  }
+
+  protected getDescription(order: Order): string {
+    const description = order?.orderItems?.map((item) => item.description).join(' + ') ?? '';
 
     if (!description) {
       return '-';
     }
 
-    return this.truncate(description, 60);
+    return this.truncate(description, 20);
+  }
+
+  private truncate(value: string, maxLength: number): string {
+    if (value.length <= maxLength) {
+      return value;
+    }
+
+    return `${value.slice(0, Math.max(maxLength - 3, 0))}...`;
   }
 
   protected goToAddOrder(): void {
@@ -73,13 +125,5 @@ export class ListOrder implements OnInit {
     }
 
     this.router.navigate(['/sale/order/edit', orderId]);
-  }
-
-  private truncate(value: string, maxLength: number): string {
-    if (value.length <= maxLength) {
-      return value;
-    }
-
-    return `${value.slice(0, Math.max(maxLength - 3, 0))}...`;
   }
 }

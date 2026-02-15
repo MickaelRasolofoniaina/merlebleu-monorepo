@@ -51,7 +51,7 @@ export class Login {
 
     this.loginService.signIn(this.signInUserDto).subscribe({
       next: () => {
-        void this.router.navigate(['/identity/user']);
+        void this.router.navigate(['/sale/order']);
       },
       error: (error) => {
         if (error?.status === 401) {

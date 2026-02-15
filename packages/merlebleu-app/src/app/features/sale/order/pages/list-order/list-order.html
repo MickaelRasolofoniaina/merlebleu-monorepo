@@ -16,8 +16,8 @@
       <th>Date de commande</th>
       <th>Date de livraison</th>
       <th>Client</th>
-      <th>Adresse livraison</th>
-      <th>Description</th>
+      <th>Commande</th>
+      <th>Status</th>
       <th style="width: 10rem">Actions</th>
     </tr>
   </ng-template>
@@ -26,8 +26,13 @@
       <td>{{ order.orderDate | date: 'dd/MM/yyyy' }}</td>
       <td>{{ order.deliveryDate | date: 'dd/MM/yyyy' }}</td>
       <td>{{ order.customerName }}</td>
-      <td>{{ order.deliveryAddress }}</td>
-      <td>{{ getFirstDescription(order) }}</td>
+      <td>{{ getDescription(order) }}</td>
+      <td>
+        <p-badge
+          [value]="getStatus(order.orderStatus)"
+          [severity]="getStatusColor(order.orderStatus)"
+        ></p-badge>
+      </td>
       <td>
         <p-button
           icon="pi pi-book"
