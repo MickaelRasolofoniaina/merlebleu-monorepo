@@ -73,6 +73,13 @@
   [loading]="isLoading"
   [tableStyle]="{ 'min-width': '60rem' }"
   [stripedRows]="true"
+  [paginator]="true"
+  [rows]="rows"
+  [first]="first"
+  [totalRecords]="totalRecords"
+  [rowsPerPageOptions]="[10, 15, 20]"
+  [lazy]="true"
+  (onPage)="onPageChange($event)"
 >
   <ng-template #header>
     <tr>

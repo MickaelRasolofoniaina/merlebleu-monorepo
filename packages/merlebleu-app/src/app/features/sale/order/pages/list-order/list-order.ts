@@ -12,6 +12,7 @@ import { InputTextModule } from 'primeng/inputtext';
 import { DatePickerModule } from 'primeng/datepicker';
 import { SelectModule } from 'primeng/select';
 import { formatDate } from '@shared/utils/date';
+import { getPageFromFirstRows } from '@shared/utils/pagination';
 
 @Component({
   selector: 'list-order',
@@ -34,6 +35,9 @@ export class ListOrder implements OnInit {
 
   protected orders = signal<Order[]>([]);
   protected isLoading = false;
+  protected totalRecords = 0;
+  protected rows = 20;
+  protected first = 0;
 
   protected filters = {
     orderDate: null as Date | null,
@@ -54,7 +58,7 @@ export class ListOrder implements OnInit {
     this.loadOrders();
   }
 
-  protected loadOrders(page = 1, limit = 20): void {
+  protected loadOrders(page = 1, limit = this.rows): void {
     this.isLoading = true;
 
     const filterParams: Record<string, unknown> = {};
@@ -82,12 +86,20 @@ export class ListOrder implements OnInit {
       .subscribe({
         next: (response) => {
           this.orders.set(response.data);
+          this.totalRecords = response.total;
         },
       });
   }
 
+  protected onPageChange(event: { first: number; rows: number }): void {
+    this.first = event.first;
+    this.rows = event.rows;
+    this.loadOrders(getPageFromFirstRows(event.first, event.rows), event.rows);
+  }
+
   protected applyFilters(): void {
-    this.loadOrders(1);
+    this.first = 0;
+    this.loadOrders(1, this.rows);
   }
 
   protected resetFilters(): void {
@@ -97,7 +109,8 @@ export class ListOrder implements OnInit {
       customerName: '',
       orderStatus: '',
     };
-    this.loadOrders(1);
+    this.first = 0;
+    this.loadOrders(1, this.rows);
   }
 
   protected getStatus(orderStatus: OrderStatus | undefined): string {
