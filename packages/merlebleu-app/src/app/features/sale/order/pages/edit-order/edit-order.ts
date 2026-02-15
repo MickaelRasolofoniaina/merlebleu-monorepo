@@ -43,9 +43,6 @@ export class EditOrder implements OnInit {
             paymentMethodId: order.paymentMethod?.id ?? '',
           } as UpdateOrderDto;
         },
-        error: (err) => {
-          console.error('Error loading order:', err);
-        },
       });
   }
 
@@ -66,15 +63,8 @@ export class EditOrder implements OnInit {
       )
       .subscribe({
         next: () => {
-          this.router.navigate(['/orders']);
-        },
-        error: (err) => {
-          console.error('Error updating order:', err);
+          this.router.navigate(['/sale/order']);
         },
       });
-  }
-
-  protected handleReset(): void {
-    console.log('Form reset');
   }
 }

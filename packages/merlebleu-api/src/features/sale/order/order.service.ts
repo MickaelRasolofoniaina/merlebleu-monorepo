@@ -118,13 +118,7 @@ export class OrderService {
   }
 
   private splitOrderInput(order: CreateOrderDto | UpdateOrderDto) {
-    const {
-      paymentMethodId,
-      orderItems,
-      orderDate,
-      deliveryDate,
-      ...orderData
-    } = order;
+    const { paymentMethodId, orderItems, ...orderData } = order;
 
     return {
       orderData: {

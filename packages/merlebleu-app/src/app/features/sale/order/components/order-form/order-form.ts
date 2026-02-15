@@ -18,6 +18,7 @@ import { InputNumberModule } from 'primeng/inputnumber';
 import { ButtonModule } from 'primeng/button';
 import { FieldsetModule } from 'primeng/fieldset';
 import { SelectModule } from 'primeng/select';
+import { MessageService } from 'primeng/api';
 
 import {
   CreateOrderDto,
@@ -61,7 +62,10 @@ export class OrderForm implements OnInit, OnChanges {
 
   protected paymentMethods: PaymentMethod[] = [];
 
-  constructor(private paymentService: PaymentService) {}
+  constructor(
+    private paymentService: PaymentService,
+    private messageService: MessageService,
+  ) {}
 
   ngOnInit(): void {
     this.loadPaymentMethods();
@@ -113,6 +117,13 @@ export class OrderForm implements OnInit, OnChanges {
     const result = createOrderSchema.safeParse(this.order);
     if (!result.success) {
       this.validationErrors = buildZodErrorMap(result.error.issues);
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Erreur de validation',
+        detail: 'La commande contient des erreurs, vérifier les champs renseignés!',
+        life: 5000,
+      });
+
       return;
     }
 

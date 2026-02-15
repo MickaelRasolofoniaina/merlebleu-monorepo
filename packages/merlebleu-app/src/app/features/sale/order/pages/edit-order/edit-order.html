@@ -14,12 +14,7 @@
   </div>
 
   @if (order) {
-    <order-form
-      [orderData]="order"
-      [isLoading]="isLoading"
-      (orderSubmit)="handleSubmit($event)"
-      (orderReset)="handleReset()"
-    />
+    <order-form [orderData]="order" [isLoading]="isLoading" (orderSubmit)="handleSubmit($event)" />
   } @else {
     <div class="flex items-center justify-center p-8">
       <p class="text-slate-500">Chargement de la commande...</p>

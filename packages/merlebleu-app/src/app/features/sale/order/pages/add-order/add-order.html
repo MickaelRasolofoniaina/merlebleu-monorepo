@@ -13,9 +13,5 @@
     </div>
   </div>
 
-  <order-form
-    [isLoading]="isLoading"
-    (orderSubmit)="handleSubmit($event)"
-    (orderReset)="handleReset()"
-  />
+  <order-form [isLoading]="isLoading" (orderSubmit)="handleSubmit($event)" />
 </div>

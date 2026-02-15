@@ -112,6 +112,10 @@ export const OrderSchema = new EntitySchema<OrderEntity>({
     orderDate: {
       type: 'timestamp',
     },
+    remarks: {
+      type: 'varchar',
+      nullable: true,
+    },
   },
   relations: {
     orderItems: {

@@ -29,15 +29,8 @@ export class AddOrder {
       )
       .subscribe({
         next: () => {
-          this.router.navigate(['/orders']);
-        },
-        error: (err) => {
-          console.error('Error creating order:', err);
+          this.router.navigate(['/sale/order']);
         },
       });
-  }
-
-  protected handleReset(): void {
-    console.log('Form reset');
   }
 }
