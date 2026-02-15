@@ -10,6 +10,7 @@ import {
 } from '@nestjs/common';
 import { OrderService } from './order.service';
 import { CreateOrderDto, UpdateOrderDto } from './order.dto';
+import { OrderStatus } from '@merlebleu/shared';
 
 @Controller('order')
 export class OrderController {
@@ -27,7 +28,7 @@ export class OrderController {
     @Query('orderDate') orderDate?: string,
     @Query('deliveryDate') deliveryDate?: string,
     @Query('customerName') customerName?: string,
-    @Query('status') status?: string,
+    @Query('status') status?: OrderStatus,
   ) {
     const pageNumber = page ? Number.parseInt(page, 10) : 1;
     const limitNumber = limit ? Number.parseInt(limit, 10) : 20;

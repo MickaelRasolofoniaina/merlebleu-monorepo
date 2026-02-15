@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { OrderEntity, OrderItemEntity } from './order.entity';
 import { CreateOrderDto, UpdateOrderDto } from './order.dto';
-import { OrderItemDto } from '@merlebleu/shared';
+import { OrderItemDto, OrderStatus } from '@merlebleu/shared';
 import { getPaginationParams } from '@shared/pagination/pagination.utils';
 import { PaymentService } from '../payment/payment.service';
 
@@ -40,38 +40,40 @@ export class OrderService {
       orderDate?: string;
       deliveryDate?: string;
       customerName?: string;
-      status?: string;
+      status?: OrderStatus;
     },
   ) {
     const pagination = getPaginationParams({ page, limit });
 
     const query = this.orderRepository
-      .createQueryBuilder('order')
-      .leftJoinAndSelect('order.orderItems', 'orderItems')
-      .leftJoinAndSelect('order.paymentMethod', 'paymentMethod')
-      .orderBy('order.orderDate', 'DESC');
+      .createQueryBuilder('orders')
+      .leftJoinAndSelect('orders.orderItems', 'orderItems')
+      .leftJoinAndSelect('orders.paymentMethod', 'paymentMethod')
+      .orderBy('orders.orderDate', 'DESC');
 
     // Apply filters
     if (filters?.orderDate) {
-      query.andWhere('order.orderDate = :orderDate', {
+      query.andWhere('orders.orderDate = :orderDate', {
         orderDate: filters.orderDate,
       });
     }
 
     if (filters?.deliveryDate) {
-      query.andWhere('order.deliveryDate = :deliveryDate', {
+      query.andWhere('orders.deliveryDate = :deliveryDate', {
         deliveryDate: filters.deliveryDate,
       });
     }
 
     if (filters?.customerName) {
-      query.andWhere('order.customerName ILIKE :customerName', {
+      query.andWhere('orders.customerName ILIKE :customerName', {
         customerName: `%${filters.customerName}%`,
       });
     }
 
     if (filters?.status) {
-      query.andWhere('order.status = :status', { status: filters.status });
+      query.andWhere('orders.orderStatus = :status', {
+        status: filters.status,
+      });
     }
 
     query.take(pagination.limit).skip(pagination.skip);
