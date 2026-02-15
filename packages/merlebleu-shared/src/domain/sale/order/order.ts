@@ -17,6 +17,7 @@ export interface OrderItem {
 }
 
 export interface Order {
+  id: string;
   orderDate: string;
   customerName: string;
   customerPhoneNumber: string;

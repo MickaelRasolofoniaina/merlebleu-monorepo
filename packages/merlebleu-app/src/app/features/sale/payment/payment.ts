@@ -158,9 +158,6 @@ export class Payment implements OnInit {
         this.deletePaymentMethodId = null;
         this.deleteValidationError = '';
       },
-      error: (error) => {
-        console.error('Error deleting payment method:', error);
-      },
     });
   }
 

@@ -12,6 +12,8 @@
     </div>
   </div>
 
+  <p-confirm-dialog />
+
   @if (order) {
     <!-- <div class="bg-white rounded-lg p-6">
       <div class="flex items-center justify-between gap-4">
@@ -159,6 +161,23 @@
           </div>
         </div>
       </p-panel>
+    </div>
+
+    <div class="flex gap-4 justify-end">
+      <p-button
+        label="Livrer"
+        icon="pi pi-check"
+        severity="success"
+        (onClick)="onDeliver()"
+        [disabled]="isUpdatingStatus || order.orderStatus === 'DELIVERED'"
+      />
+      <p-button
+        label="Annuler"
+        icon="pi pi-times"
+        severity="danger"
+        (onClick)="onCancel()"
+        [disabled]="isUpdatingStatus || order.orderStatus === 'CANCELLED'"
+      />
     </div>
   } @else {
     <div class="flex items-center justify-center p-8">
