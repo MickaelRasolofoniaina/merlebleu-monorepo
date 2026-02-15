@@ -170,6 +170,7 @@
             pInputText
             [(ngModel)]="item.description"
             class="w-full"
+            placeholder="Tout choco"
           />
           @if (errorFor('orderItems.' + i + '.description')) {
             <small class="text-red-500">{{ errorFor('orderItems.' + i + '.description') }}</small>
