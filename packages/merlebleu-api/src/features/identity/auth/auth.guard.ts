@@ -24,6 +24,9 @@ export class AuthGuard implements CanActivate {
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     if (this.bypassAuth) {
+      console.warn(
+        '⚠️  Authentication bypass is ENABLED. This should NOT be used in production!',
+      );
       return true;
     }
 
@@ -32,7 +35,9 @@ export class AuthGuard implements CanActivate {
       context.getClass(),
     ]);
 
-    // const isPublic = true;
+    console.log(
+      `AuthGuard: isPublic=${isPublic}, bypassAuth=${this.bypassAuth}`,
+    );
 
     if (isPublic) {
       // 💡 See this condition

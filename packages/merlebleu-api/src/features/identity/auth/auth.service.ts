@@ -35,8 +35,4 @@ export class AuthService {
       accessToken: await this.jwtService.signAsync(payload),
     };
   }
-
-  async verifyAccessToken(token: string) {
-    return this.jwtService.verifyAsync(token);
-  }
 }

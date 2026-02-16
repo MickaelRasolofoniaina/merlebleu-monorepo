@@ -5,6 +5,11 @@ import { authGuard } from './shared/guards/auth.guard';
 
 export const routes: Routes = [
   {
+    path: '',
+    redirectTo: 'identity/login',
+    pathMatch: 'full',
+  },
+  {
     path: 'identity/login',
     component: Login,
   },

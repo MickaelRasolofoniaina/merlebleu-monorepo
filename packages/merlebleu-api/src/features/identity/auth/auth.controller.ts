@@ -36,17 +36,10 @@ export class AuthController {
     return result;
   }
 
-  @SkipAuth()
   @HttpCode(HttpStatus.OK)
   @Get('me')
-  async getSession(@Req() req: express.Request) {
-    const token = this.extractTokenFromCookie(req);
-
-    if (!token) {
-      throw new UnauthorizedException();
-    }
-
-    return this.authService.verifyAccessToken(token);
+  async getSession() {
+    return true;
   }
 
   @HttpCode(HttpStatus.OK)
