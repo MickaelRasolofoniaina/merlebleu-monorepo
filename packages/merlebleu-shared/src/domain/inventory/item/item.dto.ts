@@ -10,3 +10,8 @@ export const createItemSchema = z.object({
     .positive("Le nombre de jours de conservation doit être positif")
     .min(1, "Le nombre de jours de conservation doit être au moins 1"),
 });
+
+export const updateItemSchema = createItemSchema;
+
+export type CreateItemDto = z.infer<typeof createItemSchema>;
+export type UpdateItemDto = z.infer<typeof updateItemSchema>;

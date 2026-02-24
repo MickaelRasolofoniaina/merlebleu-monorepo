@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { OrderEntity, OrderItemEntity } from './order.entity';
 import { CreateOrderDto, UpdateOrderDto } from './order.dto';
-import { OrderItemDto, OrderStatus } from '@merlebleu/shared';
+import { OrderItemDto, OrderStatus, ResultPaged } from '@merlebleu/shared';
 import { getPaginationParams } from '@shared/pagination/pagination.utils';
 import { PaymentService } from '../payment/payment.service';
 
@@ -42,7 +42,7 @@ export class OrderService {
       customerName?: string;
       status?: OrderStatus;
     },
-  ) {
+  ): Promise<ResultPaged<OrderEntity>> {
     const pagination = getPaginationParams({ page, limit });
 
     const query = this.orderRepository
