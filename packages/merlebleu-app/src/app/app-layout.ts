@@ -68,6 +68,19 @@ export class AppLayout {
       ],
     },
     {
+      label: 'Inventaire',
+      items: [
+        {
+          label: 'Articles',
+          icon: 'pi pi-box',
+        },
+        {
+          label: 'Ingredients',
+          icon: 'pi pi-truck',
+        },
+      ],
+    },
+    {
       label: 'Parametres',
       items: [
         {
