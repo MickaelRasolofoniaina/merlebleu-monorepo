@@ -1,8 +1,8 @@
 import { inject, Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { environment } from '../../../../environments/environment';
-import { CreateOrderDto, UpdateOrderDto, Order, OrderStatus } from '@merlebleu/shared';
+import { environment } from '@env/environment';
+import { CreateOrderDto, UpdateOrderDto, Order, OrderStatus, PaginationParams, ResultPaged } from '@merlebleu/shared';
 
 @Injectable({
   providedIn: 'root',
@@ -16,8 +16,7 @@ export class OrderService {
   }
 
   listOrders(
-    page = 1,
-    limit = 20,
+    paginationParams: PaginationParams,
     filters?: Record<string, unknown>,
   ): Observable<{
     data: Order[];
@@ -25,6 +24,7 @@ export class OrderService {
     page: number;
     limit: number;
   }> {
+    const { page = 1, limit = 20 } = paginationParams;
     let queryString = `${this.apiUrl}?page=${page}&limit=${limit}`;
 
     if (filters) {
@@ -35,12 +35,7 @@ export class OrderService {
       });
     }
 
-    return this.http.get<{
-      data: Order[];
-      total: number;
-      page: number;
-      limit: number;
-    }>(queryString);
+    return this.http.get<ResultPaged<Order>>(queryString);
   }
 
   getOrderById(id: string): Observable<Order> {

@@ -1,0 +1,44 @@
+<form (ngSubmit)="onSubmit()" class="flex flex-col gap-4">
+  <div>
+    <label for="itemLabel" class="block mb-2">Nom</label>
+    <input
+      id="itemLabel"
+      type="text"
+      pInputText
+      [(ngModel)]="item.label"
+      name="label"
+      class="w-full"
+      required
+    />
+  </div>
+  <div>
+    <label for="itemUnitPrice" class="block mb-2">Prix Unitaire</label>
+    <input
+      id="itemUnitPrice"
+      type="number"
+      pInputText
+      [(ngModel)]="item.unitPrice"
+      name="unitPrice"
+      class="w-full"
+      required
+    />
+  </div>
+  <div>
+    <label for="itemType" class="block mb-2">Type</label>
+    <select id="itemType" pInputText [(ngModel)]="item.type" name="type" class="w-full" required>
+      <option *ngFor="let t of itemTypes" [value]="t">{{ t }}</option>
+    </select>
+  </div>
+  <div>
+    <label for="itemMaxRetentionDays" class="block mb-2">Jours de Rétention</label>
+    <input
+      id="itemMaxRetentionDays"
+      type="number"
+      pInputText
+      [(ngModel)]="item.maxRetentionDays"
+      name="maxRetentionDays"
+      class="w-full"
+      required
+    />
+  </div>
+</form>

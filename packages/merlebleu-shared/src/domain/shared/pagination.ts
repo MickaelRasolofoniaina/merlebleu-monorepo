@@ -4,3 +4,10 @@ export type ResultPaged<T> = {
   page: number;
   limit: number;
 };
+
+export type PaginationParams = {
+  page?: number;
+  limit?: number;
+};
+
+export const DEFAULT_PAGE_SIZE = 20;

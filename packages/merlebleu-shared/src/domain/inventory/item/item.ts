@@ -5,6 +5,7 @@ export enum ItemType {
 }
 
 export interface Item {
+  id: string;
   label: string;
   unitPrice: number;
   type: ItemType;

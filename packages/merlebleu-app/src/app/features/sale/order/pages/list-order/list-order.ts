@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { finalize } from 'rxjs';
 import { TableModule } from 'primeng/table';
-import { Order, OrderStatus } from '@merlebleu/shared';
+import { DEFAULT_PAGE_SIZE, Order, OrderStatus } from '@merlebleu/shared';
 import { OrderService } from '../../order.service';
 import { Button } from 'primeng/button';
 import { BadgeModule } from 'primeng/badge';
@@ -37,7 +37,7 @@ export class ListOrder implements OnInit {
   protected orders = signal<Order[]>([]);
   protected isLoading = false;
   protected totalRecords = 0;
-  protected rows = 20;
+  protected rows = DEFAULT_PAGE_SIZE;
   protected first = 0;
 
   protected filters = {
@@ -75,7 +75,7 @@ export class ListOrder implements OnInit {
     }
 
     this.orderService
-      .listOrders(page, limit, filterParams)
+      .listOrders({ page, limit}, filterParams)
       .pipe(
         finalize(() => {
           this.isLoading = false;
