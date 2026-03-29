@@ -36,14 +36,7 @@ export class ItemFormComponent {
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['itemData']) {
       this.validationError = null;
-      this.item = this.itemData
-        ? { ...this.itemData }
-        : {
-            label: '',
-            unitPrice: 0,
-            type: ItemType.PASTRY,
-            maxRetentionDays: 0,
-          };
+      this.item = this.itemData ? { ...this.itemData } : this.createEmptyItem();
     }
   }
 
@@ -57,10 +50,25 @@ export class ItemFormComponent {
       return;
     }
 
-    this.itemSubmit.emit(this.item);
+    this.itemSubmit.emit({ ...validation.data });
+    this.resetForm();
   }
 
   getFieldError(field: 'label' | 'unitPrice' | 'type' | 'maxRetentionDays'): string {
     return this.validationError?.issues.find((issue) => issue.path[0] === field)?.message ?? '';
+  }
+
+  private resetForm(): void {
+    this.validationError = null;
+    this.item = this.createEmptyItem();
+  }
+
+  private createEmptyItem(): CreateItemDto {
+    return {
+      label: '',
+      unitPrice: 0,
+      type: ItemType.PASTRY,
+      maxRetentionDays: 0,
+    };
   }
 }

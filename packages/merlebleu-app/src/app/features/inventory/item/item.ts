@@ -66,8 +66,15 @@ export class ItemListComponent {
   }
 
   onSearchChange(value: string) {
-    this.search.set(value);
+    const normalizedValue = value.trim();
+
+    this.search.set(normalizedValue);
     this.page.set(1);
+
+    if (normalizedValue.length > 0 && normalizedValue.length < 3) {
+      return;
+    }
+
     this.fetchItems();
   }
 
