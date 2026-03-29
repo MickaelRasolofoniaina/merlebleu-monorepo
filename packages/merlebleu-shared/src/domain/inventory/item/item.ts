@@ -1,7 +1,7 @@
 export enum ItemType {
-  PASTRY = "pastry",
-  CAKE = "cake",
-  DRINK = "drink",
+  PASTRY = "VIENNOISERIE",
+  CAKE = "PATISSERIE",
+  DRINK = "BOISSON",
 }
 
 export interface Item {
