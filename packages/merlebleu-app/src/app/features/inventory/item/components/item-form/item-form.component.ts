@@ -1,17 +1,28 @@
 import { Component, Input, Output, EventEmitter, SimpleChanges } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { CreateItemDto, ItemType, UpdateItemDto } from '@merlebleu/shared';
+import {
+  CreateItemDto,
+  ItemType,
+  UpdateItemDto,
+  createItemSchema,
+  updateItemSchema,
+} from '@merlebleu/shared';
+import { InputNumberModule } from 'primeng/inputnumber';
+import { InputTextModule } from 'primeng/inputtext';
+import { SelectModule } from 'primeng/select';
 
 @Component({
   selector: 'mb-item-form',
   templateUrl: './item-form.component.html',
   styleUrls: ['./item-form.component.scss'],
   standalone: true,
-  imports: [FormsModule],
+  imports: [FormsModule, InputTextModule, InputNumberModule, SelectModule],
 })
 export class ItemFormComponent {
   @Input() itemData?: CreateItemDto | UpdateItemDto | null;
+  @Input() formId = 'item-form';
   @Output() itemSubmit = new EventEmitter<CreateItemDto | UpdateItemDto>();
+  validationError: ReturnType<typeof createItemSchema.safeParse>['error'] | null = null;
 
   item: CreateItemDto | UpdateItemDto = {
     label: '',
@@ -23,12 +34,33 @@ export class ItemFormComponent {
   itemTypes = Object.values(ItemType);
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes['itemData'] && this.itemData) {
-      this.item = { ...this.itemData };
+    if (changes['itemData']) {
+      this.validationError = null;
+      this.item = this.itemData
+        ? { ...this.itemData }
+        : {
+            label: '',
+            unitPrice: 0,
+            type: ItemType.PASTRY,
+            maxRetentionDays: 0,
+          };
     }
   }
 
   onSubmit() {
+    this.validationError = null;
+    const schema = this.itemData ? updateItemSchema : createItemSchema;
+    const validation = schema.safeParse(this.item);
+
+    if (!validation.success) {
+      this.validationError = validation.error;
+      return;
+    }
+
     this.itemSubmit.emit(this.item);
+  }
+
+  getFieldError(field: 'label' | 'unitPrice' | 'type' | 'maxRetentionDays'): string {
+    return this.validationError?.issues.find((issue) => issue.path[0] === field)?.message ?? '';
   }
 }

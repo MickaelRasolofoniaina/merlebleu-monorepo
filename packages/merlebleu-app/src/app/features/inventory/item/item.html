@@ -34,9 +34,9 @@
   </ng-template>
   <ng-template #body let-item>
     <tr>
-      <td>{{ item.label }}</td>
-      <td>{{ item.unitPrice | number: '1.2-2' }} €</td>
-      <td>{{ item.type }}</td>
+      <td>{{ capitalizeFirstLetter(item.label) }}</td>
+      <td>{{ formatUnitPrice(item.unitPrice) }}</td>
+      <td>{{ capitalizeFirstLetter(item.type) }}</td>
       <td>{{ item.maxRetentionDays }}</td>
       <td>
         <p-button
@@ -58,25 +58,44 @@
     </tr>
   </ng-template>
 </p-table>
-
-<!-- Add/Edit Modal -->
+<!-- Edit Modal -->
 <p-dialog
-  [visible]="showModal || showEditModal"
+  [(visible)]="showEditModal"
   [modal]="true"
   [style]="{ width: '450px' }"
-  [header]="selectedItem ? 'Editer un article' : 'Ajouter un article'"
+  header="Editer un article"
+  (onHide)="closeEditModal()"
 >
   <mb-item-form
+    [formId]="'edit-item-form'"
     [itemData]="selectedItem"
-    (itemSubmit)="selectedItem ? editItem(selectedItem.id, $event) : addItem($event)"
+    (itemSubmit)="selectedItem && editItem(selectedItem.id, $event)"
   ></mb-item-form>
   <ng-template pTemplate="footer">
     <div class="flex justify-end gap-2">
-      <p-button label="Annuler" severity="danger" (onClick)="closeModal()" />
-      <p-button
-        label="{{ selectedItem ? 'Enregistrer' : 'Ajouter' }}"
-        (onClick)="selectedItem ? editItem(selectedItem.id, selectedItem) : addItem(selectedItem)"
-      />
+      <p-button label="Annuler" severity="danger" (onClick)="closeEditModal()" />
+      <button pButton type="submit" form="edit-item-form">Enregistrer</button>
+    </div>
+  </ng-template>
+</p-dialog>
+
+<!-- Add Modal -->
+<p-dialog
+  [(visible)]="showModal"
+  [modal]="true"
+  [style]="{ width: '450px' }"
+  header="Ajouter un article"
+  (onClose)="closeAddModal()"
+>
+  <mb-item-form
+    [formId]="'add-item-form'"
+    [itemData]="null"
+    (itemSubmit)="addItem($event)"
+  ></mb-item-form>
+  <ng-template pTemplate="footer">
+    <div class="flex justify-end gap-2">
+      <p-button label="Annuler" severity="danger" (onClick)="closeAddModal()" />
+      <button pButton type="submit" form="add-item-form">Ajouter</button>
     </div>
   </ng-template>
 </p-dialog>
@@ -87,6 +106,7 @@
   [modal]="true"
   [style]="{ width: '450px' }"
   header="Confirmer la suppression"
+  (onHide)="closeDeleteModal()"
 >
   <div class="flex flex-col gap-4">
     <p>
@@ -95,8 +115,12 @@
   </div>
   <ng-template pTemplate="footer">
     <div class="flex justify-end gap-2">
-      <p-button label="Annuler" severity="secondary" (onClick)="closeModal()" />
-      <p-button label="Supprimer" severity="danger" (onClick)="deleteItem(selectedItem?.id)" />
+      <p-button label="Annuler" severity="secondary" (onClick)="closeDeleteModal()" />
+      <p-button
+        label="Supprimer"
+        severity="danger"
+        (onClick)="selectedItem && deleteItem(selectedItem.id)"
+      />
     </div>
   </ng-template>
 </p-dialog>

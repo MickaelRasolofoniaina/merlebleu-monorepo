@@ -5,9 +5,7 @@ import {
   HttpCode,
   HttpStatus,
   Post,
-  Req,
   Res,
-  UnauthorizedException,
 } from '@nestjs/common';
 import express from 'express';
 import { AuthService } from './auth.service';

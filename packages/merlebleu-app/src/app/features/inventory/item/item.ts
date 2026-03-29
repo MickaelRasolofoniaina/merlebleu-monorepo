@@ -1,20 +1,15 @@
-import {
-  CreateItemDto,
-  CreateOrderDto,
-  DEFAULT_PAGE_SIZE,
-  Item,
-  ItemType,
-  UpdateItemDto,
-} from '@merlebleu/shared';
+import { CreateItemDto, DEFAULT_PAGE_SIZE, Item, ItemType, UpdateItemDto } from '@merlebleu/shared';
 import { Component, signal, inject } from '@angular/core';
 import { ItemService } from './item.service';
 
-import { Button } from 'primeng/button';
+import { ButtonModule } from 'primeng/button';
 import { TableModule } from 'primeng/table';
 import { Dialog } from 'primeng/dialog';
+import { InputTextModule } from 'primeng/inputtext';
 import { TablePageEvent } from 'primeng/table';
-import { DecimalPipe } from '@angular/common';
 import { getPageFromFirstRows } from '@shared/utils/pagination';
+import { formatUnitPrice } from '@shared/utils/number';
+import { capitalizeFirstLetter } from '@shared/utils/text';
 import { ItemFormComponent } from './components/item-form/item-form.component';
 
 @Component({
@@ -22,9 +17,11 @@ import { ItemFormComponent } from './components/item-form/item-form.component';
   templateUrl: './item.html',
   styleUrls: ['./item.scss'],
   providers: [ItemService],
-  imports: [Button, TableModule, Dialog, DecimalPipe, ItemFormComponent],
+  imports: [ButtonModule, TableModule, Dialog, InputTextModule, ItemFormComponent],
 })
 export class ItemListComponent {
+  readonly capitalizeFirstLetter = capitalizeFirstLetter;
+  readonly formatUnitPrice = formatUnitPrice;
   items = signal<Item[]>([]);
   search = signal('');
   page = signal(1);
@@ -97,30 +94,37 @@ export class ItemListComponent {
     this.showDeleteModal = true;
   }
 
-  closeModal() {
+  closeAddModal() {
     this.showModal = false;
+  }
+
+  closeEditModal() {
     this.showEditModal = false;
+    this.selectedItem = null;
+  }
+
+  closeDeleteModal() {
     this.showDeleteModal = false;
     this.selectedItem = null;
   }
 
   addItem(item: CreateItemDto) {
     this.itemService.addItem(item).subscribe(() => {
-      this.closeModal();
+      this.closeAddModal();
       this.fetchItems();
     });
   }
 
   editItem(id: string, item: UpdateItemDto) {
     this.itemService.editItem(id, item).subscribe(() => {
-      this.closeModal();
+      this.closeEditModal();
       this.fetchItems();
     });
   }
 
   deleteItem(id: string) {
     this.itemService.deleteItem(id).subscribe(() => {
-      this.closeModal();
+      this.closeDeleteModal();
       this.fetchItems();
     });
   }

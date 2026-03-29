@@ -1,4 +1,16 @@
-import { Controller, Get, Post, Put, Delete, Param, Body, Query, DefaultValuePipe, ParseIntPipe } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Put,
+  Delete,
+  Param,
+  Body,
+  Query,
+  DefaultValuePipe,
+  ParseIntPipe,
+} from '@nestjs/common';
+import { ApiQuery } from '@nestjs/swagger';
 import { ItemService } from './item.service';
 import { CreateItemDto, UpdateItemDto } from './item.dto';
 
@@ -21,12 +33,22 @@ export class ItemController {
     return this.itemService.deleteItem(id);
   }
 
+  @ApiQuery({
+    name: 'labelContains',
+    required: false,
+    type: String,
+    description: 'Filter items by label substring',
+  })
   @Get()
   async findItems(
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
     @Query('limit', new DefaultValuePipe(20), ParseIntPipe) limit: number,
     @Query('labelContains') labelContains?: string,
   ) {
-    return this.itemService.findItems(page, limit, labelContains ? { labelContains } : undefined);
+    return this.itemService.findItems(
+      page,
+      limit,
+      labelContains ? { labelContains } : undefined,
+    );
   }
 }
