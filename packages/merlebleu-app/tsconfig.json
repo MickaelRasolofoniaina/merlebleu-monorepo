@@ -27,7 +27,8 @@
       "@merlebleu/api": ["../../merlebleu-api/src"],
       "@merlebleu/api/*": ["../../merlebleu-api/src/*"],
       "@merlebleu/app": ["src"],
-      "@merlebleu/app/*": ["src/*"]
+      "@merlebleu/app/*": ["src/*"],
+      "@env/*": ["src/environments/*"]
     }
   },
   "angularCompilerOptions": {

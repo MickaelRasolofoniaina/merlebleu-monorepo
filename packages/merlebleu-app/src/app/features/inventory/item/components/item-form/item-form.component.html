@@ -1,0 +1,59 @@
+<form [attr.id]="formId" (ngSubmit)="onSubmit()" class="flex flex-col gap-4">
+  <div>
+    <label for="itemLabel" class="block mb-2">Nom</label>
+    <input
+      id="itemLabel"
+      type="text"
+      pInputText
+      [(ngModel)]="item.label"
+      name="label"
+      class="w-full"
+      required
+    />
+    @if (getFieldError('label')) {
+      <small class="text-red-500 mt-1 block">{{ getFieldError('label') }}</small>
+    }
+  </div>
+  <div>
+    <label for="itemUnitPrice" class="block mb-2">Prix Unitaire</label>
+    <p-inputnumber
+      inputId="itemUnitPrice"
+      [(ngModel)]="item.unitPrice"
+      name="unitPrice"
+      [min]="0"
+      fluid
+      required
+    />
+    @if (getFieldError('unitPrice')) {
+      <small class="text-red-500 mt-1 block">{{ getFieldError('unitPrice') }}</small>
+    }
+  </div>
+  <div>
+    <label for="itemType" class="block mb-2">Type</label>
+    <p-select
+      inputId="itemType"
+      [(ngModel)]="item.type"
+      name="type"
+      [options]="itemTypes"
+      fluid
+      required
+    />
+    @if (getFieldError('type')) {
+      <small class="text-red-500 mt-1 block">{{ getFieldError('type') }}</small>
+    }
+  </div>
+  <div>
+    <label for="itemMaxRetentionDays" class="block mb-2">Jours de Rétention</label>
+    <p-inputnumber
+      inputId="itemMaxRetentionDays"
+      [(ngModel)]="item.maxRetentionDays"
+      name="maxRetentionDays"
+      [min]="0"
+      fluid
+      required
+    />
+    @if (getFieldError('maxRetentionDays')) {
+      <small class="text-red-500 mt-1 block">{{ getFieldError('maxRetentionDays') }}</small>
+    }
+  </div>
+</form>

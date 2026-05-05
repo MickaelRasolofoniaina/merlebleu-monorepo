@@ -1,0 +1,191 @@
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { OrderEntity, OrderItemEntity } from './order.entity';
+import { CreateOrderDto, UpdateOrderDto } from './order.dto';
+import { OrderItemDto, OrderStatus, ResultPaged } from '@merlebleu/shared';
+import { getPaginationParams } from '@shared/pagination/pagination.utils';
+import { PaymentService } from '../payment/payment.service';
+
+@Injectable()
+export class OrderService {
+  constructor(
+    @InjectRepository(OrderEntity)
+    private orderRepository: Repository<OrderEntity>,
+    private paymentService: PaymentService,
+  ) {}
+
+  async addOrder(order: CreateOrderDto): Promise<OrderEntity> {
+    const paymentMethod = await this.paymentService.getPaymentMethod(
+      order.paymentMethodId,
+    );
+
+    const { orderData, orderItems } = this.splitOrderInput(order);
+    const orderEntity = {
+      ...orderData,
+      paymentMethod,
+    } as OrderEntity;
+
+    orderEntity.orderItems = this.buildOrderItems(orderItems, orderEntity);
+
+    const savedOrder = await this.orderRepository.save(orderEntity);
+
+    return this.sanitizeOrder(savedOrder);
+  }
+
+  async listOrders(
+    page = 1,
+    limit = 20,
+    filters?: {
+      orderDate?: string;
+      deliveryDate?: string;
+      customerName?: string;
+      status?: OrderStatus;
+    },
+  ): Promise<ResultPaged<OrderEntity>> {
+    const pagination = getPaginationParams({ page, limit });
+
+    const query = this.orderRepository
+      .createQueryBuilder('orders')
+      .leftJoinAndSelect('orders.orderItems', 'orderItems')
+      .leftJoinAndSelect('orders.paymentMethod', 'paymentMethod')
+      .orderBy('orders.orderDate', 'DESC');
+
+    // Apply filters
+    if (filters?.orderDate) {
+      query.andWhere('orders.orderDate = :orderDate', {
+        orderDate: filters.orderDate,
+      });
+    }
+
+    if (filters?.deliveryDate) {
+      query.andWhere('orders.deliveryDate = :deliveryDate', {
+        deliveryDate: filters.deliveryDate,
+      });
+    }
+
+    if (filters?.customerName) {
+      query.andWhere('orders.customerName ILIKE :customerName', {
+        customerName: `%${filters.customerName}%`,
+      });
+    }
+
+    if (filters?.status) {
+      query.andWhere('orders.orderStatus = :status', {
+        status: filters.status,
+      });
+    }
+
+    query.take(pagination.limit).skip(pagination.skip);
+
+    const [data, total] = await query.getManyAndCount();
+
+    return {
+      data: data.map((order) => this.sanitizeOrder(order)),
+      total,
+      page: pagination.page,
+      limit: pagination.limit,
+    };
+  }
+
+  async getOrderById(id: string): Promise<OrderEntity> {
+    const order = await this.orderRepository.findOne({
+      where: { id },
+      relations: { orderItems: true, paymentMethod: true },
+    });
+
+    if (!order) {
+      throw new NotFoundException(`Order with id ${id} not found`);
+    }
+
+    return this.sanitizeOrder(order);
+  }
+
+  async updateOrder(id: string, order: UpdateOrderDto): Promise<OrderEntity> {
+    const existingOrder = await this.orderRepository.findOne({
+      where: { id },
+      relations: { orderItems: true, paymentMethod: true },
+    });
+
+    if (!existingOrder) {
+      throw new NotFoundException(`Order with id ${id} not found`);
+    }
+
+    const paymentMethod = await this.paymentService.getPaymentMethod(
+      order.paymentMethodId,
+    );
+
+    const { orderData, orderItems } = this.splitOrderInput(order);
+
+    Object.assign(existingOrder, {
+      ...orderData,
+      paymentMethod,
+    });
+
+    existingOrder.orderItems = this.buildOrderItems(orderItems, existingOrder);
+
+    const savedOrder = await this.orderRepository.save(existingOrder);
+
+    return this.sanitizeOrder(savedOrder);
+  }
+
+  async updateOrderStatus(id: string, status: OrderStatus): Promise<boolean> {
+    const existingOrder = await this.orderRepository.findOne({
+      where: { id },
+      relations: { orderItems: false, paymentMethod: false },
+    });
+
+    if (!existingOrder) {
+      throw new NotFoundException(`Order with id ${id} not found`);
+    }
+
+    existingOrder.orderStatus = status;
+
+    await this.orderRepository.save(existingOrder);
+
+    return true;
+  }
+
+  async deleteOrder(id: string): Promise<void> {
+    const deleteResult = await this.orderRepository.delete(id);
+
+    if (!deleteResult.affected) {
+      throw new NotFoundException(`Order with id ${id} not found`);
+    }
+  }
+
+  private buildOrderItems(
+    items: OrderItemDto[],
+    order: OrderEntity,
+  ): OrderItemEntity[] {
+    return items.map(
+      (item) =>
+        ({
+          description: item.description,
+          size: item.size,
+          totalAmount: item.totalAmount,
+          remarks: item.remarks,
+          photos: item.photos,
+          order,
+        }) as OrderItemEntity,
+    );
+  }
+
+  private splitOrderInput(order: CreateOrderDto | UpdateOrderDto) {
+    const { paymentMethodId, orderItems, ...orderData } = order;
+
+    return {
+      orderData: {
+        ...orderData,
+      },
+      orderItems,
+    };
+  }
+
+  private sanitizeOrder(order: OrderEntity): OrderEntity {
+    return {
+      ...order,
+      orderItems: (order.orderItems ?? []).map(({ order: _, ...item }) => item),
+    } as OrderEntity;
+  }
+}
