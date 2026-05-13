@@ -9,3 +9,16 @@
 - Use the `async` pipe for observables in templates
 - Use `NgOptimizedImage` for static images
 - Use PrimeNG components whenever a UI component is needed
+- Use Tailwind utility classes exclusively for styling — do not write custom CSS classes
+- Do not add an `error` callback in `.subscribe()` — errors are handled globally by `httpErrorInterceptor`; only provide `next` (and `finalize` via `pipe` if needed):
+  ```ts
+  this.orderService
+    .listOrders({ page, limit }, filterParams)
+    .pipe(finalize(() => { this.isLoading = false; }))
+    .subscribe({
+      next: (response) => {
+        this.orders.set(response.data);
+        this.totalRecords = response.total;
+      },
+    });
+  ```
