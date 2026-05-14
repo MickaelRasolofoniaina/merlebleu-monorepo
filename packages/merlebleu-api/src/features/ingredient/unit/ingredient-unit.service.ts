@@ -1,8 +1,14 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { IngredientUnitEntity, IngredientUnitSchema } from './ingredient-unit.entity';
-import { CreateIngredientUnitDto, UpdateIngredientUnitDto } from './ingredient-unit.dto';
+import {
+  IngredientUnitEntity,
+  IngredientUnitSchema,
+} from './ingredient-unit.entity';
+import {
+  CreateIngredientUnitDto,
+  UpdateIngredientUnitDto,
+} from './ingredient-unit.dto';
 
 @Injectable()
 export class IngredientUnitService {
@@ -20,10 +26,14 @@ export class IngredientUnitService {
     return this.unitRepository.save(unit);
   }
 
-  async update(id: string, dto: UpdateIngredientUnitDto): Promise<IngredientUnitEntity> {
+  async update(
+    id: string,
+    dto: UpdateIngredientUnitDto,
+  ): Promise<IngredientUnitEntity> {
     await this.unitRepository.update(id, dto);
     const updated = await this.unitRepository.findOneBy({ id });
-    if (!updated) throw new NotFoundException(`Unité avec l'id ${id} introuvable`);
+    if (!updated)
+      throw new NotFoundException(`Unité avec l'id ${id} introuvable`);
     return updated;
   }
 

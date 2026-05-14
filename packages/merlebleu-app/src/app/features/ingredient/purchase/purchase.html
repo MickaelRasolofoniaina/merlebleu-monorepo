@@ -1,7 +1,17 @@
 <div class="flex justify-between items-center mb-4">
-  <h2 class="text-2xl font-bold">Ingrédients</h2>
+  <h2 class="text-2xl font-bold">Achats d'ingrédients</h2>
 </div>
 <div class="flex flex-wrap gap-3 items-center mb-4">
+  <p-datepicker
+    [(ngModel)]="filterPurchaseDate"
+    dateFormat="dd/mm/yy"
+    placeholder="Filtrer par date"
+    [showIcon]="true"
+    [showClear]="true"
+    (onSelect)="onDateFilter()"
+    (onClear)="onDateFilter()"
+    class="w-52"
+  />
   <input
     type="text"
     pInputText
@@ -19,23 +29,13 @@
     (onChange)="onCategoryFilter()"
     class="w-52"
   />
-  <p-select
-    [(ngModel)]="filterUnitId"
-    [options]="units()"
-    optionLabel="label"
-    optionValue="id"
-    placeholder="Toutes unités"
-    [showClear]="true"
-    (onChange)="onUnitFilter()"
-    class="w-44"
-  />
   <p-button label="Ajouter" icon="pi pi-plus" (onClick)="openAddModal()" class="ml-auto" />
 </div>
 
 <p-table
-  [value]="ingredients()"
+  [value]="purchases()"
   [loading]="isLoading()"
-  [tableStyle]="{ 'min-width': '50rem' }"
+  [tableStyle]="{ 'min-width': '60rem' }"
   [stripedRows]="true"
   [paginator]="true"
   [rows]="rows"
@@ -45,19 +45,25 @@
 >
   <ng-template #header>
     <tr>
+      <th>Date</th>
       <th>Libellé</th>
       <th>Catégorie</th>
       <th>Unité</th>
-      <th class="text-right!">Prix Unitaire</th>
+      <th class="text-right!">Quantité</th>
+      <th class="text-right!">Prix unitaire</th>
+      <th class="text-right!">Prix total</th>
       <th style="width: 12rem">Actions</th>
     </tr>
   </ng-template>
-  <ng-template #body let-ingredient>
+  <ng-template #body let-purchase>
     <tr>
-      <td>{{ capitalizeFirstLetter(ingredient.label) }}</td>
-      <td>{{ capitalizeFirstLetter(ingredient.category.label) }}</td>
-      <td>{{ capitalizeFirstLetter(ingredient.unit.label) }}</td>
-      <td>{{ formatUnitPrice(ingredient.unitPrice) }}</td>
+      <td>{{ purchase.purchaseDate | date: 'dd/MM/yyyy' }}</td>
+      <td>{{ capitalizeFirstLetter(purchase.ingredient.label) }}</td>
+      <td>{{ capitalizeFirstLetter(purchase.ingredient.category.label) }}</td>
+      <td>{{ capitalizeFirstLetter(purchase.ingredient.unit.label) }}</td>
+      <td>{{ purchase.quantity }}</td>
+      <td>{{ formatUnitPrice(purchase.ingredient.unitPrice) }}</td>
+      <td>{{ formatUnitPrice(getTotalPrice(purchase)) }}</td>
       <td>
         <p-button
           icon="pi pi-pencil"
@@ -65,14 +71,14 @@
           [outlined]="true"
           severity="warn"
           class="mr-2"
-          (onClick)="openEditModal(ingredient)"
+          (onClick)="openEditModal(purchase)"
         />
         <p-button
           icon="pi pi-trash"
           [rounded]="true"
           [outlined]="true"
           severity="danger"
-          (onClick)="openDeleteModal(ingredient)"
+          (onClick)="openDeleteModal(purchase)"
         />
       </td>
     </tr>
@@ -84,20 +90,19 @@
   [(visible)]="showEditModal"
   [modal]="true"
   [style]="{ width: '450px' }"
-  header="Modifier un ingrédient"
+  header="Modifier un achat"
   (onHide)="closeEditModal()"
 >
-  <mb-ingredient-form
-    [formId]="'edit-ingredient-form'"
+  <mb-purchase-form
+    [formId]="'edit-purchase-form'"
     [itemData]="editDto"
-    [categories]="categories()"
-    [units]="units()"
-    (itemSubmit)="selectedIngredient && editIngredient(selectedIngredient.id, $event)"
-  ></mb-ingredient-form>
+    [ingredients]="ingredients()"
+    (itemSubmit)="selectedPurchase && editPurchase(selectedPurchase.id, $event)"
+  />
   <ng-template pTemplate="footer">
     <div class="flex justify-end gap-2">
       <p-button label="Annuler" severity="danger" (onClick)="closeEditModal()" />
-      <button pButton type="submit" form="edit-ingredient-form">Enregistrer</button>
+      <button pButton type="submit" form="edit-purchase-form">Enregistrer</button>
     </div>
   </ng-template>
 </p-dialog>
@@ -107,20 +112,19 @@
   [(visible)]="showModal"
   [modal]="true"
   [style]="{ width: '450px' }"
-  header="Ajouter un ingrédient"
+  header="Ajouter un achat"
   (onClose)="closeAddModal()"
 >
-  <mb-ingredient-form
-    [formId]="'add-ingredient-form'"
+  <mb-purchase-form
+    [formId]="'add-purchase-form'"
     [itemData]="null"
-    [categories]="categories()"
-    [units]="units()"
-    (itemSubmit)="addIngredient($event)"
-  ></mb-ingredient-form>
+    [ingredients]="ingredients()"
+    (itemSubmit)="addPurchase($event)"
+  />
   <ng-template pTemplate="footer">
     <div class="flex justify-end gap-2">
       <p-button label="Annuler" severity="danger" (onClick)="closeAddModal()" />
-      <button pButton type="submit" form="add-ingredient-form">Ajouter</button>
+      <button pButton type="submit" form="add-purchase-form">Ajouter</button>
     </div>
   </ng-template>
 </p-dialog>
@@ -135,8 +139,9 @@
 >
   <div class="flex flex-col gap-4">
     <p>
-      Confirmer la suppression de l'ingrédient
-      <strong>{{ selectedIngredient?.label }}</strong> ?
+      Confirmer la suppression de l'achat de
+      <strong>{{ selectedPurchase?.ingredient?.label }}</strong>
+      du {{ selectedPurchase?.purchaseDate | date: 'dd/MM/yyyy' }} ?
     </p>
   </div>
   <ng-template pTemplate="footer">
@@ -145,7 +150,7 @@
       <p-button
         label="Supprimer"
         severity="danger"
-        (onClick)="selectedIngredient && deleteIngredient(selectedIngredient.id)"
+        (onClick)="selectedPurchase && deletePurchase(selectedPurchase.id)"
       />
     </div>
   </ng-template>

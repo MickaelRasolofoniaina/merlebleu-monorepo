@@ -1,6 +1,17 @@
-import { Controller, Get, Post, Put, Delete, Param, Body } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Put,
+  Delete,
+  Param,
+  Body,
+} from '@nestjs/common';
 import { IngredientUnitService } from './ingredient-unit.service';
-import { CreateIngredientUnitDto, UpdateIngredientUnitDto } from './ingredient-unit.dto';
+import {
+  CreateIngredientUnitDto,
+  UpdateIngredientUnitDto,
+} from './ingredient-unit.dto';
 
 @Controller('ingredient-unit')
 export class IngredientUnitController {

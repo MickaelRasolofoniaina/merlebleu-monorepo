@@ -21,6 +21,7 @@ import { getPageFromFirstRows } from '@shared/utils/pagination';
 import { formatUnitPrice } from '@shared/utils/number';
 import { capitalizeFirstLetter } from '@shared/utils/text';
 import { finalize } from 'rxjs';
+import { NgClass } from '../../../../../../../node_modules/@angular/common/common_module.d';
 
 @Component({
   selector: 'mb-ingredient-list',
@@ -35,6 +36,7 @@ import { finalize } from 'rxjs';
     SelectModule,
     FormsModule,
     IngredientFormComponent,
+    NgClass,
   ],
 })
 export class IngredientListComponent implements OnInit {

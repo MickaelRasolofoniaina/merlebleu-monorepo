@@ -20,7 +20,8 @@ export class IngredientService {
   ): Promise<ResultPaged<IngredientEntity>> {
     const pagination = getPaginationParams({ page, limit });
     const where: FindOptionsWhere<IngredientEntity> = {};
-    if (filters?.labelContains) where.label = ILike(`%${filters.labelContains}%`);
+    if (filters?.labelContains)
+      where.label = ILike(`%${filters.labelContains}%`);
     if (filters?.categoryId) where.category = { id: filters.categoryId };
     if (filters?.unitId) where.unit = { id: filters.unitId };
 
@@ -43,7 +44,10 @@ export class IngredientService {
     return this.repo.save(entity);
   }
 
-  async updateIngredient(id: string, dto: UpdateIngredientDto): Promise<IngredientEntity> {
+  async updateIngredient(
+    id: string,
+    dto: UpdateIngredientDto,
+  ): Promise<IngredientEntity> {
     await this.repo.update(id, {
       label: dto.label,
       unitPrice: dto.unitPrice,
@@ -51,12 +55,14 @@ export class IngredientService {
       unit: { id: dto.unitId },
     });
     const updated = await this.repo.findOneBy({ id });
-    if (!updated) throw new NotFoundException(`Ingrédient avec l'id ${id} introuvable`);
+    if (!updated)
+      throw new NotFoundException(`Ingrédient avec l'id ${id} introuvable`);
     return updated;
   }
 
   async deleteIngredient(id: string): Promise<void> {
     const result = await this.repo.delete(id);
-    if (!result.affected) throw new NotFoundException(`Ingrédient avec l'id ${id} introuvable`);
+    if (!result.affected)
+      throw new NotFoundException(`Ingrédient avec l'id ${id} introuvable`);
   }
 }

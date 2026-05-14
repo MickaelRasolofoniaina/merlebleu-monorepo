@@ -19,7 +19,8 @@
       "Bash(awk '{print $NF}')",
       "Bash(npx tsc *)",
       "PowerShell(grep *)",
-      "PowerShell(Get-ChildItem -Path \"C:\\\\Work\\\\Merlebleu\\\\merlebleu-monorepo\" -File | Where-Object { $_.Name -match \"tail|post|config\" } | Select-Object Name)"
+      "PowerShell(Get-ChildItem -Path \"C:\\\\Work\\\\Merlebleu\\\\merlebleu-monorepo\" -File | Where-Object { $_.Name -match \"tail|post|config\" } | Select-Object Name)",
+      "Bash(npx eslint *)"
     ]
   }
 }

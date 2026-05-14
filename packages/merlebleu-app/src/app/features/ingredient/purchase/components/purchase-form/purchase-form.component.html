@@ -1,0 +1,56 @@
+<form [id]="formId()" (ngSubmit)="onSubmit()" class="flex flex-col gap-4">
+  <div class="flex flex-col gap-1">
+    <label for="purchaseDate" class="font-medium">Date de l'achat</label>
+    <p-datepicker
+      inputId="purchaseDate"
+      [(ngModel)]="item.purchaseDate"
+      name="purchaseDate"
+      dateFormat="dd/mm/yy"
+      [showIcon]="true"
+      placeholder="Sélectionner une date"
+      fluid
+      appendTo="body"
+    />
+    @if (getFieldError('purchaseDate')) {
+      <small class="text-red-500 mt-1 block">{{ getFieldError('purchaseDate') }}</small>
+    }
+  </div>
+
+  <div class="flex flex-col gap-1">
+    <label for="ingredientId" class="font-medium">Ingrédient</label>
+    <p-select
+      inputId="ingredientId"
+      [(ngModel)]="item.ingredientId"
+      name="ingredientId"
+      [options]="ingredients()"
+      optionLabel="label"
+      optionValue="id"
+      placeholder="Sélectionner un ingrédient"
+      [filter]="true"
+      filterPlaceholder="Rechercher un ingrédient..."
+      fluid
+      required
+      appendTo="body"
+    />
+    @if (getFieldError('ingredientId')) {
+      <small class="text-red-500 mt-1 block">{{ getFieldError('ingredientId') }}</small>
+    }
+  </div>
+
+  <div class="flex flex-col gap-1">
+    <label for="quantity" class="font-medium">Quantité</label>
+    <p-inputnumber
+      inputId="quantity"
+      [(ngModel)]="item.quantity"
+      name="quantity"
+      [minFractionDigits]="0"
+      [maxFractionDigits]="2"
+      [min]="0"
+      placeholder="0"
+      fluid
+    />
+    @if (getFieldError('quantity')) {
+      <small class="text-red-500 mt-1 block">{{ getFieldError('quantity') }}</small>
+    }
+  </div>
+</form>

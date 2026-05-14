@@ -1,4 +1,7 @@
-import { createIngredientSchema, updateIngredientSchema } from '@merlebleu/shared';
+import {
+  createIngredientSchema,
+  updateIngredientSchema,
+} from '@merlebleu/shared';
 import { createZodDto } from 'nestjs-zod';
 
 export class CreateIngredientDto extends createZodDto(createIngredientSchema) {}

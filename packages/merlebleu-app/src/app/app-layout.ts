@@ -69,6 +69,7 @@ export class AppLayout {
         {
           label: 'Achat',
           icon: 'pi pi-wallet',
+          routerLink: ['/ingredient/purchase'],
         },
         {
           label: 'Liste',

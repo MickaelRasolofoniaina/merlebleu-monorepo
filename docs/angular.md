@@ -10,6 +10,7 @@
 - Use `NgOptimizedImage` for static images
 - Use PrimeNG components whenever a UI component is needed
 - Use Tailwind utility classes exclusively for styling — do not write custom CSS classes
+- In tables, right-align all numeric columns (quantities, prices, totals, etc.)
 - Do not add an `error` callback in `.subscribe()` — errors are handled globally by `httpErrorInterceptor`; only provide `next` and `finalize` via `pipe` if needed for example to set loading indicator:
   ```ts
   this.orderService

@@ -1,5 +1,5 @@
-import { Item, ItemType } from "@merlebleu/shared";
-import { EntitySchema } from "typeorm";
+import { Item, ItemType } from '@merlebleu/shared';
+import { EntitySchema } from 'typeorm';
 
 export class ItemEntity implements Item {
   id: string;
@@ -10,27 +10,27 @@ export class ItemEntity implements Item {
 }
 
 export const ItemSchema = new EntitySchema<ItemEntity>({
-  name: "ItemEntity",
-  tableName: "items",
+  name: 'ItemEntity',
+  tableName: 'items',
   target: ItemEntity,
   columns: {
     id: {
-      type: "uuid",
+      type: 'uuid',
       primary: true,
-      generated: "uuid",
+      generated: 'uuid',
     },
     label: {
-      type: "varchar",
+      type: 'varchar',
     },
     unitPrice: {
-      type: "integer",
+      type: 'integer',
     },
     type: {
-      type: "enum",
+      type: 'enum',
       enum: ItemType,
     },
     maxRetentionDays: {
-      type: "int",
+      type: 'int',
     },
   },
 });

@@ -1,5 +1,5 @@
-import { IngredientUnit } from "@merlebleu/shared";
-import { EntitySchema } from "typeorm";
+import { IngredientUnit } from '@merlebleu/shared';
+import { EntitySchema } from 'typeorm';
 
 export class IngredientUnitEntity implements IngredientUnit {
   id: string;
@@ -7,17 +7,17 @@ export class IngredientUnitEntity implements IngredientUnit {
 }
 
 export const IngredientUnitSchema = new EntitySchema<IngredientUnitEntity>({
-  name: "IngredientUnitEntity",
-  tableName: "ingredient_units",
+  name: 'IngredientUnitEntity',
+  tableName: 'ingredient_units',
   target: IngredientUnitEntity,
   columns: {
     id: {
-      type: "uuid",
+      type: 'uuid',
       primary: true,
-      generated: "uuid",
+      generated: 'uuid',
     },
     label: {
-      type: "varchar",
+      type: 'varchar',
     },
   },
 });

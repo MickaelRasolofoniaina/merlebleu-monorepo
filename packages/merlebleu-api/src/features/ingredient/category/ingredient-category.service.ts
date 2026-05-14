@@ -1,8 +1,14 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { IngredientCategoryEntity, IngredientCategorySchema } from './ingredient-category.entity';
-import { CreateIngredientCategoryDto, UpdateIngredientCategoryDto } from './ingredient-category.dto';
+import {
+  IngredientCategoryEntity,
+  IngredientCategorySchema,
+} from './ingredient-category.entity';
+import {
+  CreateIngredientCategoryDto,
+  UpdateIngredientCategoryDto,
+} from './ingredient-category.dto';
 
 @Injectable()
 export class IngredientCategoryService {
@@ -20,10 +26,14 @@ export class IngredientCategoryService {
     return this.categoryRepository.save(category);
   }
 
-  async update(id: string, dto: UpdateIngredientCategoryDto): Promise<IngredientCategoryEntity> {
+  async update(
+    id: string,
+    dto: UpdateIngredientCategoryDto,
+  ): Promise<IngredientCategoryEntity> {
     await this.categoryRepository.update(id, dto);
     const updated = await this.categoryRepository.findOneBy({ id });
-    if (!updated) throw new NotFoundException(`Catégorie avec l'id ${id} introuvable`);
+    if (!updated)
+      throw new NotFoundException(`Catégorie avec l'id ${id} introuvable`);
     return updated;
   }
 
