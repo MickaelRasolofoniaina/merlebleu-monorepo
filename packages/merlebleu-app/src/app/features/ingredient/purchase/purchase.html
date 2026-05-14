@@ -52,7 +52,7 @@
       <th class="text-right!">Quantité</th>
       <th class="text-right!">Prix unitaire</th>
       <th class="text-right!">Prix total</th>
-      <th style="width: 12rem">Actions</th>
+      <th style="width: 12rem" class="text-center!">Actions</th>
     </tr>
   </ng-template>
   <ng-template #body let-purchase>
@@ -61,9 +61,9 @@
       <td>{{ capitalizeFirstLetter(purchase.ingredient.label) }}</td>
       <td>{{ capitalizeFirstLetter(purchase.ingredient.category.label) }}</td>
       <td>{{ capitalizeFirstLetter(purchase.ingredient.unit.label) }}</td>
-      <td>{{ purchase.quantity }}</td>
-      <td>{{ formatUnitPrice(purchase.ingredient.unitPrice) }}</td>
-      <td>{{ formatUnitPrice(getTotalPrice(purchase)) }}</td>
+      <td class="text-right!">{{ purchase.quantity }}</td>
+      <td class="text-right!">{{ formatUnitPrice(purchase.ingredient.unitPrice) }}</td>
+      <td class="text-right!">{{ formatUnitPrice(getTotalPrice(purchase)) }}</td>
       <td>
         <p-button
           icon="pi pi-pencil"

@@ -48,8 +48,8 @@
       <th>Libellé</th>
       <th>Catégorie</th>
       <th>Unité</th>
-      <th class="text-right!">Prix Unitaire</th>
-      <th style="width: 12rem">Actions</th>
+      <th style="text-align: right">Prix Unitaire</th>
+      <th style="width: 12rem" class="text-center!">Actions</th>
     </tr>
   </ng-template>
   <ng-template #body let-ingredient>
@@ -57,7 +57,7 @@
       <td>{{ capitalizeFirstLetter(ingredient.label) }}</td>
       <td>{{ capitalizeFirstLetter(ingredient.category.label) }}</td>
       <td>{{ capitalizeFirstLetter(ingredient.unit.label) }}</td>
-      <td>{{ formatUnitPrice(ingredient.unitPrice) }}</td>
+      <td style="text-align: right">{{ formatUnitPrice(ingredient.unitPrice) }}</td>
       <td>
         <p-button
           icon="pi pi-pencil"
