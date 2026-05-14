@@ -54,10 +54,6 @@ export class AppLayout {
       label: 'Depenses',
       items: [
         {
-          label: 'Ingredients',
-          icon: 'pi pi-truck',
-        },
-        {
           label: 'Salaires',
           icon: 'pi pi-wallet',
         },
@@ -68,16 +64,35 @@ export class AppLayout {
       ],
     },
     {
+      label: 'Ingredients',
+      items: [
+        {
+          label: 'Achat',
+          icon: 'pi pi-wallet',
+        },
+        {
+          label: 'Liste',
+          icon: 'pi pi-database',
+        },
+        {
+          label: 'Catégorie',
+          icon: 'pi pi-hashtag',
+          routerLink: ['/ingredient/category'],
+        },
+        {
+          label: 'Unité',
+          icon: 'pi pi-book',
+          routerLink: ['/ingredient/unit'],
+        },
+      ],
+    },
+    {
       label: 'Inventaire',
       items: [
         {
           label: 'Articles',
           icon: 'pi pi-box',
           routerLink: ['/inventory/item'],
-        },
-        {
-          label: 'Ingredients',
-          icon: 'pi pi-truck',
         },
       ],
     },

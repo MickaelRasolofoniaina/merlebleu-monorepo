@@ -6,6 +6,7 @@ import { AppService } from './app.service';
 import { SaleModule } from './features/sale/sale.module';
 import { IdentityModule } from './features/identity/identity.module';
 import { ItemModule } from './features/inventory/item/item.module';
+import { IngredientModule } from './features/ingredient/ingredient.module';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { ItemModule } from './features/inventory/item/item.module';
     SaleModule,
     IdentityModule,
     ItemModule,
+    IngredientModule,
   ],
   controllers: [AppController],
   providers: [AppService],

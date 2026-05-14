@@ -31,6 +31,11 @@ export const routes: Routes = [
         loadChildren: () =>
           import('./features/identity/identity.routes').then((m) => m.IDENTITY_ROUTES),
       },
+      {
+        path: 'ingredient',
+        loadChildren: () =>
+          import('./features/ingredient/ingredient.routes').then((m) => m.INGREDIENT_ROUTES),
+      },
     ],
   },
 ];

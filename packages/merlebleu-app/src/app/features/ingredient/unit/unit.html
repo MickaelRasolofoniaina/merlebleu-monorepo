@@ -1,0 +1,120 @@
+<div class="flex justify-between items-center mb-4">
+  <h2 class="text-2xl font-bold">Unités d'ingrédients</h2>
+</div>
+<div class="flex justify-end mb-4">
+  <p-button label="Ajouter" icon="pi pi-plus" (onClick)="openAddModal()" />
+</div>
+
+<p-table
+  [value]="units()"
+  [loading]="isLoading()"
+  [tableStyle]="{ 'min-width': '30rem' }"
+  [stripedRows]="true"
+>
+  <ng-template #header>
+    <tr>
+      <th>Libellé</th>
+      <th style="width: 10rem">Actions</th>
+    </tr>
+  </ng-template>
+  <ng-template #body let-unit>
+    <tr>
+      <td>{{ capitalizeFirstLetter(unit.label) }}</td>
+      <td>
+        <p-button
+          icon="pi pi-pencil"
+          [rounded]="true"
+          [outlined]="true"
+          severity="warn"
+          class="mr-2"
+          (onClick)="openEditModal(unit)"
+        />
+        <p-button
+          icon="pi pi-trash"
+          [rounded]="true"
+          [outlined]="true"
+          severity="danger"
+          (onClick)="openDeleteModal(unit)"
+        />
+      </td>
+    </tr>
+  </ng-template>
+</p-table>
+
+<!-- Add Modal -->
+<p-dialog
+  [(visible)]="showAddModal"
+  [modal]="true"
+  [style]="{ width: '400px' }"
+  header="Ajouter une unité"
+  (onHide)="closeAddModal()"
+>
+  <div class="flex flex-col gap-2">
+    <label for="add-label" class="font-medium">Libellé</label>
+    <input
+      id="add-label"
+      type="text"
+      pInputText
+      [(ngModel)]="addLabel"
+      placeholder="Ex: Sachet, Pièce, Paquet..."
+      class="w-full"
+    />
+    @if (addValidationError) {
+      <small class="text-red-500">{{ addValidationError }}</small>
+    }
+  </div>
+  <ng-template pTemplate="footer">
+    <div class="flex justify-end gap-2">
+      <p-button label="Annuler" severity="danger" (onClick)="closeAddModal()" />
+      <p-button label="Ajouter" (onClick)="submitAdd()" />
+    </div>
+  </ng-template>
+</p-dialog>
+
+<!-- Edit Modal -->
+<p-dialog
+  [(visible)]="showEditModal"
+  [modal]="true"
+  [style]="{ width: '400px' }"
+  header="Modifier une unité"
+  (onHide)="closeEditModal()"
+>
+  <div class="flex flex-col gap-2">
+    <label for="edit-label" class="font-medium">Libellé</label>
+    <input
+      id="edit-label"
+      type="text"
+      pInputText
+      [(ngModel)]="editLabel"
+      class="w-full"
+    />
+    @if (editValidationError) {
+      <small class="text-red-500">{{ editValidationError }}</small>
+    }
+  </div>
+  <ng-template pTemplate="footer">
+    <div class="flex justify-end gap-2">
+      <p-button label="Annuler" severity="danger" (onClick)="closeEditModal()" />
+      <p-button label="Enregistrer" (onClick)="submitEdit()" />
+    </div>
+  </ng-template>
+</p-dialog>
+
+<!-- Delete Modal -->
+<p-dialog
+  [(visible)]="showDeleteModal"
+  [modal]="true"
+  [style]="{ width: '400px' }"
+  header="Confirmer la suppression"
+  (onHide)="closeDeleteModal()"
+>
+  <p>
+    Confirmer la suppression de l'unité <strong>{{ selectedUnit?.label }}</strong> ?
+  </p>
+  <ng-template pTemplate="footer">
+    <div class="flex justify-end gap-2">
+      <p-button label="Annuler" severity="secondary" (onClick)="closeDeleteModal()" />
+      <p-button label="Supprimer" severity="danger" (onClick)="deleteUnit()" />
+    </div>
+  </ng-template>
+</p-dialog>
