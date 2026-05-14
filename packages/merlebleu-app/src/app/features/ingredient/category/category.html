@@ -1,15 +1,25 @@
 <div class="flex justify-between items-center mb-4">
   <h2 class="text-2xl font-bold">Catégories d'ingrédients</h2>
 </div>
-<div class="flex justify-end mb-4">
-  <p-button label="Ajouter" icon="pi pi-plus" (onClick)="openAddModal()" />
+<div class="flex items-center gap-3 mb-4">
+  <input
+    type="text"
+    pInputText
+    placeholder="Rechercher par libellé..."
+    [ngModel]="searchLabel()"
+    (ngModelChange)="searchLabel.set($event)"
+    class="w-64"
+  />
+  <p-button label="Ajouter" icon="pi pi-plus" (onClick)="openAddModal()" class="ml-auto" />
 </div>
 
 <p-table
-  [value]="categories()"
+  [value]="filteredCategories()"
   [loading]="isLoading()"
   [tableStyle]="{ 'min-width': '30rem' }"
   [stripedRows]="true"
+  [paginator]="true"
+  [rows]="rows"
 >
   <ng-template #header>
     <tr>

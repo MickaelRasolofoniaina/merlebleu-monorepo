@@ -1,7 +1,8 @@
-import { Component, signal, inject } from '@angular/core';
+import { Component, signal, inject, computed } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import {
   CreateIngredientCategoryDto,
+  DEFAULT_PAGE_SIZE,
   IngredientCategory,
   UpdateIngredientCategoryDto,
   createIngredientCategorySchema,
@@ -24,7 +25,14 @@ import { capitalizeFirstLetter } from '@shared/utils/text';
 export class IngredientCategoryComponent {
   readonly capitalizeFirstLetter = capitalizeFirstLetter;
 
-  categories = signal<IngredientCategory[]>([]);
+  allCategories = signal<IngredientCategory[]>([]);
+  searchLabel = signal('');
+  filteredCategories = computed(() => {
+    const search = this.searchLabel().toLowerCase().trim();
+    if (!search || search.length < 3) return this.allCategories();
+    return this.allCategories().filter((c) => c.label.toLowerCase().includes(search));
+  });
+  rows = DEFAULT_PAGE_SIZE;
   isLoading = signal(false);
   showAddModal = false;
   showEditModal = false;
@@ -45,7 +53,7 @@ export class IngredientCategoryComponent {
   fetchCategories() {
     this.isLoading.set(true);
     this.categoryService.getAll().subscribe((data) => {
-      this.categories.set(data);
+      this.allCategories.set(data);
       this.isLoading.set(false);
     });
   }

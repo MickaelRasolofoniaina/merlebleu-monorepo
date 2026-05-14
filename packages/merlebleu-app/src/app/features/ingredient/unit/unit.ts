@@ -1,7 +1,8 @@
-import { Component, signal, inject } from '@angular/core';
+import { Component, signal, inject, computed } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import {
   CreateIngredientUnitDto,
+  DEFAULT_PAGE_SIZE,
   IngredientUnit,
   UpdateIngredientUnitDto,
   createIngredientUnitSchema,
@@ -24,7 +25,14 @@ import { capitalizeFirstLetter } from '@shared/utils/text';
 export class IngredientUnitComponent {
   readonly capitalizeFirstLetter = capitalizeFirstLetter;
 
-  units = signal<IngredientUnit[]>([]);
+  allUnits = signal<IngredientUnit[]>([]);
+  searchLabel = signal('');
+  filteredUnits = computed(() => {
+    const search = this.searchLabel().toLowerCase().trim();
+    if (!search || search.length < 3) return this.allUnits();
+    return this.allUnits().filter((u) => u.label.toLowerCase().includes(search));
+  });
+  rows = DEFAULT_PAGE_SIZE;
   isLoading = signal(false);
   showAddModal = false;
   showEditModal = false;
@@ -45,7 +53,7 @@ export class IngredientUnitComponent {
   fetchUnits() {
     this.isLoading.set(true);
     this.unitService.getAll().subscribe((data) => {
-      this.units.set(data);
+      this.allUnits.set(data);
       this.isLoading.set(false);
     });
   }
