@@ -73,6 +73,7 @@ export class AppLayout {
         {
           label: 'Liste',
           icon: 'pi pi-database',
+          routerLink: ['/ingredient/ingredient'],
         },
         {
           label: 'Catégorie',

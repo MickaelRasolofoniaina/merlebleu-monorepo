@@ -13,7 +13,13 @@
       "Bash(Select-Object -ExpandProperty FullName)",
       "Bash(Sort-Object)",
       "Bash(grep -E \"\\\\.\\(ts|js|sql\\)$\")",
-      "Bash(npm run *)"
+      "Bash(npm run *)",
+      "PowerShell(Get-ChildItem -Path \"C:\\\\Work\\\\Merlebleu\\\\merlebleu-monorepo\\\\packages\\\\merlebleu-api\\\\src\\\\features\\\\inventory\" -Recurse -File | ForEach-Object { $_.FullName } | Sort-Object)",
+      "Bash(git ls-tree *)",
+      "Bash(awk '{print $NF}')",
+      "Bash(npx tsc *)",
+      "PowerShell(grep *)",
+      "PowerShell(Get-ChildItem -Path \"C:\\\\Work\\\\Merlebleu\\\\merlebleu-monorepo\" -File | Where-Object { $_.Name -match \"tail|post|config\" } | Select-Object Name)"
     ]
   }
 }

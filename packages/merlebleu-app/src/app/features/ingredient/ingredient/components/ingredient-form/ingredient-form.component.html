@@ -1,0 +1,68 @@
+<form [attr.id]="formId" (ngSubmit)="onSubmit()" class="flex flex-col gap-4">
+  <div>
+    <label for="ingredientLabel" class="block mb-2">Libellé</label>
+    <input
+      id="ingredientLabel"
+      type="text"
+      pInputText
+      [(ngModel)]="item.label"
+      name="label"
+      class="w-full"
+      required
+    />
+    @if (getFieldError('label')) {
+      <small class="text-red-500 mt-1 block">{{ getFieldError('label') }}</small>
+    }
+  </div>
+  <div>
+    <label for="ingredientCategory" class="block mb-2">Catégorie</label>
+    <p-select
+      inputId="ingredientCategory"
+      [(ngModel)]="item.categoryId"
+      name="categoryId"
+      [options]="categories"
+      optionLabel="label"
+      optionValue="id"
+      placeholder="Sélectionner une catégorie"
+      fluid
+      required
+      appendTo="body"
+    />
+    @if (getFieldError('categoryId')) {
+      <small class="text-red-500 mt-1 block">{{ getFieldError('categoryId') }}</small>
+    }
+  </div>
+  <div>
+    <label for="ingredientUnit" class="block mb-2">Unité</label>
+    <p-select
+      inputId="ingredientUnit"
+      [(ngModel)]="item.unitId"
+      name="unitId"
+      [options]="units"
+      optionLabel="label"
+      optionValue="id"
+      placeholder="Sélectionner une unité"
+      fluid
+      required
+      appendTo="body"
+    />
+    @if (getFieldError('unitId')) {
+      <small class="text-red-500 mt-1 block">{{ getFieldError('unitId') }}</small>
+    }
+  </div>
+  <div>
+    <label for="ingredientUnitPrice" class="block mb-2">Prix Unitaire</label>
+    <p-inputnumber
+      inputId="ingredientUnitPrice"
+      [(ngModel)]="item.unitPrice"
+      name="unitPrice"
+      [min]="1"
+      [maxFractionDigits]="0"
+      fluid
+      required
+    />
+    @if (getFieldError('unitPrice')) {
+      <small class="text-red-500 mt-1 block">{{ getFieldError('unitPrice') }}</small>
+    }
+  </div>
+</form>

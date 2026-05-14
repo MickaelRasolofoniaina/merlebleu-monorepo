@@ -1,0 +1,152 @@
+<div class="flex justify-between items-center mb-4">
+  <h2 class="text-2xl font-bold">Ingrédients</h2>
+</div>
+<div class="flex flex-wrap gap-3 items-center mb-4">
+  <input
+    type="text"
+    pInputText
+    placeholder="Rechercher par libellé..."
+    (input)="onSearchChange($event.target.value)"
+    class="w-64"
+  />
+  <p-select
+    [(ngModel)]="filterCategoryId"
+    [options]="categories()"
+    optionLabel="label"
+    optionValue="id"
+    placeholder="Toutes catégories"
+    [showClear]="true"
+    (onChange)="onCategoryFilter()"
+    class="w-52"
+  />
+  <p-select
+    [(ngModel)]="filterUnitId"
+    [options]="units()"
+    optionLabel="label"
+    optionValue="id"
+    placeholder="Toutes unités"
+    [showClear]="true"
+    (onChange)="onUnitFilter()"
+    class="w-44"
+  />
+  <p-button label="Ajouter" icon="pi pi-plus" (onClick)="openAddModal()" class="ml-auto" />
+</div>
+
+<p-table
+  [value]="ingredients()"
+  [loading]="isLoading()"
+  [tableStyle]="{ 'min-width': '50rem' }"
+  [stripedRows]="true"
+  [paginator]="true"
+  [rows]="rows"
+  [totalRecords]="totalRecords()"
+  [first]="first()"
+  (onPage)="onTablePage($event)"
+>
+  <ng-template #header>
+    <tr>
+      <th>Libellé</th>
+      <th>Catégorie</th>
+      <th>Unité</th>
+      <th>Prix Unitaire</th>
+      <th style="width: 12rem">Actions</th>
+    </tr>
+  </ng-template>
+  <ng-template #body let-ingredient>
+    <tr>
+      <td>{{ capitalizeFirstLetter(ingredient.label) }}</td>
+      <td>{{ capitalizeFirstLetter(ingredient.category.label) }}</td>
+      <td>{{ capitalizeFirstLetter(ingredient.unit.label) }}</td>
+      <td>{{ formatUnitPrice(ingredient.unitPrice) }}</td>
+      <td>
+        <p-button
+          icon="pi pi-pencil"
+          [rounded]="true"
+          [outlined]="true"
+          severity="warn"
+          class="mr-2"
+          (onClick)="openEditModal(ingredient)"
+        />
+        <p-button
+          icon="pi pi-trash"
+          [rounded]="true"
+          [outlined]="true"
+          severity="danger"
+          (onClick)="openDeleteModal(ingredient)"
+        />
+      </td>
+    </tr>
+  </ng-template>
+</p-table>
+
+<!-- Edit Modal -->
+<p-dialog
+  [(visible)]="showEditModal"
+  [modal]="true"
+  [style]="{ width: '450px' }"
+  header="Modifier un ingrédient"
+  (onHide)="closeEditModal()"
+>
+  <mb-ingredient-form
+    [formId]="'edit-ingredient-form'"
+    [itemData]="editDto"
+    [categories]="categories()"
+    [units]="units()"
+    (itemSubmit)="selectedIngredient && editIngredient(selectedIngredient.id, $event)"
+  ></mb-ingredient-form>
+  <ng-template pTemplate="footer">
+    <div class="flex justify-end gap-2">
+      <p-button label="Annuler" severity="danger" (onClick)="closeEditModal()" />
+      <button pButton type="submit" form="edit-ingredient-form">Enregistrer</button>
+    </div>
+  </ng-template>
+</p-dialog>
+
+<!-- Add Modal -->
+<p-dialog
+  [(visible)]="showModal"
+  [modal]="true"
+  [style]="{ width: '450px' }"
+  header="Ajouter un ingrédient"
+  (onClose)="closeAddModal()"
+>
+  <mb-ingredient-form
+    [formId]="'add-ingredient-form'"
+    [itemData]="null"
+    [categories]="categories()"
+    [units]="units()"
+    (itemSubmit)="addIngredient($event)"
+  ></mb-ingredient-form>
+  <ng-template pTemplate="footer">
+    <div class="flex justify-end gap-2">
+      <p-button label="Annuler" severity="danger" (onClick)="closeAddModal()" />
+      <button pButton type="submit" form="add-ingredient-form">Ajouter</button>
+    </div>
+  </ng-template>
+</p-dialog>
+
+<!-- Delete Confirmation Modal -->
+<p-dialog
+  [(visible)]="showDeleteModal"
+  [modal]="true"
+  [style]="{ width: '450px' }"
+  header="Confirmer la suppression"
+  (onHide)="closeDeleteModal()"
+>
+  <div class="flex flex-col gap-4">
+    <p>
+      Confirmer la suppression de l'ingrédient
+      <strong>{{ selectedIngredient?.label }}</strong> ?
+    </p>
+  </div>
+  <ng-template pTemplate="footer">
+    <div class="flex justify-end gap-2">
+      <p-button label="Annuler" severity="secondary" (onClick)="closeDeleteModal()" />
+      <p-button
+        label="Supprimer"
+        severity="danger"
+        (onClick)="selectedIngredient && deleteIngredient(selectedIngredient.id)"
+      />
+    </div>
+  </ng-template>
+</p-dialog>
