@@ -71,3 +71,7 @@ See [docs/angular.md](docs/angular.md).
 ## NestJS Conventions
 
 See [docs/nestjs.md](docs/nestjs.md).
+
+## Shared Library Conventions
+
+See [docs/shared.md](docs/shared.md).

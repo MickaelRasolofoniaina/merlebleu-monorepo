@@ -22,6 +22,7 @@ Generate a conventional commit message for all current changes, then commit and 
 ```
 
 Examples from this project:
+
 - `feat(inventory): streamline item form initialization and reset logic; normalize search input`
 - `feat(auth): simplify getSession method and remove access token verification`
 - `feat: split claude instruction md files`
