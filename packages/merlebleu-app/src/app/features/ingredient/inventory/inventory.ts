@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { Ingredient, IngredientCategory, IngredientUnit } from '@merlebleu/shared';
 import { IngredientCategoryService } from '../category/category.service';
 import { IngredientUnitService } from '../unit/unit.service';
@@ -9,6 +9,7 @@ import { InputTextModule } from 'primeng/inputtext';
 import { SelectModule } from 'primeng/select';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { ButtonModule } from 'primeng/button';
+import { TagModule } from 'primeng/tag';
 import { MessageService } from 'primeng/api';
 import { capitalizeFirstLetter } from '@shared/utils/text';
 import { ReportGeneratorService } from '@shared/services/report-generator.service';
@@ -26,10 +27,12 @@ import { finalize } from 'rxjs';
     SelectModule,
     InputNumberModule,
     ButtonModule,
+    TagModule,
   ],
 })
 export class InventoryComponent implements OnInit {
   readonly capitalizeFirstLetter = capitalizeFirstLetter;
+  readonly Number = Number;
 
   ingredients = signal<Ingredient[]>([]);
   categories = signal<IngredientCategory[]>([]);
@@ -40,6 +43,20 @@ export class InventoryComponent implements OnInit {
   searchLabel = '';
   filterCategoryId: string | null = null;
   filterUnitId: string | null = null;
+  filterStatus = signal<'out_of_stock' | 'available' | null>(null);
+
+  readonly statusOptions = [
+    { label: 'En Rupture', value: 'out_of_stock' },
+    { label: 'Disponible', value: 'available' },
+  ];
+
+  filteredIngredients = computed(() => {
+    const status = this.filterStatus();
+    if (!status) return this.ingredients();
+    return this.ingredients().filter((i) =>
+      status === 'out_of_stock' ? Number(i.stock) === 0 : Number(i.stock) > 0
+    );
+  });
 
   stockValues: Record<string, number> = {};
 
