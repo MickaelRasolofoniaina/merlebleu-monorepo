@@ -30,6 +30,14 @@
     class="w-44"
   />
 </div>
+<div class="flex justify-end mb-4">
+  <p-button
+    label="Liste à acheter"
+    icon="pi pi-file-pdf"
+    severity="contrast"
+    (onClick)="generateShoppingList()"
+  />
+</div>
 
 <p-table
   [value]="ingredients()"

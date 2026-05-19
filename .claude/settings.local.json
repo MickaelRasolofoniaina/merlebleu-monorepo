@@ -23,7 +23,8 @@
       "Bash(npx eslint *)",
       "Bash(Select-Object -First 20 FullName)",
       "Bash(xargs grep -l \"theme\\\\|dark\\\\|light\")",
-      "Bash(npx ng *)"
+      "Bash(npx ng *)",
+      "PowerShell(Get-ChildItem -Path \"C:\\\\Work\\\\Merlebleu\\\\merlebleu-monorepo\\\\packages\\\\merlebleu-shared\\\\src\\\\domain\" -Recurse -Filter \"index.ts\" | ForEach-Object { $_.FullName })"
     ]
   }
 }

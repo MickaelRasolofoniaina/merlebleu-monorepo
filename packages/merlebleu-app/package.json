@@ -31,6 +31,8 @@
     "@merlebleu/shared": "*",
     "@primeuix/themes": "^2.0.2",
     "@tailwindcss/postcss": "^4.1.18",
+    "jspdf": "^4.2.1",
+    "jspdf-autotable": "^5.0.8",
     "primeicons": "^7.0.0",
     "primeng": "^20.4.0",
     "rxjs": "~7.8.0",

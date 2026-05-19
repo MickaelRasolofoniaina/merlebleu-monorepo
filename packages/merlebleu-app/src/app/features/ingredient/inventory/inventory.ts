@@ -8,6 +8,7 @@ import { TableModule } from 'primeng/table';
 import { InputTextModule } from 'primeng/inputtext';
 import { SelectModule } from 'primeng/select';
 import { InputNumberModule } from 'primeng/inputnumber';
+import { ButtonModule } from 'primeng/button';
 import { MessageService } from 'primeng/api';
 import { capitalizeFirstLetter } from '@shared/utils/text';
 import { finalize } from 'rxjs';
@@ -23,6 +24,7 @@ import { finalize } from 'rxjs';
     InputTextModule,
     SelectModule,
     InputNumberModule,
+    ButtonModule,
   ],
 })
 export class InventoryComponent implements OnInit {
@@ -103,9 +105,7 @@ export class InventoryComponent implements OnInit {
 
     this.ingredientService.updateIngredientStock(ingredient.id, stock).subscribe({
       next: (updated) => {
-        this.ingredients.update((list) =>
-          list.map((i) => (i.id === updated.id ? updated : i)),
-        );
+        this.ingredients.update((list) => list.map((i) => (i.id === updated.id ? updated : i)));
         this.stockValues[ingredient.id] = Number(updated.stock);
         const saving = new Set(this.savingIds());
         saving.delete(ingredient.id);
@@ -133,5 +133,34 @@ export class InventoryComponent implements OnInit {
 
   isSaving(id: string): boolean {
     return this.savingIds().has(id);
+  }
+
+  async generateShoppingList() {
+    const { default: jsPDF } = await import('jspdf');
+    const { default: autoTable } = await import('jspdf-autotable');
+
+    const outOfStock = this.ingredients().filter((i) => Number(i.stock) === 0);
+    const doc = new jsPDF();
+    const today = new Date().toLocaleDateString('fr-FR');
+
+    doc.setFontSize(16);
+    doc.text('Liste des ingrédients à acheter', 14, 20);
+    doc.setFontSize(10);
+    doc.text(`Date : ${today}`, 14, 28);
+
+    autoTable(doc, {
+      startY: 35,
+      head: [['Désignation', 'Catégorie', 'Stock restant']],
+      body: outOfStock.map((i) => [
+        capitalizeFirstLetter(i.label),
+        capitalizeFirstLetter(i.category.label),
+        '0',
+      ]),
+      styles: { font: 'helvetica' },
+      headStyles: { fillColor: [41, 128, 185] },
+      columnStyles: { 2: { halign: 'right' } },
+    });
+
+    doc.save(`liste-ingredient-a-acheter-${today.replace(/\//g, '-')}.pdf`);
   }
 }
