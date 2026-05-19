@@ -75,3 +75,7 @@ See [docs/nestjs.md](docs/nestjs.md).
 ## Shared Library Conventions
 
 See [docs/shared.md](docs/shared.md).
+
+## Naming Conventions
+
+All names — folders, components, files, variables, functions, classes, constants, and any other identifiers — must be in **English only**, without exception.
