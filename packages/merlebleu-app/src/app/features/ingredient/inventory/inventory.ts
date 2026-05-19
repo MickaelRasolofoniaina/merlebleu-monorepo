@@ -4,11 +4,11 @@ import { IngredientCategoryService } from '../category/category.service';
 import { IngredientUnitService } from '../unit/unit.service';
 import { IngredientService } from '../ingredient/ingredient.service';
 import { FormsModule } from '@angular/forms';
-import { ButtonModule } from 'primeng/button';
 import { TableModule } from 'primeng/table';
 import { InputTextModule } from 'primeng/inputtext';
 import { SelectModule } from 'primeng/select';
 import { InputNumberModule } from 'primeng/inputnumber';
+import { MessageService } from 'primeng/api';
 import { capitalizeFirstLetter } from '@shared/utils/text';
 import { finalize } from 'rxjs';
 
@@ -19,7 +19,6 @@ import { finalize } from 'rxjs';
   providers: [IngredientService, IngredientCategoryService, IngredientUnitService],
   imports: [
     FormsModule,
-    ButtonModule,
     TableModule,
     InputTextModule,
     SelectModule,
@@ -44,6 +43,7 @@ export class InventoryComponent implements OnInit {
   private ingredientService = inject(IngredientService);
   private categoryService = inject(IngredientCategoryService);
   private unitService = inject(IngredientUnitService);
+  private messageService = inject(MessageService);
 
   ngOnInit() {
     this.categoryService.getAll().subscribe((data) => this.categories.set(data));
@@ -89,6 +89,12 @@ export class InventoryComponent implements OnInit {
     this.fetchIngredients();
   }
 
+  onBlur(ingredient: Ingredient) {
+    if (this.isSaving(ingredient.id)) return;
+    if (this.stockValues[ingredient.id] === Number(ingredient.stock)) return;
+    this.onSave(ingredient);
+  }
+
   onSave(ingredient: Ingredient) {
     const stock = this.stockValues[ingredient.id] ?? 0;
     const ids = new Set(this.savingIds());
@@ -104,11 +110,23 @@ export class InventoryComponent implements OnInit {
         const saving = new Set(this.savingIds());
         saving.delete(ingredient.id);
         this.savingIds.set(saving);
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Enregistré',
+          detail: 'Stock mis à jour.',
+          life: 3000,
+        });
       },
       error: () => {
         const saving = new Set(this.savingIds());
         saving.delete(ingredient.id);
         this.savingIds.set(saving);
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Erreur',
+          detail: 'Impossible de mettre à jour le stock.',
+          life: 5000,
+        });
       },
     });
   }

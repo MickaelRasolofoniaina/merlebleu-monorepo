@@ -43,7 +43,6 @@
       <th>Catégorie</th>
       <th style="width: 14rem">Quantité</th>
       <th>Unité</th>
-      <th style="width: 10rem" class="text-center!">Action</th>
     </tr>
   </ng-template>
   <ng-template #body let-ingredient>
@@ -57,16 +56,10 @@
           [showButtons]="false"
           [useGrouping]="false"
           inputStyleClass="w-28"
+          (onBlur)="onBlur(ingredient)"
         />
       </td>
       <td>{{ capitalizeFirstLetter(ingredient.unit.label) }}</td>
-      <td class="text-center!">
-        <p-button
-          label="Enregistrer"
-          [loading]="isSaving(ingredient.id)"
-          (onClick)="onSave(ingredient)"
-        />
-      </td>
     </tr>
   </ng-template>
 </p-table>
