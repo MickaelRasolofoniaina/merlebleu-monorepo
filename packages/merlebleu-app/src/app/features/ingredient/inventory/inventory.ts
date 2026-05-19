@@ -13,9 +13,9 @@ import { capitalizeFirstLetter } from '@shared/utils/text';
 import { finalize } from 'rxjs';
 
 @Component({
-  selector: 'mb-inventaire',
-  templateUrl: './inventaire.html',
-  styleUrls: ['./inventaire.scss'],
+  selector: 'mb-inventory',
+  templateUrl: './inventory.html',
+  styleUrls: ['./inventory.scss'],
   providers: [IngredientService, IngredientCategoryService, IngredientUnitService],
   imports: [
     FormsModule,
@@ -26,7 +26,7 @@ import { finalize } from 'rxjs';
     InputNumberModule,
   ],
 })
-export class InventaireComponent implements OnInit {
+export class InventoryComponent implements OnInit {
   readonly capitalizeFirstLetter = capitalizeFirstLetter;
 
   ingredients = signal<Ingredient[]>([]);

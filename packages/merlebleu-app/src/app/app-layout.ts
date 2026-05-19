@@ -72,7 +72,7 @@ export class AppLayout {
         {
           label: 'Inventaire',
           icon: 'pi pi-clipboard',
-          routerLink: ['/ingredient/inventaire'],
+          routerLink: ['/ingredient/inventory'],
         },
         {
           label: 'Liste',
