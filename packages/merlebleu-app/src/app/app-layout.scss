@@ -1,5 +1,4 @@
 header {
-  background-color: white;
   padding: 16px;
   margin-bottom: 15px;
 
@@ -36,12 +35,12 @@ header {
 }
 
 :host ::ng-deep .p-menu-item-link-active {
-  background-color: var(--p-button-warn-background) !important;
-  color: var(--p-button-primary-color) !important;
+  background-color: #1e293b !important;
+  color: #ffffff !important;
 }
 
 :host ::ng-deep .p-menu-item-link-active .p-menu-item-icon {
-  color: var(--p-button-primary-color) !important;
+  color: #ffffff !important;
 }
 
 .content {
@@ -49,4 +48,8 @@ header {
   background-color: white;
   border-radius: var(--p-menu-border-radius);
   flex: 1;
+}
+
+:host-context(.dark) .content {
+  background-color: #1e293b;
 }

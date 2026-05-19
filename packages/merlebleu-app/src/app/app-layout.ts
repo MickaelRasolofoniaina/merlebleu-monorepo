@@ -3,13 +3,12 @@ import { CommonModule } from '@angular/common';
 import { RouterOutlet } from '@angular/router';
 import { MenuItem } from 'primeng/api';
 import { MenuModule } from 'primeng/menu';
-import { BadgeModule } from 'primeng/badge';
 import { RippleModule } from 'primeng/ripple';
 import { AvatarModule } from 'primeng/avatar';
 import { Button } from 'primeng/button';
-import { OverlayBadgeModule } from 'primeng/overlaybadge';
 import { Router } from '@angular/router';
 import { AuthService } from './shared/services/auth.service';
+import { ThemeService } from './shared/services/theme.service';
 
 @Component({
   selector: 'app-layout',
@@ -17,11 +16,9 @@ import { AuthService } from './shared/services/auth.service';
     CommonModule,
     RouterOutlet,
     MenuModule,
-    BadgeModule,
     RippleModule,
     AvatarModule,
     Button,
-    OverlayBadgeModule,
   ],
   templateUrl: './app-layout.html',
   styleUrl: './app-layout.scss',
@@ -29,6 +26,7 @@ import { AuthService } from './shared/services/auth.service';
 export class AppLayout {
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
+  protected readonly themeService = inject(ThemeService);
   userInitials = '';
 
   protected items: MenuItem[] = [
