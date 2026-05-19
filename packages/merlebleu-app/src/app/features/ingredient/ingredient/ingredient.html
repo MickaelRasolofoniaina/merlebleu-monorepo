@@ -47,6 +47,7 @@
     <tr>
       <th>Libellé</th>
       <th>Catégorie</th>
+      <th style="text-align: right">Stock</th>
       <th>Unité</th>
       <th style="text-align: right">Prix Unitaire</th>
       <th style="width: 12rem" class="text-center!">Actions</th>
@@ -56,6 +57,7 @@
     <tr>
       <td>{{ capitalizeFirstLetter(ingredient.label) }}</td>
       <td>{{ capitalizeFirstLetter(ingredient.category.label) }}</td>
+      <td style="text-align: right">{{ ingredient.stock }}</td>
       <td>{{ capitalizeFirstLetter(ingredient.unit.label) }}</td>
       <td style="text-align: right">{{ formatUnitPrice(ingredient.unitPrice) }}</td>
       <td>

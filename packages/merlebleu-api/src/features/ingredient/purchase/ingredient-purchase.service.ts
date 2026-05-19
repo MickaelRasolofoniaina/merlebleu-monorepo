@@ -11,12 +11,15 @@ import {
   CreateIngredientPurchaseDto,
   UpdateIngredientPurchaseDto,
 } from './ingredient-purchase.dto';
+import { IngredientEntity, IngredientSchema } from '../ingredient.entity';
 
 @Injectable()
 export class IngredientPurchaseService {
   constructor(
     @InjectRepository(IngredientPurchaseSchema)
     private readonly repo: Repository<IngredientPurchaseEntity>,
+    @InjectRepository(IngredientSchema)
+    private readonly ingredientRepo: Repository<IngredientEntity>,
   ) {}
 
   async findPurchases(
@@ -54,7 +57,7 @@ export class IngredientPurchaseService {
     return { data, total, page, limit };
   }
 
-  addPurchase(
+  async addPurchase(
     dto: CreateIngredientPurchaseDto,
   ): Promise<IngredientPurchaseEntity> {
     const entity = this.repo.create({
@@ -62,27 +65,47 @@ export class IngredientPurchaseService {
       quantity: dto.quantity,
       ingredient: { id: dto.ingredientId },
     });
-    return this.repo.save(entity);
+    const saved = await this.repo.save(entity);
+    await this.ingredientRepo.increment({ id: dto.ingredientId }, 'stock', dto.quantity);
+    return saved;
   }
 
   async updatePurchase(
     id: string,
     dto: UpdateIngredientPurchaseDto,
   ): Promise<IngredientPurchaseEntity> {
+    const existing = await this.repo.findOneBy({ id });
+    if (!existing)
+      throw new NotFoundException(`Achat avec l'id ${id} introuvable`);
+
+    const oldIngredientId = existing.ingredient.id;
+    const newIngredientId = dto.ingredientId;
+
     await this.repo.update(id, {
       purchaseDate: dto.purchaseDate,
       quantity: dto.quantity,
-      ingredient: { id: dto.ingredientId },
+      ingredient: { id: newIngredientId },
     });
+
+    if (oldIngredientId !== newIngredientId) {
+      await this.ingredientRepo.increment({ id: oldIngredientId }, 'stock', -Number(existing.quantity));
+      await this.ingredientRepo.increment({ id: newIngredientId }, 'stock', dto.quantity);
+    } else {
+      const delta = dto.quantity - Number(existing.quantity);
+      if (delta !== 0) {
+        await this.ingredientRepo.increment({ id: newIngredientId }, 'stock', delta);
+      }
+    }
+
     const updated = await this.repo.findOneBy({ id });
-    if (!updated)
-      throw new NotFoundException(`Achat avec l'id ${id} introuvable`);
-    return updated;
+    return updated!;
   }
 
   async deletePurchase(id: string): Promise<void> {
-    const result = await this.repo.delete(id);
-    if (!result.affected)
+    const existing = await this.repo.findOneBy({ id });
+    if (!existing)
       throw new NotFoundException(`Achat avec l'id ${id} introuvable`);
+    await this.repo.delete(id);
+    await this.ingredientRepo.increment({ id: existing.ingredient.id }, 'stock', -Number(existing.quantity));
   }
 }

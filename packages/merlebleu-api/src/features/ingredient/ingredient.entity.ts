@@ -7,6 +7,7 @@ export class IngredientEntity implements Ingredient {
   id: string;
   label: string;
   unitPrice: number;
+  stock: number;
   category: IngredientCategoryEntity;
   unit: IngredientUnitEntity;
 }
@@ -19,6 +20,7 @@ export const IngredientSchema = new EntitySchema<IngredientEntity>({
     id: { type: 'uuid', primary: true, generated: 'uuid' },
     label: { type: 'varchar' },
     unitPrice: { type: 'integer' },
+    stock: { type: 'decimal', precision: 10, scale: 2, default: 0 },
   },
   relations: {
     category: {

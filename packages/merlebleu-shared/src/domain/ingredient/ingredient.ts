@@ -5,6 +5,7 @@ export interface Ingredient {
   id: string;
   label: string;
   unitPrice: number;
+  stock: number;
   category: IngredientCategory;
   unit: IngredientUnit;
 }

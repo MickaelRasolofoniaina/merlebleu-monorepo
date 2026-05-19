@@ -70,6 +70,11 @@ export class AppLayout {
           routerLink: ['/ingredient/purchase'],
         },
         {
+          label: 'Inventaire',
+          icon: 'pi pi-clipboard',
+          routerLink: ['/ingredient/inventaire'],
+        },
+        {
           label: 'Liste',
           icon: 'pi pi-database',
           routerLink: ['/ingredient/ingredient'],

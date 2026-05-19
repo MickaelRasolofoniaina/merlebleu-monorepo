@@ -4,7 +4,7 @@ import { FindOptionsWhere, ILike, Repository } from 'typeorm';
 import { ResultPaged } from '@merlebleu/shared';
 import { getPaginationParams } from '@shared/pagination/pagination.utils';
 import { IngredientEntity, IngredientSchema } from './ingredient.entity';
-import { CreateIngredientDto, UpdateIngredientDto } from './ingredient.dto';
+import { CreateIngredientDto, UpdateIngredientDto, UpdateIngredientStockDto } from './ingredient.dto';
 
 @Injectable()
 export class IngredientService {
@@ -64,5 +64,16 @@ export class IngredientService {
     const result = await this.repo.delete(id);
     if (!result.affected)
       throw new NotFoundException(`Ingrédient avec l'id ${id} introuvable`);
+  }
+
+  async updateIngredientStock(
+    id: string,
+    dto: UpdateIngredientStockDto,
+  ): Promise<IngredientEntity> {
+    await this.repo.update(id, { stock: dto.stock });
+    const updated = await this.repo.findOneBy({ id });
+    if (!updated)
+      throw new NotFoundException(`Ingrédient avec l'id ${id} introuvable`);
+    return updated;
   }
 }

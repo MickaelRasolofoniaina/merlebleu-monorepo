@@ -3,6 +3,7 @@ import {
   Get,
   Post,
   Put,
+  Patch,
   Delete,
   Param,
   Body,
@@ -12,7 +13,7 @@ import {
 } from '@nestjs/common';
 import { ApiQuery } from '@nestjs/swagger';
 import { IngredientService } from './ingredient.service';
-import { CreateIngredientDto, UpdateIngredientDto } from './ingredient.dto';
+import { CreateIngredientDto, UpdateIngredientDto, UpdateIngredientStockDto } from './ingredient.dto';
 
 @Controller('ingredient')
 export class IngredientController {
@@ -49,5 +50,13 @@ export class IngredientController {
   @Delete(':id')
   deleteIngredient(@Param('id') id: string) {
     return this.ingredientService.deleteIngredient(id);
+  }
+
+  @Patch(':id/stock')
+  updateIngredientStock(
+    @Param('id') id: string,
+    @Body() dto: UpdateIngredientStockDto,
+  ) {
+    return this.ingredientService.updateIngredientStock(id, dto);
   }
 }

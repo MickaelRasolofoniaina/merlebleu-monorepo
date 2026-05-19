@@ -37,4 +37,8 @@ export class IngredientService {
   deleteIngredient(id: string): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/${id}`);
   }
+
+  updateIngredientStock(id: string, stock: number): Observable<Ingredient> {
+    return this.http.patch<Ingredient>(`${this.apiUrl}/${id}/stock`, { stock });
+  }
 }
