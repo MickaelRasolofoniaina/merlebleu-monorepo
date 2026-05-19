@@ -11,6 +11,7 @@ import { InputNumberModule } from 'primeng/inputnumber';
 import { ButtonModule } from 'primeng/button';
 import { MessageService } from 'primeng/api';
 import { capitalizeFirstLetter } from '@shared/utils/text';
+import { ReportGeneratorService } from '@shared/services/report-generator.service';
 import { finalize } from 'rxjs';
 
 @Component({
@@ -46,6 +47,7 @@ export class InventoryComponent implements OnInit {
   private categoryService = inject(IngredientCategoryService);
   private unitService = inject(IngredientUnitService);
   private messageService = inject(MessageService);
+  private reportGeneratorService = inject(ReportGeneratorService);
 
   ngOnInit() {
     this.categoryService.getAll().subscribe((data) => this.categories.set(data));
@@ -135,32 +137,8 @@ export class InventoryComponent implements OnInit {
     return this.savingIds().has(id);
   }
 
-  async generateShoppingList() {
-    const { default: jsPDF } = await import('jspdf');
-    const { default: autoTable } = await import('jspdf-autotable');
-
+  generateShoppingList() {
     const outOfStock = this.ingredients().filter((i) => Number(i.stock) === 0);
-    const doc = new jsPDF();
-    const today = new Date().toLocaleDateString('fr-FR');
-
-    doc.setFontSize(16);
-    doc.text('Liste des ingrédients à acheter', 14, 20);
-    doc.setFontSize(10);
-    doc.text(`Date : ${today}`, 14, 28);
-
-    autoTable(doc, {
-      startY: 35,
-      head: [['Désignation', 'Catégorie', 'Stock restant']],
-      body: outOfStock.map((i) => [
-        capitalizeFirstLetter(i.label),
-        capitalizeFirstLetter(i.category.label),
-        '0',
-      ]),
-      styles: { font: 'helvetica' },
-      headStyles: { fillColor: [41, 128, 185] },
-      columnStyles: { 2: { halign: 'right' } },
-    });
-
-    doc.save(`liste-ingredient-a-acheter-${today.replace(/\//g, '-')}.pdf`);
+    this.reportGeneratorService.generateShoppingList(outOfStock);
   }
 }

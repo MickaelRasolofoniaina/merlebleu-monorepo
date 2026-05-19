@@ -24,7 +24,10 @@
       "Bash(Select-Object -First 20 FullName)",
       "Bash(xargs grep -l \"theme\\\\|dark\\\\|light\")",
       "Bash(npx ng *)",
-      "PowerShell(Get-ChildItem -Path \"C:\\\\Work\\\\Merlebleu\\\\merlebleu-monorepo\\\\packages\\\\merlebleu-shared\\\\src\\\\domain\" -Recurse -Filter \"index.ts\" | ForEach-Object { $_.FullName })"
+      "PowerShell(Get-ChildItem -Path \"C:\\\\Work\\\\Merlebleu\\\\merlebleu-monorepo\\\\packages\\\\merlebleu-shared\\\\src\\\\domain\" -Recurse -Filter \"index.ts\" | ForEach-Object { $_.FullName })",
+      "Bash(git stash *)",
+      "Bash(python -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\(json.dumps\\(d['projects']['merlebleu-app']['architect']['build']['configurations']['production']['budgets'], indent=2\\)\\)\")",
+      "Bash(node *)"
     ]
   }
 }
