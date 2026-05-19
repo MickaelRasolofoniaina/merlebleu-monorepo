@@ -50,7 +50,8 @@ export class Login {
     }
 
     this.loginService.signIn(this.signInUserDto).subscribe({
-      next: () => {
+      next: (response) => {
+        localStorage.setItem('user_name', response.name);
         void this.router.navigate(['/sale/order']);
       },
       error: (error) => {

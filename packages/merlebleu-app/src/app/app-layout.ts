@@ -126,26 +126,18 @@ export class AppLayout {
   ];
 
   ngOnInit(): void {
-    this.authService.getSession().subscribe({
-      next: (session) => {
-        const name = this.getUserLabel(session);
-        this.userInitials = name.slice(0, 2).toUpperCase();
-      },
-    });
-  }
-
-  private getUserLabel(session: unknown): string {
-    const payload = session as { name?: string; email?: string };
-    const raw = (payload.name ?? payload.email ?? '').trim();
-    return raw.length > 0 ? raw : '??';
+    const name = localStorage.getItem('user_name') ?? '';
+    this.userInitials = name.slice(0, 2).toUpperCase() || '??';
   }
 
   logout(): void {
     this.authService.logout().subscribe({
       next: () => {
+        localStorage.removeItem('user_name');
         void this.router.navigate(['/identity/login']);
       },
       error: () => {
+        localStorage.removeItem('user_name');
         void this.router.navigate(['/identity/login']);
       },
     });

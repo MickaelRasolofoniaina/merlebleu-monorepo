@@ -5,4 +5,5 @@ export class SignInDto extends createZodDto(signInUserSchema) {}
 
 export class LoginResponseDto implements LoginResponseDto {
   accessToken: string;
+  name: string;
 }
