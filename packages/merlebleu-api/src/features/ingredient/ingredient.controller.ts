@@ -13,7 +13,11 @@ import {
 } from '@nestjs/common';
 import { ApiQuery } from '@nestjs/swagger';
 import { IngredientService } from './ingredient.service';
-import { CreateIngredientDto, UpdateIngredientDto, UpdateIngredientStockDto } from './ingredient.dto';
+import {
+  CreateIngredientDto,
+  UpdateIngredientDto,
+  UpdateIngredientStockDto,
+} from './ingredient.dto';
 
 @Controller('ingredient')
 export class IngredientController {

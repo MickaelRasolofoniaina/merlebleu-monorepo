@@ -34,7 +34,7 @@ export class PurchaseFormComponent implements OnChanges {
       this.validationError = null;
       const data = this.itemData();
       this.item = data
-        ? { purchaseDate: parseDate(data.purchaseDate as unknown as string), ingredientId: data.ingredientId, quantity: data.quantity }
+        ? { purchaseDate: parseDate(data.purchaseDate), ingredientId: data.ingredientId, quantity: data.quantity }
         : this.createEmpty();
     }
   }

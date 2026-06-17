@@ -130,7 +130,7 @@ export class PurchaseListComponent implements OnInit {
 
   toDto(purchase: IngredientPurchase): UpdateIngredientPurchaseDto {
     return {
-      purchaseDate: new Date(purchase.purchaseDate) as unknown as Date,
+      purchaseDate: purchase.purchaseDate,
       ingredientId: purchase.ingredient.id,
       quantity: Number(purchase.quantity),
     };

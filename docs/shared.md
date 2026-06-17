@@ -61,6 +61,30 @@ export type CreateItemDto = z.infer<typeof createItemSchema>;
 export type UpdateItemDto = z.infer<typeof updateItemSchema>;
 ```
 
+### Date fields
+
+Every date field in a Zod schema must always use the following pattern, without exception:
+
+```ts
+z.preprocess(
+  (value) => (value instanceof Date ? value.toISOString() : value),
+  z.iso.datetime(),
+);
+```
+
+The `preprocess` step converts a `Date` instance into an ISO string before validation, since `z.iso.datetime()` only validates string input. This keeps schemas working whether the value arrives as a `Date` (e.g. from a date picker) or already as an ISO string (e.g. from JSON over HTTP).
+
+```ts
+// packages/merlebleu-shared/src/domain/ingredient/purchase/ingredient-purchase.dto.ts
+export const createIngredientPurchaseSchema = z.object({
+  purchaseDate: z.preprocess(
+    (value) => (value instanceof Date ? value.toISOString() : value),
+    z.iso.datetime({ error: "La date de l'achat est requise" }),
+  ),
+  // ...
+});
+```
+
 ---
 
 ## 3. TypeORM entity in `merlebleu-api`

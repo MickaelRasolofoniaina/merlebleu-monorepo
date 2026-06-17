@@ -61,12 +61,16 @@ export class IngredientPurchaseService {
     dto: CreateIngredientPurchaseDto,
   ): Promise<IngredientPurchaseEntity> {
     const entity = this.repo.create({
-      purchaseDate: dto.purchaseDate,
+      purchaseDate: new Date(dto.purchaseDate),
       quantity: dto.quantity,
       ingredient: { id: dto.ingredientId },
     });
     const saved = await this.repo.save(entity);
-    await this.ingredientRepo.increment({ id: dto.ingredientId }, 'stock', dto.quantity);
+    await this.ingredientRepo.increment(
+      { id: dto.ingredientId },
+      'stock',
+      dto.quantity,
+    );
     return saved;
   }
 
@@ -82,18 +86,30 @@ export class IngredientPurchaseService {
     const newIngredientId = dto.ingredientId;
 
     await this.repo.update(id, {
-      purchaseDate: dto.purchaseDate,
+      purchaseDate: new Date(dto.purchaseDate),
       quantity: dto.quantity,
       ingredient: { id: newIngredientId },
     });
 
     if (oldIngredientId !== newIngredientId) {
-      await this.ingredientRepo.increment({ id: oldIngredientId }, 'stock', -Number(existing.quantity));
-      await this.ingredientRepo.increment({ id: newIngredientId }, 'stock', dto.quantity);
+      await this.ingredientRepo.increment(
+        { id: oldIngredientId },
+        'stock',
+        -Number(existing.quantity),
+      );
+      await this.ingredientRepo.increment(
+        { id: newIngredientId },
+        'stock',
+        dto.quantity,
+      );
     } else {
       const delta = dto.quantity - Number(existing.quantity);
       if (delta !== 0) {
-        await this.ingredientRepo.increment({ id: newIngredientId }, 'stock', delta);
+        await this.ingredientRepo.increment(
+          { id: newIngredientId },
+          'stock',
+          delta,
+        );
       }
     }
 
@@ -106,6 +122,10 @@ export class IngredientPurchaseService {
     if (!existing)
       throw new NotFoundException(`Achat avec l'id ${id} introuvable`);
     await this.repo.delete(id);
-    await this.ingredientRepo.increment({ id: existing.ingredient.id }, 'stock', -Number(existing.quantity));
+    await this.ingredientRepo.increment(
+      { id: existing.ingredient.id },
+      'stock',
+      -Number(existing.quantity),
+    );
   }
 }

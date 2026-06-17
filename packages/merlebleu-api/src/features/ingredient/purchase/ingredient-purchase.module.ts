@@ -6,7 +6,9 @@ import { IngredientPurchaseService } from './ingredient-purchase.service';
 import { IngredientPurchaseController } from './ingredient-purchase.controller';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([IngredientPurchaseSchema, IngredientSchema])],
+  imports: [
+    TypeOrmModule.forFeature([IngredientPurchaseSchema, IngredientSchema]),
+  ],
   providers: [IngredientPurchaseService],
   controllers: [IngredientPurchaseController],
 })

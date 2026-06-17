@@ -9,4 +9,6 @@ export class CreateIngredientDto extends createZodDto(createIngredientSchema) {}
 
 export class UpdateIngredientDto extends createZodDto(updateIngredientSchema) {}
 
-export class UpdateIngredientStockDto extends createZodDto(updateIngredientStockSchema) {}
+export class UpdateIngredientStockDto extends createZodDto(
+  updateIngredientStockSchema,
+) {}

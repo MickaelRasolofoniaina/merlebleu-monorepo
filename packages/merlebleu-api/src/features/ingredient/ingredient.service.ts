@@ -4,7 +4,11 @@ import { FindOptionsWhere, ILike, Repository } from 'typeorm';
 import { ResultPaged } from '@merlebleu/shared';
 import { getPaginationParams } from '@shared/pagination/pagination.utils';
 import { IngredientEntity, IngredientSchema } from './ingredient.entity';
-import { CreateIngredientDto, UpdateIngredientDto, UpdateIngredientStockDto } from './ingredient.dto';
+import {
+  CreateIngredientDto,
+  UpdateIngredientDto,
+  UpdateIngredientStockDto,
+} from './ingredient.dto';
 
 @Injectable()
 export class IngredientService {
