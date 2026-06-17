@@ -81,7 +81,7 @@
       <td>{{ capitalizeFirstLetter(ingredient.unit.label) }}</td>
       <td>
         <p-tag
-          [value]="Number(ingredient.stock) === 0 ? 'En Rupture' : 'Disponible'"
+          [value]="Number(ingredient.stock) === 0 ? 'En Rupture' : 'En Stock'"
           [severity]="Number(ingredient.stock) === 0 ? 'danger' : 'success'"
         />
       </td>

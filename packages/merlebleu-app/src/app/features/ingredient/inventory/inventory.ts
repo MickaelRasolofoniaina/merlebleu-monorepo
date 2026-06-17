@@ -47,14 +47,14 @@ export class InventoryComponent implements OnInit {
 
   readonly statusOptions = [
     { label: 'En Rupture', value: 'out_of_stock' },
-    { label: 'Disponible', value: 'available' },
+    { label: 'En Stock', value: 'available' },
   ];
 
   filteredIngredients = computed(() => {
     const status = this.filterStatus();
     if (!status) return this.ingredients();
     return this.ingredients().filter((i) =>
-      status === 'out_of_stock' ? Number(i.stock) === 0 : Number(i.stock) > 0
+      status === 'out_of_stock' ? Number(i.stock) === 0 : Number(i.stock) > 0,
     );
   });
 
