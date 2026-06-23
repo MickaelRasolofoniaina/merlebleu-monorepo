@@ -57,6 +57,7 @@ export class OrderForm implements OnInit, OnChanges {
   protected order: CreateOrderDto | UpdateOrderDto = this.buildDefaultOrder();
 
   protected now: Date = new Date();
+
   protected orderDateValue: Date | null = null;
   protected deliveryDateValue: Date | null = null;
 
@@ -168,7 +169,7 @@ export class OrderForm implements OnInit, OnChanges {
       customerName: '',
       customerPhoneNumber: '',
       customerFacebookName: '',
-      deliveryDate: formatDate(new Date()),
+      deliveryDate: new Date(new Date().setDate(new Date().getDate() + 1)).toISOString(),
       deliveryAddress: '',
       isFromFacebook: false,
       orderItems: [this.buildOrderItem()],
