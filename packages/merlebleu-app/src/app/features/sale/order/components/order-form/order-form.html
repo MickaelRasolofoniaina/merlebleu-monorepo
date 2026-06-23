@@ -8,7 +8,7 @@
     </p>
     <div class="grid gap-4 [grid-template-columns:repeat(auto-fit,minmax(240px,1fr))]">
       <div class="flex flex-col gap-2">
-        <label for="orderDate" class="font-semibold text-slate-900"> Date de commande </label>
+        <label for="orderDate" class="font-semibold text-slate-900"> Date de la commande </label>
         <p-datepicker
           inputId="orderDate"
           name="orderDate"
@@ -17,9 +17,10 @@
           [showIcon]="true"
           dateFormat="dd/mm/yy"
           class="w-full"
+          [maxDate]="now"
         />
         @if (errorFor('orderDate')) {
-          <small class="text-red-500">{{ errorFor('orderDate') }}</small>
+        <small class="text-red-500">{{ errorFor('orderDate') }}</small>
         }
       </div>
       <div class="flex flex-col gap-2">
@@ -32,9 +33,10 @@
           [showIcon]="true"
           dateFormat="dd/mm/yy"
           class="w-full"
+          [minDate]="now"
         />
         @if (errorFor('deliveryDate')) {
-          <small class="text-red-500">{{ errorFor('deliveryDate') }}</small>
+        <small class="text-red-500">{{ errorFor('deliveryDate') }}</small>
         }
       </div>
       <div class="flex flex-col gap-2">
@@ -49,7 +51,7 @@
           class="w-full"
         />
         @if (errorFor('customerName')) {
-          <small class="text-red-500">{{ errorFor('customerName') }}</small>
+        <small class="text-red-500">{{ errorFor('customerName') }}</small>
         }
       </div>
       <div class="flex flex-col gap-2">
@@ -67,7 +69,7 @@
         />
         <small class="text-slate-500"> Un ou plusieurs numeros separes par un espace. </small>
         @if (errorFor('customerPhoneNumber')) {
-          <small class="text-red-500">{{ errorFor('customerPhoneNumber') }}</small>
+        <small class="text-red-500">{{ errorFor('customerPhoneNumber') }}</small>
         }
       </div>
       <div class="flex flex-col gap-2">
@@ -84,7 +86,7 @@
           class="w-full"
         />
         @if (errorFor('customerFacebookName')) {
-          <small class="text-red-500">{{ errorFor('customerFacebookName') }}</small>
+        <small class="text-red-500">{{ errorFor('customerFacebookName') }}</small>
         }
       </div>
       <div class="flex flex-col gap-2">
@@ -101,7 +103,7 @@
           class="w-full"
         />
         @if (errorFor('deliveryAddress')) {
-          <small class="text-red-500">{{ errorFor('deliveryAddress') }}</small>
+        <small class="text-red-500">{{ errorFor('deliveryAddress') }}</small>
         }
       </div>
       <div class="flex flex-col gap-2 items-start">
@@ -114,7 +116,7 @@
           [(ngModel)]="order.isFromFacebook"
         />
         @if (errorFor('isFromFacebook')) {
-          <small class="text-red-500">{{ errorFor('isFromFacebook') }}</small>
+        <small class="text-red-500">{{ errorFor('isFromFacebook') }}</small>
         }
       </div>
       <div class="flex flex-col gap-2 col-span-full">
@@ -129,7 +131,7 @@
           class="w-full"
         ></textarea>
         @if (errorFor('remarks')) {
-          <small class="text-red-500">{{ errorFor('remarks') }}</small>
+        <small class="text-red-500">{{ errorFor('remarks') }}</small>
         }
       </div>
     </div>
@@ -140,7 +142,7 @@
       <p class="text-slate-500">Ajoutez un ou plusieurs commandes.</p>
     </div>
     @if (errorFor('orderItems')) {
-      <small class="text-red-500">{{ errorFor('orderItems') }}</small>
+    <small class="text-red-500">{{ errorFor('orderItems') }}</small>
     }
 
     <div
@@ -172,7 +174,7 @@
             placeholder="Tout choco"
           />
           @if (errorFor('orderItems.' + i + '.description')) {
-            <small class="text-red-500">{{ errorFor('orderItems.' + i + '.description') }}</small>
+          <small class="text-red-500">{{ errorFor('orderItems.' + i + '.description') }}</small>
           }
         </div>
         <div class="flex flex-col gap-2">
@@ -185,7 +187,7 @@
             class="w-full"
           />
           @if (errorFor('orderItems.' + i + '.size')) {
-            <small class="text-red-500">{{ errorFor('orderItems.' + i + '.size') }}</small>
+          <small class="text-red-500">{{ errorFor('orderItems.' + i + '.size') }}</small>
           }
         </div>
         <div class="flex flex-col gap-2">
@@ -199,7 +201,7 @@
             (ngModelChange)="syncTotalFromItems()"
           />
           @if (errorFor('orderItems.' + i + '.totalAmount')) {
-            <small class="text-red-500">{{ errorFor('orderItems.' + i + '.totalAmount') }}</small>
+          <small class="text-red-500">{{ errorFor('orderItems.' + i + '.totalAmount') }}</small>
           }
         </div>
         <div class="flex flex-col gap-2 col-span-full">
@@ -214,7 +216,7 @@
             class="w-full"
           ></textarea>
           @if (errorFor('orderItems.' + i + '.remarks')) {
-            <small class="text-red-500">{{ errorFor('orderItems.' + i + '.remarks') }}</small>
+          <small class="text-red-500">{{ errorFor('orderItems.' + i + '.remarks') }}</small>
           }
         </div>
       </div>
@@ -236,7 +238,7 @@
           disabled=""
         />
         @if (errorFor('totalAmount')) {
-          <small class="text-red-500">{{ errorFor('totalAmount') }}</small>
+        <small class="text-red-500">{{ errorFor('totalAmount') }}</small>
         }
       </div>
       <div class="flex flex-col gap-2">
@@ -250,7 +252,7 @@
           (ngModelChange)="updateBalanceAmount()"
         />
         @if (errorFor('paidAmount')) {
-          <small class="text-red-500">{{ errorFor('paidAmount') }}</small>
+        <small class="text-red-500">{{ errorFor('paidAmount') }}</small>
         }
       </div>
       <div class="flex flex-col gap-2">
@@ -264,7 +266,7 @@
           disabled=""
         />
         @if (errorFor('balanceAmount')) {
-          <small class="text-red-500">{{ errorFor('balanceAmount') }}</small>
+        <small class="text-red-500">{{ errorFor('balanceAmount') }}</small>
         }
       </div>
       <div class="flex flex-col gap-2">
@@ -282,7 +284,7 @@
           class="w-full"
         />
         @if (errorFor('paymentMethodId')) {
-          <small class="text-red-500">{{ errorFor('paymentMethodId') }}</small>
+        <small class="text-red-500">{{ errorFor('paymentMethodId') }}</small>
         }
       </div>
     </div>

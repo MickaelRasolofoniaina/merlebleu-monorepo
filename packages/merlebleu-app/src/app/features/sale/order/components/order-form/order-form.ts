@@ -56,6 +56,7 @@ export class OrderForm implements OnInit, OnChanges {
 
   protected order: CreateOrderDto | UpdateOrderDto = this.buildDefaultOrder();
 
+  protected now: Date = new Date();
   protected orderDateValue: Date | null = null;
   protected deliveryDateValue: Date | null = null;
 
