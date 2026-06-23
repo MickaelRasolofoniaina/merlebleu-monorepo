@@ -12,6 +12,7 @@
 - Use Tailwind utility classes exclusively for styling — do not write custom CSS classes
 - In tables, right-align all numeric columns (quantities, prices, totals, etc.) by using tailwind css class text-right!
 - In tables, center-align the Actions column header by using tailwind css class text-center!
+- Add `appendTo="body"` on every `p-select` (and other PrimeNG overlay-panel components) placed inside a `p-dialog` — without it, the dropdown panel is clipped/scrolls incorrectly inside the dialog's overflow container, causing a vertical scroll bug
 - Do not add an `error` callback in `.subscribe()` — errors are handled globally by `httpErrorInterceptor`; only provide `next` and `finalize` via `pipe` if needed for example to set loading indicator:
   ```ts
   this.orderService
