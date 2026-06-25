@@ -7,7 +7,7 @@ import {
   UpdateItemDto,
 } from '@merlebleu/shared/src/domain/inventory/item/item.dto';
 import { getPaginationParams } from '@shared/pagination/pagination.utils';
-import { ResultPaged } from '@merlebleu/shared';
+import { ItemType, ResultPaged } from '@merlebleu/shared';
 
 @Injectable()
 export class ItemService {
@@ -38,13 +38,17 @@ export class ItemService {
     limit = 20,
     filters?: {
       labelContains?: string;
+      type?: ItemType;
     },
   ): Promise<ResultPaged<ItemEntity>> {
     const pagination = getPaginationParams({ page, limit });
 
-    const where = filters?.labelContains
-      ? { label: ILike(`%${filters.labelContains}%`) }
-      : {};
+    const where = {
+      ...(filters?.labelContains
+        ? { label: ILike(`%${filters.labelContains}%`) }
+        : {}),
+      ...(filters?.type ? { type: filters.type } : {}),
+    };
     const [items, total] = await this.itemRepository.findAndCount({
       where,
       skip: pagination.skip,
@@ -57,5 +61,12 @@ export class ItemService {
       page,
       limit,
     };
+  }
+
+  async findItemsByType(type: ItemType): Promise<ItemEntity[]> {
+    return this.itemRepository.find({
+      where: { type },
+      order: { label: 'ASC' },
+    });
   }
 }

@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, map } from 'rxjs';
-import { CreateItemDto, Item, ResultPaged, UpdateItemDto } from '@merlebleu/shared';
+import { CreateItemDto, Item, ItemType, ResultPaged, UpdateItemDto } from '@merlebleu/shared';
 import { environment } from '@merlebleu/app/environments/environment';
 
 @Injectable()
@@ -13,17 +13,20 @@ export class ItemService {
     search: string,
     page: number,
     pageSize: number,
+    type?: ItemType | null,
   ): Observable<{ items: Item[]; total: number }> {
-    return this.http
-      .get<
-        ResultPaged<Item>
-      >(`${this.apiUrl}?labelContains=${encodeURIComponent(search)}&page=${page}&limit=${pageSize}`)
-      .pipe(
-        map(({ data, total }) => ({
-          items: data,
-          total,
-        })),
-      );
+    let url = `${this.apiUrl}?labelContains=${encodeURIComponent(search)}&page=${page}&limit=${pageSize}`;
+
+    if (type) {
+      url += `&type=${encodeURIComponent(type)}`;
+    }
+
+    return this.http.get<ResultPaged<Item>>(url).pipe(
+      map(({ data, total }) => ({
+        items: data,
+        total,
+      })),
+    );
   }
 
   addItem(item: CreateItemDto): Observable<Item> {

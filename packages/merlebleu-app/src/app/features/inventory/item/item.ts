@@ -2,10 +2,12 @@ import { CreateItemDto, DEFAULT_PAGE_SIZE, Item, ItemType, UpdateItemDto } from 
 import { Component, signal, inject } from '@angular/core';
 import { ItemService } from './item.service';
 
+import { FormsModule } from '@angular/forms';
 import { ButtonModule } from 'primeng/button';
 import { TableModule } from 'primeng/table';
 import { Dialog } from 'primeng/dialog';
 import { InputTextModule } from 'primeng/inputtext';
+import { SelectModule } from 'primeng/select';
 import { TablePageEvent } from 'primeng/table';
 import { getPageFromFirstRows } from '@shared/utils/pagination';
 import { formatUnitPrice } from '@shared/utils/number';
@@ -17,13 +19,23 @@ import { ItemFormComponent } from './components/item-form/item-form.component';
   templateUrl: './item.html',
   styleUrls: ['./item.scss'],
   providers: [ItemService],
-  imports: [ButtonModule, TableModule, Dialog, InputTextModule, ItemFormComponent],
+  imports: [
+    ButtonModule,
+    TableModule,
+    Dialog,
+    InputTextModule,
+    SelectModule,
+    FormsModule,
+    ItemFormComponent,
+  ],
 })
 export class ItemListComponent {
   readonly capitalizeFirstLetter = capitalizeFirstLetter;
   readonly formatUnitPrice = formatUnitPrice;
+  readonly itemTypes = Object.values(ItemType);
   items = signal<Item[]>([]);
   search = signal('');
+  filterType: ItemType | null = null;
   page = signal(1);
   rows = DEFAULT_PAGE_SIZE;
   first = signal(0);
@@ -57,7 +69,7 @@ export class ItemListComponent {
   fetchItems() {
     this.isLoading.set(true);
     this.itemService
-      .getItems(this.search(), this.page(), this.rows)
+      .getItems(this.search(), this.page(), this.rows, this.filterType)
       .subscribe(({ items, total }) => {
         this.items.set(items);
         this.totalRecords.set(total);
@@ -75,6 +87,11 @@ export class ItemListComponent {
       return;
     }
 
+    this.fetchItems();
+  }
+
+  onTypeFilter() {
+    this.page.set(1);
     this.fetchItems();
   }
 

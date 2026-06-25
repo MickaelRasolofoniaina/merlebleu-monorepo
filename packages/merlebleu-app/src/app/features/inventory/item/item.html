@@ -1,7 +1,7 @@
 <div class="flex justify-between items-center mb-4">
   <h2 class="text-2xl font-bold">Articles</h2>
 </div>
-<div class="flex justify-between items-center mb-4">
+<div class="flex flex-wrap gap-3 items-center mb-4">
   <input
     type="text"
     pInputText
@@ -9,7 +9,15 @@
     (input)="onSearchChange($event.target.value)"
     class="w-64"
   />
-  <p-button label="Ajouter" icon="pi pi-plus" (onClick)="openAddModal()" />
+  <p-select
+    [(ngModel)]="filterType"
+    [options]="itemTypes"
+    placeholder="Tous les types"
+    [showClear]="true"
+    (onChange)="onTypeFilter()"
+    class="w-52"
+  />
+  <p-button label="Ajouter" icon="pi pi-plus" (onClick)="openAddModal()" class="ml-auto" />
 </div>
 
 <p-table
