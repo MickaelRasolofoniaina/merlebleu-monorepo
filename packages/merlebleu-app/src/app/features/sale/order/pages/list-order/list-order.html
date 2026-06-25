@@ -9,7 +9,7 @@
   <h3 class="text-lg font-semibold mb-4">Filtres</h3>
   <div class="mb-4">
     <div class="flex flex-col gap-2">
-      <label class="font-semibold text-slate-900">Nom du client</label>
+      <label class="font-semibold text-slate-900 dark:text-white">Nom du client</label>
       <input
         pInputText
         [(ngModel)]="filters.customerName"
@@ -20,7 +20,7 @@
   </div>
   <div class="grid gap-4 [grid-template-columns:repeat(auto-fit,minmax(200px,1fr))]">
     <div class="flex flex-col gap-2">
-      <label class="font-semibold text-slate-900">Date de commande</label>
+      <label class="font-semibold text-slate-900 dark:text-white">Date de commande</label>
       <p-datepicker
         [(ngModel)]="filters.orderDate"
         [showIcon]="true"
@@ -29,7 +29,7 @@
       />
     </div>
     <div class="flex flex-col gap-2">
-      <label class="font-semibold text-slate-900">Date de livraison</label>
+      <label class="font-semibold text-slate-900 dark:text-white">Date de livraison</label>
       <p-datepicker
         [(ngModel)]="filters.deliveryDate"
         [showIcon]="true"
@@ -38,7 +38,7 @@
       />
     </div>
     <div class="flex flex-col gap-2">
-      <label class="font-semibold text-slate-900">Statut</label>
+      <label class="font-semibold text-slate-900 dark:text-white">Statut</label>
       <p-select
         [(ngModel)]="filters.orderStatus"
         [options]="statusOptions"
