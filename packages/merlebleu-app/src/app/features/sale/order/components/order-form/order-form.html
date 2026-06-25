@@ -6,7 +6,7 @@
     <div class="flex flex-col gap-4">
       <div class="flex flex-wrap gap-4">
         <div class="flex flex-col gap-2 w-60">
-          <label for="orderDate" class="font-semibold text-slate-900"> Date de la commande </label>
+          <label for="orderDate" class="font-semibold text-slate-900 dark:text-white"> Date de la commande </label>
           <p-datepicker
             inputId="orderDate"
             name="orderDate"
@@ -22,7 +22,7 @@
           }
         </div>
         <div class="flex flex-col gap-2 w-60">
-          <label for="deliveryDate" class="font-semibold text-slate-900"> Date de livraison </label>
+          <label for="deliveryDate" class="font-semibold text-slate-900 dark:text-white"> Date de livraison </label>
           <p-datepicker
             inputId="deliveryDate"
             name="deliveryDate"
@@ -42,7 +42,7 @@
       </div>
       <div class="grid gap-4 [grid-template-columns:repeat(auto-fit,minmax(240px,1fr))]">
         <div class="flex flex-col gap-2">
-          <label for="customerName" class="font-semibold text-slate-900"> Nom du client </label>
+          <label for="customerName" class="font-semibold text-slate-900 dark:text-white"> Nom du client </label>
           <input
             id="customerName"
             name="customerName"
@@ -57,7 +57,7 @@
           }
         </div>
         <div class="flex flex-col gap-2">
-          <label for="customerPhoneNumber" class="font-semibold text-slate-900">
+          <label for="customerPhoneNumber" class="font-semibold text-slate-900 dark:text-white">
             Numéro de téléphone
           </label>
           <input
@@ -75,7 +75,7 @@
           }
         </div>
         <div class="flex flex-col gap-2">
-          <label for="deliveryAddress" class="font-semibold text-slate-900">
+          <label for="deliveryAddress" class="font-semibold text-slate-900 dark:text-white">
             Adresse de livraison
           </label>
           <input
@@ -94,7 +94,7 @@
       </div>
       <div class="grid gap-4 [grid-template-columns:repeat(auto-fit,minmax(240px,1fr))]">
         <div class="flex flex-col gap-2">
-          <label for="customerFacebookName" class="font-semibold text-slate-900">
+          <label for="customerFacebookName" class="font-semibold text-slate-900 dark:text-white">
             Compte Facebook
           </label>
           <input
@@ -111,7 +111,7 @@
           }
         </div>
         <div class="flex flex-col gap-2 items-start">
-          <label for="isFromFacebook" class="font-semibold text-slate-900">
+          <label for="isFromFacebook" class="font-semibold text-slate-900 dark:text-white">
             Commande via Facebook
           </label>
           <p-toggleSwitch
@@ -125,7 +125,7 @@
         </div>
       </div>
       <div class="flex flex-col gap-2">
-        <label for="remarks" class="font-semibold text-slate-900"> Remarques </label>
+        <label for="remarks" class="font-semibold text-slate-900 dark:text-white"> Remarques </label>
         <textarea
           id="remarks"
           name="remarks"
@@ -166,7 +166,7 @@
       </div>
       <div class="grid gap-4 [grid-template-columns:repeat(auto-fit,minmax(240px,1fr))]">
         <div class="flex flex-col gap-2">
-          <label for="description-{{ i }}" class="font-semibold text-slate-900">
+          <label for="description-{{ i }}" class="font-semibold text-slate-900 dark:text-white">
             Description
           </label>
           <input
@@ -183,7 +183,7 @@
           }
         </div>
         <div class="flex flex-col gap-2">
-          <label for="size-{{ i }}" class="font-semibold text-slate-900"> Personne </label>
+          <label for="size-{{ i }}" class="font-semibold text-slate-900 dark:text-white"> Personne </label>
           <p-inputNumber
             inputId="size-{{ i }}"
             name="size-{{ i }}"
@@ -196,7 +196,7 @@
           }
         </div>
         <div class="flex flex-col gap-2">
-          <label for="itemTotal-{{ i }}" class="font-semibold text-slate-900"> Montant </label>
+          <label for="itemTotal-{{ i }}" class="font-semibold text-slate-900 dark:text-white"> Montant </label>
           <p-inputNumber
             inputId="itemTotal-{{ i }}"
             name="itemTotal-{{ i }}"
@@ -210,7 +210,7 @@
           }
         </div>
         <div class="flex flex-col gap-2 col-span-full">
-          <label for="itemRemarks-{{ i }}" class="font-semibold text-slate-900"> Remarques </label>
+          <label for="itemRemarks-{{ i }}" class="font-semibold text-slate-900 dark:text-white"> Remarques </label>
           <textarea
             id="itemRemarks-{{ i }}"
             name="itemRemarks-{{ i }}"
@@ -232,7 +232,7 @@
   <p-fieldset legend="Paiement" styleClass="border border-dashed border-slate-200 rounded-xl">
     <div class="grid gap-4 [grid-template-columns:repeat(auto-fit,minmax(240px,1fr))]">
       <div class="flex flex-col gap-2">
-        <label for="totalAmount" class="font-semibold text-slate-900"> Montant total </label>
+        <label for="totalAmount" class="font-semibold text-slate-900 dark:text-white"> Montant total </label>
         <p-inputNumber
           inputId="totalAmount"
           name="totalAmount"
@@ -247,7 +247,7 @@
         }
       </div>
       <div class="flex flex-col gap-2">
-        <label for="paidAmount" class="font-semibold text-slate-900"> Montant paye </label>
+        <label for="paidAmount" class="font-semibold text-slate-900 dark:text-white"> Montant paye </label>
         <p-inputNumber
           inputId="paidAmount"
           name="paidAmount"
@@ -261,7 +261,7 @@
         }
       </div>
       <div class="flex flex-col gap-2">
-        <label for="balanceAmount" class="font-semibold text-slate-900"> Solde </label>
+        <label for="balanceAmount" class="font-semibold text-slate-900 dark:text-white"> Solde </label>
         <p-inputNumber
           inputId="balanceAmount"
           name="balanceAmount"
@@ -275,7 +275,7 @@
         }
       </div>
       <div class="flex flex-col gap-2">
-        <label for="paymentMethodId" class="font-semibold text-slate-900">
+        <label for="paymentMethodId" class="font-semibold text-slate-900 dark:text-white">
           Methode de paiement
         </label>
         <p-select
