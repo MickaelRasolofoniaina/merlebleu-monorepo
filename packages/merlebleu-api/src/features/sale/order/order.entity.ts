@@ -6,6 +6,7 @@ export class OrderItemEntity implements OrderItem {
   id: string;
   description: string;
   size: number;
+  unitPrice: number;
   totalAmount: number;
   remarks?: string | undefined;
   photos?: string[] | undefined;
@@ -46,6 +47,10 @@ export const OrderItemSchema = new EntitySchema<OrderItemEntity>({
     },
     size: {
       type: 'int',
+    },
+    unitPrice: {
+      type: 'integer',
+      default: 0,
     },
     totalAmount: {
       type: 'integer',

@@ -163,6 +163,7 @@ export class OrderService {
         ({
           description: item.description,
           size: item.size,
+          unitPrice: item.unitPrice,
           totalAmount: item.totalAmount,
           remarks: item.remarks,
           photos: item.photos,

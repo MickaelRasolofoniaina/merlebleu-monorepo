@@ -26,13 +26,17 @@ import {
   OrderItemDto,
   PaymentMethod,
   createOrderSchema,
+  Item,
+  ItemType,
 } from '@merlebleu/shared';
 import { buildZodErrorMap } from '@shared/utils/zod-errors';
 import { formatDate, parseDate } from '@shared/utils/date';
 import { PaymentService } from '@features/sale/payment/payment.service';
+import { ItemService } from '@features/inventory/item/item.service';
 
 @Component({
   selector: 'order-form',
+  providers: [ItemService],
   imports: [
     DatePickerModule,
     FormsModule,
@@ -64,14 +68,17 @@ export class OrderForm implements OnInit, OnChanges {
   protected validationErrors: Record<string, string> = {};
 
   protected paymentMethods: PaymentMethod[] = [];
+  protected patisserieItems: Item[] = [];
 
   constructor(
     private paymentService: PaymentService,
     private messageService: MessageService,
+    private itemService: ItemService,
   ) {}
 
   ngOnInit(): void {
     this.loadPaymentMethods();
+    this.loadPatisserieItems();
     this.syncDateValuesFromOrder();
   }
 
@@ -86,6 +93,25 @@ export class OrderForm implements OnInit, OnChanges {
     this.paymentService.getAllPaymentMethods().subscribe((methods) => {
       this.paymentMethods = methods;
     });
+  }
+
+  protected loadPatisserieItems(): void {
+    this.itemService.getItemsByType(ItemType.CAKE).subscribe((items) => {
+      this.patisserieItems = items;
+    });
+  }
+
+  protected onArticleSelected(item: OrderItemDto): void {
+    const selected = this.patisserieItems.find((article) => article.label === item.description);
+    if (selected) {
+      item.unitPrice = selected.unitPrice;
+    }
+    this.syncItemAmount(item);
+  }
+
+  protected syncItemAmount(item: OrderItemDto): void {
+    item.totalAmount = (Number(item.unitPrice) || 0) * (Number(item.size) || 0);
+    this.syncTotalFromItems();
   }
 
   protected addOrderItem(): void {
@@ -185,6 +211,7 @@ export class OrderForm implements OnInit, OnChanges {
     return {
       description: '',
       size: 0,
+      unitPrice: 0,
       totalAmount: 0,
       remarks: '',
       photos: [],
@@ -194,7 +221,10 @@ export class OrderForm implements OnInit, OnChanges {
   private deepCopyOrder(dto: CreateOrderDto | UpdateOrderDto): CreateOrderDto | UpdateOrderDto {
     return {
       ...dto,
-      orderItems: dto.orderItems.map((item) => ({ ...item })),
+      orderItems: dto.orderItems.map((item) => ({
+        ...item,
+        unitPrice: item.unitPrice || (item.size ? item.totalAmount / item.size : 0),
+      })),
     };
   }
 

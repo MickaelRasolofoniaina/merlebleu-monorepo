@@ -29,6 +29,10 @@ export class ItemService {
     );
   }
 
+  getItemsByType(type: ItemType): Observable<Item[]> {
+    return this.http.get<Item[]>(`${this.apiUrl}/type/${type}`);
+  }
+
   addItem(item: CreateItemDto): Observable<Item> {
     return this.http.post<Item>(this.apiUrl, item);
   }

@@ -113,6 +113,7 @@
           <thead class="text-slate-500 border-b border-slate-200">
             <tr>
               <th class="text-left py-2 pr-4">Description</th>
+              <th class="text-left py-2 pr-4 text-right">Prix unitaire</th>
               <th class="text-left py-2 pr-4 text-right">Personne</th>
               <th class="text-left py-2 pr-4 text-right">Montant</th>
               <th class="text-left py-2 pr-4">Remarques</th>
@@ -122,6 +123,7 @@
           <tbody>
             <tr *ngFor="let item of order.orderItems" class="border-b border-slate-100">
               <td class="py-3 pr-4 text-slate-900">{{ item.description }}</td>
+              <td class="py-3 pr-4 text-right">{{ item.unitPrice | number: '1.0-2' }}</td>
               <td class="py-3 pr-4 text-right">{{ item.size }}</td>
               <td class="py-3 pr-4 text-right">{{ item.totalAmount | number: '1.0-2' }}</td>
               <td class="py-3 pr-4">{{ formatRemarks(item.remarks) }}</td>

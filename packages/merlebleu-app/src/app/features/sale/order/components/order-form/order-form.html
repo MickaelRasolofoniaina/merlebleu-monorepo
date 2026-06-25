@@ -169,17 +169,35 @@
           <label for="description-{{ i }}" class="font-semibold text-slate-900 dark:text-white">
             Description
           </label>
-          <input
-            id="description-{{ i }}"
+          <p-select
+            inputId="description-{{ i }}"
             name="description-{{ i }}"
-            type="text"
-            pInputText
             [(ngModel)]="item.description"
+            [options]="patisserieItems"
+            optionLabel="label"
+            optionValue="label"
+            [filter]="true"
+            filterPlaceholder="Rechercher un article..."
+            placeholder="Sélectionnez un article"
             class="w-full"
-            placeholder="Tout choco"
+            (ngModelChange)="onArticleSelected(item)"
           />
           @if (errorFor('orderItems.' + i + '.description')) {
           <small class="text-red-500">{{ errorFor('orderItems.' + i + '.description') }}</small>
+          }
+        </div>
+        <div class="flex flex-col gap-2">
+          <label for="unitPrice-{{ i }}" class="font-semibold text-slate-900 dark:text-white"> Prix unitaire </label>
+          <p-inputNumber
+            inputId="unitPrice-{{ i }}"
+            name="unitPrice-{{ i }}"
+            [(ngModel)]="item.unitPrice"
+            [min]="0"
+            class="w-full"
+            (ngModelChange)="syncItemAmount(item)"
+          />
+          @if (errorFor('orderItems.' + i + '.unitPrice')) {
+          <small class="text-red-500">{{ errorFor('orderItems.' + i + '.unitPrice') }}</small>
           }
         </div>
         <div class="flex flex-col gap-2">
@@ -190,6 +208,7 @@
             [(ngModel)]="item.size"
             [min]="0"
             class="w-full"
+            (ngModelChange)="syncItemAmount(item)"
           />
           @if (errorFor('orderItems.' + i + '.size')) {
           <small class="text-red-500">{{ errorFor('orderItems.' + i + '.size') }}</small>
@@ -203,7 +222,7 @@
             [(ngModel)]="item.totalAmount"
             [min]="0"
             class="w-full"
-            (ngModelChange)="syncTotalFromItems()"
+            disabled=""
           />
           @if (errorFor('orderItems.' + i + '.totalAmount')) {
           <small class="text-red-500">{{ errorFor('orderItems.' + i + '.totalAmount') }}</small>
