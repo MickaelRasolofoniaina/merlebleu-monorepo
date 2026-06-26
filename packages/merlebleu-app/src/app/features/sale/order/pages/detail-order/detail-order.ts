@@ -6,23 +6,13 @@ import { PanelModule } from 'primeng/panel';
 import { ButtonModule } from 'primeng/button';
 import { ConfirmationService } from 'primeng/api';
 import { ConfirmDialog } from 'primeng/confirmdialog';
-import { Stepper, StepList, Step } from 'primeng/stepper';
 import { Order } from '@merlebleu/shared';
 import { OrderService } from '../../order.service';
 import { ORDER_STATUSES } from '@shared/utils/order';
 
 @Component({
   selector: 'detail-order',
-  imports: [
-    CommonModule,
-    RouterLink,
-    PanelModule,
-    ButtonModule,
-    Stepper,
-    StepList,
-    Step,
-    ConfirmDialog,
-  ],
+  imports: [CommonModule, RouterLink, PanelModule, ButtonModule, ConfirmDialog],
   templateUrl: './detail-order.html',
   styleUrl: './detail-order.scss',
   providers: [ConfirmationService, DecimalPipe],
