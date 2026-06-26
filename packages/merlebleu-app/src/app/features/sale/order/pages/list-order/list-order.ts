@@ -16,6 +16,7 @@ import { formatDate } from '@shared/utils/date';
 import { getPageFromFirstRows } from '@shared/utils/pagination';
 import { ORDER_STATUSES, getOrderStatusLabel, getOrderStatusColor } from '@shared/utils/order';
 import { getUserShopId } from '@shared/utils/user';
+import { Shop } from '@merlebleu/shared';
 
 @Component({
   selector: 'list-order',
