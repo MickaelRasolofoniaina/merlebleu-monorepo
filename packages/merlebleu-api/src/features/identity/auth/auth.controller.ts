@@ -5,16 +5,22 @@ import {
   HttpCode,
   HttpStatus,
   Post,
+  Req,
   Res,
+  UnauthorizedException,
 } from '@nestjs/common';
 import express from 'express';
 import { AuthService } from './auth.service';
+import { UserService } from '../user/user.service';
 import { SignInDto } from './auth.dto';
 import { SkipAuth } from 'src/shared/auth/public';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private authService: AuthService) {}
+  constructor(
+    private authService: AuthService,
+    private userService: UserService,
+  ) {}
 
   @SkipAuth()
   @HttpCode(HttpStatus.OK)

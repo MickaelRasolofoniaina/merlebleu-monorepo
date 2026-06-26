@@ -4,7 +4,7 @@ import { Observable } from 'rxjs';
 import { Shop, CreateShopDto, UpdateShopDto } from '@merlebleu/shared';
 import { environment } from '@env/environment';
 
-@Injectable()
+@Injectable({ providedIn: 'root' })
 export class ShopService {
   private http = inject(HttpClient);
   private readonly apiUrl = `${environment.apiBaseUrl}/shop`;

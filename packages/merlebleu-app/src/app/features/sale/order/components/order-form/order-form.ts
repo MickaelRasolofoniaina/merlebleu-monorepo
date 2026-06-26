@@ -28,11 +28,13 @@ import {
   createOrderSchema,
   Item,
   ItemType,
+  Shop,
 } from '@merlebleu/shared';
 import { buildZodErrorMap } from '@shared/utils/zod-errors';
 import { formatDate, parseDate } from '@shared/utils/date';
 import { PaymentService } from '@features/sale/payment/payment.service';
 import { ItemService } from '@features/inventory/item/item.service';
+import { ShopService } from '@features/shop/shop-list/shop.service';
 
 @Component({
   selector: 'order-form',
@@ -69,16 +71,20 @@ export class OrderForm implements OnInit, OnChanges {
 
   protected paymentMethods: PaymentMethod[] = [];
   protected patisserieItems: Item[] = [];
+  protected shops: Shop[] = [];
 
   constructor(
     private paymentService: PaymentService,
     private messageService: MessageService,
     private itemService: ItemService,
+    private shopService: ShopService,
   ) {}
 
   ngOnInit(): void {
     this.loadPaymentMethods();
     this.loadPatisserieItems();
+    this.loadShops();
+    this.applyUserShopDefault();
     this.syncDateValuesFromOrder();
   }
 
@@ -93,6 +99,27 @@ export class OrderForm implements OnInit, OnChanges {
     this.paymentService.getAllPaymentMethods().subscribe((methods) => {
       this.paymentMethods = methods;
     });
+  }
+
+  protected loadShops(): void {
+    this.shopService.getAll().subscribe((shops) => {
+      this.shops = shops;
+    });
+  }
+
+  protected applyUserShopDefault(): void {
+    if (this.orderData) {
+      return;
+    }
+    const raw = localStorage.getItem('user_shop');
+    if (raw) {
+      try {
+        const shop: Shop = JSON.parse(raw);
+        this.order.shopId = shop.id;
+      } catch {
+        // ignore corrupted localStorage value
+      }
+    }
   }
 
   protected loadPatisserieItems(): void {
@@ -204,6 +231,7 @@ export class OrderForm implements OnInit, OnChanges {
       paidAmount: 0,
       balanceAmount: 0,
       paymentMethodId: '',
+      shopId: '',
     };
   }
 

@@ -6,6 +6,7 @@ import { CreateOrderDto, UpdateOrderDto } from './order.dto';
 import { OrderItemDto, OrderStatus, ResultPaged } from '@merlebleu/shared';
 import { getPaginationParams } from '@shared/pagination/pagination.utils';
 import { PaymentService } from '../payment/payment.service';
+import { ShopService } from '../../shop/shop.service';
 
 @Injectable()
 export class OrderService {
@@ -13,17 +14,20 @@ export class OrderService {
     @InjectRepository(OrderEntity)
     private orderRepository: Repository<OrderEntity>,
     private paymentService: PaymentService,
+    private shopService: ShopService,
   ) {}
 
   async addOrder(order: CreateOrderDto): Promise<OrderEntity> {
     const paymentMethod = await this.paymentService.getPaymentMethod(
       order.paymentMethodId,
     );
+    const shop = await this.shopService.findOne(order.shopId);
 
     const { orderData, orderItems } = this.splitOrderInput(order);
     const orderEntity = {
       ...orderData,
       paymentMethod,
+      shop,
     } as OrderEntity;
 
     orderEntity.orderItems = this.buildOrderItems(orderItems, orderEntity);
@@ -41,6 +45,7 @@ export class OrderService {
       deliveryDate?: string;
       customerName?: string;
       status?: OrderStatus;
+      shopId?: string;
     },
   ): Promise<ResultPaged<OrderEntity>> {
     const pagination = getPaginationParams({ page, limit });
@@ -49,9 +54,9 @@ export class OrderService {
       .createQueryBuilder('orders')
       .leftJoinAndSelect('orders.orderItems', 'orderItems')
       .leftJoinAndSelect('orders.paymentMethod', 'paymentMethod')
+      .leftJoinAndSelect('orders.shop', 'shop')
       .orderBy('orders.orderDate', 'DESC');
 
-    // Apply filters
     if (filters?.orderDate) {
       query.andWhere('orders.orderDate = :orderDate', {
         orderDate: filters.orderDate,
@@ -76,6 +81,10 @@ export class OrderService {
       });
     }
 
+    if (filters?.shopId) {
+      query.andWhere('shop.id = :shopId', { shopId: filters.shopId });
+    }
+
     query.take(pagination.limit).skip(pagination.skip);
 
     const [data, total] = await query.getManyAndCount();
@@ -91,7 +100,7 @@ export class OrderService {
   async getOrderById(id: string): Promise<OrderEntity> {
     const order = await this.orderRepository.findOne({
       where: { id },
-      relations: { orderItems: true, paymentMethod: true },
+      relations: { orderItems: true, paymentMethod: true, shop: true },
     });
 
     if (!order) {
@@ -104,7 +113,7 @@ export class OrderService {
   async updateOrder(id: string, order: UpdateOrderDto): Promise<OrderEntity> {
     const existingOrder = await this.orderRepository.findOne({
       where: { id },
-      relations: { orderItems: true, paymentMethod: true },
+      relations: { orderItems: true, paymentMethod: true, shop: true },
     });
 
     if (!existingOrder) {
@@ -114,12 +123,14 @@ export class OrderService {
     const paymentMethod = await this.paymentService.getPaymentMethod(
       order.paymentMethodId,
     );
+    const shop = await this.shopService.findOne(order.shopId);
 
     const { orderData, orderItems } = this.splitOrderInput(order);
 
     Object.assign(existingOrder, {
       ...orderData,
       paymentMethod,
+      shop,
     });
 
     existingOrder.orderItems = this.buildOrderItems(orderItems, existingOrder);
@@ -173,7 +184,7 @@ export class OrderService {
   }
 
   private splitOrderInput(order: CreateOrderDto | UpdateOrderDto) {
-    const { paymentMethodId, orderItems, ...orderData } = order;
+    const { paymentMethodId, shopId, orderItems, ...orderData } = order;
 
     return {
       orderData: {

@@ -52,6 +52,11 @@ export class Login {
     this.loginService.signIn(this.signInUserDto).subscribe({
       next: (response) => {
         localStorage.setItem('user_name', response.name);
+        if (response.shop) {
+          localStorage.setItem('user_shop', JSON.stringify(response.shop));
+        } else {
+          localStorage.removeItem('user_shop');
+        }
         void this.router.navigate(['/sale/order']);
       },
       error: (error) => {

@@ -5,6 +5,22 @@
   >
     <div class="flex flex-col gap-4">
       <div class="flex flex-wrap gap-4">
+        <div class="flex flex-col gap-2 w-80">
+          <label for="shopId" class="font-semibold text-slate-900 dark:text-white"> Boutique </label>
+          <p-select
+            inputId="shopId"
+            name="shopId"
+            [(ngModel)]="order.shopId"
+            [options]="shops"
+            optionLabel="address"
+            optionValue="id"
+            placeholder="Sélectionnez une boutique"
+            class="w-full"
+          />
+          @if (errorFor('shopId')) {
+          <small class="text-red-500">{{ errorFor('shopId') }}</small>
+          }
+        </div>
         <div class="flex flex-col gap-2 w-60">
           <label for="orderDate" class="font-semibold text-slate-900 dark:text-white"> Date de la commande </label>
           <p-datepicker

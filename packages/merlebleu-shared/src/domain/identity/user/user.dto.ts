@@ -1,4 +1,5 @@
 import z from "zod";
+import { Shop } from "../../shop/shop";
 
 export const createUserSchema = z.object({
   name: z.string().min(1, "Veuillez remplir le nom de l'utilisateur"),
@@ -15,6 +16,7 @@ export const createUserSchema = z.object({
       /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/,
       "Le mot de passe doit contenir au moins un caractère spécial",
     ),
+  shopId: z.string().uuid().optional().nullable(),
 });
 
 export const updateUserSchema = z.object({
@@ -32,6 +34,7 @@ export const updateUserSchema = z.object({
       /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/,
       "Le mot de passe doit contenir au moins un caractère spécial",
     ),
+  shopId: z.string().uuid().optional().nullable(),
 });
 
 export const signInUserSchema = z.object({
@@ -50,5 +53,6 @@ export type UserDto = {
   id: string;
   name: string;
   email: string;
+  shop?: Shop;
 };
 export type SignInUserDto = z.infer<typeof signInUserSchema>;

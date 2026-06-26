@@ -41,6 +41,7 @@ export class EditOrder implements OnInit {
           this.order = {
             ...order,
             paymentMethodId: order.paymentMethod?.id ?? '',
+            shopId: order.shop?.id ?? '',
           } as UpdateOrderDto;
         },
       });

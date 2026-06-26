@@ -6,6 +6,7 @@ import { finalize } from 'rxjs';
 import { TableModule } from 'primeng/table';
 import { DEFAULT_PAGE_SIZE, Order, OrderStatus } from '@merlebleu/shared';
 import { OrderService } from '../../order.service';
+import { ShopService } from '@features/shop/shop-list/shop.service';
 import { Button } from 'primeng/button';
 import { BadgeModule } from 'primeng/badge';
 import { InputTextModule } from 'primeng/inputtext';
@@ -14,6 +15,7 @@ import { SelectModule } from 'primeng/select';
 import { formatDate } from '@shared/utils/date';
 import { getPageFromFirstRows } from '@shared/utils/pagination';
 import { ORDER_STATUSES, getOrderStatusLabel, getOrderStatusColor } from '@shared/utils/order';
+import { getUserShopId } from '@shared/utils/user';
 
 @Component({
   selector: 'list-order',
@@ -32,9 +34,11 @@ import { ORDER_STATUSES, getOrderStatusLabel, getOrderStatusColor } from '@share
 })
 export class ListOrder implements OnInit {
   private readonly orderService = inject(OrderService);
+  private readonly shopService = inject(ShopService);
   private readonly router = inject(Router);
 
   protected orders = signal<Order[]>([]);
+  protected shops = signal<Shop[]>([]);
   protected isLoading = false;
   protected totalRecords = 0;
   protected rows = DEFAULT_PAGE_SIZE;
@@ -45,6 +49,7 @@ export class ListOrder implements OnInit {
     deliveryDate: null as Date | null,
     customerName: '',
     orderStatus: '',
+    shopId: getUserShopId(),
   };
 
   protected statusOptions = ORDER_STATUSES.map((s) => ({
@@ -53,6 +58,7 @@ export class ListOrder implements OnInit {
   }));
 
   ngOnInit(): void {
+    this.shopService.getAll().subscribe((shops) => this.shops.set(shops));
     this.loadOrders();
   }
 
@@ -60,7 +66,6 @@ export class ListOrder implements OnInit {
     this.isLoading = true;
 
     const filterParams: Record<string, unknown> = {};
-    console.log('Filters:', this.filters);
     if (this.filters.orderDate) {
       filterParams['orderDate'] = formatDate(this.filters.orderDate);
     }
@@ -72,6 +77,9 @@ export class ListOrder implements OnInit {
     }
     if (this.filters.orderStatus) {
       filterParams['status'] = this.filters.orderStatus;
+    }
+    if (this.filters.shopId) {
+      filterParams['shopId'] = this.filters.shopId;
     }
 
     this.orderService
@@ -106,6 +114,7 @@ export class ListOrder implements OnInit {
       deliveryDate: null,
       customerName: '',
       orderStatus: '',
+      shopId: getUserShopId(),
     };
     this.first = 0;
     this.loadOrders(1, this.rows);

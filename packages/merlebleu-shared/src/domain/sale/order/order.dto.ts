@@ -78,6 +78,10 @@ export const createOrderSchema = z
     paymentMethodId: z
       .string()
       .min(1, "Veuillez sélectionner une méthode de paiement"),
+    shopId: z
+      .string()
+      .uuid({ message: "Veuillez sélectionner une boutique" })
+      .min(1, "Veuillez sélectionner une boutique"),
   })
   .refine(
     (data) => {

@@ -33,6 +33,7 @@ export class OrderController {
     @Query('deliveryDate') deliveryDate?: string,
     @Query('customerName') customerName?: string,
     @Query('status') status?: OrderStatus,
+    @Query('shopId') shopId?: string,
   ) {
     const pageNumber = page ? Number.parseInt(page, 10) : 1;
     const limitNumber = limit ? Number.parseInt(limit, 10) : 20;
@@ -41,6 +42,7 @@ export class OrderController {
       deliveryDate,
       customerName,
       status,
+      shopId,
     });
   }
 

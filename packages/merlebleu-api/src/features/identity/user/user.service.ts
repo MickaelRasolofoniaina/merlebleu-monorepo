@@ -1,6 +1,7 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { UserEntity, UserSchema } from './user.entity';
+import { ShopEntity } from '../../shop/shop.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CreateUserDto, UpdateUserDto, UserDto } from '@merlebleu/shared';
 
@@ -11,10 +12,26 @@ export class UserService {
     private userRepository: Repository<UserEntity>,
   ) {}
 
-  // find user by email
   findUserByEmail(email: string) {
-    // implementation here
-    return this.userRepository.findOne({ where: { email } });
+    return this.userRepository.findOne({ where: { email }, relations: { shop: true } });
+  }
+
+  async findUserById(id: string): Promise<UserDto> {
+    const user = await this.userRepository.findOne({
+      where: { id },
+      relations: { shop: true },
+    });
+
+    if (!user) {
+      throw new NotFoundException(`User with id ${id} not found`);
+    }
+
+    return {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      shop: user.shop ?? undefined,
+    };
   }
 
   async createUser(createUserDto: CreateUserDto) {
@@ -25,15 +42,14 @@ export class UserService {
         email: createUserDto.email,
         password: hashedPassword,
       });
+
+      if (createUserDto.shopId) {
+        user.shop = { id: createUserDto.shopId } as ShopEntity;
+      }
+
       const userCreated = await this.userRepository.save(user);
 
-      const userDto: UserDto = {
-        id: userCreated.id,
-        name: userCreated.name,
-        email: userCreated.email,
-      };
-
-      return userDto;
+      return this.findUserById(userCreated.id);
     } catch (error) {
       if (error.code === '23505') {
         throw new BadRequestException(
@@ -47,15 +63,31 @@ export class UserService {
   }
 
   async updateUser(id: string, updates: UpdateUserDto) {
-    const nextUpdates = { ...updates };
+    const user = await this.userRepository.findOne({
+      where: { id },
+      relations: { shop: true },
+    });
 
-    if (updates.password) {
-      nextUpdates.password = await this.hashPassword(updates.password);
+    if (!user) {
+      throw new NotFoundException(`User with id ${id} not found`);
     }
 
-    // Not very optimized but this is not frequent operation
-    await this.userRepository.update({ id }, nextUpdates);
-    return this.userRepository.findOne({ where: { id } });
+    const { shopId, ...userUpdates } = updates;
+
+    if (userUpdates.password) {
+      userUpdates.password = await this.hashPassword(userUpdates.password);
+    }
+
+    Object.assign(user, userUpdates);
+
+    if (shopId !== undefined) {
+      // null clears the FK in DB; cast needed because interface type disallows null
+      user.shop = shopId ? ({ id: shopId } as ShopEntity) : (null as unknown as undefined);
+    }
+
+    await this.userRepository.save(user);
+
+    return this.userRepository.findOne({ where: { id }, relations: { shop: true } });
   }
 
   deleteUser(id: string) {
@@ -68,11 +100,15 @@ export class UserService {
   }
 
   async getAllUsers(): Promise<UserDto[]> {
-    const users = await this.userRepository.find({ order: { name: 'ASC' } });
+    const users = await this.userRepository.find({
+      order: { name: 'ASC' },
+      relations: { shop: true },
+    });
     return users.map((user) => ({
       id: user.id,
       name: user.name,
       email: user.email,
+      shop: user.shop ?? undefined,
     }));
   }
 }

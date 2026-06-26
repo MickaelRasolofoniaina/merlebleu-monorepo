@@ -1,4 +1,5 @@
 import { PaymentMethod } from "../payment/payment";
+import { Shop } from "../../shop/shop";
 
 export enum OrderStatus {
   TODO = "TODO",
@@ -32,5 +33,6 @@ export interface Order {
   paidAmount: number;
   balanceAmount: number;
   paymentMethod: PaymentMethod;
+  shop: Shop;
   orderStatus?: OrderStatus;
 }

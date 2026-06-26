@@ -5,6 +5,8 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { OrderSchema, OrderItemSchema } from './order.entity';
 import { PaymentMethodSchema } from '../payment/payment.entity';
 import { PaymentService } from '../payment/payment.service';
+import { ShopSchema } from '../../shop/shop.entity';
+import { ShopService } from '../../shop/shop.service';
 
 @Module({
   imports: [
@@ -12,9 +14,10 @@ import { PaymentService } from '../payment/payment.service';
       OrderSchema,
       OrderItemSchema,
       PaymentMethodSchema,
+      ShopSchema,
     ]),
   ],
   controllers: [OrderController],
-  providers: [OrderService, PaymentService],
+  providers: [OrderService, PaymentService, ShopService],
 })
 export class OrderModule {}

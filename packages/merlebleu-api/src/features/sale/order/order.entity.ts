@@ -1,6 +1,7 @@
 import { Order, OrderItem, OrderStatus } from '@merlebleu/shared';
 import { EntitySchema } from 'typeorm';
 import { PaymentMethodEntity } from '../payment/payment.entity';
+import { ShopEntity } from '../../shop/shop.entity';
 
 export class OrderItemEntity implements OrderItem {
   id: string;
@@ -27,6 +28,7 @@ export class OrderEntity implements Order {
   paidAmount: number;
   balanceAmount: number;
   paymentMethod: PaymentMethodEntity;
+  shop: ShopEntity;
   orderDate: string;
   orderStatus?: OrderStatus;
 }
@@ -140,6 +142,14 @@ export const OrderSchema = new EntitySchema<OrderEntity>({
       target: () => PaymentMethodEntity,
       joinColumn: {
         name: 'paymentMethodId',
+        referencedColumnName: 'id',
+      },
+    },
+    shop: {
+      type: 'many-to-one',
+      target: () => ShopEntity,
+      joinColumn: {
+        name: 'shopId',
         referencedColumnName: 'id',
       },
     },
