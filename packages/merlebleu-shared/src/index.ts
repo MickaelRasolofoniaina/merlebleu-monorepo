@@ -21,3 +21,5 @@ export * from "./domain/sale/payment/payment.dto";
 export * from "./domain/sale/payment/payment";
 export * from "./domain/shared/base";
 export * from "./domain/shared/pagination";
+export * from "./domain/shop/shop.dto";
+export * from "./domain/shop/shop";

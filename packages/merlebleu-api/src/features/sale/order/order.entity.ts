@@ -98,7 +98,7 @@ export const OrderSchema = new EntitySchema<OrderEntity>({
       nullable: true,
     },
     deliveryDate: {
-      type: 'date',
+      type: 'timestamp',
     },
     deliveryAddress: {
       type: 'varchar',

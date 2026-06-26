@@ -36,6 +36,11 @@ export const routes: Routes = [
         loadChildren: () =>
           import('./features/ingredient/ingredient.routes').then((m) => m.INGREDIENT_ROUTES),
       },
+      {
+        path: 'shop',
+        loadChildren: () =>
+          import('./features/shop/shop.routes').then((m) => m.SHOP_ROUTES),
+      },
     ],
   },
 ];

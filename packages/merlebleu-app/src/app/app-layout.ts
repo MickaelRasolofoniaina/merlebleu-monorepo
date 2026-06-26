@@ -114,6 +114,11 @@ export class AppLayout {
           icon: 'pi pi-users',
         },
         {
+          label: 'Boutique',
+          icon: 'pi pi-shop',
+          routerLink: ['/shop'],
+        },
+        {
           label: 'Methode de paiement',
           icon: 'pi pi-credit-card',
           routerLink: ['/sale/payment'],

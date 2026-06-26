@@ -7,6 +7,7 @@ import { SaleModule } from './features/sale/sale.module';
 import { IdentityModule } from './features/identity/identity.module';
 import { ItemModule } from './features/inventory/item/item.module';
 import { IngredientModule } from './features/ingredient/ingredient.module';
+import { ShopModule } from './features/shop/shop.module';
 
 @Module({
   imports: [
@@ -31,6 +32,7 @@ import { IngredientModule } from './features/ingredient/ingredient.module';
     IdentityModule,
     ItemModule,
     IngredientModule,
+    ShopModule,
   ],
   controllers: [AppController],
   providers: [AppService],
