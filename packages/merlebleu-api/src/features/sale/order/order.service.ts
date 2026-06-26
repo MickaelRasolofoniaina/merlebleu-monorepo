@@ -55,7 +55,7 @@ export class OrderService {
       .leftJoinAndSelect('orders.orderItems', 'orderItems')
       .leftJoinAndSelect('orders.paymentMethod', 'paymentMethod')
       .leftJoinAndSelect('orders.shop', 'shop')
-      .orderBy('orders.orderDate', 'DESC');
+      .orderBy('orders.deliveryDate', 'ASC');
 
     if (filters?.orderDate) {
       query.andWhere('orders.orderDate = :orderDate', {
