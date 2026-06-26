@@ -75,7 +75,7 @@ export class ListOrder implements OnInit {
     }
 
     this.orderService
-      .listOrders({ page, limit}, filterParams)
+      .listOrders({ page, limit }, filterParams)
       .pipe(
         finalize(() => {
           this.isLoading = false;
@@ -128,7 +128,7 @@ export class ListOrder implements OnInit {
       return '-';
     }
 
-    return this.truncate(description, 20);
+    return description;
   }
 
   private truncate(value: string, maxLength: number): string {

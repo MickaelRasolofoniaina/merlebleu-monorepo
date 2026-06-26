@@ -11,6 +11,7 @@ export enum OrderStatus {
 export interface OrderItem {
   description: string;
   size: number;
+  unitPrice: number;
   totalAmount: number;
   remarks?: string;
   photos?: string[];

@@ -178,7 +178,7 @@ export class OrderForm implements OnInit, OnChanges {
 
   protected onDeliveryDateChange(value: Date | null): void {
     this.deliveryDateValue = value;
-    this.order.deliveryDate = formatDate(value);
+    this.order.deliveryDate = value ? value.toISOString() : '';
   }
 
   protected trackByIndex(index: number): number {

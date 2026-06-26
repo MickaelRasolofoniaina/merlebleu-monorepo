@@ -5,6 +5,9 @@ export const createOrderItemSchema = z.object({
     .string()
     .min(1, "Veuillez remplir la description de l'article"),
   size: z.number().positive("La taille doit être un nombre positif"),
+  unitPrice: z
+    .number()
+    .positive("Le prix unitaire doit être un nombre positif"),
   totalAmount: z
     .number()
     .positive("Le montant total doit être un nombre positif"),

@@ -7,7 +7,7 @@
 
 <div class="border border-dashed border-slate-200 rounded-xl p-5 mb-6">
   <h3 class="text-lg font-semibold mb-4">Filtres</h3>
-  <div class="mb-4">
+  <div class="grid gap-4 [grid-template-columns:repeat(auto-fit,minmax(200px,1fr))] mb-4">
     <div class="flex flex-col gap-2">
       <label class="font-semibold text-slate-900 dark:text-white">Nom du client</label>
       <input
@@ -17,10 +17,8 @@
         class="w-full"
       />
     </div>
-  </div>
-  <div class="grid gap-4 [grid-template-columns:repeat(auto-fit,minmax(200px,1fr))]">
     <div class="flex flex-col gap-2">
-      <label class="font-semibold text-slate-900 dark:text-white">Date de commande</label>
+      <label class="font-semibold text-slate-900 dark:text-white">Date de la commande</label>
       <p-datepicker
         [(ngModel)]="filters.orderDate"
         [showIcon]="true"
@@ -37,7 +35,9 @@
         class="w-full"
       />
     </div>
-    <div class="flex flex-col gap-2">
+  </div>
+  <div class="flex flex-wrap items-end gap-4">
+    <div class="flex flex-col gap-2 min-w-[200px]">
       <label class="font-semibold text-slate-900 dark:text-white">Statut</label>
       <p-select
         [(ngModel)]="filters.orderStatus"
@@ -49,22 +49,22 @@
         [showClear]="true"
       />
     </div>
-  </div>
-  <div class="flex gap-3 mt-4">
-    <p-button
-      label="Filtrer"
-      icon="pi pi-search"
-      (onClick)="applyFilters()"
-      [disabled]="isLoading"
-    />
-    <p-button
-      label="Réinitialiser"
-      icon="pi pi-refresh"
-      severity="secondary"
-      [outlined]="true"
-      (onClick)="resetFilters()"
-      [disabled]="isLoading"
-    />
+    <div class="flex gap-3">
+      <p-button
+        label="Réinitialiser"
+        icon="pi pi-refresh"
+        severity="secondary"
+        [outlined]="true"
+        (onClick)="resetFilters()"
+        [disabled]="isLoading"
+      />
+      <p-button
+        label="Filtrer"
+        icon="pi pi-search"
+        (onClick)="applyFilters()"
+        [disabled]="isLoading"
+      />
+    </div>
   </div>
 </div>
 
@@ -83,20 +83,22 @@
 >
   <ng-template #header>
     <tr>
-      <th>Commande</th>
-      <th>Date de commande</th>
-      <th>Date de livraison</th>
       <th>Client</th>
-      <th>Status</th>
+      <th>Commande</th>
+      <th>Date de la commande</th>
+      <th>Date de livraison</th>
+      <th>Statut</th>
       <th style="width: 10rem" class="text-center!">Actions</th>
     </tr>
   </ng-template>
   <ng-template #body let-order>
     <tr>
+      <td>{{ order.customerName }}</td>
       <td>{{ getDescription(order) }}</td>
       <td>{{ order.orderDate | date: 'dd/MM/yyyy' }}</td>
-      <td>{{ order.deliveryDate | date: 'dd/MM/yyyy' }}</td>
-      <td>{{ order.customerName }}</td>
+      <td>
+        {{ order.deliveryDate | date: 'dd/MM/yyyy' }} à {{ order.deliveryDate | date: 'HH:mm' }}
+      </td>
       <td>
         <p-badge
           [value]="getStatus(order.orderStatus)"
