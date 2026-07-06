@@ -52,6 +52,25 @@ export class OrderService {
     return this.http.get<ResultPaged<Order>>(queryString);
   }
 
+  listOrdersToPrepare(
+    paginationParams: PaginationParams,
+    customerName?: string,
+    shopId?: string,
+  ): Observable<ResultPaged<Order>> {
+    const { page = 1, limit = 20 } = paginationParams;
+    let queryString = `${this.apiUrl}/to-prepare?page=${page}&limit=${limit}`;
+
+    if (customerName) {
+      queryString += `&customerName=${encodeURIComponent(customerName)}`;
+    }
+
+    if (shopId) {
+      queryString += `&shopId=${encodeURIComponent(shopId)}`;
+    }
+
+    return this.http.get<ResultPaged<Order>>(queryString);
+  }
+
   getOrderById(id: string): Observable<Order> {
     return this.http.get<Order>(`${this.apiUrl}/${id}`);
   }

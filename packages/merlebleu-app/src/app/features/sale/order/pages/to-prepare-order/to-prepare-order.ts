@@ -5,24 +5,26 @@ import { Router } from '@angular/router';
 import { finalize } from 'rxjs';
 import { TableModule } from 'primeng/table';
 import { InputTextModule } from 'primeng/inputtext';
+import { SelectModule } from 'primeng/select';
 import { Button } from 'primeng/button';
-import { DEFAULT_PAGE_SIZE, Order } from '@merlebleu/shared';
+import { DEFAULT_PAGE_SIZE, Order, Shop } from '@merlebleu/shared';
 import { OrderService } from '../../order.service';
-import { addDays, formatDate } from '@shared/utils/date';
+import { ShopService } from '@features/shop/shop-list/shop.service';
 import { getPageFromFirstRows } from '@shared/utils/pagination';
-import { getUserShopId } from '@shared/utils/user';
 
 @Component({
   selector: 'to-prepare-order',
-  imports: [CommonModule, FormsModule, TableModule, InputTextModule, Button],
+  imports: [CommonModule, FormsModule, TableModule, InputTextModule, SelectModule, Button],
   templateUrl: './to-prepare-order.html',
   styleUrl: './to-prepare-order.scss',
 })
 export class ToPrepareOrder implements OnInit {
   private readonly orderService = inject(OrderService);
+  private readonly shopService = inject(ShopService);
   private readonly router = inject(Router);
 
   protected orders = signal<Order[]>([]);
+  protected shops = signal<Shop[]>([]);
   protected isLoading = false;
   protected totalRecords = 0;
   protected rows = DEFAULT_PAGE_SIZE;
@@ -30,33 +32,23 @@ export class ToPrepareOrder implements OnInit {
 
   protected filters = {
     customerName: '',
+    shopId: '',
   };
 
   ngOnInit(): void {
+    this.shopService.getAll().subscribe((shops) => this.shops.set(shops));
     this.loadOrders();
   }
 
   protected loadOrders(page = 1, limit = this.rows): void {
     this.isLoading = true;
 
-    const tomorrow = addDays(new Date(), 1);
-    const dayAfterTomorrow = addDays(new Date(), 2);
-
-    const filterParams: Record<string, unknown> = {
-      deliveryDateFrom: formatDate(tomorrow),
-      deliveryDateTo: formatDate(dayAfterTomorrow),
-    };
-
-    const shopId = getUserShopId();
-    if (shopId) {
-      filterParams['shopId'] = shopId;
-    }
-    if (this.filters.customerName) {
-      filterParams['customerName'] = this.filters.customerName;
-    }
-
     this.orderService
-      .listOrders({ page, limit }, filterParams)
+      .listOrdersToPrepare(
+        { page, limit },
+        this.filters.customerName || undefined,
+        this.filters.shopId || undefined,
+      )
       .pipe(
         finalize(() => {
           this.isLoading = false;
@@ -84,6 +76,7 @@ export class ToPrepareOrder implements OnInit {
   protected resetFilters(): void {
     this.filters = {
       customerName: '',
+      shopId: '',
     };
     this.first = 0;
     this.loadOrders(1, this.rows);

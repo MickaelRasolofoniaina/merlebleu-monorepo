@@ -65,6 +65,23 @@ export class OrderController {
     );
   }
 
+  @Get('to-prepare')
+  listOrdersToPrepare(
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
+    @Query('customerName') customerName?: string,
+    @Query('shopId') shopId?: string,
+  ) {
+    const pageNumber = page ? Number.parseInt(page, 10) : 1;
+    const limitNumber = limit ? Number.parseInt(limit, 10) : 20;
+    return this.orderService.listOrdersToPrepare(
+      pageNumber,
+      limitNumber,
+      customerName,
+      shopId,
+    );
+  }
+
   @Get(':id')
   getOrderById(@Param('id') id: string) {
     return this.orderService.getOrderById(id);
