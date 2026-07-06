@@ -1,18 +1,20 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, inject, signal } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { finalize } from 'rxjs';
 import { TableModule } from 'primeng/table';
+import { InputTextModule } from 'primeng/inputtext';
+import { Button } from 'primeng/button';
 import { DEFAULT_PAGE_SIZE, Order } from '@merlebleu/shared';
 import { OrderService } from '../../order.service';
-import { Button } from 'primeng/button';
 import { addDays, formatDate } from '@shared/utils/date';
 import { getPageFromFirstRows } from '@shared/utils/pagination';
 import { getUserShopId } from '@shared/utils/user';
 
 @Component({
   selector: 'to-prepare-order',
-  imports: [CommonModule, TableModule, Button],
+  imports: [CommonModule, FormsModule, TableModule, InputTextModule, Button],
   templateUrl: './to-prepare-order.html',
   styleUrl: './to-prepare-order.scss',
 })
@@ -25,6 +27,10 @@ export class ToPrepareOrder implements OnInit {
   protected totalRecords = 0;
   protected rows = DEFAULT_PAGE_SIZE;
   protected first = 0;
+
+  protected filters = {
+    customerName: '',
+  };
 
   ngOnInit(): void {
     this.loadOrders();
@@ -44,6 +50,9 @@ export class ToPrepareOrder implements OnInit {
     const shopId = getUserShopId();
     if (shopId) {
       filterParams['shopId'] = shopId;
+    }
+    if (this.filters.customerName) {
+      filterParams['customerName'] = this.filters.customerName;
     }
 
     this.orderService
@@ -67,14 +76,17 @@ export class ToPrepareOrder implements OnInit {
     this.loadOrders(getPageFromFirstRows(event.first, event.rows), event.rows);
   }
 
-  protected getDescription(order: Order): string {
-    const description = order?.orderItems?.map((item) => item.description).join(' + ') ?? '';
+  protected applyFilters(): void {
+    this.first = 0;
+    this.loadOrders(1, this.rows);
+  }
 
-    if (!description) {
-      return '-';
-    }
-
-    return description;
+  protected resetFilters(): void {
+    this.filters = {
+      customerName: '',
+    };
+    this.first = 0;
+    this.loadOrders(1, this.rows);
   }
 
   protected goToOrderDetail(order: Order): void {
@@ -87,13 +99,7 @@ export class ToPrepareOrder implements OnInit {
     this.router.navigate(['/sale/order/detail', orderId]);
   }
 
-  protected goToEditOrder(order: Order): void {
-    const orderId = (order as { id?: string }).id;
-
-    if (!orderId) {
-      return;
-    }
-
-    this.router.navigate(['/sale/order/edit', orderId]);
+  protected formatRemarks(value?: string | null): string {
+    return value?.trim() ? value : '-';
   }
 }
