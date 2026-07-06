@@ -8,6 +8,8 @@ import { getPaginationParams } from '@shared/pagination/pagination.utils';
 import { PaymentService } from '../payment/payment.service';
 import { ShopService } from '../../shop/shop.service';
 
+const TO_DELIVER_SHOP_ID = 'd644ffcf-c069-4d1d-8e45-b5fa93c38b3b';
+
 @Injectable()
 export class OrderService {
   constructor(
@@ -109,6 +111,31 @@ export class OrderService {
       page: pagination.page,
       limit: pagination.limit,
     };
+  }
+
+  async listOrdersToDeliver(
+    page = 1,
+    limit = 20,
+    customerName?: string,
+  ): Promise<ResultPaged<OrderEntity>> {
+    const now = new Date();
+    const todayStart = new Date(
+      now.getFullYear(),
+      now.getMonth(),
+      now.getDate(),
+    );
+    const tomorrowStart = new Date(todayStart);
+    tomorrowStart.setDate(tomorrowStart.getDate() + 1);
+
+    const formatDate = (d: Date) =>
+      `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+
+    return this.listOrders(page, limit, {
+      deliveryDateFrom: formatDate(todayStart),
+      deliveryDateTo: formatDate(tomorrowStart),
+      shopId: TO_DELIVER_SHOP_ID,
+      customerName,
+    });
   }
 
   async getOrderById(id: string): Promise<OrderEntity> {

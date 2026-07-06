@@ -50,6 +50,21 @@ export class OrderController {
     });
   }
 
+  @Get('to-deliver')
+  listOrdersToDeliver(
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
+    @Query('customerName') customerName?: string,
+  ) {
+    const pageNumber = page ? Number.parseInt(page, 10) : 1;
+    const limitNumber = limit ? Number.parseInt(limit, 10) : 20;
+    return this.orderService.listOrdersToDeliver(
+      pageNumber,
+      limitNumber,
+      customerName,
+    );
+  }
+
   @Get(':id')
   getOrderById(@Param('id') id: string) {
     return this.orderService.getOrderById(id);

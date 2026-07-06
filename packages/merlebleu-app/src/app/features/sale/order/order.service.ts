@@ -38,6 +38,20 @@ export class OrderService {
     return this.http.get<ResultPaged<Order>>(queryString);
   }
 
+  listOrdersToDeliver(
+    paginationParams: PaginationParams,
+    customerName?: string,
+  ): Observable<ResultPaged<Order>> {
+    const { page = 1, limit = 20 } = paginationParams;
+    let queryString = `${this.apiUrl}/to-deliver?page=${page}&limit=${limit}`;
+
+    if (customerName) {
+      queryString += `&customerName=${encodeURIComponent(customerName)}`;
+    }
+
+    return this.http.get<ResultPaged<Order>>(queryString);
+  }
+
   getOrderById(id: string): Observable<Order> {
     return this.http.get<Order>(`${this.apiUrl}/${id}`);
   }

@@ -8,9 +8,7 @@ import { InputTextModule } from 'primeng/inputtext';
 import { DEFAULT_PAGE_SIZE, Order } from '@merlebleu/shared';
 import { OrderService } from '../../order.service';
 import { Button } from 'primeng/button';
-import { addDays, formatDate } from '@shared/utils/date';
 import { getPageFromFirstRows } from '@shared/utils/pagination';
-import { getUserShopId } from '@shared/utils/user';
 
 @Component({
   selector: 'to-deliver-order',
@@ -39,24 +37,8 @@ export class ToDeliverOrder implements OnInit {
   protected loadOrders(page = 1, limit = this.rows): void {
     this.isLoading = true;
 
-    const today = new Date();
-    const tomorrow = addDays(today, 1);
-
-    const filterParams: Record<string, unknown> = {
-      deliveryDateFrom: formatDate(today),
-      deliveryDateTo: formatDate(tomorrow),
-    };
-
-    const shopId = getUserShopId();
-    if (shopId) {
-      filterParams['shopId'] = shopId;
-    }
-    if (this.filters.customerName) {
-      filterParams['customerName'] = this.filters.customerName;
-    }
-
     this.orderService
-      .listOrders({ page, limit }, filterParams)
+      .listOrdersToDeliver({ page, limit }, this.filters.customerName || undefined)
       .pipe(
         finalize(() => {
           this.isLoading = false;
