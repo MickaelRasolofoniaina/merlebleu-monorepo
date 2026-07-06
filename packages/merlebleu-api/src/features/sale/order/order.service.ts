@@ -70,7 +70,7 @@ export class OrderService {
     }
 
     if (filters?.deliveryDate) {
-      query.andWhere('orders.deliveryDate = :deliveryDate', {
+      query.andWhere('CAST(orders.deliveryDate AS DATE) = :deliveryDate', {
         deliveryDate: filters.deliveryDate,
       });
     }
