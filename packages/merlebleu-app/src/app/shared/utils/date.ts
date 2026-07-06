@@ -18,3 +18,9 @@ export const parseDate = (value?: string): Date | null => {
   const parsed = new Date(value);
   return Number.isNaN(parsed.getTime()) ? null : parsed;
 };
+
+export const addDays = (value: Date, days: number): Date => {
+  const result = new Date(value);
+  result.setDate(result.getDate() + days);
+  return result;
+};

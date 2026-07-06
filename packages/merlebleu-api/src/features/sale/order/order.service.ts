@@ -43,6 +43,8 @@ export class OrderService {
     filters?: {
       orderDate?: string;
       deliveryDate?: string;
+      deliveryDateFrom?: string;
+      deliveryDateTo?: string;
       customerName?: string;
       status?: OrderStatus;
       shopId?: string;
@@ -66,6 +68,18 @@ export class OrderService {
     if (filters?.deliveryDate) {
       query.andWhere('orders.deliveryDate = :deliveryDate', {
         deliveryDate: filters.deliveryDate,
+      });
+    }
+
+    if (filters?.deliveryDateFrom) {
+      query.andWhere('orders.deliveryDate >= :deliveryDateFrom', {
+        deliveryDateFrom: filters.deliveryDateFrom,
+      });
+    }
+
+    if (filters?.deliveryDateTo) {
+      query.andWhere('orders.deliveryDate < :deliveryDateTo', {
+        deliveryDateTo: filters.deliveryDateTo,
       });
     }
 

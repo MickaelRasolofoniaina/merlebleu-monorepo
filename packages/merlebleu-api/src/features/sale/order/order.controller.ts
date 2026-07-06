@@ -31,6 +31,8 @@ export class OrderController {
     @Query('limit') limit?: string,
     @Query('orderDate') orderDate?: string,
     @Query('deliveryDate') deliveryDate?: string,
+    @Query('deliveryDateFrom') deliveryDateFrom?: string,
+    @Query('deliveryDateTo') deliveryDateTo?: string,
     @Query('customerName') customerName?: string,
     @Query('status') status?: OrderStatus,
     @Query('shopId') shopId?: string,
@@ -40,6 +42,8 @@ export class OrderController {
     return this.orderService.listOrders(pageNumber, limitNumber, {
       orderDate,
       deliveryDate,
+      deliveryDateFrom,
+      deliveryDateTo,
       customerName,
       status,
       shopId,
