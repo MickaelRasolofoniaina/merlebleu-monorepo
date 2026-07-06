@@ -30,3 +30,34 @@
       },
     });
   ```
+- Same rule applies inside `ConfirmationService.confirm()`'s `accept` callback: do not add error handling for the underlying HTTP call — `httpErrorInterceptor` already handles it globally. Only manage loading/local state via `finalize`:
+  ```ts
+  this.confirmationService.confirm({
+    message: 'Mark the order as completed?',
+    header: 'Complete order',
+    acceptLabel: 'Yes',
+    rejectLabel: 'No',
+    acceptButtonStyleClass: 'p-button-danger',
+    rejectButtonStyleClass: 'p-button-secondary',
+    accept: () => {
+      const ids = new Set(this.completingIds());
+      ids.add(order.id);
+      this.completingIds.set(ids);
+
+      this.orderService
+        .updateOrderStatus(order.id, OrderStatus.TODELIVER)
+        .pipe(
+          finalize(() => {
+            const updatedIds = new Set(this.completingIds());
+            updatedIds.delete(order.id);
+            this.completingIds.set(updatedIds);
+          }),
+        )
+        .subscribe({
+          next: () => {
+            // update local state on success
+          },
+        });
+    },
+  });
+  ```
