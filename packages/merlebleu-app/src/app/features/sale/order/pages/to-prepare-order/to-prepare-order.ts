@@ -124,6 +124,7 @@ export class ToPrepareOrder implements OnInit {
       header: 'Terminer la commande',
       acceptLabel: 'Oui',
       rejectLabel: 'Non',
+      acceptButtonStyleClass: 'p-button-danger',
       rejectButtonStyleClass: 'p-button-secondary',
       accept: () => {
         const ids = new Set(this.completingIds());
