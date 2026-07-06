@@ -99,12 +99,16 @@
       <th>Date de la commande</th>
       <th>Date de livraison</th>
       <th>Statut</th>
-      <th style="width: 10rem" class="text-center!">Actions</th>
+      <th>Actions</th>
     </tr>
   </ng-template>
   <ng-template #body let-order>
     <tr>
-      <td>{{ order.customerName }}</td>
+      <td>
+        <a class="cursor-pointer text-primary hover:underline" (click)="goToOrderDetail(order)">
+          {{ order.customerName }}
+        </a>
+      </td>
       <td>{{ getDescription(order) }}</td>
       <td>{{ order.orderDate | date: 'dd/MM/yyyy' }}</td>
       <td>
@@ -118,14 +122,6 @@
         ></p-badge>
       </td>
       <td>
-        <p-button
-          icon="pi pi-book"
-          [rounded]="true"
-          [outlined]="true"
-          severity="secondary"
-          class="mr-2"
-          (onClick)="goToOrderDetail(order)"
-        />
         <p-button
           icon="pi pi-pencil"
           [rounded]="true"
