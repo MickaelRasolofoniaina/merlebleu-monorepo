@@ -7,21 +7,34 @@ import { TableModule } from 'primeng/table';
 import { InputTextModule } from 'primeng/inputtext';
 import { SelectModule } from 'primeng/select';
 import { Button } from 'primeng/button';
-import { DEFAULT_PAGE_SIZE, Order, Shop } from '@merlebleu/shared';
+import { ConfirmationService, MessageService } from 'primeng/api';
+import { ConfirmDialog } from 'primeng/confirmdialog';
+import { DEFAULT_PAGE_SIZE, Order, OrderStatus, Shop } from '@merlebleu/shared';
 import { OrderService } from '../../order.service';
 import { ShopService } from '@features/shop/shop-list/shop.service';
 import { getPageFromFirstRows } from '@shared/utils/pagination';
 
 @Component({
   selector: 'to-prepare-order',
-  imports: [CommonModule, FormsModule, TableModule, InputTextModule, SelectModule, Button],
+  imports: [
+    CommonModule,
+    FormsModule,
+    TableModule,
+    InputTextModule,
+    SelectModule,
+    Button,
+    ConfirmDialog,
+  ],
   templateUrl: './to-prepare-order.html',
   styleUrl: './to-prepare-order.scss',
+  providers: [ConfirmationService],
 })
 export class ToPrepareOrder implements OnInit {
   private readonly orderService = inject(OrderService);
   private readonly shopService = inject(ShopService);
   private readonly router = inject(Router);
+  private readonly confirmationService = inject(ConfirmationService);
+  private readonly messageService = inject(MessageService);
 
   protected orders = signal<Order[]>([]);
   protected shops = signal<Shop[]>([]);
@@ -29,6 +42,7 @@ export class ToPrepareOrder implements OnInit {
   protected totalRecords = 0;
   protected rows = DEFAULT_PAGE_SIZE;
   protected first = 0;
+  protected completingIds = signal<Set<string>>(new Set());
 
   protected filters = {
     customerName: '',
@@ -94,5 +108,49 @@ export class ToPrepareOrder implements OnInit {
 
   protected formatRemarks(value?: string | null): string {
     return value?.trim() ? value : '-';
+  }
+
+  protected isCompleting(order: Order): boolean {
+    return this.completingIds().has(order.id);
+  }
+
+  protected isOrderCompleted(order: Order): boolean {
+    return order.orderStatus === OrderStatus.TODELIVER;
+  }
+
+  protected onComplete(order: Order): void {
+    this.confirmationService.confirm({
+      message: 'Marquer la commande comme terminée?',
+      header: 'Terminer la commande',
+      acceptLabel: 'Oui',
+      rejectLabel: 'Non',
+      rejectButtonStyleClass: 'p-button-secondary',
+      accept: () => {
+        const ids = new Set(this.completingIds());
+        ids.add(order.id);
+        this.completingIds.set(ids);
+
+        this.orderService
+          .updateOrderStatus(order.id, OrderStatus.TODELIVER)
+          .pipe(
+            finalize(() => {
+              const updatedIds = new Set(this.completingIds());
+              updatedIds.delete(order.id);
+              this.completingIds.set(updatedIds);
+            }),
+          )
+          .subscribe({
+            next: () => {
+              this.loadOrders(getPageFromFirstRows(this.first, this.rows), this.rows);
+              this.messageService.add({
+                severity: 'success',
+                summary: 'Commande terminée',
+                detail: 'La commande est prête à être livrée.',
+                life: 3000,
+              });
+            },
+          });
+      },
+    });
   }
 }

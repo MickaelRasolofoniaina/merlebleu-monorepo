@@ -45,6 +45,8 @@
   </div>
 </div>
 
+<p-confirm-dialog />
+
 <p-table
   [value]="orders()"
   [loading]="isLoading"
@@ -63,6 +65,7 @@
       <th>Commande</th>
       <th>Remarques</th>
       <th>Boutique</th>
+      <th></th>
     </tr>
   </ng-template>
   <ng-template #body let-order>
@@ -82,11 +85,23 @@
       </td>
       <td>{{ formatRemarks(order.remarks) }}</td>
       <td>{{ order.shop.address }}</td>
+      <td>
+        <p-button
+          icon="pi pi-check"
+          [loading]="isCompleting(order)"
+          (onClick)="onComplete(order)"
+          [outlined]="!isOrderCompleted(order)"
+          [rounded]="true"
+          [severity]="isOrderCompleted(order) ? 'success' : 'danger'"
+          [disabled]="isOrderCompleted(order)"
+          size="small"
+        />
+      </td>
     </tr>
   </ng-template>
   <ng-template #emptymessage>
     <tr>
-      <td colspan="4" class="text-center-important py-6">Aucune commande à préparer</td>
+      <td colspan="5" class="text-center-important py-6">Aucune commande à préparer</td>
     </tr>
   </ng-template>
 </p-table>
