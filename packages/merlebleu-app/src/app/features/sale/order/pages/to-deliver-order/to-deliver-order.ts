@@ -5,14 +5,16 @@ import { Router } from '@angular/router';
 import { finalize } from 'rxjs';
 import { TableModule } from 'primeng/table';
 import { InputTextModule } from 'primeng/inputtext';
-import { DEFAULT_PAGE_SIZE, Order } from '@merlebleu/shared';
+import { DEFAULT_PAGE_SIZE, Order, OrderStatus } from '@merlebleu/shared';
 import { OrderService } from '../../order.service';
 import { Button } from 'primeng/button';
+import { BadgeModule } from 'primeng/badge';
 import { getPageFromFirstRows } from '@shared/utils/pagination';
+import { getOrderStatusLabel, getOrderStatusColor } from '@shared/utils/order';
 
 @Component({
   selector: 'to-deliver-order',
-  imports: [CommonModule, FormsModule, TableModule, InputTextModule, Button],
+  imports: [CommonModule, FormsModule, TableModule, InputTextModule, Button, BadgeModule],
   templateUrl: './to-deliver-order.html',
   styleUrl: './to-deliver-order.scss',
 })
@@ -83,5 +85,15 @@ export class ToDeliverOrder implements OnInit {
 
   protected formatRemarks(value?: string | null): string {
     return value?.trim() ? value : '-';
+  }
+
+  protected getStatus(orderStatus: OrderStatus | undefined): string {
+    return getOrderStatusLabel(orderStatus);
+  }
+
+  protected getStatusColor(
+    orderStatus: OrderStatus | undefined,
+  ): 'info' | 'success' | 'warn' | 'danger' | 'contrast' {
+    return getOrderStatusColor(orderStatus);
   }
 }

@@ -50,6 +50,7 @@
       <th>Client</th>
       <th>Commande</th>
       <th>Remarques</th>
+      <th>Statut</th>
     </tr>
   </ng-template>
   <ng-template #body let-order>
@@ -68,11 +69,18 @@
         </div>
       </td>
       <td>{{ formatRemarks(order.remarks) }}</td>
+      <td>
+        <p-badge
+          [value]="getStatus(order.orderStatus)"
+          [severity]="getStatusColor(order.orderStatus)"
+          style="height: fit-content"
+        ></p-badge>
+      </td>
     </tr>
   </ng-template>
   <ng-template #emptymessage>
     <tr>
-      <td colspan="3" class="text-center-important py-6">Aucune commande à livrer</td>
+      <td colspan="4" class="text-center-important py-6">Aucune commande à livrer</td>
     </tr>
   </ng-template>
 </p-table>
