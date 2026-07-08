@@ -272,10 +272,13 @@ export class OrderService {
     return items.map(
       (item) =>
         ({
-          description: item.description,
+          type: item.type,
           size: item.size,
           unitPrice: item.unitPrice,
           totalAmount: item.totalAmount,
+          shape: item.shape,
+          text: item.text,
+          decoration: item.decoration,
           remarks: item.remarks,
           photos: item.photos,
           order,

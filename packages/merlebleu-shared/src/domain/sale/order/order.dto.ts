@@ -1,9 +1,10 @@
 import { z } from "zod";
+import { Shape } from "./order";
 
 export const createOrderItemSchema = z.object({
-  description: z
+  type: z
     .string()
-    .min(1, "Veuillez remplir la description de l'article"),
+    .min(1, "Veuillez remplir le type de l'article"),
   size: z.number().positive("La taille doit être un nombre positif"),
   unitPrice: z
     .number()
@@ -11,6 +12,9 @@ export const createOrderItemSchema = z.object({
   totalAmount: z
     .number()
     .positive("Le montant total doit être un nombre positif"),
+  shape: z.enum(Shape, "Veuillez sélectionner une forme"),
+  text: z.string().min(1, "Veuillez remplir le texte"),
+  decoration: z.string().min(1, "Veuillez remplir la décoration"),
   remarks: z.string().optional(),
   photos: z.array(z.string()).optional(),
 });

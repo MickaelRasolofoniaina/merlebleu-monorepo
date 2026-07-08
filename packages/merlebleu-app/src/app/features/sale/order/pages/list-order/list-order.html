@@ -109,7 +109,7 @@
           {{ order.customerName }}
         </a>
       </td>
-      <td>{{ getDescription(order) }}</td>
+      <td>{{ getType(order) }}</td>
       <td>{{ order.orderDate | date: 'dd/MM/yyyy' }}</td>
       <td>
         {{ order.deliveryDate | date: 'dd/MM/yyyy' }} à {{ order.deliveryDate | date: 'HH:mm' }}

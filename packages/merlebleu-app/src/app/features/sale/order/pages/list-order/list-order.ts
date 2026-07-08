@@ -131,14 +131,14 @@ export class ListOrder implements OnInit {
     return getOrderStatusColor(orderStatus);
   }
 
-  protected getDescription(order: Order): string {
-    const description = order?.orderItems?.map((item) => item.description).join(' + ') ?? '';
+  protected getType(order: Order): string {
+    const type = order?.orderItems?.map((item) => item.type).join(' + ') ?? '';
 
-    if (!description) {
+    if (!type) {
       return '-';
     }
 
-    return description;
+    return type;
   }
 
   private truncate(value: string, maxLength: number): string {

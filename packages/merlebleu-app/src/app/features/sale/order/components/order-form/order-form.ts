@@ -28,6 +28,7 @@ import {
   createOrderSchema,
   Item,
   ItemType,
+  Shape,
   Shop,
 } from '@merlebleu/shared';
 import { buildZodErrorMap } from '@shared/utils/zod-errors';
@@ -72,6 +73,7 @@ export class OrderForm implements OnInit, OnChanges {
   protected paymentMethods: PaymentMethod[] = [];
   protected patisserieItems: Item[] = [];
   protected shops: Shop[] = [];
+  protected shapes = Object.values(Shape);
 
   constructor(
     private paymentService: PaymentService,
@@ -129,7 +131,7 @@ export class OrderForm implements OnInit, OnChanges {
   }
 
   protected onArticleSelected(item: OrderItemDto): void {
-    const selected = this.patisserieItems.find((article) => article.label === item.description);
+    const selected = this.patisserieItems.find((article) => article.label === item.type);
     if (selected) {
       item.unitPrice = selected.unitPrice;
     }
@@ -237,10 +239,13 @@ export class OrderForm implements OnInit, OnChanges {
 
   private buildOrderItem(): OrderItemDto {
     return {
-      description: '',
+      type: '',
       size: 0,
       unitPrice: 0,
       totalAmount: 0,
+      shape: '' as Shape,
+      text: '',
+      decoration: '',
       remarks: '',
       photos: [],
     };

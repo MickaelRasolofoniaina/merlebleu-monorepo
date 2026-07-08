@@ -1,12 +1,14 @@
 <form class="flex flex-col gap-6">
   <p-fieldset
-    legend="Informations commande"
+    legend="Client & Livraison"
     styleClass="border border-dashed border-slate-200 rounded-xl"
   >
     <div class="flex flex-col gap-4">
       <div class="flex flex-wrap gap-4">
-        <div class="flex flex-col gap-2 w-80">
-          <label for="shopId" class="font-semibold text-slate-900 dark:text-white"> Boutique </label>
+        <div class="flex flex-col gap-2 flex-[4]">
+          <label for="shopId" class="font-semibold text-slate-900 dark:text-white">
+            Boutique
+          </label>
           <p-select
             inputId="shopId"
             name="shopId"
@@ -21,8 +23,10 @@
           <small class="text-red-500">{{ errorFor('shopId') }}</small>
           }
         </div>
-        <div class="flex flex-col gap-2 w-60">
-          <label for="orderDate" class="font-semibold text-slate-900 dark:text-white"> Date de la commande </label>
+        <div class="flex flex-col gap-2 flex-[3]">
+          <label for="orderDate" class="font-semibold text-slate-900 dark:text-white">
+            Date de la commande
+          </label>
           <p-datepicker
             inputId="orderDate"
             name="orderDate"
@@ -37,8 +41,10 @@
           <small class="text-red-500">{{ errorFor('orderDate') }}</small>
           }
         </div>
-        <div class="flex flex-col gap-2 w-60">
-          <label for="deliveryDate" class="font-semibold text-slate-900 dark:text-white"> Date de livraison </label>
+        <div class="flex flex-col gap-2 flex-[3]">
+          <label for="deliveryDate" class="font-semibold text-slate-900 dark:text-white">
+            Date de livraison
+          </label>
           <p-datepicker
             inputId="deliveryDate"
             name="deliveryDate"
@@ -58,7 +64,9 @@
       </div>
       <div class="grid gap-4 [grid-template-columns:repeat(auto-fit,minmax(240px,1fr))]">
         <div class="flex flex-col gap-2">
-          <label for="customerName" class="font-semibold text-slate-900 dark:text-white"> Nom du client </label>
+          <label for="customerName" class="font-semibold text-slate-900 dark:text-white">
+            Nom du client
+          </label>
           <input
             id="customerName"
             name="customerName"
@@ -141,7 +149,9 @@
         </div>
       </div>
       <div class="flex flex-col gap-2">
-        <label for="remarks" class="font-semibold text-slate-900 dark:text-white"> Remarques </label>
+        <label for="remarks" class="font-semibold text-slate-900 dark:text-white">
+          Remarques
+        </label>
         <textarea
           id="remarks"
           name="remarks"
@@ -171,7 +181,7 @@
       *ngFor="let item of order.orderItems; let i = index; trackBy: trackByIndex"
     >
       <div class="flex items-center justify-between">
-        <h4 class="text-base font-semibold">Ligne numéro {{ i + 1 }}</h4>
+        <h4 class="text-base font-semibold">Commande numéro {{ i + 1 }}</h4>
         <p-button
           icon="pi pi-trash"
           severity="danger"
@@ -180,72 +190,134 @@
           (onClick)="removeOrderItem(i)"
         />
       </div>
-      <div class="grid gap-4 [grid-template-columns:repeat(auto-fit,minmax(240px,1fr))]">
+      <div class="flex flex-col gap-4">
+        <div class="flex flex-nowrap gap-4">
+          <div class="flex flex-col gap-2 flex-[3]">
+            <label for="type-{{ i }}" class="font-semibold text-slate-900 dark:text-white">
+              Type
+            </label>
+            <p-select
+              inputId="type-{{ i }}"
+              name="type-{{ i }}"
+              [(ngModel)]="item.type"
+              [options]="patisserieItems"
+              optionLabel="label"
+              optionValue="label"
+              [filter]="true"
+              filterPlaceholder="Rechercher un type..."
+              placeholder="Sélectionnez un type"
+              class="w-full"
+              (ngModelChange)="onArticleSelected(item)"
+            />
+            @if (errorFor('orderItems.' + i + '.type')) {
+            <small class="text-red-500">{{ errorFor('orderItems.' + i + '.type') }}</small>
+            }
+          </div>
+          <div class="flex flex-col gap-2 flex-[2]">
+            <label for="unitPrice-{{ i }}" class="font-semibold text-slate-900 dark:text-white">
+              Prix unitaire
+            </label>
+            <p-inputNumber
+              inputId="unitPrice-{{ i }}"
+              name="unitPrice-{{ i }}"
+              [(ngModel)]="item.unitPrice"
+              [min]="0"
+              class="w-full"
+              (ngModelChange)="syncItemAmount(item)"
+            />
+            @if (errorFor('orderItems.' + i + '.unitPrice')) {
+            <small class="text-red-500">{{ errorFor('orderItems.' + i + '.unitPrice') }}</small>
+            }
+          </div>
+          <div class="flex flex-col gap-2 flex-1">
+            <label for="size-{{ i }}" class="font-semibold text-slate-900 dark:text-white">
+              Taille
+            </label>
+            <p-inputNumber
+              inputId="size-{{ i }}"
+              name="size-{{ i }}"
+              [(ngModel)]="item.size"
+              [min]="0"
+              class="w-full"
+              (ngModelChange)="syncItemAmount(item)"
+            />
+            @if (errorFor('orderItems.' + i + '.size')) {
+            <small class="text-red-500">{{ errorFor('orderItems.' + i + '.size') }}</small>
+            }
+          </div>
+          <div class="flex flex-col gap-2 flex-[2]">
+            <label for="itemTotal-{{ i }}" class="font-semibold text-slate-900 dark:text-white">
+              Montant
+            </label>
+            <p-inputNumber
+              inputId="itemTotal-{{ i }}"
+              name="itemTotal-{{ i }}"
+              [(ngModel)]="item.totalAmount"
+              [min]="0"
+              class="w-full"
+              disabled=""
+            />
+            @if (errorFor('orderItems.' + i + '.totalAmount')) {
+            <small class="text-red-500">{{ errorFor('orderItems.' + i + '.totalAmount') }}</small>
+            }
+          </div>
+        </div>
+        <div class="flex flex-wrap gap-4">
+          <div class="flex flex-col gap-2 flex-1">
+            <label for="shape-{{ i }}" class="font-semibold text-slate-900 dark:text-white">
+              Forme
+            </label>
+            <p-select
+              inputId="shape-{{ i }}"
+              name="shape-{{ i }}"
+              [(ngModel)]="item.shape"
+              [options]="shapes"
+              placeholder="Sélectionnez une forme"
+              class="w-full"
+            />
+            @if (errorFor('orderItems.' + i + '.shape')) {
+            <small class="text-red-500">{{ errorFor('orderItems.' + i + '.shape') }}</small>
+            }
+          </div>
+          <div class="flex flex-col gap-2 flex-[3]">
+            <label for="text-{{ i }}" class="font-semibold text-slate-900 dark:text-white">
+              Texte
+            </label>
+            <input
+              id="text-{{ i }}"
+              name="text-{{ i }}"
+              type="text"
+              pInputText
+              [(ngModel)]="item.text"
+              placeholder="Texte à écrire sur le gâteau"
+              class="w-full"
+            />
+            @if (errorFor('orderItems.' + i + '.text')) {
+            <small class="text-red-500">{{ errorFor('orderItems.' + i + '.text') }}</small>
+            }
+          </div>
+        </div>
         <div class="flex flex-col gap-2">
-          <label for="description-{{ i }}" class="font-semibold text-slate-900 dark:text-white">
-            Description
+          <label for="decoration-{{ i }}" class="font-semibold text-slate-900 dark:text-white">
+            Décoration
           </label>
-          <p-select
-            inputId="description-{{ i }}"
-            name="description-{{ i }}"
-            [(ngModel)]="item.description"
-            [options]="patisserieItems"
-            optionLabel="label"
-            optionValue="label"
-            [filter]="true"
-            filterPlaceholder="Rechercher un article..."
-            placeholder="Sélectionnez un article"
+          <input
+            id="decoration-{{ i }}"
+            name="decoration-{{ i }}"
+            type="text"
+            pInputText
+            [(ngModel)]="item.decoration"
+            placeholder="Décoration souhaitée"
             class="w-full"
-            (ngModelChange)="onArticleSelected(item)"
           />
-          @if (errorFor('orderItems.' + i + '.description')) {
-          <small class="text-red-500">{{ errorFor('orderItems.' + i + '.description') }}</small>
+          @if (errorFor('orderItems.' + i + '.decoration')) {
+          <small class="text-red-500">{{ errorFor('orderItems.' + i + '.decoration') }}</small>
           }
         </div>
         <div class="flex flex-col gap-2">
-          <label for="unitPrice-{{ i }}" class="font-semibold text-slate-900 dark:text-white"> Prix unitaire </label>
-          <p-inputNumber
-            inputId="unitPrice-{{ i }}"
-            name="unitPrice-{{ i }}"
-            [(ngModel)]="item.unitPrice"
-            [min]="0"
-            class="w-full"
-            (ngModelChange)="syncItemAmount(item)"
-          />
-          @if (errorFor('orderItems.' + i + '.unitPrice')) {
-          <small class="text-red-500">{{ errorFor('orderItems.' + i + '.unitPrice') }}</small>
-          }
-        </div>
-        <div class="flex flex-col gap-2">
-          <label for="size-{{ i }}" class="font-semibold text-slate-900 dark:text-white"> Personne </label>
-          <p-inputNumber
-            inputId="size-{{ i }}"
-            name="size-{{ i }}"
-            [(ngModel)]="item.size"
-            [min]="0"
-            class="w-full"
-            (ngModelChange)="syncItemAmount(item)"
-          />
-          @if (errorFor('orderItems.' + i + '.size')) {
-          <small class="text-red-500">{{ errorFor('orderItems.' + i + '.size') }}</small>
-          }
-        </div>
-        <div class="flex flex-col gap-2">
-          <label for="itemTotal-{{ i }}" class="font-semibold text-slate-900 dark:text-white"> Montant </label>
-          <p-inputNumber
-            inputId="itemTotal-{{ i }}"
-            name="itemTotal-{{ i }}"
-            [(ngModel)]="item.totalAmount"
-            [min]="0"
-            class="w-full"
-            disabled=""
-          />
-          @if (errorFor('orderItems.' + i + '.totalAmount')) {
-          <small class="text-red-500">{{ errorFor('orderItems.' + i + '.totalAmount') }}</small>
-          }
-        </div>
-        <div class="flex flex-col gap-2 col-span-full">
-          <label for="itemRemarks-{{ i }}" class="font-semibold text-slate-900 dark:text-white"> Remarques </label>
+          <label for="itemRemarks-{{ i }}" class="font-semibold text-slate-900 dark:text-white">
+            Remarques
+          </label>
           <textarea
             id="itemRemarks-{{ i }}"
             name="itemRemarks-{{ i }}"
@@ -261,13 +333,15 @@
         </div>
       </div>
     </div>
-    <p-button label="Ajouter une ligne" icon="pi pi-plus" (onClick)="addOrderItem()" />
+    <p-button label="Ajouter une autre commande" icon="pi pi-plus" (onClick)="addOrderItem()" />
   </p-fieldset>
 
   <p-fieldset legend="Paiement" styleClass="border border-dashed border-slate-200 rounded-xl">
     <div class="grid gap-4 [grid-template-columns:repeat(auto-fit,minmax(240px,1fr))]">
       <div class="flex flex-col gap-2">
-        <label for="totalAmount" class="font-semibold text-slate-900 dark:text-white"> Montant total </label>
+        <label for="totalAmount" class="font-semibold text-slate-900 dark:text-white">
+          Montant total
+        </label>
         <p-inputNumber
           inputId="totalAmount"
           name="totalAmount"
@@ -282,7 +356,9 @@
         }
       </div>
       <div class="flex flex-col gap-2">
-        <label for="paidAmount" class="font-semibold text-slate-900 dark:text-white"> Montant paye </label>
+        <label for="paidAmount" class="font-semibold text-slate-900 dark:text-white">
+          Avance
+        </label>
         <p-inputNumber
           inputId="paidAmount"
           name="paidAmount"
@@ -296,7 +372,9 @@
         }
       </div>
       <div class="flex flex-col gap-2">
-        <label for="balanceAmount" class="font-semibold text-slate-900 dark:text-white"> Solde </label>
+        <label for="balanceAmount" class="font-semibold text-slate-900 dark:text-white">
+          Reste
+        </label>
         <p-inputNumber
           inputId="balanceAmount"
           name="balanceAmount"

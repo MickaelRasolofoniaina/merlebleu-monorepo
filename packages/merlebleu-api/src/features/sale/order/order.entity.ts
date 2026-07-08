@@ -1,14 +1,17 @@
-import { Order, OrderItem, OrderStatus } from '@merlebleu/shared';
+import { Order, OrderItem, OrderStatus, Shape } from '@merlebleu/shared';
 import { EntitySchema } from 'typeorm';
 import { PaymentMethodEntity } from '../payment/payment.entity';
 import { ShopEntity } from '../../shop/shop.entity';
 
 export class OrderItemEntity implements OrderItem {
   id: string;
-  description: string;
+  type: string;
   size: number;
   unitPrice: number;
   totalAmount: number;
+  shape: Shape;
+  text: string;
+  decoration: string;
   remarks?: string | undefined;
   photos?: string[] | undefined;
   order?: OrderEntity;
@@ -44,7 +47,7 @@ export const OrderItemSchema = new EntitySchema<OrderItemEntity>({
       primary: true,
       generated: 'uuid',
     },
-    description: {
+    type: {
       type: 'varchar',
     },
     size: {
@@ -56,6 +59,16 @@ export const OrderItemSchema = new EntitySchema<OrderItemEntity>({
     },
     totalAmount: {
       type: 'integer',
+    },
+    shape: {
+      type: 'enum',
+      enum: Shape,
+    },
+    text: {
+      type: 'varchar',
+    },
+    decoration: {
+      type: 'varchar',
     },
     remarks: {
       type: 'varchar',

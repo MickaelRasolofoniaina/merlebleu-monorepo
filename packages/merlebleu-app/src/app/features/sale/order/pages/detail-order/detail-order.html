@@ -80,15 +80,21 @@
         <thead class="text-slate-500 border-b border-slate-200">
           <tr>
             <th class="text-left py-2 pr-4">Désignation</th>
+            <th class="py-2 pr-4 text-left">Forme</th>
+            <th class="py-2 pr-4 text-left">Texte</th>
+            <th class="py-2 pr-4 text-left">Décoration</th>
             <th class="py-2 pr-4 text-left">Remarques</th>
             <th class="py-2 pr-4 text-right">Prix unitaire</th>
-            <th class="py-2 pr-4 text-right">Personne</th>
+            <th class="py-2 pr-4 text-right">Taille</th>
             <th class="py-2 pr-4 text-right">Montant</th>
           </tr>
         </thead>
         <tbody>
           <tr *ngFor="let item of order.orderItems" class="border-b border-slate-100">
-            <td class="py-3 pr-4 text-slate-900">{{ item.description }}</td>
+            <td class="py-3 pr-4 text-slate-900">{{ item.type }}</td>
+            <td class="py-3 pr-4">{{ item.shape }}</td>
+            <td class="py-3 pr-4">{{ item.text }}</td>
+            <td class="py-3 pr-4">{{ item.decoration }}</td>
             <td class="py-3 pr-4">{{ formatRemarks(item.remarks) }}</td>
             <td class="py-3 pr-4 text-right">{{ item.unitPrice | number: '1.0-2' }}</td>
             <td class="py-3 pr-4 text-right">{{ item.size }}</td>
@@ -107,11 +113,11 @@
           <span class="font-medium text-slate-900">{{ order.totalAmount | number: '1.0-2' }}</span>
         </div>
         <div class="flex items-center justify-between">
-          <span class="text-slate-500">Montant paye</span>
+          <span class="text-slate-500">Avance</span>
           <span class="font-medium text-slate-900">{{ order.paidAmount | number: '1.0-2' }}</span>
         </div>
         <div class="flex items-center justify-between">
-          <span class="text-slate-500">Solde</span>
+          <span class="text-slate-500">Reste</span>
           <span class="font-medium text-slate-900"
             >{{ order.balanceAmount | number: '1.0-2' }}</span
           >

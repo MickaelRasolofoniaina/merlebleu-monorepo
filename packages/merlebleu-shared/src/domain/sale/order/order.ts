@@ -9,11 +9,22 @@ export enum OrderStatus {
   CANCELLED = "CANCELLED",
 }
 
+export enum Shape {
+  RECTANGLE = "Rectangle",
+  ROND = "Rond",
+  COEUR = "Coeur",
+  CARREE = "Carrée",
+  PERSONNALISE = "Personnalisé",
+}
+
 export interface OrderItem {
-  description: string;
+  type: string;
   size: number;
   unitPrice: number;
   totalAmount: number;
+  shape: Shape;
+  text: string;
+  decoration: string;
   remarks?: string;
   photos?: string[];
 }
