@@ -1,7 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
 import { finalize } from 'rxjs';
 import { TableModule } from 'primeng/table';
 import { InputTextModule } from 'primeng/inputtext';
@@ -11,22 +10,32 @@ import { Button } from 'primeng/button';
 import { BadgeModule } from 'primeng/badge';
 import { getPageFromFirstRows } from '@shared/utils/pagination';
 import { getOrderStatusLabel, getOrderStatusColor } from '@shared/utils/order';
+import { OrderDetailDialog } from '../../components/order-detail-dialog/order-detail-dialog';
 
 @Component({
   selector: 'to-deliver-order',
-  imports: [CommonModule, FormsModule, TableModule, InputTextModule, Button, BadgeModule],
+  imports: [
+    CommonModule,
+    FormsModule,
+    TableModule,
+    InputTextModule,
+    Button,
+    BadgeModule,
+    OrderDetailDialog,
+  ],
   templateUrl: './to-deliver-order.html',
   styleUrl: './to-deliver-order.scss',
 })
 export class ToDeliverOrder implements OnInit {
   private readonly orderService = inject(OrderService);
-  private readonly router = inject(Router);
 
   protected orders = signal<Order[]>([]);
   protected isLoading = false;
   protected totalRecords = 0;
   protected rows = DEFAULT_PAGE_SIZE;
   protected first = 0;
+  protected selectedOrder = signal<Order | null>(null);
+  protected displayOrderDetailDialog = false;
 
   protected filters = {
     customerName: '',
@@ -73,14 +82,9 @@ export class ToDeliverOrder implements OnInit {
     this.loadOrders(1, this.rows);
   }
 
-  protected goToOrderDetail(order: Order): void {
-    const orderId = (order as { id?: string }).id;
-
-    if (!orderId) {
-      return;
-    }
-
-    this.router.navigate(['/sale/order/detail', orderId]);
+  protected openOrderDetail(order: Order): void {
+    this.selectedOrder.set(order);
+    this.displayOrderDetailDialog = true;
   }
 
   protected formatRemarks(value?: string | null): string {

@@ -17,6 +17,7 @@ import { getPageFromFirstRows } from '@shared/utils/pagination';
 import { ORDER_STATUSES, getOrderStatusLabel, getOrderStatusColor } from '@shared/utils/order';
 import { getUserShopId } from '@shared/utils/user';
 import { Shop } from '@merlebleu/shared';
+import { OrderDetailDialog } from '../../components/order-detail-dialog/order-detail-dialog';
 
 @Component({
   selector: 'list-order',
@@ -29,6 +30,7 @@ import { Shop } from '@merlebleu/shared';
     InputTextModule,
     DatePickerModule,
     SelectModule,
+    OrderDetailDialog,
   ],
   templateUrl: './list-order.html',
   styleUrl: './list-order.scss',
@@ -57,6 +59,9 @@ export class ListOrder implements OnInit {
     label: s.label,
     value: s.value,
   }));
+
+  protected selectedOrder = signal<Order | null>(null);
+  protected displayOrderDetailDialog = false;
 
   ngOnInit(): void {
     this.shopService.getAll().subscribe((shops) => this.shops.set(shops));
@@ -131,14 +136,9 @@ export class ListOrder implements OnInit {
     return getOrderStatusColor(orderStatus);
   }
 
-  protected getType(order: Order): string {
-    const type = order?.orderItems?.map((item) => item.type).join(' + ') ?? '';
-
-    if (!type) {
-      return '-';
-    }
-
-    return type;
+  protected openOrderDetail(order: Order): void {
+    this.selectedOrder.set(order);
+    this.displayOrderDetailDialog = true;
   }
 
   private truncate(value: string, maxLength: number): string {
@@ -151,16 +151,6 @@ export class ListOrder implements OnInit {
 
   protected goToAddOrder(): void {
     this.router.navigate(['/sale/order/add']);
-  }
-
-  protected goToOrderDetail(order: Order): void {
-    const orderId = (order as { id?: string }).id;
-
-    if (!orderId) {
-      return;
-    }
-
-    this.router.navigate(['/sale/order/detail', orderId]);
   }
 
   protected goToEditOrder(order: Order): void {

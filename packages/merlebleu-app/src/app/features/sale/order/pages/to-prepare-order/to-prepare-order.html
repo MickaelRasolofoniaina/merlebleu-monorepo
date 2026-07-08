@@ -71,7 +71,7 @@
   <ng-template #body let-order>
     <tr>
       <td>
-        <a class="cursor-pointer hover:underline" (click)="goToOrderDetail(order)">
+        <a class="cursor-pointer hover:underline" (click)="openOrderDetail(order)">
           {{ order.customerName }}
         </a>
       </td>
@@ -105,3 +105,5 @@
     </tr>
   </ng-template>
 </p-table>
+
+<order-detail-dialog [order]="selectedOrder()" [(visible)]="displayOrderDetailDialog" />

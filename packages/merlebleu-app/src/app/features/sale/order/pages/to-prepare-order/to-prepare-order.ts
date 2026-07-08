@@ -1,7 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
 import { finalize } from 'rxjs';
 import { TableModule } from 'primeng/table';
 import { InputTextModule } from 'primeng/inputtext';
@@ -13,6 +12,7 @@ import { DEFAULT_PAGE_SIZE, Order, OrderStatus, Shop } from '@merlebleu/shared';
 import { OrderService } from '../../order.service';
 import { ShopService } from '@features/shop/shop-list/shop.service';
 import { getPageFromFirstRows } from '@shared/utils/pagination';
+import { OrderDetailDialog } from '../../components/order-detail-dialog/order-detail-dialog';
 
 @Component({
   selector: 'to-prepare-order',
@@ -24,6 +24,7 @@ import { getPageFromFirstRows } from '@shared/utils/pagination';
     SelectModule,
     Button,
     ConfirmDialog,
+    OrderDetailDialog,
   ],
   templateUrl: './to-prepare-order.html',
   styleUrl: './to-prepare-order.scss',
@@ -32,7 +33,6 @@ import { getPageFromFirstRows } from '@shared/utils/pagination';
 export class ToPrepareOrder implements OnInit {
   private readonly orderService = inject(OrderService);
   private readonly shopService = inject(ShopService);
-  private readonly router = inject(Router);
   private readonly confirmationService = inject(ConfirmationService);
   private readonly messageService = inject(MessageService);
 
@@ -43,6 +43,8 @@ export class ToPrepareOrder implements OnInit {
   protected rows = DEFAULT_PAGE_SIZE;
   protected first = 0;
   protected completingIds = signal<Set<string>>(new Set());
+  protected selectedOrder = signal<Order | null>(null);
+  protected displayOrderDetailDialog = false;
 
   protected filters = {
     customerName: '',
@@ -96,14 +98,9 @@ export class ToPrepareOrder implements OnInit {
     this.loadOrders(1, this.rows);
   }
 
-  protected goToOrderDetail(order: Order): void {
-    const orderId = (order as { id?: string }).id;
-
-    if (!orderId) {
-      return;
-    }
-
-    this.router.navigate(['/sale/order/detail', orderId]);
+  protected openOrderDetail(order: Order): void {
+    this.selectedOrder.set(order);
+    this.displayOrderDetailDialog = true;
   }
 
   protected formatRemarks(value?: string | null): string {
