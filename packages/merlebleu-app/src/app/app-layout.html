@@ -10,22 +10,18 @@
     <h1>Le Merlebleu</h1>
   </div>
   <div class="flex items-center">
-    <p-avatar [label]="userInitials" class="mr-2" size="large" shape="circle" />
-    <div class="mx-2">
-      <p-button
-        [icon]="themeService.isDarkMode() ? 'pi pi-sun' : 'pi pi-moon'"
-        [severity]="themeService.isDarkMode() ? 'warn' : 'secondary'"
-        (onClick)="themeService.toggleTheme()"
-      />
+    <p>{{ name() }}</p>
+    <div class="ml-2">
+      <p-button icon="pi pi-cog" severity="contrast" (onClick)="settingsMenu.toggle($event)" />
+      <p-menu #settingsMenu [model]="settingsItems()" [popup]="true" />
     </div>
-    <p-button severity="info" icon="pi pi-sign-out" label="Deconnexion" (onClick)="logout()" />
   </div>
 </header>
 <main class="main">
   @if (sidebarOpen()) {
-    <div class="sidebar">
-      <p-menu [model]="items" class="menu" />
-    </div>
+  <div class="sidebar">
+    <p-menu [model]="items" class="menu" />
+  </div>
   }
   <div class="content">
     <router-outlet />

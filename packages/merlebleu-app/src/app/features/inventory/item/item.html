@@ -36,7 +36,7 @@
       <th>Nom</th>
       <th>Prix Unitaire</th>
       <th>Type</th>
-      <th>Jours de Rétention</th>
+      <th class="text-right!">Jours de Rétention</th>
       <th style="width: 12rem" class="text-center!">Actions</th>
     </tr>
   </ng-template>
@@ -45,20 +45,18 @@
       <td>{{ capitalizeFirstLetter(item.label) }}</td>
       <td>{{ formatUnitPrice(item.unitPrice) }}</td>
       <td>{{ capitalizeFirstLetter(item.type) }}</td>
-      <td>{{ item.maxRetentionDays }}</td>
-      <td>
+      <td class="text-right!">{{ item.maxRetentionDays }}</td>
+      <td class="text-center!">
         <p-button
           icon="pi pi-pencil"
-          [rounded]="true"
-          [outlined]="true"
+          size="small"
           severity="warn"
           class="mr-2"
           (onClick)="openEditModal(item)"
         />
         <p-button
           icon="pi pi-trash"
-          [rounded]="true"
-          [outlined]="true"
+          size="small"
           severity="danger"
           (onClick)="openDeleteModal(item)"
         />
@@ -117,9 +115,7 @@
   (onHide)="closeDeleteModal()"
 >
   <div class="flex flex-col gap-4">
-    <p>
-      Confirmer la suppression de l'article <strong>{{ selectedItem?.label }}</strong> ?
-    </p>
+    <p>Confirmer la suppression de l'article <strong>{{ selectedItem?.label }}</strong> ?</p>
   </div>
   <ng-template pTemplate="footer">
     <div class="flex justify-end gap-2">

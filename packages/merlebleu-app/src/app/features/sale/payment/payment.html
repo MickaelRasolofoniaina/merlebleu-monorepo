@@ -20,19 +20,17 @@
   <ng-template #body let-payment>
     <tr>
       <td>{{ payment.name }}</td>
-      <td>
+      <td class="text-center!">
         <p-button
           icon="pi pi-pencil"
-          [rounded]="true"
-          [outlined]="true"
+          size="small"
           severity="warn"
           class="mr-2"
           (onClick)="editPaymentMethod(payment.id, payment.name)"
         />
         <p-button
           icon="pi pi-trash"
-          [rounded]="true"
-          [outlined]="true"
+          size="small"
           severity="danger"
           (onClick)="deletePaymentMethod(payment.id, payment.name)"
         />

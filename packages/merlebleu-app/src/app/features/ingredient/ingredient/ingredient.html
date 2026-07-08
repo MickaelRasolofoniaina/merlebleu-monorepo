@@ -60,19 +60,17 @@
       <td style="text-align: right">{{ ingredient.stock }}</td>
       <td>{{ capitalizeFirstLetter(ingredient.unit.label) }}</td>
       <td style="text-align: right">{{ formatUnitPrice(ingredient.unitPrice) }}</td>
-      <td>
+      <td class="text-center!">
         <p-button
           icon="pi pi-pencil"
-          [rounded]="true"
-          [outlined]="true"
+          size="small"
           severity="warn"
           class="mr-2"
           (onClick)="openEditModal(ingredient)"
         />
         <p-button
           icon="pi pi-trash"
-          [rounded]="true"
-          [outlined]="true"
+          size="small"
           severity="danger"
           (onClick)="openDeleteModal(ingredient)"
         />

@@ -5,79 +5,54 @@
   <p-button label="Ajouter" icon="pi pi-plus" (onClick)="goToAddOrder()" />
 </div>
 
-<div class="border border-dashed border-slate-200 rounded-xl p-5 mb-6">
-  <h3 class="text-lg font-semibold mb-4">Filtres</h3>
-  <div class="grid gap-4 [grid-template-columns:repeat(auto-fit,minmax(200px,1fr))] mb-4">
-    <div class="flex flex-col gap-2">
-      <label class="font-semibold text-slate-900 dark:text-white">Nom du client</label>
-      <input
-        pInputText
-        [(ngModel)]="filters.customerName"
-        placeholder="Contient..."
-        class="w-full"
-      />
-    </div>
-    <div class="flex flex-col gap-2">
-      <label class="font-semibold text-slate-900 dark:text-white">Date</label>
-      <p-datepicker
-        [(ngModel)]="filters.orderDate"
-        [showIcon]="true"
-        dateFormat="dd/mm/yy"
-        class="w-full"
-      />
-    </div>
-    <div class="flex flex-col gap-2">
-      <label class="font-semibold text-slate-900 dark:text-white">Date de livraison</label>
-      <p-datepicker
-        [(ngModel)]="filters.deliveryDate"
-        [showIcon]="true"
-        dateFormat="dd/mm/yy"
-        class="w-full"
-      />
-    </div>
-  </div>
-  <div class="flex flex-wrap items-end gap-4">
-    <div class="flex flex-col gap-2 min-w-[200px]">
-      <label class="font-semibold text-slate-900 dark:text-white">Boutique</label>
-      <p-select
-        [(ngModel)]="filters.shopId"
-        [options]="shops()"
-        optionLabel="address"
-        optionValue="id"
-        placeholder="Toutes les boutiques"
-        class="w-full"
-        [showClear]="true"
-      />
-    </div>
-    <div class="flex flex-col gap-2 min-w-[200px]">
-      <label class="font-semibold text-slate-900 dark:text-white">Statut</label>
-      <p-select
-        [(ngModel)]="filters.orderStatus"
-        [options]="statusOptions"
-        optionLabel="label"
-        optionValue="value"
-        placeholder="Tous les statuts"
-        class="w-full"
-        [showClear]="true"
-      />
-    </div>
-    <div class="flex gap-3">
-      <p-button
-        label="Réinitialiser"
-        icon="pi pi-refresh"
-        severity="secondary"
-        [outlined]="true"
-        (onClick)="resetFilters()"
-        [disabled]="isLoading"
-      />
-      <p-button
-        label="Filtrer"
-        icon="pi pi-search"
-        (onClick)="applyFilters()"
-        [disabled]="isLoading"
-      />
-    </div>
-  </div>
+<div class="flex flex-wrap gap-3 items-center mb-4">
+  <input
+    pInputText
+    [(ngModel)]="filters.customerName"
+    placeholder="Nom du client..."
+    class="w-52"
+  />
+  <p-datepicker
+    [(ngModel)]="filters.orderDate"
+    [showIcon]="true"
+    dateFormat="dd/mm/yy"
+    placeholder="Date de commande"
+    class="w-52"
+  />
+  <p-datepicker
+    [(ngModel)]="filters.deliveryDate"
+    [showIcon]="true"
+    dateFormat="dd/mm/yy"
+    placeholder="Date de livraison"
+    class="w-52"
+  />
+  <p-select
+    [(ngModel)]="filters.shopId"
+    [options]="shops()"
+    optionLabel="address"
+    optionValue="id"
+    placeholder="Toutes boutiques"
+    class="w-52"
+    [showClear]="true"
+  />
+  <p-select
+    [(ngModel)]="filters.orderStatus"
+    [options]="statusOptions"
+    optionLabel="label"
+    optionValue="value"
+    placeholder="Tout statuts"
+    class="w-52"
+    [showClear]="true"
+  />
+  <p-button
+    label="Réinitialiser"
+    icon="pi pi-refresh"
+    severity="secondary"
+    [outlined]="true"
+    (onClick)="resetFilters()"
+    [disabled]="isLoading"
+  />
+  <p-button label="Filtrer" icon="pi pi-search" (onClick)="applyFilters()" [disabled]="isLoading" />
 </div>
 
 <p-table

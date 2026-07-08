@@ -12,6 +12,7 @@ import { Button } from 'primeng/button';
 import { BadgeModule } from 'primeng/badge';
 import { getPageFromFirstRows } from '@shared/utils/pagination';
 import { ORDER_STATUSES, getOrderStatusLabel, getOrderStatusColor } from '@shared/utils/order';
+import { getUserShopId } from '@shared/utils/user';
 import { OrderDetailDialog } from '../../components/order-detail-dialog/order-detail-dialog';
 
 @Component({
@@ -44,7 +45,7 @@ export class ToDeliverOrder implements OnInit {
 
   protected filters = {
     customerName: '',
-    shopId: '',
+    shopId: getUserShopId(),
     orderStatus: '',
   };
 
@@ -95,7 +96,7 @@ export class ToDeliverOrder implements OnInit {
   protected resetFilters(): void {
     this.filters = {
       customerName: '',
-      shopId: '',
+      shopId: getUserShopId(),
       orderStatus: '',
     };
     this.first = 0;

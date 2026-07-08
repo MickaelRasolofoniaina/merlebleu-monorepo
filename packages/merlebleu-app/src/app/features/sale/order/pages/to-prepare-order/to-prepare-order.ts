@@ -14,6 +14,7 @@ import { OrderService } from '../../order.service';
 import { ShopService } from '@features/shop/shop-list/shop.service';
 import { getPageFromFirstRows } from '@shared/utils/pagination';
 import { ORDER_STATUSES, getOrderStatusLabel, getOrderStatusColor } from '@shared/utils/order';
+import { getUserShopId } from '@shared/utils/user';
 import { OrderDetailDialog } from '../../components/order-detail-dialog/order-detail-dialog';
 
 @Component({
@@ -51,7 +52,7 @@ export class ToPrepareOrder implements OnInit {
 
   protected filters = {
     customerName: '',
-    shopId: '',
+    shopId: getUserShopId(),
     orderStatus: '',
   };
 
@@ -102,7 +103,7 @@ export class ToPrepareOrder implements OnInit {
   protected resetFilters(): void {
     this.filters = {
       customerName: '',
-      shopId: '',
+      shopId: getUserShopId(),
       orderStatus: '',
     };
     this.first = 0;
