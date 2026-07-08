@@ -98,7 +98,11 @@ export const createOrderSchema = z
         "La date de livraison ne peut pas être antérieure à la date de commande",
       path: ["deliveryDate"],
     },
-  );
+  )
+  .refine((data) => data.paidAmount <= data.totalAmount, {
+    message: "L'avance payée ne peut pas être supérieure au montant total",
+    path: ["paidAmount"],
+  });
 
 export const updateOrderSchema = createOrderSchema;
 

@@ -41,12 +41,22 @@ export class OrderService {
   listOrdersToDeliver(
     paginationParams: PaginationParams,
     customerName?: string,
+    shopId?: string,
+    status?: OrderStatus,
   ): Observable<ResultPaged<Order>> {
     const { page = 1, limit = 20 } = paginationParams;
     let queryString = `${this.apiUrl}/to-deliver?page=${page}&limit=${limit}`;
 
     if (customerName) {
       queryString += `&customerName=${encodeURIComponent(customerName)}`;
+    }
+
+    if (shopId) {
+      queryString += `&shopId=${encodeURIComponent(shopId)}`;
+    }
+
+    if (status) {
+      queryString += `&status=${encodeURIComponent(status)}`;
     }
 
     return this.http.get<ResultPaged<Order>>(queryString);

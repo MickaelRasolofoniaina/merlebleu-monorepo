@@ -136,7 +136,7 @@
         </div>
         <div class="flex flex-col gap-2 items-start">
           <label for="isFromFacebook" class="font-semibold text-slate-900 dark:text-white">
-            Commande via Facebook
+            Commande par Facebook
           </label>
           <p-toggleSwitch
             inputId="isFromFacebook"
@@ -364,6 +364,7 @@
           name="paidAmount"
           [(ngModel)]="order.paidAmount"
           [min]="0"
+          [max]="order.totalAmount"
           class="w-full"
           (ngModelChange)="updateBalanceAmount()"
         />

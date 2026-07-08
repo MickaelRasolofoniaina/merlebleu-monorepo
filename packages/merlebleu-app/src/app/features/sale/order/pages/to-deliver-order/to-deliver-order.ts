@@ -1,26 +1,29 @@
-import { CommonModule } from '@angular/common';
 import { Component, OnInit, inject, signal } from '@angular/core';
+import { DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { finalize } from 'rxjs';
 import { TableModule } from 'primeng/table';
 import { InputTextModule } from 'primeng/inputtext';
-import { DEFAULT_PAGE_SIZE, Order, OrderStatus } from '@merlebleu/shared';
+import { SelectModule } from 'primeng/select';
+import { DEFAULT_PAGE_SIZE, Order, OrderStatus, Shop } from '@merlebleu/shared';
 import { OrderService } from '../../order.service';
+import { ShopService } from '@features/shop/shop-list/shop.service';
 import { Button } from 'primeng/button';
 import { BadgeModule } from 'primeng/badge';
 import { getPageFromFirstRows } from '@shared/utils/pagination';
-import { getOrderStatusLabel, getOrderStatusColor } from '@shared/utils/order';
+import { ORDER_STATUSES, getOrderStatusLabel, getOrderStatusColor } from '@shared/utils/order';
 import { OrderDetailDialog } from '../../components/order-detail-dialog/order-detail-dialog';
 
 @Component({
   selector: 'to-deliver-order',
   imports: [
-    CommonModule,
     FormsModule,
     TableModule,
     InputTextModule,
+    SelectModule,
     Button,
     BadgeModule,
+    DatePipe,
     OrderDetailDialog,
   ],
   templateUrl: './to-deliver-order.html',
@@ -28,8 +31,10 @@ import { OrderDetailDialog } from '../../components/order-detail-dialog/order-de
 })
 export class ToDeliverOrder implements OnInit {
   private readonly orderService = inject(OrderService);
+  private readonly shopService = inject(ShopService);
 
   protected orders = signal<Order[]>([]);
+  protected shops = signal<Shop[]>([]);
   protected isLoading = false;
   protected totalRecords = 0;
   protected rows = DEFAULT_PAGE_SIZE;
@@ -39,9 +44,17 @@ export class ToDeliverOrder implements OnInit {
 
   protected filters = {
     customerName: '',
+    shopId: '',
+    orderStatus: '',
   };
 
+  protected statusOptions = ORDER_STATUSES.map((s) => ({
+    label: s.label,
+    value: s.value,
+  }));
+
   ngOnInit(): void {
+    this.shopService.getAll().subscribe((shops) => this.shops.set(shops));
     this.loadOrders();
   }
 
@@ -49,7 +62,12 @@ export class ToDeliverOrder implements OnInit {
     this.isLoading = true;
 
     this.orderService
-      .listOrdersToDeliver({ page, limit }, this.filters.customerName || undefined)
+      .listOrdersToDeliver(
+        { page, limit },
+        this.filters.customerName || undefined,
+        this.filters.shopId || undefined,
+        (this.filters.orderStatus as OrderStatus) || undefined,
+      )
       .pipe(
         finalize(() => {
           this.isLoading = false;
@@ -77,6 +95,8 @@ export class ToDeliverOrder implements OnInit {
   protected resetFilters(): void {
     this.filters = {
       customerName: '',
+      shopId: '',
+      orderStatus: '',
     };
     this.first = 0;
     this.loadOrders(1, this.rows);
@@ -85,10 +105,6 @@ export class ToDeliverOrder implements OnInit {
   protected openOrderDetail(order: Order): void {
     this.selectedOrder.set(order);
     this.displayOrderDetailDialog = true;
-  }
-
-  protected formatRemarks(value?: string | null): string {
-    return value?.trim() ? value : '-';
   }
 
   protected getStatus(orderStatus: OrderStatus | undefined): string {

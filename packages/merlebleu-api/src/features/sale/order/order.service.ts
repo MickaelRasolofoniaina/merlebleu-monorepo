@@ -119,6 +119,8 @@ export class OrderService {
     page = 1,
     limit = 20,
     customerName?: string,
+    shopId?: string,
+    status?: OrderStatus,
   ): Promise<ResultPaged<OrderEntity>> {
     const now = new Date();
     const todayStart = new Date(
@@ -132,8 +134,9 @@ export class OrderService {
     return this.listOrders(page, limit, {
       deliveryDateFrom: formatDate(todayStart),
       deliveryDateTo: formatDate(tomorrowStart),
-      shopId: TALATAMATY_SHOP_ID,
       customerName,
+      shopId,
+      status,
     });
   }
 
@@ -166,13 +169,9 @@ export class OrderService {
       .orderBy('orders.deliveryDate', 'ASC')
       .where(
         new Brackets((qb) => {
-          qb.where(
-            'CAST(orders.deliveryDate AS date) = :tomorrow AND shop.id = :talatamatyShopId',
-            { tomorrow, talatamatyShopId: TALATAMATY_SHOP_ID },
-          ).orWhere(
-            'CAST(orders.deliveryDate AS date) = :today AND shop.id = :anosyAvaratraShopId',
-            { today, anosyAvaratraShopId: ANOSY_AVARATRA_SHOP_ID },
-          );
+          qb.where('CAST(orders.deliveryDate AS date) = :tomorrow', {
+            tomorrow,
+          }).orWhere('CAST(orders.deliveryDate AS date) = :today', { today });
         }),
       );
 
