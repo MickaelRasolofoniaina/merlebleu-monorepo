@@ -20,7 +20,7 @@ export const ORDER_STATUSES: OrderStatusConfig[] = [
     bgColor: 'bg-slate-100',
     textColor: 'text-slate-700',
     borderColor: 'border-slate-400',
-    badgeSeverity: 'contrast',
+    badgeSeverity: 'danger',
   },
   {
     index: 1,
@@ -40,7 +40,7 @@ export const ORDER_STATUSES: OrderStatusConfig[] = [
     bgColor: 'bg-amber-100',
     textColor: 'text-amber-700',
     borderColor: 'border-amber-500',
-    badgeSeverity: 'warn',
+    badgeSeverity: 'info',
   },
   {
     index: 3,
@@ -60,7 +60,7 @@ export const ORDER_STATUSES: OrderStatusConfig[] = [
     bgColor: 'bg-red-100',
     textColor: 'text-red-700',
     borderColor: 'border-red-500',
-    badgeSeverity: 'danger',
+    badgeSeverity: 'warn',
   },
 ];
 
