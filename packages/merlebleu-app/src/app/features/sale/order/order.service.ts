@@ -56,6 +56,7 @@ export class OrderService {
     paginationParams: PaginationParams,
     customerName?: string,
     shopId?: string,
+    status?: OrderStatus,
   ): Observable<ResultPaged<Order>> {
     const { page = 1, limit = 20 } = paginationParams;
     let queryString = `${this.apiUrl}/to-prepare?page=${page}&limit=${limit}`;
@@ -66,6 +67,10 @@ export class OrderService {
 
     if (shopId) {
       queryString += `&shopId=${encodeURIComponent(shopId)}`;
+    }
+
+    if (status) {
+      queryString += `&status=${encodeURIComponent(status)}`;
     }
 
     return this.http.get<ResultPaged<Order>>(queryString);

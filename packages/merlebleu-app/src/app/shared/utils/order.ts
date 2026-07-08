@@ -40,7 +40,7 @@ export const ORDER_STATUSES: OrderStatusConfig[] = [
     bgColor: 'bg-amber-100',
     textColor: 'text-amber-700',
     borderColor: 'border-amber-500',
-    badgeSeverity: 'info',
+    badgeSeverity: 'success',
   },
   {
     index: 3,
@@ -50,7 +50,7 @@ export const ORDER_STATUSES: OrderStatusConfig[] = [
     bgColor: 'bg-green-100',
     textColor: 'text-green-700',
     borderColor: 'border-green-500',
-    badgeSeverity: 'success',
+    badgeSeverity: 'info',
   },
   {
     index: 4,

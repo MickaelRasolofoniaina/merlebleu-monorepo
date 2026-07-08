@@ -100,16 +100,12 @@
       <th class="text-right">Reste</th>
       <th class="text">Boutique</th>
       <th>Statut</th>
-      <th class="text-center">Actions</th>
+      <th class="text-center!">Actions</th>
     </tr>
   </ng-template>
   <ng-template #body let-order>
     <tr>
-      <td>
-        <a class="cursor-pointer text-primary hover:underline" (click)="openOrderDetail(order)">
-          {{ order.customerName }}
-        </a>
-      </td>
+      <td>{{ order.customerName }}</td>
       <td>{{ order.orderDate | date: 'dd/MM/yyyy' }}</td>
       <td>
         {{ order.deliveryDate | date: 'dd/MM/yyyy' }} à {{ order.deliveryDate | date: 'HH:mm' }}
@@ -123,7 +119,7 @@
           style="height: fit-content"
         ></p-badge>
       </td>
-      <td class="text-center">
+      <td class="text-center!">
         <p-button
           icon="pi pi-info-circle"
           severity="info"

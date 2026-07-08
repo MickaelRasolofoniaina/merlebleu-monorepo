@@ -6,12 +6,14 @@ import { TableModule } from 'primeng/table';
 import { InputTextModule } from 'primeng/inputtext';
 import { SelectModule } from 'primeng/select';
 import { Button } from 'primeng/button';
+import { BadgeModule } from 'primeng/badge';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { ConfirmDialog } from 'primeng/confirmdialog';
 import { DEFAULT_PAGE_SIZE, Order, OrderStatus, Shop } from '@merlebleu/shared';
 import { OrderService } from '../../order.service';
 import { ShopService } from '@features/shop/shop-list/shop.service';
 import { getPageFromFirstRows } from '@shared/utils/pagination';
+import { ORDER_STATUSES, getOrderStatusLabel, getOrderStatusColor } from '@shared/utils/order';
 import { OrderDetailDialog } from '../../components/order-detail-dialog/order-detail-dialog';
 
 @Component({
@@ -23,6 +25,7 @@ import { OrderDetailDialog } from '../../components/order-detail-dialog/order-de
     InputTextModule,
     SelectModule,
     Button,
+    BadgeModule,
     ConfirmDialog,
     OrderDetailDialog,
   ],
@@ -49,7 +52,13 @@ export class ToPrepareOrder implements OnInit {
   protected filters = {
     customerName: '',
     shopId: '',
+    orderStatus: '',
   };
+
+  protected statusOptions = ORDER_STATUSES.map((s) => ({
+    label: s.label,
+    value: s.value,
+  }));
 
   ngOnInit(): void {
     this.shopService.getAll().subscribe((shops) => this.shops.set(shops));
@@ -64,6 +73,7 @@ export class ToPrepareOrder implements OnInit {
         { page, limit },
         this.filters.customerName || undefined,
         this.filters.shopId || undefined,
+        (this.filters.orderStatus as OrderStatus) || undefined,
       )
       .pipe(
         finalize(() => {
@@ -93,6 +103,7 @@ export class ToPrepareOrder implements OnInit {
     this.filters = {
       customerName: '',
       shopId: '',
+      orderStatus: '',
     };
     this.first = 0;
     this.loadOrders(1, this.rows);
@@ -101,6 +112,16 @@ export class ToPrepareOrder implements OnInit {
   protected openOrderDetail(order: Order): void {
     this.selectedOrder.set(order);
     this.displayOrderDetailDialog = true;
+  }
+
+  protected getStatus(orderStatus: OrderStatus | undefined): string {
+    return getOrderStatusLabel(orderStatus);
+  }
+
+  protected getStatusColor(
+    orderStatus: OrderStatus | undefined,
+  ): 'info' | 'success' | 'warn' | 'danger' | 'contrast' {
+    return getOrderStatusColor(orderStatus);
   }
 
   protected formatRemarks(value?: string | null): string {
@@ -121,7 +142,7 @@ export class ToPrepareOrder implements OnInit {
       header: 'Terminer la commande',
       acceptLabel: 'Oui',
       rejectLabel: 'Non',
-      acceptButtonStyleClass: 'p-button-danger',
+      acceptButtonStyleClass: 'p-button-success',
       rejectButtonStyleClass: 'p-button-secondary',
       accept: () => {
         const ids = new Set(this.completingIds());

@@ -142,6 +142,7 @@ export class OrderService {
     limit = 20,
     customerName?: string,
     shopId?: string,
+    status?: OrderStatus,
   ): Promise<ResultPaged<OrderEntity>> {
     const pagination = getPaginationParams({ page, limit });
 
@@ -183,6 +184,10 @@ export class OrderService {
 
     if (shopId) {
       query.andWhere('shop.id = :filterShopId', { filterShopId: shopId });
+    }
+
+    if (status) {
+      query.andWhere('orders.orderStatus = :status', { status });
     }
 
     query.take(pagination.limit).skip(pagination.skip);

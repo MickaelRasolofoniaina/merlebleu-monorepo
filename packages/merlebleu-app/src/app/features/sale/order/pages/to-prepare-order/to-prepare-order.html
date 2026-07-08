@@ -26,6 +26,18 @@
         [showClear]="true"
       />
     </div>
+    <div class="flex flex-col gap-2 min-w-[200px]">
+      <label class="font-semibold text-slate-900 dark:text-white">Statut</label>
+      <p-select
+        [(ngModel)]="filters.orderStatus"
+        [options]="statusOptions"
+        optionLabel="label"
+        optionValue="value"
+        placeholder="Tous les statuts"
+        class="w-full"
+        [showClear]="true"
+      />
+    </div>
     <div class="flex gap-3">
       <p-button
         label="Réinitialiser"
@@ -62,37 +74,39 @@
   <ng-template #header>
     <tr>
       <th>Client</th>
-      <th>Commande</th>
-      <th>Remarques</th>
+      <th>Date de livraison</th>
       <th>Boutique</th>
-      <th></th>
+      <th>Statut</th>
+      <th class="text-center!">Actions</th>
     </tr>
   </ng-template>
   <ng-template #body let-order>
     <tr>
+      <td>{{ order.customerName }}</td>
       <td>
-        <a class="cursor-pointer hover:underline" (click)="openOrderDetail(order)">
-          {{ order.customerName }}
-        </a>
+        {{ order.deliveryDate | date: 'dd/MM/yyyy' }} à {{ order.deliveryDate | date: 'HH:mm' }}
       </td>
-      <td>
-        <div *ngFor="let item of order.orderItems" class="mb-1">
-          <div>{{ item.type }} ({{ item.size }})</div>
-          @if (item.remarks?.trim()) {
-          <div class="text-sm text-slate-500">{{ item.remarks }}</div>
-          }
-        </div>
-      </td>
-      <td>{{ formatRemarks(order.remarks) }}</td>
       <td>{{ order.shop.address }}</td>
       <td>
+        <p-badge
+          [value]="getStatus(order.orderStatus)"
+          [severity]="getStatusColor(order.orderStatus)"
+          style="height: fit-content"
+        ></p-badge>
+      </td>
+      <td class="text-center!">
+        <p-button
+          icon="pi pi-info-circle"
+          severity="info"
+          class="mr-2"
+          (onClick)="openOrderDetail(order)"
+          size="small"
+        />
         <p-button
           icon="pi pi-check"
           [loading]="isCompleting(order)"
           (onClick)="onComplete(order)"
-          [outlined]="!isOrderCompleted(order)"
-          [rounded]="true"
-          [severity]="isOrderCompleted(order) ? 'success' : 'danger'"
+          severity="success"
           [disabled]="isOrderCompleted(order)"
           size="small"
         />

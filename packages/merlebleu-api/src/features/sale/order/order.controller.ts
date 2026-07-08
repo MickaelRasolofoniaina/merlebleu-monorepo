@@ -71,6 +71,7 @@ export class OrderController {
     @Query('limit') limit?: string,
     @Query('customerName') customerName?: string,
     @Query('shopId') shopId?: string,
+    @Query('status') status?: OrderStatus,
   ) {
     const pageNumber = page ? Number.parseInt(page, 10) : 1;
     const limitNumber = limit ? Number.parseInt(limit, 10) : 20;
@@ -79,6 +80,7 @@ export class OrderController {
       limitNumber,
       customerName,
       shopId,
+      status,
     );
   }
 
