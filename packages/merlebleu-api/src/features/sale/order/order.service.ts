@@ -169,9 +169,13 @@ export class OrderService {
       .orderBy('orders.deliveryDate', 'ASC')
       .where(
         new Brackets((qb) => {
-          qb.where('CAST(orders.deliveryDate AS date) = :tomorrow', {
+          qb.where('CAST(orders.deliveryDate AS date) = :tomorrow and shop.Id = :talatamatyShopId', {
             tomorrow,
-          }).orWhere('CAST(orders.deliveryDate AS date) = :today', { today });
+            talatamatyShopId: TALATAMATY_SHOP_ID
+          }).orWhere('CAST(orders.deliveryDate AS date) = :today and shop.Id = :anosyShopId', {
+            today,
+            anosyShopId: ANOSY_AVARATRA_SHOP_ID
+          });
         }),
       );
 
