@@ -24,7 +24,7 @@ export interface OrderItem {
   totalAmount: number;
   shape: Shape;
   text?: string;
-  decoration: string;
+  decoration?: string;
   remarks?: string;
   photos?: string[];
 }

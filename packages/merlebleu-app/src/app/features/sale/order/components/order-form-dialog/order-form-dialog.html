@@ -1,0 +1,13 @@
+<p-dialog
+  [(visible)]="visible"
+  [modal]="true"
+  [style]="{ width: '70rem' }"
+  [header]="header"
+  [maximizable]="true"
+>
+  <order-form
+    [orderData]="orderData()"
+    [isLoading]="isLoading()"
+    (orderSubmit)="orderSubmit.emit($event)"
+  />
+</p-dialog>

@@ -93,9 +93,11 @@ export class OrderForm implements OnInit, OnChanges {
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes['orderData'] && this.orderData) {
-      this.order = this.deepCopyOrder(this.orderData);
+    if (changes['orderData']) {
+      this.order = this.orderData ? this.deepCopyOrder(this.orderData) : this.buildDefaultOrder();
+      this.applyUserShopDefault();
       this.syncDateValuesFromOrder();
+      this.validationErrors = {};
     }
   }
 

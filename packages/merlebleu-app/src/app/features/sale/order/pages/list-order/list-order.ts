@@ -1,10 +1,15 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
 import { finalize } from 'rxjs';
 import { TableModule } from 'primeng/table';
-import { DEFAULT_PAGE_SIZE, Order, OrderStatus } from '@merlebleu/shared';
+import {
+  CreateOrderDto,
+  DEFAULT_PAGE_SIZE,
+  Order,
+  OrderStatus,
+  UpdateOrderDto,
+} from '@merlebleu/shared';
 import { OrderService } from '../../order.service';
 import { ShopService } from '@features/shop/shop-list/shop.service';
 import { Button } from 'primeng/button';
@@ -18,6 +23,7 @@ import { ORDER_STATUSES, getOrderStatusLabel, getOrderStatusColor } from '@share
 import { getUserShopId } from '@shared/utils/user';
 import { Shop } from '@merlebleu/shared';
 import { OrderDetailDialog } from '../../components/order-detail-dialog/order-detail-dialog';
+import { OrderFormDialog } from '../../components/order-form-dialog/order-form-dialog';
 
 @Component({
   selector: 'list-order',
@@ -31,6 +37,7 @@ import { OrderDetailDialog } from '../../components/order-detail-dialog/order-de
     DatePickerModule,
     SelectModule,
     OrderDetailDialog,
+    OrderFormDialog,
   ],
   templateUrl: './list-order.html',
   styleUrl: './list-order.scss',
@@ -38,7 +45,6 @@ import { OrderDetailDialog } from '../../components/order-detail-dialog/order-de
 export class ListOrder implements OnInit {
   private readonly orderService = inject(OrderService);
   private readonly shopService = inject(ShopService);
-  private readonly router = inject(Router);
 
   protected orders = signal<Order[]>([]);
   protected shops = signal<Shop[]>([]);
@@ -62,6 +68,11 @@ export class ListOrder implements OnInit {
 
   protected selectedOrder = signal<Order | null>(null);
   protected displayOrderDetailDialog = false;
+
+  protected editingOrderId: string | null = null;
+  protected editingOrder?: UpdateOrderDto;
+  protected isFormLoading = false;
+  protected displayOrderFormDialog = false;
 
   ngOnInit(): void {
     this.shopService.getAll().subscribe((shops) => this.shops.set(shops));
@@ -149,17 +160,40 @@ export class ListOrder implements OnInit {
     return `${value.slice(0, Math.max(maxLength - 3, 0))}...`;
   }
 
-  protected goToAddOrder(): void {
-    this.router.navigate(['/sale/order/add']);
+  protected openAddOrder(): void {
+    this.editingOrderId = null;
+    this.editingOrder = undefined;
+    this.displayOrderFormDialog = true;
   }
 
-  protected goToEditOrder(order: Order): void {
-    const orderId = (order as { id?: string }).id;
+  protected openEditOrder(order: Order): void {
+    this.editingOrderId = order.id;
+    this.editingOrder = {
+      ...order,
+      paymentMethodId: order.paymentMethod?.id ?? '',
+      shopId: order.shop?.id ?? '',
+    } as UpdateOrderDto;
+    this.displayOrderFormDialog = true;
+  }
 
-    if (!orderId) {
-      return;
-    }
+  protected handleOrderSubmit(order: CreateOrderDto | UpdateOrderDto): void {
+    this.isFormLoading = true;
 
-    this.router.navigate(['/sale/order/edit', orderId]);
+    const request = this.editingOrderId
+      ? this.orderService.updateOrder(this.editingOrderId, order as UpdateOrderDto)
+      : this.orderService.addOrder(order as CreateOrderDto);
+
+    request
+      .pipe(
+        finalize(() => {
+          this.isFormLoading = false;
+        }),
+      )
+      .subscribe({
+        next: () => {
+          this.displayOrderFormDialog = false;
+          this.loadOrders(getPageFromFirstRows(this.first, this.rows), this.rows);
+        },
+      });
   }
 }

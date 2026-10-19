@@ -14,7 +14,7 @@ export const createOrderItemSchema = z.object({
     .positive("Le montant total doit être un nombre positif"),
   shape: z.enum(Shape, "Veuillez sélectionner une forme"),
   text: z.string().optional(),
-  decoration: z.string().min(1, "Veuillez remplir la décoration"),
+  decoration: z.string().optional(),
   remarks: z.string().optional(),
   photos: z.array(z.string()).optional(),
 });

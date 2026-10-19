@@ -76,7 +76,7 @@
   <p-fieldset legend="Livraison" styleClass="border border-dashed border-slate-200 rounded-xl">
     <div class="flex flex-col gap-4">
       <div class="flex flex-wrap gap-4">
-        <div class="flex flex-col gap-2 flex-[4]">
+        <div class="flex flex-col gap-2 flex-none">
           <label for="shopId" class="font-semibold text-slate-900 dark:text-white">
             Boutique
           </label>
@@ -88,7 +88,7 @@
             optionLabel="address"
             optionValue="id"
             placeholder="Sélectionnez une boutique"
-            class="w-full"
+            appendTo="body"
           />
           @if (errorFor('shopId')) {
           <small class="text-red-500">{{ errorFor('shopId') }}</small>
@@ -96,7 +96,7 @@
         </div>
         <div class="flex flex-col gap-2 flex-[3]">
           <label for="orderDate" class="font-semibold text-slate-900 dark:text-white">
-            Date de la commande
+            Date de commande
           </label>
           <p-datepicker
             inputId="orderDate"
@@ -107,12 +107,15 @@
             dateFormat="dd/mm/yy"
             class="w-full"
             [maxDate]="now"
+            appendTo="body"
           />
           @if (errorFor('orderDate')) {
           <small class="text-red-500">{{ errorFor('orderDate') }}</small>
           }
         </div>
-        <div class="flex flex-col gap-2 flex-[3]">
+      </div>
+      <div class="flex flex-nowrap gap-4">
+        <div class="flex flex-col gap-2 flex-none">
           <label for="deliveryDate" class="font-semibold text-slate-900 dark:text-white">
             Date de livraison
           </label>
@@ -123,14 +126,14 @@
             (ngModelChange)="onDeliveryDateChange($event)"
             [showIcon]="true"
             dateFormat="dd/mm/yy"
-            class="w-full"
             [minDate]="now"
+            appendTo="body"
           />
           @if (errorFor('deliveryDate')) {
           <small class="text-red-500">{{ errorFor('deliveryDate') }}</small>
           }
         </div>
-        <div class="flex flex-col gap-2 flex-[2]">
+        <div class="flex flex-col gap-2 flex-none">
           <label for="deliveryStartTime" class="font-semibold text-slate-900 dark:text-white">
             Heure début de livraison
           </label>
@@ -142,13 +145,13 @@
             [showIcon]="true"
             [timeOnly]="true"
             hourFormat="24"
-            class="w-full"
+            appendTo="body"
           />
           @if (errorFor('deliveryStartTime')) {
           <small class="text-red-500">{{ errorFor('deliveryStartTime') }}</small>
           }
         </div>
-        <div class="flex flex-col gap-2 flex-[2]">
+        <div class="flex flex-col gap-2 flex-none">
           <label for="deliveryEndTime" class="font-semibold text-slate-900 dark:text-white">
             Heure fin de livraison
           </label>
@@ -160,7 +163,7 @@
             [showIcon]="true"
             [timeOnly]="true"
             hourFormat="24"
-            class="w-full"
+            appendTo="body"
           />
           @if (errorFor('deliveryEndTime')) {
           <small class="text-red-500">{{ errorFor('deliveryEndTime') }}</small>
@@ -208,7 +211,7 @@
 
   <p-fieldset legend="Commandes" styleClass="border border-dashed border-slate-200 rounded-xl">
     <div class="mb-4 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-      <p class="text-slate-500">Ajoutez un ou plusieurs commandes.</p>
+      <p class="text-slate-500">Ajoutez une ou plusieurs commandes.</p>
     </div>
     @if (errorFor('orderItems')) {
     <small class="text-red-500">{{ errorFor('orderItems') }}</small>
@@ -230,7 +233,7 @@
       </div>
       <div class="flex flex-col gap-4">
         <div class="flex flex-nowrap gap-4">
-          <div class="flex flex-col gap-2 flex-[3]">
+          <div class="flex flex-col gap-2 flex-none">
             <label for="type-{{ i }}" class="font-semibold text-slate-900 dark:text-white">
               Type
             </label>
@@ -244,30 +247,14 @@
               [filter]="true"
               filterPlaceholder="Rechercher un type..."
               placeholder="Sélectionnez un type"
-              class="w-full"
+              appendTo="body"
               (ngModelChange)="onArticleSelected(item)"
             />
             @if (errorFor('orderItems.' + i + '.type')) {
             <small class="text-red-500">{{ errorFor('orderItems.' + i + '.type') }}</small>
             }
           </div>
-          <div class="flex flex-col gap-2 flex-[2]">
-            <label for="unitPrice-{{ i }}" class="font-semibold text-slate-900 dark:text-white">
-              Prix unitaire
-            </label>
-            <p-inputNumber
-              inputId="unitPrice-{{ i }}"
-              name="unitPrice-{{ i }}"
-              [(ngModel)]="item.unitPrice"
-              [min]="0"
-              class="w-full"
-              (ngModelChange)="syncItemAmount(item)"
-            />
-            @if (errorFor('orderItems.' + i + '.unitPrice')) {
-            <small class="text-red-500">{{ errorFor('orderItems.' + i + '.unitPrice') }}</small>
-            }
-          </div>
-          <div class="flex flex-col gap-2 flex-1">
+          <div class="flex flex-col gap-2 flex-none">
             <label for="size-{{ i }}" class="font-semibold text-slate-900 dark:text-white">
               Taille / Nombre
             </label>
@@ -276,14 +263,28 @@
               name="size-{{ i }}"
               [(ngModel)]="item.size"
               [min]="0"
-              class="w-full"
               (ngModelChange)="syncItemAmount(item)"
             />
             @if (errorFor('orderItems.' + i + '.size')) {
             <small class="text-red-500">{{ errorFor('orderItems.' + i + '.size') }}</small>
             }
           </div>
-          <div class="flex flex-col gap-2 flex-[2]">
+          <div class="flex flex-col gap-2 flex-none">
+            <label for="unitPrice-{{ i }}" class="font-semibold text-slate-900 dark:text-white">
+              Prix unitaire
+            </label>
+            <p-inputNumber
+              inputId="unitPrice-{{ i }}"
+              name="unitPrice-{{ i }}"
+              [(ngModel)]="item.unitPrice"
+              [min]="0"
+              (ngModelChange)="syncItemAmount(item)"
+            />
+            @if (errorFor('orderItems.' + i + '.unitPrice')) {
+            <small class="text-red-500">{{ errorFor('orderItems.' + i + '.unitPrice') }}</small>
+            }
+          </div>
+          <div class="flex flex-col gap-2 flex-none">
             <label for="itemTotal-{{ i }}" class="font-semibold text-slate-900 dark:text-white">
               Montant
             </label>
@@ -292,7 +293,6 @@
               name="itemTotal-{{ i }}"
               [(ngModel)]="item.totalAmount"
               [min]="0"
-              class="w-full"
               disabled=""
             />
             @if (errorFor('orderItems.' + i + '.totalAmount')) {
@@ -312,6 +312,7 @@
               [options]="shapes"
               placeholder="Sélectionnez une forme"
               class="w-full"
+              appendTo="body"
             />
             @if (errorFor('orderItems.' + i + '.shape')) {
             <small class="text-red-500">{{ errorFor('orderItems.' + i + '.shape') }}</small>
@@ -337,7 +338,7 @@
         </div>
         <div class="flex flex-col gap-2">
           <label for="decoration-{{ i }}" class="font-semibold text-slate-900 dark:text-white">
-            Décoration
+            Décoration (optionnel)
           </label>
           <input
             id="decoration-{{ i }}"
@@ -345,7 +346,7 @@
             type="text"
             pInputText
             [(ngModel)]="item.decoration"
-            placeholder="Décoration souhaitée"
+            placeholder="Décoration souhaitée (optionnel)"
             class="w-full"
           />
           @if (errorFor('orderItems.' + i + '.decoration')) {
@@ -371,12 +372,14 @@
         </div>
       </div>
     </div>
-    <p-button label="Ajouter une autre commande" icon="pi pi-plus" (onClick)="addOrderItem()" />
+    <div class="flex justify-end">
+      <p-button label="Autre commande" icon="pi pi-plus" (onClick)="addOrderItem()" />
+    </div>
   </p-fieldset>
 
   <p-fieldset legend="Paiement" styleClass="border border-dashed border-slate-200 rounded-xl">
-    <div class="grid gap-4 [grid-template-columns:repeat(auto-fit,minmax(240px,1fr))]">
-      <div class="flex flex-col gap-2">
+    <div class="flex flex-nowrap gap-4">
+      <div class="flex flex-col gap-2 flex-none">
         <label for="totalAmount" class="font-semibold text-slate-900 dark:text-white">
           Montant total
         </label>
@@ -385,7 +388,6 @@
           name="totalAmount"
           [(ngModel)]="order.totalAmount"
           [min]="0"
-          class="w-full"
           (ngModelChange)="updateBalanceAmount()"
           disabled=""
         />
@@ -393,7 +395,7 @@
         <small class="text-red-500">{{ errorFor('totalAmount') }}</small>
         }
       </div>
-      <div class="flex flex-col gap-2">
+      <div class="flex flex-col gap-2 flex-none">
         <label for="paidAmount" class="font-semibold text-slate-900 dark:text-white">
           Avance
         </label>
@@ -403,14 +405,13 @@
           [(ngModel)]="order.paidAmount"
           [min]="0"
           [max]="order.totalAmount"
-          class="w-full"
           (ngModelChange)="updateBalanceAmount()"
         />
         @if (errorFor('paidAmount')) {
         <small class="text-red-500">{{ errorFor('paidAmount') }}</small>
         }
       </div>
-      <div class="flex flex-col gap-2">
+      <div class="flex flex-col gap-2 flex-none">
         <label for="balanceAmount" class="font-semibold text-slate-900 dark:text-white">
           Reste
         </label>
@@ -419,14 +420,13 @@
           name="balanceAmount"
           [(ngModel)]="order.balanceAmount"
           [min]="0"
-          class="w-full"
           disabled=""
         />
         @if (errorFor('balanceAmount')) {
         <small class="text-red-500">{{ errorFor('balanceAmount') }}</small>
         }
       </div>
-      <div class="flex flex-col gap-2">
+      <div class="flex flex-col gap-2 flex-none">
         <label for="paymentMethodId" class="font-semibold text-slate-900 dark:text-white">
           Methode de paiement
         </label>
@@ -438,7 +438,7 @@
           optionLabel="name"
           optionValue="id"
           placeholder="Selectionnez une methode de paiement"
-          class="w-full"
+          appendTo="body"
         />
         @if (errorFor('paymentMethodId')) {
         <small class="text-red-500">{{ errorFor('paymentMethodId') }}</small>

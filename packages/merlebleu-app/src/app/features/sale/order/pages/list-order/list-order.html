@@ -2,7 +2,7 @@
   <h2 class="text-2xl font-bold">Toutes les commandes</h2>
 </div>
 <div class="flex justify-end mb-4">
-  <p-button label="Ajouter" icon="pi pi-plus" severity="primary" (onClick)="goToAddOrder()" />
+  <p-button label="Ajouter" icon="pi pi-plus" severity="primary" (onClick)="openAddOrder()" />
 </div>
 
 <div class="flex flex-wrap gap-3 items-center mb-4">
@@ -40,7 +40,7 @@
     [options]="statusOptions"
     optionLabel="label"
     optionValue="value"
-    placeholder="Tout statuts"
+    placeholder="Tout les statuts"
     class="w-52"
     [showClear]="true"
   />
@@ -105,7 +105,7 @@
         <p-button
           icon="pi pi-pencil"
           severity="warn"
-          (onClick)="goToEditOrder(order)"
+          (onClick)="openEditOrder(order)"
           size="small"
         />
       </td>
@@ -119,3 +119,11 @@
 </p-table>
 
 <order-detail-dialog [order]="selectedOrder()" [(visible)]="displayOrderDetailDialog" />
+
+<order-form-dialog
+  [orderData]="editingOrder"
+  [isEdit]="!!editingOrderId"
+  [isLoading]="isFormLoading"
+  [(visible)]="displayOrderFormDialog"
+  (orderSubmit)="handleOrderSubmit($event)"
+/>

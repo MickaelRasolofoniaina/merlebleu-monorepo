@@ -11,7 +11,7 @@ export class OrderItemEntity implements OrderItem {
   totalAmount: number;
   shape: Shape;
   text?: string | undefined;
-  decoration: string;
+  decoration?: string | undefined;
   remarks?: string | undefined;
   photos?: string[] | undefined;
   order?: OrderEntity;
@@ -72,6 +72,7 @@ export const OrderItemSchema = new EntitySchema<OrderItemEntity>({
     },
     decoration: {
       type: 'varchar',
+      nullable: true,
     },
     remarks: {
       type: 'varchar',
