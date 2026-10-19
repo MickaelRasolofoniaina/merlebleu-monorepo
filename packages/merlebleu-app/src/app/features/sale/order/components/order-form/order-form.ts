@@ -282,5 +282,7 @@ export class OrderForm implements OnInit, OnChanges {
     this.deliveryDateValue = parseDate(this.order.deliveryDate);
     this.deliveryStartTimeValue = parseTime(this.order.deliveryStartTime);
     this.deliveryEndTimeValue = parseTime(this.order.deliveryEndTime);
+    this.order.deliveryStartTime = formatTime(this.deliveryStartTimeValue);
+    this.order.deliveryEndTime = formatTime(this.deliveryEndTimeValue);
   }
 }

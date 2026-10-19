@@ -144,7 +144,7 @@ export class ToPrepareOrder implements OnInit {
       acceptLabel: 'Oui',
       rejectLabel: 'Non',
       acceptButtonStyleClass: 'p-button-success',
-      rejectButtonStyleClass: 'p-button-secondary',
+      rejectButtonStyleClass: 'p-button-danger',
       accept: () => {
         const ids = new Set(this.completingIds());
         ids.add(order.id);

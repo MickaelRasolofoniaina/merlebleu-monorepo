@@ -31,7 +31,7 @@
     [options]="shops()"
     optionLabel="address"
     optionValue="id"
-    placeholder="Toutes boutiques"
+    placeholder="Toutes les boutiques"
     class="w-52"
     [showClear]="true"
   />
@@ -40,7 +40,7 @@
     [options]="statusOptions"
     optionLabel="label"
     optionValue="value"
-    placeholder="Tout les statuts"
+    placeholder="Tous les statuts"
     class="w-52"
     [showClear]="true"
   />
@@ -48,7 +48,7 @@
   <p-button
     label="Réinitialiser"
     icon="pi pi-refresh"
-    severity="warn"
+    severity="contrast"
     (onClick)="resetFilters()"
     [disabled]="isLoading"
   />
