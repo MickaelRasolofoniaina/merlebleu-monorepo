@@ -23,7 +23,7 @@ export interface OrderItem {
   unitPrice: number;
   totalAmount: number;
   shape: Shape;
-  text: string;
+  text?: string;
   decoration: string;
   remarks?: string;
   photos?: string[];
@@ -36,7 +36,9 @@ export interface Order {
   customerPhoneNumber: string;
   customerFacebookName?: string;
   deliveryDate: string;
-  deliveryAddress: string;
+  deliveryStartTime: string;
+  deliveryEndTime: string;
+  deliveryAddress?: string;
   isFromFacebook: boolean;
   orderItems: OrderItem[];
   remarks?: string;

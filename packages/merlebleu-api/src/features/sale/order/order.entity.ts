@@ -10,7 +10,7 @@ export class OrderItemEntity implements OrderItem {
   unitPrice: number;
   totalAmount: number;
   shape: Shape;
-  text: string;
+  text?: string | undefined;
   decoration: string;
   remarks?: string | undefined;
   photos?: string[] | undefined;
@@ -23,7 +23,9 @@ export class OrderEntity implements Order {
   customerPhoneNumber: string;
   customerFacebookName?: string | undefined;
   deliveryDate: string;
-  deliveryAddress: string;
+  deliveryStartTime: string;
+  deliveryEndTime: string;
+  deliveryAddress?: string | undefined;
   isFromFacebook: boolean;
   orderItems: OrderItemEntity[];
   remarks?: string | undefined;
@@ -66,6 +68,7 @@ export const OrderItemSchema = new EntitySchema<OrderItemEntity>({
     },
     text: {
       type: 'varchar',
+      nullable: true,
     },
     decoration: {
       type: 'varchar',
@@ -113,10 +116,17 @@ export const OrderSchema = new EntitySchema<OrderEntity>({
       nullable: true,
     },
     deliveryDate: {
-      type: 'timestamp',
+      type: 'date',
+    },
+    deliveryStartTime: {
+      type: 'time',
+    },
+    deliveryEndTime: {
+      type: 'time',
     },
     deliveryAddress: {
       type: 'varchar',
+      nullable: true,
     },
     isFromFacebook: {
       type: 'boolean',

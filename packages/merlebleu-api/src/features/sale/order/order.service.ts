@@ -61,7 +61,8 @@ export class OrderService {
       .leftJoinAndSelect('orders.orderItems', 'orderItems')
       .leftJoinAndSelect('orders.paymentMethod', 'paymentMethod')
       .leftJoinAndSelect('orders.shop', 'shop')
-      .orderBy('orders.deliveryDate', 'ASC');
+      .orderBy('orders.deliveryDate', 'ASC')
+      .addOrderBy('orders.deliveryStartTime', 'ASC');
 
     if (filters?.orderDate) {
       query.andWhere('orders.orderDate = :orderDate', {
@@ -70,7 +71,7 @@ export class OrderService {
     }
 
     if (filters?.deliveryDate) {
-      query.andWhere('CAST(orders.deliveryDate AS DATE) = :deliveryDate', {
+      query.andWhere('orders.deliveryDate = :deliveryDate', {
         deliveryDate: filters.deliveryDate,
       });
     }
@@ -167,12 +168,13 @@ export class OrderService {
       .leftJoinAndSelect('orders.paymentMethod', 'paymentMethod')
       .leftJoinAndSelect('orders.shop', 'shop')
       .orderBy('orders.deliveryDate', 'ASC')
+      .addOrderBy('orders.deliveryStartTime', 'ASC')
       .where(
         new Brackets((qb) => {
-          qb.where('CAST(orders.deliveryDate AS date) = :tomorrow and shop.Id = :talatamatyShopId', {
+          qb.where('orders.deliveryDate = :tomorrow and shop.Id = :talatamatyShopId', {
             tomorrow,
             talatamatyShopId: TALATAMATY_SHOP_ID
-          }).orWhere('CAST(orders.deliveryDate AS date) = :today and shop.Id = :anosyShopId', {
+          }).orWhere('orders.deliveryDate = :today and shop.Id = :anosyShopId', {
             today,
             anosyShopId: ANOSY_AVARATRA_SHOP_ID
           });

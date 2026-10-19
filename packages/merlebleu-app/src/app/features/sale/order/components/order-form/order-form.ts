@@ -32,7 +32,7 @@ import {
   Shop,
 } from '@merlebleu/shared';
 import { buildZodErrorMap } from '@shared/utils/zod-errors';
-import { formatDate, parseDate } from '@shared/utils/date';
+import { addDays, formatDate, formatTime, parseDate, parseTime } from '@shared/utils/date';
 import { PaymentService } from '@features/sale/payment/payment.service';
 import { ItemService } from '@features/inventory/item/item.service';
 import { ShopService } from '@features/shop/shop-list/shop.service';
@@ -67,6 +67,8 @@ export class OrderForm implements OnInit, OnChanges {
 
   protected orderDateValue: Date | null = null;
   protected deliveryDateValue: Date | null = null;
+  protected deliveryStartTimeValue: Date | null = null;
+  protected deliveryEndTimeValue: Date | null = null;
 
   protected validationErrors: Record<string, string> = {};
 
@@ -207,7 +209,17 @@ export class OrderForm implements OnInit, OnChanges {
 
   protected onDeliveryDateChange(value: Date | null): void {
     this.deliveryDateValue = value;
-    this.order.deliveryDate = value ? value.toISOString() : '';
+    this.order.deliveryDate = formatDate(value);
+  }
+
+  protected onDeliveryStartTimeChange(value: Date | null): void {
+    this.deliveryStartTimeValue = value;
+    this.order.deliveryStartTime = formatTime(value);
+  }
+
+  protected onDeliveryEndTimeChange(value: Date | null): void {
+    this.deliveryEndTimeValue = value;
+    this.order.deliveryEndTime = formatTime(value);
   }
 
   protected trackByIndex(index: number): number {
@@ -224,7 +236,9 @@ export class OrderForm implements OnInit, OnChanges {
       customerName: '',
       customerPhoneNumber: '',
       customerFacebookName: '',
-      deliveryDate: new Date(new Date().setDate(new Date().getDate() + 1)).toISOString(),
+      deliveryDate: formatDate(addDays(new Date(), 1)),
+      deliveryStartTime: '08:00',
+      deliveryEndTime: '18:00',
       deliveryAddress: '',
       isFromFacebook: false,
       orderItems: [this.buildOrderItem()],
@@ -264,5 +278,7 @@ export class OrderForm implements OnInit, OnChanges {
   private syncDateValuesFromOrder(): void {
     this.orderDateValue = parseDate(this.order.orderDate);
     this.deliveryDateValue = parseDate(this.order.deliveryDate);
+    this.deliveryStartTimeValue = parseTime(this.order.deliveryStartTime);
+    this.deliveryEndTimeValue = parseTime(this.order.deliveryEndTime);
   }
 }

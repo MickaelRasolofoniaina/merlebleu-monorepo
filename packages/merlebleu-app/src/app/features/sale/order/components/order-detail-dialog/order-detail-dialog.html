@@ -3,11 +3,12 @@
   [modal]="true"
   [style]="{ width: '60rem' }"
   header="Détail de la commande"
+  [maximizable]="true"
 >
   @if (order(); as order) {
   <div class="flex flex-col gap-6">
     <div class="grid gap-6 lg:grid-cols-2">
-      <p-panel header="Information du client">
+      <p-panel header="Client">
         <div class="grid gap-3">
           <div class="flex items-center justify-between">
             <span class="text-slate-500">Nom</span>
@@ -32,7 +33,7 @@
         </div>
       </p-panel>
 
-      <p-panel header="Détail de la livraison">
+      <p-panel header="Livraison">
         <div class="grid gap-3">
           <div class="flex items-center justify-between">
             <span class="text-slate-500">Date</span>
@@ -43,8 +44,8 @@
           <div class="flex items-center justify-between">
             <span class="text-slate-500">Date de livraison</span>
             <span class="font-medium text-slate-900">
-              {{ order.deliveryDate | date: 'dd/MM/yyyy' }} à {{ order.deliveryDate | date: 'HH:mm'
-              }}
+              {{ order.deliveryDate | date: 'dd/MM/yyyy' }} de {{ order.deliveryStartTime.slice(0, 5) }} à
+              {{ order.deliveryEndTime.slice(0, 5) }}
             </span>
           </div>
           <div class="flex items-center justify-between">
@@ -99,7 +100,7 @@
     </p-panel>
 
     <div class="grid gap-6 lg:grid-cols-2">
-      <p-panel header="Détail du paiement">
+      <p-panel header="Paiement">
         <div class="grid gap-3">
           <div class="flex items-center justify-between">
             <span class="text-slate-500">Montant total</span>

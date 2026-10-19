@@ -13,7 +13,7 @@ export const createOrderItemSchema = z.object({
     .number()
     .positive("Le montant total doit être un nombre positif"),
   shape: z.enum(Shape, "Veuillez sélectionner une forme"),
-  text: z.string().min(1, "Veuillez remplir le texte"),
+  text: z.string().optional(),
   decoration: z.string().min(1, "Veuillez remplir la décoration"),
   remarks: z.string().optional(),
   photos: z.array(z.string()).optional(),
@@ -62,9 +62,19 @@ export const createOrderSchema = z
             "La date de livraison doit être aujourd'hui ou une date future",
         },
       ),
-    deliveryAddress: z
+    deliveryStartTime: z
       .string()
-      .min(1, "Veuillez remplir l'adresse de livraison"),
+      .regex(
+        /^([01]\d|2[0-3]):[0-5]\d$/,
+        "L'heure de début de livraison doit être au format HH:mm",
+      ),
+    deliveryEndTime: z
+      .string()
+      .regex(
+        /^([01]\d|2[0-3]):[0-5]\d$/,
+        "L'heure de fin de livraison doit être au format HH:mm",
+      ),
+    deliveryAddress: z.string().optional(),
     isFromFacebook: z.boolean(),
     orderItems: z
       .array(createOrderItemSchema)
@@ -102,6 +112,11 @@ export const createOrderSchema = z
   .refine((data) => data.paidAmount <= data.totalAmount, {
     message: "L'avance payée ne peut pas être supérieure au montant total",
     path: ["paidAmount"],
+  })
+  .refine((data) => data.deliveryEndTime > data.deliveryStartTime, {
+    message:
+      "L'heure de fin de livraison doit être après l'heure de début de livraison",
+    path: ["deliveryEndTime"],
   });
 
 export const updateOrderSchema = createOrderSchema;

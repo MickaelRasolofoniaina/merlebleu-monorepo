@@ -65,7 +65,8 @@
     <tr>
       <td>{{ order.customerName }}</td>
       <td>
-        {{ order.deliveryDate | date: 'dd/MM/yyyy' }} à {{ order.deliveryDate | date: 'HH:mm' }}
+        {{ order.deliveryDate | date: 'dd/MM/yyyy' }} de {{ order.deliveryStartTime }} à
+        {{ order.deliveryEndTime }}
       </td>
       <td>{{ order.shop.address }}</td>
       <td>

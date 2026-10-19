@@ -1,8 +1,79 @@
 <form class="flex flex-col gap-6">
-  <p-fieldset
-    legend="Client & Livraison"
-    styleClass="border border-dashed border-slate-200 rounded-xl"
-  >
+  <p-fieldset legend="Client" styleClass="border border-dashed border-slate-200 rounded-xl">
+    <div class="flex flex-col gap-4">
+      <div class="grid gap-4 [grid-template-columns:repeat(auto-fit,minmax(240px,1fr))]">
+        <div class="flex flex-col gap-2">
+          <label for="customerName" class="font-semibold text-slate-900 dark:text-white">
+            Nom du client
+          </label>
+          <input
+            id="customerName"
+            name="customerName"
+            type="text"
+            pInputText
+            [(ngModel)]="order.customerName"
+            placeholder="Nom complet"
+            class="w-full"
+          />
+          @if (errorFor('customerName')) {
+          <small class="text-red-500">{{ errorFor('customerName') }}</small>
+          }
+        </div>
+        <div class="flex flex-col gap-2">
+          <label for="customerPhoneNumber" class="font-semibold text-slate-900 dark:text-white">
+            Numéro de téléphone
+          </label>
+          <input
+            id="customerPhoneNumber"
+            name="customerPhoneNumber"
+            type="text"
+            pInputText
+            [(ngModel)]="order.customerPhoneNumber"
+            placeholder="034xxxxxxx 032xxxxxxx"
+            class="w-full"
+          />
+          <small class="text-slate-500"> Un ou plusieurs numeros séparés par un espace. </small>
+          @if (errorFor('customerPhoneNumber')) {
+          <small class="text-red-500">{{ errorFor('customerPhoneNumber') }}</small>
+          }
+        </div>
+      </div>
+      <div class="grid gap-4 [grid-template-columns:repeat(auto-fit,minmax(240px,1fr))]">
+        <div class="flex flex-col gap-2">
+          <label for="customerFacebookName" class="font-semibold text-slate-900 dark:text-white">
+            Compte Facebook
+          </label>
+          <input
+            id="customerFacebookName"
+            name="customerFacebookName"
+            type="text"
+            pInputText
+            [(ngModel)]="order.customerFacebookName"
+            placeholder="Compte Facebook (optionnel)"
+            class="w-full"
+          />
+          @if (errorFor('customerFacebookName')) {
+          <small class="text-red-500">{{ errorFor('customerFacebookName') }}</small>
+          }
+        </div>
+        <div class="flex flex-col gap-2 items-start">
+          <label for="isFromFacebook" class="font-semibold text-slate-900 dark:text-white">
+            Commande par Facebook
+          </label>
+          <p-toggleSwitch
+            inputId="isFromFacebook"
+            name="isFromFacebook"
+            [(ngModel)]="order.isFromFacebook"
+          />
+          @if (errorFor('isFromFacebook')) {
+          <small class="text-red-500">{{ errorFor('isFromFacebook') }}</small>
+          }
+        </div>
+      </div>
+    </div>
+  </p-fieldset>
+
+  <p-fieldset legend="Livraison" styleClass="border border-dashed border-slate-200 rounded-xl">
     <div class="flex flex-col gap-4">
       <div class="flex flex-wrap gap-4">
         <div class="flex flex-col gap-2 flex-[4]">
@@ -53,54 +124,53 @@
             [showIcon]="true"
             dateFormat="dd/mm/yy"
             class="w-full"
-            [showTime]="true"
-            hourFormat="24"
             [minDate]="now"
           />
           @if (errorFor('deliveryDate')) {
           <small class="text-red-500">{{ errorFor('deliveryDate') }}</small>
           }
         </div>
+        <div class="flex flex-col gap-2 flex-[2]">
+          <label for="deliveryStartTime" class="font-semibold text-slate-900 dark:text-white">
+            Heure début de livraison
+          </label>
+          <p-datepicker
+            inputId="deliveryStartTime"
+            name="deliveryStartTime"
+            [ngModel]="deliveryStartTimeValue"
+            (ngModelChange)="onDeliveryStartTimeChange($event)"
+            [showIcon]="true"
+            [timeOnly]="true"
+            hourFormat="24"
+            class="w-full"
+          />
+          @if (errorFor('deliveryStartTime')) {
+          <small class="text-red-500">{{ errorFor('deliveryStartTime') }}</small>
+          }
+        </div>
+        <div class="flex flex-col gap-2 flex-[2]">
+          <label for="deliveryEndTime" class="font-semibold text-slate-900 dark:text-white">
+            Heure fin de livraison
+          </label>
+          <p-datepicker
+            inputId="deliveryEndTime"
+            name="deliveryEndTime"
+            [ngModel]="deliveryEndTimeValue"
+            (ngModelChange)="onDeliveryEndTimeChange($event)"
+            [showIcon]="true"
+            [timeOnly]="true"
+            hourFormat="24"
+            class="w-full"
+          />
+          @if (errorFor('deliveryEndTime')) {
+          <small class="text-red-500">{{ errorFor('deliveryEndTime') }}</small>
+          }
+        </div>
       </div>
       <div class="grid gap-4 [grid-template-columns:repeat(auto-fit,minmax(240px,1fr))]">
         <div class="flex flex-col gap-2">
-          <label for="customerName" class="font-semibold text-slate-900 dark:text-white">
-            Nom du client
-          </label>
-          <input
-            id="customerName"
-            name="customerName"
-            type="text"
-            pInputText
-            [(ngModel)]="order.customerName"
-            placeholder="Nom complet"
-            class="w-full"
-          />
-          @if (errorFor('customerName')) {
-          <small class="text-red-500">{{ errorFor('customerName') }}</small>
-          }
-        </div>
-        <div class="flex flex-col gap-2">
-          <label for="customerPhoneNumber" class="font-semibold text-slate-900 dark:text-white">
-            Numéro de téléphone
-          </label>
-          <input
-            id="customerPhoneNumber"
-            name="customerPhoneNumber"
-            type="text"
-            pInputText
-            [(ngModel)]="order.customerPhoneNumber"
-            placeholder="034xxxxxxx 032xxxxxxx"
-            class="w-full"
-          />
-          <small class="text-slate-500"> Un ou plusieurs numeros séparés par un espace. </small>
-          @if (errorFor('customerPhoneNumber')) {
-          <small class="text-red-500">{{ errorFor('customerPhoneNumber') }}</small>
-          }
-        </div>
-        <div class="flex flex-col gap-2">
           <label for="deliveryAddress" class="font-semibold text-slate-900 dark:text-white">
-            Adresse de livraison
+            Adresse de livraison (optionnel)
           </label>
           <input
             id="deliveryAddress"
@@ -108,43 +178,11 @@
             type="text"
             pInputText
             [(ngModel)]="order.deliveryAddress"
-            placeholder="Adresse complète"
+            placeholder="Adresse complète (optionnel)"
             class="w-full"
           />
           @if (errorFor('deliveryAddress')) {
           <small class="text-red-500">{{ errorFor('deliveryAddress') }}</small>
-          }
-        </div>
-      </div>
-      <div class="grid gap-4 [grid-template-columns:repeat(auto-fit,minmax(240px,1fr))]">
-        <div class="flex flex-col gap-2">
-          <label for="customerFacebookName" class="font-semibold text-slate-900 dark:text-white">
-            Compte Facebook
-          </label>
-          <input
-            id="customerFacebookName"
-            name="customerFacebookName"
-            type="text"
-            pInputText
-            [(ngModel)]="order.customerFacebookName"
-            placeholder="Compte Facebook (optionnel)"
-            class="w-full"
-          />
-          @if (errorFor('customerFacebookName')) {
-          <small class="text-red-500">{{ errorFor('customerFacebookName') }}</small>
-          }
-        </div>
-        <div class="flex flex-col gap-2 items-start">
-          <label for="isFromFacebook" class="font-semibold text-slate-900 dark:text-white">
-            Commande par Facebook
-          </label>
-          <p-toggleSwitch
-            inputId="isFromFacebook"
-            name="isFromFacebook"
-            [(ngModel)]="order.isFromFacebook"
-          />
-          @if (errorFor('isFromFacebook')) {
-          <small class="text-red-500">{{ errorFor('isFromFacebook') }}</small>
           }
         </div>
       </div>
@@ -231,7 +269,7 @@
           </div>
           <div class="flex flex-col gap-2 flex-1">
             <label for="size-{{ i }}" class="font-semibold text-slate-900 dark:text-white">
-              Taille
+              Taille / Nombre
             </label>
             <p-inputNumber
               inputId="size-{{ i }}"
@@ -281,7 +319,7 @@
           </div>
           <div class="flex flex-col gap-2 flex-[3]">
             <label for="text-{{ i }}" class="font-semibold text-slate-900 dark:text-white">
-              Texte
+              Texte (optionnel)
             </label>
             <input
               id="text-{{ i }}"
@@ -289,7 +327,7 @@
               type="text"
               pInputText
               [(ngModel)]="item.text"
-              placeholder="Texte à écrire sur le gâteau"
+              placeholder="Texte à mettre sur le gâteau (optionnel)"
               class="w-full"
             />
             @if (errorFor('orderItems.' + i + '.text')) {
@@ -411,18 +449,18 @@
 
   <div class="flex flex-col gap-3 lg:flex-row lg:justify-end lg:items-center">
     <p-button
+      label="Reinitialiser"
+      icon="pi pi-refresh"
+      severity="warn"
+      [disabled]="isLoading"
+      (onClick)="reset()"
+    />
+    <p-button
       label="Enregistrer"
       icon="pi pi-check"
       [disabled]="isLoading"
       [loading]="isLoading"
       (onClick)="submit()"
-    />
-    <p-button
-      label="Reinitialiser"
-      icon="pi pi-refresh"
-      severity="secondary"
-      [disabled]="isLoading"
-      (onClick)="reset()"
     />
   </div>
 </form>
