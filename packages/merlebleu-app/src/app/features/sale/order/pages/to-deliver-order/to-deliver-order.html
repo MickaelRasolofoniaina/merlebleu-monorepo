@@ -27,15 +27,14 @@
     class="w-52"
     [showClear]="true"
   />
+  <p-button label="Filtrer" icon="pi pi-search" (onClick)="applyFilters()" [disabled]="isLoading" severity="info" />
   <p-button
     label="Réinitialiser"
     icon="pi pi-refresh"
-    severity="secondary"
-    [outlined]="true"
+    severity="contrast"
     (onClick)="resetFilters()"
     [disabled]="isLoading"
   />
-  <p-button label="Filtrer" icon="pi pi-search" (onClick)="applyFilters()" [disabled]="isLoading" />
 </div>
 
 <p-table
