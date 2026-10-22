@@ -1,4 +1,4 @@
-import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterOutlet } from '@angular/router';
 import { MenuItem } from 'primeng/api';
@@ -22,19 +22,6 @@ export class AppLayout {
   protected readonly themeService = inject(ThemeService);
   protected readonly sidebarOpen = signal(true);
   protected readonly name = signal('');
-
-  protected readonly settingsItems = computed<MenuItem[]>(() => [
-    {
-      label: this.themeService.isDarkMode() ? 'Theme clair' : 'Theme sombre',
-      icon: this.themeService.isDarkMode() ? 'pi pi-sun' : 'pi pi-moon',
-      command: () => this.themeService.toggleTheme(),
-    },
-    {
-      label: 'Se deconnecter',
-      icon: 'pi pi-sign-out',
-      command: () => this.logout(),
-    },
-  ]);
 
   protected items: MenuItem[] = [
     {

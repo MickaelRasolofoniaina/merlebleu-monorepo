@@ -11,10 +11,19 @@
   </div>
   <div class="flex items-center">
     <p>{{ name() }}</p>
-    <div class="ml-2">
-      <p-button icon="pi pi-cog" severity="contrast" (onClick)="settingsMenu.toggle($event)" />
-      <p-menu #settingsMenu [model]="settingsItems()" [popup]="true" />
-    </div>
+    <p-button
+      [icon]="themeService.isDarkMode() ? 'pi pi-sun' : 'pi pi-moon'"
+      [text]="true"
+      severity="secondary"
+      class="ml-2"
+      (onClick)="themeService.toggleTheme()"
+    />
+    <p-button
+      icon="pi pi-sign-out"
+      [text]="true"
+      severity="secondary"
+      (onClick)="logout()"
+    />
   </div>
 </header>
 <main class="main">
