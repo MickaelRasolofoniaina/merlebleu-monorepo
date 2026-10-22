@@ -43,6 +43,7 @@ export interface Order {
   orderItems: OrderItem[];
   remarks?: string;
   totalAmount: number;
+  deliveryFee: number;
   paidAmount: number;
   balanceAmount: number;
   paymentMethod: PaymentMethod;

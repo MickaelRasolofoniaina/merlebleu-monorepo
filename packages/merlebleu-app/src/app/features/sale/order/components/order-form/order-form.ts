@@ -170,8 +170,9 @@ export class OrderForm implements OnInit, OnChanges {
 
   protected updateBalanceAmount(): void {
     const total = Number(this.order.totalAmount) || 0;
+    const deliveryFee = Number(this.order.deliveryFee) || 0;
     const paid = Number(this.order.paidAmount) || 0;
-    this.order.balanceAmount = Math.max(total - paid, 0);
+    this.order.balanceAmount = Math.max(total + deliveryFee - paid, 0);
   }
 
   protected submit(): void {
@@ -240,12 +241,13 @@ export class OrderForm implements OnInit, OnChanges {
       customerFacebookName: '',
       deliveryDate: formatDate(addDays(new Date(), 1)),
       deliveryStartTime: '08:00',
-      deliveryEndTime: '18:00',
+      deliveryEndTime: '10:00',
       deliveryAddress: '',
       isFromFacebook: false,
       orderItems: [this.buildOrderItem()],
       remarks: '',
       totalAmount: 0,
+      deliveryFee: 0,
       paidAmount: 0,
       balanceAmount: 0,
       paymentMethodId: '',

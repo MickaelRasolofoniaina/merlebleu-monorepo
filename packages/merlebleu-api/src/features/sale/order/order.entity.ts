@@ -30,6 +30,7 @@ export class OrderEntity implements Order {
   orderItems: OrderItemEntity[];
   remarks?: string | undefined;
   totalAmount: number;
+  deliveryFee: number;
   paidAmount: number;
   balanceAmount: number;
   paymentMethod: PaymentMethodEntity;
@@ -134,6 +135,10 @@ export const OrderSchema = new EntitySchema<OrderEntity>({
     },
     totalAmount: {
       type: 'integer',
+    },
+    deliveryFee: {
+      type: 'integer',
+      default: 0,
     },
     paidAmount: {
       type: 'integer',

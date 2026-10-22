@@ -8,6 +8,21 @@
   @if (order(); as order) {
   <div class="flex flex-col gap-6">
     <div class="grid gap-6 lg:grid-cols-2">
+      <p-panel header="Informations générales">
+        <div class="grid gap-3">
+          <div class="flex items-center justify-between">
+            <span class="text-slate-500">Boutique</span>
+            <span class="font-medium text-slate-900 text-right">{{ order.shop.address }}</span>
+          </div>
+          <div class="flex items-center justify-between">
+            <span class="text-slate-500">Date de commande</span>
+            <span class="font-medium text-slate-900">
+              {{ order.orderDate | date: 'dd/MM/yyyy' }}
+            </span>
+          </div>
+        </div>
+      </p-panel>
+
       <p-panel header="Client">
         <div class="grid gap-3">
           <div class="flex items-center justify-between">
@@ -29,38 +44,6 @@
             <span class="font-medium text-slate-900">
               {{ order.isFromFacebook ? 'Oui' : 'Non' }}
             </span>
-          </div>
-        </div>
-      </p-panel>
-
-      <p-panel header="Livraison">
-        <div class="grid gap-3">
-          <div class="flex items-center justify-between">
-            <span class="text-slate-500">Date</span>
-            <span class="font-medium text-slate-900">
-              {{ order.orderDate | date: 'dd/MM/yyyy' }}
-            </span>
-          </div>
-          <div class="flex items-center justify-between">
-            <span class="text-slate-500">Date de livraison</span>
-            <span class="font-medium text-slate-900">
-              {{ order.deliveryDate | date: 'dd/MM/yyyy' }} de {{ order.deliveryStartTime.slice(0, 5) }} à
-              {{ order.deliveryEndTime.slice(0, 5) }}
-            </span>
-          </div>
-          <div class="flex items-center justify-between">
-            <span class="text-slate-500">Adresse</span>
-            <span class="font-medium text-slate-900 text-right">{{ order.deliveryAddress }}</span>
-          </div>
-          <div class="flex items-center justify-between">
-            <span class="text-slate-500">Remarques</span>
-            <span class="font-medium text-slate-900 text-right"
-              >{{ formatRemarks(order.remarks) }}</span
-            >
-          </div>
-          <div class="flex items-center justify-between">
-            <span class="text-slate-500">Boutique</span>
-            <span class="font-medium text-slate-900 text-right">{{ order.shop.address }}</span>
           </div>
         </div>
       </p-panel>
@@ -99,6 +82,28 @@
       </div>
     </p-panel>
 
+    <p-panel header="Livraison">
+      <div class="grid gap-3">
+        <div class="flex items-center justify-between">
+          <span class="text-slate-500">Date de livraison</span>
+          <span class="font-medium text-slate-900">
+            {{ order.deliveryDate | date: 'dd/MM/yyyy' }} de {{ order.deliveryStartTime.slice(0, 5) }} à
+            {{ order.deliveryEndTime.slice(0, 5) }}
+          </span>
+        </div>
+        <div class="flex items-center justify-between">
+          <span class="text-slate-500">Adresse</span>
+          <span class="font-medium text-slate-900 text-right">{{ order.deliveryAddress }}</span>
+        </div>
+        <div class="flex items-center justify-between">
+          <span class="text-slate-500">Remarques</span>
+          <span class="font-medium text-slate-900 text-right"
+            >{{ formatRemarks(order.remarks) }}</span
+          >
+        </div>
+      </div>
+    </p-panel>
+
     <div class="grid gap-6 lg:grid-cols-2">
       <p-panel header="Paiement">
         <div class="grid gap-3">
@@ -106,6 +111,12 @@
             <span class="text-slate-500">Montant total</span>
             <span class="font-medium text-slate-900"
               >{{ order.totalAmount | number: '1.0-2' }}</span
+            >
+          </div>
+          <div class="flex items-center justify-between">
+            <span class="text-slate-500">Frais de livraison / Autres</span>
+            <span class="font-medium text-slate-900"
+              >{{ order.deliveryFee | number: '1.0-2' }}</span
             >
           </div>
           <div class="flex items-center justify-between">

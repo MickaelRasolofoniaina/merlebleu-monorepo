@@ -83,6 +83,9 @@ export const createOrderSchema = z
     totalAmount: z
       .number()
       .positive("Le montant total doit être un nombre positif"),
+    deliveryFee: z
+      .number()
+      .nonnegative("Les frais de livraison doivent être un nombre positif ou zéro"),
     paidAmount: z
       .number()
       .nonnegative("Le montant payé doit être un nombre positif ou zéro"),
@@ -109,13 +112,13 @@ export const createOrderSchema = z
       path: ["deliveryDate"],
     },
   )
-  .refine((data) => data.paidAmount <= data.totalAmount, {
+  .refine((data) => data.paidAmount <= data.totalAmount + data.deliveryFee, {
     message: "L'avance payée ne peut pas être supérieure au montant total",
     path: ["paidAmount"],
   })
-  .refine((data) => data.deliveryEndTime > data.deliveryStartTime, {
+  .refine((data) => data.deliveryEndTime >= data.deliveryStartTime, {
     message:
-      "L'heure de fin de livraison doit être après l'heure de début de livraison",
+      "L'heure de fin de livraison ne peut pas être avant l'heure de début de livraison",
     path: ["deliveryEndTime"],
   });
 

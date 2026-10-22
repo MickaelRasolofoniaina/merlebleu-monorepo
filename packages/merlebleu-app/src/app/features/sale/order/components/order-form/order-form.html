@@ -1,4 +1,49 @@
 <form class="flex flex-col gap-6">
+  <p-fieldset
+    legend="Informations générales"
+    styleClass="border border-dashed border-slate-200 rounded-xl"
+  >
+    <div class="flex flex-wrap gap-4">
+      <div class="flex flex-col gap-2 flex-none">
+        <label for="shopId" class="font-semibold text-slate-900 dark:text-white">
+          Boutique
+        </label>
+        <p-select
+          inputId="shopId"
+          name="shopId"
+          [(ngModel)]="order.shopId"
+          [options]="shops"
+          optionLabel="address"
+          optionValue="id"
+          placeholder="Sélectionnez une boutique"
+          appendTo="body"
+        />
+        @if (errorFor('shopId')) {
+        <small class="text-red-500">{{ errorFor('shopId') }}</small>
+        }
+      </div>
+      <div class="flex flex-col gap-2 flex-[3]">
+        <label for="orderDate" class="font-semibold text-slate-900 dark:text-white">
+          Date de commande
+        </label>
+        <p-datepicker
+          inputId="orderDate"
+          name="orderDate"
+          [ngModel]="orderDateValue"
+          (ngModelChange)="onOrderDateChange($event)"
+          [showIcon]="true"
+          dateFormat="dd/mm/yy"
+          class="w-full"
+          [maxDate]="now"
+          appendTo="body"
+        />
+        @if (errorFor('orderDate')) {
+        <small class="text-red-500">{{ errorFor('orderDate') }}</small>
+        }
+      </div>
+    </div>
+  </p-fieldset>
+
   <p-fieldset legend="Client" styleClass="border border-dashed border-slate-200 rounded-xl">
     <div class="flex flex-col gap-4">
       <div class="grid gap-4 [grid-template-columns:repeat(auto-fit,minmax(240px,1fr))]">
@@ -69,142 +114,6 @@
           <small class="text-red-500">{{ errorFor('isFromFacebook') }}</small>
           }
         </div>
-      </div>
-    </div>
-  </p-fieldset>
-
-  <p-fieldset legend="Livraison" styleClass="border border-dashed border-slate-200 rounded-xl">
-    <div class="flex flex-col gap-4">
-      <div class="flex flex-wrap gap-4">
-        <div class="flex flex-col gap-2 flex-none">
-          <label for="shopId" class="font-semibold text-slate-900 dark:text-white">
-            Boutique
-          </label>
-          <p-select
-            inputId="shopId"
-            name="shopId"
-            [(ngModel)]="order.shopId"
-            [options]="shops"
-            optionLabel="address"
-            optionValue="id"
-            placeholder="Sélectionnez une boutique"
-            appendTo="body"
-          />
-          @if (errorFor('shopId')) {
-          <small class="text-red-500">{{ errorFor('shopId') }}</small>
-          }
-        </div>
-        <div class="flex flex-col gap-2 flex-[3]">
-          <label for="orderDate" class="font-semibold text-slate-900 dark:text-white">
-            Date de commande
-          </label>
-          <p-datepicker
-            inputId="orderDate"
-            name="orderDate"
-            [ngModel]="orderDateValue"
-            (ngModelChange)="onOrderDateChange($event)"
-            [showIcon]="true"
-            dateFormat="dd/mm/yy"
-            class="w-full"
-            [maxDate]="now"
-            appendTo="body"
-          />
-          @if (errorFor('orderDate')) {
-          <small class="text-red-500">{{ errorFor('orderDate') }}</small>
-          }
-        </div>
-      </div>
-      <div class="flex flex-nowrap gap-4">
-        <div class="flex flex-col gap-2 flex-none">
-          <label for="deliveryDate" class="font-semibold text-slate-900 dark:text-white">
-            Date de livraison
-          </label>
-          <p-datepicker
-            inputId="deliveryDate"
-            name="deliveryDate"
-            [ngModel]="deliveryDateValue"
-            (ngModelChange)="onDeliveryDateChange($event)"
-            [showIcon]="true"
-            dateFormat="dd/mm/yy"
-            [minDate]="now"
-            appendTo="body"
-          />
-          @if (errorFor('deliveryDate')) {
-          <small class="text-red-500">{{ errorFor('deliveryDate') }}</small>
-          }
-        </div>
-        <div class="flex flex-col gap-2 flex-none">
-          <label for="deliveryStartTime" class="font-semibold text-slate-900 dark:text-white">
-            Heure début de livraison
-          </label>
-          <p-datepicker
-            inputId="deliveryStartTime"
-            name="deliveryStartTime"
-            [ngModel]="deliveryStartTimeValue"
-            (ngModelChange)="onDeliveryStartTimeChange($event)"
-            [showIcon]="true"
-            [timeOnly]="true"
-            hourFormat="24"
-            appendTo="body"
-          />
-          @if (errorFor('deliveryStartTime')) {
-          <small class="text-red-500">{{ errorFor('deliveryStartTime') }}</small>
-          }
-        </div>
-        <div class="flex flex-col gap-2 flex-none">
-          <label for="deliveryEndTime" class="font-semibold text-slate-900 dark:text-white">
-            Heure fin de livraison
-          </label>
-          <p-datepicker
-            inputId="deliveryEndTime"
-            name="deliveryEndTime"
-            [ngModel]="deliveryEndTimeValue"
-            (ngModelChange)="onDeliveryEndTimeChange($event)"
-            [showIcon]="true"
-            [timeOnly]="true"
-            hourFormat="24"
-            appendTo="body"
-          />
-          @if (errorFor('deliveryEndTime')) {
-          <small class="text-red-500">{{ errorFor('deliveryEndTime') }}</small>
-          }
-        </div>
-      </div>
-      <div class="grid gap-4 [grid-template-columns:repeat(auto-fit,minmax(240px,1fr))]">
-        <div class="flex flex-col gap-2">
-          <label for="deliveryAddress" class="font-semibold text-slate-900 dark:text-white">
-            Adresse de livraison (optionnel)
-          </label>
-          <input
-            id="deliveryAddress"
-            name="deliveryAddress"
-            type="text"
-            pInputText
-            [(ngModel)]="order.deliveryAddress"
-            placeholder="Adresse complète (optionnel)"
-            class="w-full"
-          />
-          @if (errorFor('deliveryAddress')) {
-          <small class="text-red-500">{{ errorFor('deliveryAddress') }}</small>
-          }
-        </div>
-      </div>
-      <div class="flex flex-col gap-2">
-        <label for="remarks" class="font-semibold text-slate-900 dark:text-white">
-          Remarques
-        </label>
-        <textarea
-          id="remarks"
-          name="remarks"
-          pTextarea
-          [(ngModel)]="order.remarks"
-          rows="3"
-          placeholder="Tout autres remarques concernant la commande"
-          class="w-full"
-        ></textarea>
-        @if (errorFor('remarks')) {
-        <small class="text-red-500">{{ errorFor('remarks') }}</small>
-        }
       </div>
     </div>
   </p-fieldset>
@@ -377,72 +286,188 @@
     </div>
   </p-fieldset>
 
+  <p-fieldset legend="Livraison" styleClass="border border-dashed border-slate-200 rounded-xl">
+    <div class="flex flex-col gap-4">
+      <div class="flex flex-nowrap gap-4">
+        <div class="flex flex-col gap-2 flex-none">
+          <label for="deliveryDate" class="font-semibold text-slate-900 dark:text-white">
+            Date de livraison
+          </label>
+          <p-datepicker
+            inputId="deliveryDate"
+            name="deliveryDate"
+            [ngModel]="deliveryDateValue"
+            (ngModelChange)="onDeliveryDateChange($event)"
+            [showIcon]="true"
+            dateFormat="dd/mm/yy"
+            [minDate]="now"
+            appendTo="body"
+          />
+          @if (errorFor('deliveryDate')) {
+          <small class="text-red-500">{{ errorFor('deliveryDate') }}</small>
+          }
+        </div>
+        <div class="flex flex-col gap-2 flex-none">
+          <label for="deliveryStartTime" class="font-semibold text-slate-900 dark:text-white">
+            De
+          </label>
+          <p-datepicker
+            inputId="deliveryStartTime"
+            name="deliveryStartTime"
+            [ngModel]="deliveryStartTimeValue"
+            (ngModelChange)="onDeliveryStartTimeChange($event)"
+            [showIcon]="true"
+            [timeOnly]="true"
+            hourFormat="24"
+            appendTo="body"
+          />
+          @if (errorFor('deliveryStartTime')) {
+          <small class="text-red-500">{{ errorFor('deliveryStartTime') }}</small>
+          }
+        </div>
+        <div class="flex flex-col gap-2 flex-none">
+          <label for="deliveryEndTime" class="font-semibold text-slate-900 dark:text-white">
+            à
+          </label>
+          <p-datepicker
+            inputId="deliveryEndTime"
+            name="deliveryEndTime"
+            [ngModel]="deliveryEndTimeValue"
+            (ngModelChange)="onDeliveryEndTimeChange($event)"
+            [showIcon]="true"
+            [timeOnly]="true"
+            hourFormat="24"
+            appendTo="body"
+          />
+          @if (errorFor('deliveryEndTime')) {
+          <small class="text-red-500">{{ errorFor('deliveryEndTime') }}</small>
+          }
+        </div>
+      </div>
+      <div class="grid gap-4 [grid-template-columns:repeat(auto-fit,minmax(240px,1fr))]">
+        <div class="flex flex-col gap-2">
+          <label for="deliveryAddress" class="font-semibold text-slate-900 dark:text-white">
+            Adresse de livraison (optionnel)
+          </label>
+          <input
+            id="deliveryAddress"
+            name="deliveryAddress"
+            type="text"
+            pInputText
+            [(ngModel)]="order.deliveryAddress"
+            placeholder="Adresse complète (optionnel)"
+            class="w-full"
+          />
+          @if (errorFor('deliveryAddress')) {
+          <small class="text-red-500">{{ errorFor('deliveryAddress') }}</small>
+          }
+        </div>
+      </div>
+      <div class="flex flex-col gap-2">
+        <label for="remarks" class="font-semibold text-slate-900 dark:text-white">
+          Remarques
+        </label>
+        <textarea
+          id="remarks"
+          name="remarks"
+          pTextarea
+          [(ngModel)]="order.remarks"
+          rows="3"
+          placeholder="Tout autres remarques concernant la commande"
+          class="w-full"
+        ></textarea>
+        @if (errorFor('remarks')) {
+        <small class="text-red-500">{{ errorFor('remarks') }}</small>
+        }
+      </div>
+    </div>
+  </p-fieldset>
+
   <p-fieldset legend="Paiement" styleClass="border border-dashed border-slate-200 rounded-xl">
-    <div class="flex flex-nowrap gap-4">
-      <div class="flex flex-col gap-2 flex-none">
-        <label for="totalAmount" class="font-semibold text-slate-900 dark:text-white">
-          Montant total
-        </label>
-        <p-inputNumber
-          inputId="totalAmount"
-          name="totalAmount"
-          [(ngModel)]="order.totalAmount"
-          [min]="0"
-          (ngModelChange)="updateBalanceAmount()"
-          disabled=""
-        />
-        @if (errorFor('totalAmount')) {
-        <small class="text-red-500">{{ errorFor('totalAmount') }}</small>
-        }
+    <div class="flex flex-col gap-4">
+      <div class="flex flex-nowrap gap-4">
+        <div class="flex flex-col gap-2 flex-none">
+          <label for="totalAmount" class="font-semibold text-slate-900 dark:text-white">
+            Montant total
+          </label>
+          <p-inputNumber
+            inputId="totalAmount"
+            name="totalAmount"
+            [(ngModel)]="order.totalAmount"
+            [min]="0"
+            (ngModelChange)="updateBalanceAmount()"
+            disabled=""
+          />
+          @if (errorFor('totalAmount')) {
+          <small class="text-red-500">{{ errorFor('totalAmount') }}</small>
+          }
+        </div>
+        <div class="flex flex-col gap-2 flex-none">
+          <label for="deliveryFee" class="font-semibold text-slate-900 dark:text-white">
+            Frais de livraison / Autres
+          </label>
+          <p-inputNumber
+            inputId="deliveryFee"
+            name="deliveryFee"
+            [(ngModel)]="order.deliveryFee"
+            [min]="0"
+            (ngModelChange)="updateBalanceAmount()"
+          />
+          @if (errorFor('deliveryFee')) {
+          <small class="text-red-500">{{ errorFor('deliveryFee') }}</small>
+          }
+        </div>
+        <div class="flex flex-col gap-2 flex-none">
+          <label for="paidAmount" class="font-semibold text-slate-900 dark:text-white">
+            Avance
+          </label>
+          <p-inputNumber
+            inputId="paidAmount"
+            name="paidAmount"
+            [(ngModel)]="order.paidAmount"
+            [min]="0"
+            [max]="order.totalAmount + order.deliveryFee"
+            (ngModelChange)="updateBalanceAmount()"
+          />
+          @if (errorFor('paidAmount')) {
+          <small class="text-red-500">{{ errorFor('paidAmount') }}</small>
+          }
+        </div>
+        <div class="flex flex-col gap-2 flex-none">
+          <label for="balanceAmount" class="font-semibold text-slate-900 dark:text-white">
+            Reste
+          </label>
+          <p-inputNumber
+            inputId="balanceAmount"
+            name="balanceAmount"
+            [(ngModel)]="order.balanceAmount"
+            [min]="0"
+            disabled=""
+          />
+          @if (errorFor('balanceAmount')) {
+          <small class="text-red-500">{{ errorFor('balanceAmount') }}</small>
+          }
+        </div>
       </div>
-      <div class="flex flex-col gap-2 flex-none">
-        <label for="paidAmount" class="font-semibold text-slate-900 dark:text-white">
-          Avance
-        </label>
-        <p-inputNumber
-          inputId="paidAmount"
-          name="paidAmount"
-          [(ngModel)]="order.paidAmount"
-          [min]="0"
-          [max]="order.totalAmount"
-          (ngModelChange)="updateBalanceAmount()"
-        />
-        @if (errorFor('paidAmount')) {
-        <small class="text-red-500">{{ errorFor('paidAmount') }}</small>
-        }
-      </div>
-      <div class="flex flex-col gap-2 flex-none">
-        <label for="balanceAmount" class="font-semibold text-slate-900 dark:text-white">
-          Reste
-        </label>
-        <p-inputNumber
-          inputId="balanceAmount"
-          name="balanceAmount"
-          [(ngModel)]="order.balanceAmount"
-          [min]="0"
-          disabled=""
-        />
-        @if (errorFor('balanceAmount')) {
-        <small class="text-red-500">{{ errorFor('balanceAmount') }}</small>
-        }
-      </div>
-      <div class="flex flex-col gap-2 flex-none">
-        <label for="paymentMethodId" class="font-semibold text-slate-900 dark:text-white">
-          Methode de paiement
-        </label>
-        <p-select
-          inputId="paymentMethodId"
-          name="paymentMethodId"
-          [(ngModel)]="order.paymentMethodId"
-          [options]="paymentMethods"
-          optionLabel="name"
-          optionValue="id"
-          placeholder="Selectionnez une methode de paiement"
-          appendTo="body"
-        />
-        @if (errorFor('paymentMethodId')) {
-        <small class="text-red-500">{{ errorFor('paymentMethodId') }}</small>
-        }
+      <div class="flex flex-nowrap gap-4">
+        <div class="flex flex-col gap-2 flex-none">
+          <label for="paymentMethodId" class="font-semibold text-slate-900 dark:text-white">
+            Methode de paiement
+          </label>
+          <p-select
+            inputId="paymentMethodId"
+            name="paymentMethodId"
+            [(ngModel)]="order.paymentMethodId"
+            [options]="paymentMethods"
+            optionLabel="name"
+            optionValue="id"
+            placeholder="Methode de paiement"
+            appendTo="body"
+          />
+          @if (errorFor('paymentMethodId')) {
+          <small class="text-red-500">{{ errorFor('paymentMethodId') }}</small>
+          }
+        </div>
       </div>
     </div>
   </p-fieldset>
