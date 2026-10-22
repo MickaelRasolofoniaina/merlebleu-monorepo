@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, ViewChild, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { finalize } from 'rxjs';
 import { TableModule } from 'primeng/table';
@@ -43,6 +43,8 @@ import { OrderFormDialog } from '../../components/order-form-dialog/order-form-d
   styleUrl: './list-order.scss',
 })
 export class ListOrder implements OnInit {
+  @ViewChild(OrderFormDialog) private orderFormDialog!: OrderFormDialog;
+
   private readonly orderService = inject(OrderService);
   private readonly shopService = inject(ShopService);
 
@@ -178,9 +180,10 @@ export class ListOrder implements OnInit {
 
   protected handleOrderSubmit(order: CreateOrderDto | UpdateOrderDto): void {
     this.isFormLoading = true;
+    const isEditing = !!this.editingOrderId;
 
-    const request = this.editingOrderId
-      ? this.orderService.updateOrder(this.editingOrderId, order as UpdateOrderDto)
+    const request = isEditing
+      ? this.orderService.updateOrder(this.editingOrderId!, order as UpdateOrderDto)
       : this.orderService.addOrder(order as CreateOrderDto);
 
     request
@@ -192,6 +195,9 @@ export class ListOrder implements OnInit {
       .subscribe({
         next: () => {
           this.displayOrderFormDialog = false;
+          if (!isEditing) {
+            this.orderFormDialog.resetForm();
+          }
           this.loadOrders(getPageFromFirstRows(this.first, this.rows), this.rows);
         },
       });

@@ -1,4 +1,4 @@
-import { Component, input, model, output } from '@angular/core';
+import { Component, ViewChild, input, model, output } from '@angular/core';
 import { DialogModule } from 'primeng/dialog';
 import { CreateOrderDto, UpdateOrderDto } from '@merlebleu/shared';
 import { OrderForm } from '../order-form/order-form';
@@ -10,6 +10,8 @@ import { OrderForm } from '../order-form/order-form';
   styleUrl: './order-form-dialog.scss',
 })
 export class OrderFormDialog {
+  @ViewChild(OrderForm) private orderForm!: OrderForm;
+
   orderData = input<CreateOrderDto | UpdateOrderDto | undefined>(undefined);
   isEdit = input(false);
   isLoading = input(false);
@@ -19,5 +21,9 @@ export class OrderFormDialog {
 
   protected get header(): string {
     return this.isEdit() ? 'Modifier commande' : 'Nouvelle commande';
+  }
+
+  public resetForm(): void {
+    this.orderForm.reset();
   }
 }

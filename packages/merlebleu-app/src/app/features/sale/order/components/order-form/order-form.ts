@@ -194,7 +194,7 @@ export class OrderForm implements OnInit, OnChanges {
     this.orderSubmit.emit(this.order);
   }
 
-  protected reset(): void {
+  public reset(): void {
     if (this.orderData) {
       this.order = this.deepCopyOrder(this.orderData);
     } else {
