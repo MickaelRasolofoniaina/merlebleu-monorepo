@@ -22,6 +22,13 @@
   (filter)="onPastryFilter($event)"
   (resetFilter)="onPastryReset()"
 />
+} @else if (displayMode() === CALENDAR_VIEW) {
+<order-calendar-view
+  [orders]="calendarOrders()"
+  [loading]="isCalendarLoading"
+  (rangeChange)="onCalendarRangeChange($event)"
+  (eventClick)="openOrderDetail($event)"
+/>
 } @else {
 <div class="flex flex-wrap gap-3 items-center mb-4">
   <input

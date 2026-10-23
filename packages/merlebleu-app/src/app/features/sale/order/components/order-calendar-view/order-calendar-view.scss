@@ -1,0 +1,33 @@
+:host {
+  display: block;
+}
+
+::ng-deep .fc-toolbar-title {
+  text-transform: capitalize;
+}
+
+::ng-deep .fc-event {
+  cursor: pointer;
+  border: none;
+  font-size: 0.8rem;
+}
+
+::ng-deep .order-status-info {
+  background-color: #3b82f6;
+}
+
+::ng-deep .order-status-success {
+  background-color: #22c55e;
+}
+
+::ng-deep .order-status-warn {
+  background-color: #f97316;
+}
+
+::ng-deep .order-status-danger {
+  background-color: #ef4444;
+}
+
+::ng-deep .order-status-contrast {
+  background-color: #64748b;
+}

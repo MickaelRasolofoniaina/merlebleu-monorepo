@@ -29,6 +29,10 @@ import { UserPreferencesService } from '@shared/services/user-preferences.servic
 import { OrderDetailDialog } from '../../components/order-detail-dialog/order-detail-dialog';
 import { OrderFormDialog } from '../../components/order-form-dialog/order-form-dialog';
 import { PastryOrderTable } from '../../components/pastry-order-table/pastry-order-table';
+import { OrderCalendarView } from '../../components/order-calendar-view/order-calendar-view';
+
+const CALENDAR_VIEW = 'CALENDAR' as const;
+type ListOrderDisplayMode = OrderDisplayMode | typeof CALENDAR_VIEW;
 
 @Component({
   selector: 'list-order',
@@ -45,6 +49,7 @@ import { PastryOrderTable } from '../../components/pastry-order-table/pastry-ord
     OrderDetailDialog,
     OrderFormDialog,
     PastryOrderTable,
+    OrderCalendarView,
   ],
   templateUrl: './list-order.html',
   styleUrl: './list-order.scss',
@@ -57,15 +62,20 @@ export class ListOrder implements OnInit {
   private readonly userPreferencesService = inject(UserPreferencesService);
 
   protected readonly OrderDisplayMode = OrderDisplayMode;
-  protected displayMode = signal<OrderDisplayMode>(OrderDisplayMode.STANDARD);
+  protected readonly CALENDAR_VIEW = CALENDAR_VIEW;
+  protected displayMode = signal<ListOrderDisplayMode>(OrderDisplayMode.STANDARD);
   protected displayModeOptions = [
     { label: 'Standard', value: OrderDisplayMode.STANDARD },
     { label: 'Pâtissier', value: OrderDisplayMode.PASTRY },
+    { label: 'Calendrier', value: CALENDAR_VIEW },
   ];
 
   protected orders = signal<Order[]>([]);
   protected orderItemRows = signal<OrderItemRowDto[]>([]);
   protected pastryFilters: OrderItemRowFilters = {};
+  protected calendarOrders = signal<Order[]>([]);
+  protected isCalendarLoading = false;
+  private calendarRange = this.getDefaultCalendarRange();
   protected shops = signal<Shop[]>([]);
   protected isLoading = false;
   protected totalRecords = 0;
@@ -93,26 +103,39 @@ export class ListOrder implements OnInit {
   protected isFormLoading = false;
   protected displayOrderFormDialog = false;
 
+  private hasManualDisplayMode = false;
+
   ngOnInit(): void {
     this.shopService.getAll().subscribe((shops) => this.shops.set(shops));
 
     this.userPreferencesService.getCurrentUser().subscribe({
       next: (user) => {
+        if (this.hasManualDisplayMode) {
+          return;
+        }
         this.displayMode.set(user.defaultOrderDisplayMode ?? OrderDisplayMode.STANDARD);
         this.loadOrders();
       },
       error: () => {
-        this.loadOrders();
+        if (!this.hasManualDisplayMode) {
+          this.loadOrders();
+        }
       },
     });
   }
 
   protected onDisplayModeChange(): void {
+    this.hasManualDisplayMode = true;
     this.first = 0;
     this.loadOrders(1, this.rows);
   }
 
   protected loadOrders(page = 1, limit = this.rows): void {
+    if (this.displayMode() === CALENDAR_VIEW) {
+      this.loadCalendarOrders();
+      return;
+    }
+
     if (this.displayMode() === OrderDisplayMode.PASTRY) {
       this.loadOrderItemRows(page, limit);
       return;
@@ -168,6 +191,47 @@ export class ListOrder implements OnInit {
           this.totalRecords = response.total;
         },
       });
+  }
+
+  private getDefaultCalendarRange(): { from: string; to: string } {
+    const now = new Date();
+    const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const firstDayOfNextMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+
+    return {
+      from: formatDate(firstDayOfMonth),
+      to: formatDate(firstDayOfNextMonth),
+    };
+  }
+
+  private loadCalendarOrders(): void {
+    this.isCalendarLoading = true;
+
+    const filterParams: Record<string, unknown> = {
+      deliveryDateFrom: this.calendarRange.from,
+      deliveryDateTo: this.calendarRange.to,
+    };
+    if (this.filters.shopId) {
+      filterParams['shopId'] = this.filters.shopId;
+    }
+
+    this.orderService
+      .listOrders({ page: 1, limit: 1000 }, filterParams)
+      .pipe(
+        finalize(() => {
+          this.isCalendarLoading = false;
+        }),
+      )
+      .subscribe({
+        next: (response) => {
+          this.calendarOrders.set(response.data);
+        },
+      });
+  }
+
+  protected onCalendarRangeChange(range: { from: string; to: string }): void {
+    this.calendarRange = range;
+    this.loadCalendarOrders();
   }
 
   protected onPastryFilter(filters: OrderItemRowFilters): void {
