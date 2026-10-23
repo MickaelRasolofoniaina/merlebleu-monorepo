@@ -3,7 +3,12 @@ import { Repository } from 'typeorm';
 import { UserEntity, UserSchema } from './user.entity';
 import { ShopEntity } from '../../shop/shop.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { CreateUserDto, UpdateUserDto, UserDto } from '@merlebleu/shared';
+import {
+  CreateUserDto,
+  UpdateUserDto,
+  UpdateUserPreferencesDto,
+  UserDto,
+} from '@merlebleu/shared';
 
 @Injectable()
 export class UserService {
@@ -31,6 +36,7 @@ export class UserService {
       name: user.name,
       email: user.email,
       shop: user.shop ?? undefined,
+      defaultOrderDisplayMode: user.defaultOrderDisplayMode ?? undefined,
     };
   }
 
@@ -109,6 +115,24 @@ export class UserService {
       name: user.name,
       email: user.email,
       shop: user.shop ?? undefined,
+      defaultOrderDisplayMode: user.defaultOrderDisplayMode ?? undefined,
     }));
+  }
+
+  async updateUserPreferences(
+    id: string,
+    updates: UpdateUserPreferencesDto,
+  ): Promise<UserDto> {
+    const user = await this.userRepository.findOne({ where: { id } });
+
+    if (!user) {
+      throw new NotFoundException(`User with id ${id} not found`);
+    }
+
+    Object.assign(user, updates);
+
+    await this.userRepository.save(user);
+
+    return this.findUserById(id);
   }
 }

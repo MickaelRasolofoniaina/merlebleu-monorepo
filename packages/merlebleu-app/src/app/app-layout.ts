@@ -106,6 +106,11 @@ export class AppLayout {
           routerLink: ['/identity/user'],
         },
         {
+          label: 'Mon profil',
+          icon: 'pi pi-id-card',
+          routerLink: ['/identity/profile'],
+        },
+        {
           label: 'Roles',
           icon: 'pi pi-users',
         },

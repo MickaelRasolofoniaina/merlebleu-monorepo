@@ -17,6 +17,11 @@ export enum Shape {
   PERSONNALISE = "Personnalisé",
 }
 
+export enum OrderDisplayMode {
+  STANDARD = "STANDARD",
+  PASTRY = "PASTRY",
+}
+
 export interface OrderItem {
   type: string;
   size: number;

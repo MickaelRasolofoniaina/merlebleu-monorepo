@@ -1,5 +1,6 @@
 import z from "zod";
 import { Shop } from "../../shop/shop";
+import { OrderDisplayMode } from "../../sale/order/order";
 
 export const createUserSchema = z.object({
   name: z.string().min(1, "Veuillez remplir le nom de l'utilisateur"),
@@ -47,12 +48,18 @@ export const signInUserSchema = z.object({
     .min(1, "Veuillez remplir le mot de passe de l'utilisateur"),
 });
 
+export const updateUserPreferencesSchema = z.object({
+  defaultOrderDisplayMode: z.enum(OrderDisplayMode),
+});
+
 export type CreateUserDto = z.infer<typeof createUserSchema>;
 export type UpdateUserDto = z.infer<typeof updateUserSchema>;
+export type UpdateUserPreferencesDto = z.infer<typeof updateUserPreferencesSchema>;
 export type UserDto = {
   id: string;
   name: string;
   email: string;
   shop?: Shop;
+  defaultOrderDisplayMode?: OrderDisplayMode;
 };
 export type SignInUserDto = z.infer<typeof signInUserSchema>;

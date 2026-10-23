@@ -1,22 +1,27 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Brackets, Repository } from 'typeorm';
-import { OrderEntity, OrderItemEntity } from './order.entity';
+import { Repository } from 'typeorm';
+import { OrderEntity, OrderItemEntity, OrderItemSchema } from './order.entity';
 import { CreateOrderDto, UpdateOrderDto } from './order.dto';
-import { OrderItemDto, OrderStatus, ResultPaged } from '@merlebleu/shared';
+import {
+  OrderItemDto,
+  OrderItemRowDto,
+  OrderStatus,
+  ResultPaged,
+  Shape,
+} from '@merlebleu/shared';
 import { getPaginationParams } from '@shared/pagination/pagination.utils';
 import { formatDate } from '@shared/date/date.utils';
 import { PaymentService } from '../payment/payment.service';
 import { ShopService } from '../../shop/shop.service';
-
-const TALATAMATY_SHOP_ID = 'd644ffcf-c069-4d1d-8e45-b5fa93c38b3b';
-const ANOSY_AVARATRA_SHOP_ID = '0ac4b6aa-c3b5-43f5-8f8f-67257b4fb7fb';
 
 @Injectable()
 export class OrderService {
   constructor(
     @InjectRepository(OrderEntity)
     private orderRepository: Repository<OrderEntity>,
+    @InjectRepository(OrderItemSchema)
+    private orderItemRepository: Repository<OrderItemEntity>,
     private paymentService: PaymentService,
     private shopService: ShopService,
   ) {}
@@ -51,6 +56,7 @@ export class OrderService {
       deliveryDateTo?: string;
       customerName?: string;
       status?: OrderStatus;
+      statuses?: OrderStatus[];
       shopId?: string;
     },
   ): Promise<ResultPaged<OrderEntity>> {
@@ -62,7 +68,8 @@ export class OrderService {
       .leftJoinAndSelect('orders.paymentMethod', 'paymentMethod')
       .leftJoinAndSelect('orders.shop', 'shop')
       .orderBy('orders.deliveryDate', 'ASC')
-      .addOrderBy('orders.deliveryStartTime', 'ASC');
+      .addOrderBy('orders.deliveryStartTime', 'ASC')
+      .addOrderBy('orders.id', 'ASC');
 
     if (filters?.orderDate) {
       query.andWhere('orders.orderDate = :orderDate', {
@@ -98,6 +105,10 @@ export class OrderService {
       query.andWhere('orders.orderStatus = :status', {
         status: filters.status,
       });
+    } else if (filters?.statuses?.length) {
+      query.andWhere('orders.orderStatus IN (:...statuses)', {
+        statuses: filters.statuses,
+      });
     }
 
     if (filters?.shopId) {
@@ -122,22 +133,19 @@ export class OrderService {
     customerName?: string,
     shopId?: string,
     status?: OrderStatus,
+    orderDate?: string,
+    deliveryDate?: string,
   ): Promise<ResultPaged<OrderEntity>> {
-    const now = new Date();
-    const todayStart = new Date(
-      now.getFullYear(),
-      now.getMonth(),
-      now.getDate(),
-    );
-    const tomorrowStart = new Date(todayStart);
-    tomorrowStart.setDate(tomorrowStart.getDate() + 1);
+    const today = this.getToday();
 
     return this.listOrders(page, limit, {
-      deliveryDateFrom: formatDate(todayStart),
-      deliveryDateTo: formatDate(tomorrowStart),
+      deliveryDateFrom: today,
       customerName,
       shopId,
       status,
+      statuses: status ? undefined : [OrderStatus.TODELIVER],
+      orderDate,
+      deliveryDate,
     });
   }
 
@@ -147,52 +155,103 @@ export class OrderService {
     customerName?: string,
     shopId?: string,
     status?: OrderStatus,
+    orderDate?: string,
+    deliveryDate?: string,
   ): Promise<ResultPaged<OrderEntity>> {
+    const today = this.getToday();
+
+    return this.listOrders(page, limit, {
+      deliveryDateFrom: today,
+      customerName,
+      shopId,
+      status,
+      statuses: status
+        ? undefined
+        : [OrderStatus.TODO, OrderStatus.INPROGRESS],
+      orderDate,
+      deliveryDate,
+    });
+  }
+
+  async listOrderItems(
+    page = 1,
+    limit = 20,
+    filters?: {
+      customerName?: string;
+      deliveryDate?: string;
+      deliveryDateFrom?: string;
+      deliveryDateTo?: string;
+      type?: string;
+      shape?: Shape;
+      text?: string;
+      decoration?: string;
+      size?: number;
+      statuses?: OrderStatus[];
+    },
+  ): Promise<ResultPaged<OrderItemRowDto>> {
     const pagination = getPaginationParams({ page, limit });
 
-    const now = new Date();
-    const todayStart = new Date(
-      now.getFullYear(),
-      now.getMonth(),
-      now.getDate(),
-    );
-    const tomorrowStart = new Date(todayStart);
-    tomorrowStart.setDate(tomorrowStart.getDate() + 1);
-
-    const today = formatDate(todayStart);
-    const tomorrow = formatDate(tomorrowStart);
-
-    const query = this.orderRepository
-      .createQueryBuilder('orders')
-      .leftJoinAndSelect('orders.orderItems', 'orderItems')
-      .leftJoinAndSelect('orders.paymentMethod', 'paymentMethod')
-      .leftJoinAndSelect('orders.shop', 'shop')
+    const query = this.orderItemRepository
+      .createQueryBuilder('orderItems')
+      .innerJoinAndSelect('orderItems.order', 'orders')
       .orderBy('orders.deliveryDate', 'ASC')
       .addOrderBy('orders.deliveryStartTime', 'ASC')
-      .where(
-        new Brackets((qb) => {
-          qb.where('orders.deliveryDate = :tomorrow and shop.Id = :talatamatyShopId', {
-            tomorrow,
-            talatamatyShopId: TALATAMATY_SHOP_ID
-          }).orWhere('orders.deliveryDate = :today and shop.Id = :anosyShopId', {
-            today,
-            anosyShopId: ANOSY_AVARATRA_SHOP_ID
-          });
-        }),
-      );
+      .addOrderBy('orders.id', 'ASC');
 
-    if (customerName) {
+    if (filters?.customerName) {
       query.andWhere('orders.customerName ILIKE :customerName', {
-        customerName: `%${customerName}%`,
+        customerName: `%${filters.customerName}%`,
       });
     }
 
-    if (shopId) {
-      query.andWhere('shop.id = :filterShopId', { filterShopId: shopId });
+    if (filters?.deliveryDate) {
+      query.andWhere('orders.deliveryDate = :deliveryDate', {
+        deliveryDate: filters.deliveryDate,
+      });
     }
 
-    if (status) {
-      query.andWhere('orders.orderStatus = :status', { status });
+    if (filters?.deliveryDateFrom) {
+      query.andWhere('orders.deliveryDate >= :deliveryDateFrom', {
+        deliveryDateFrom: filters.deliveryDateFrom,
+      });
+    }
+
+    if (filters?.deliveryDateTo) {
+      query.andWhere('orders.deliveryDate < :deliveryDateTo', {
+        deliveryDateTo: filters.deliveryDateTo,
+      });
+    }
+
+    if (filters?.type) {
+      query.andWhere('orderItems.type ILIKE :type', {
+        type: `%${filters.type}%`,
+      });
+    }
+
+    if (filters?.shape) {
+      query.andWhere('orderItems.shape = :shape', { shape: filters.shape });
+    }
+
+    if (filters?.text) {
+      query.andWhere('orderItems.text ILIKE :text', {
+        text: `%${filters.text}%`,
+      });
+    }
+
+    if (filters?.decoration) {
+      query.andWhere('orderItems.decoration ILIKE :decoration', {
+        decoration: `%${filters.decoration}%`,
+      });
+    }
+
+    if (filters?.size !== undefined) {
+      query.andWhere('orderItems.size = :size', { size: filters.size });
+    }
+
+    if (filters?.statuses?.length) {
+      query.andWhere('orders.orderStatus IN (:...statuses)', {
+        statuses: filters.statuses,
+      });
     }
 
     query.take(pagination.limit).skip(pagination.skip);
@@ -200,11 +259,53 @@ export class OrderService {
     const [data, total] = await query.getManyAndCount();
 
     return {
-      data: data.map((order) => this.sanitizeOrder(order)),
+      data: data.map((item) => this.toOrderItemRowDto(item)),
       total,
       page: pagination.page,
       limit: pagination.limit,
     };
+  }
+
+  async listOrderItemsToDeliver(
+    page = 1,
+    limit = 20,
+    filters?: {
+      customerName?: string;
+      type?: string;
+      shape?: Shape;
+      text?: string;
+      decoration?: string;
+      size?: number;
+    },
+  ): Promise<ResultPaged<OrderItemRowDto>> {
+    const today = this.getToday();
+
+    return this.listOrderItems(page, limit, {
+      ...filters,
+      deliveryDateFrom: today,
+      statuses: [OrderStatus.TODELIVER],
+    });
+  }
+
+  async listOrderItemsToPrepare(
+    page = 1,
+    limit = 20,
+    filters?: {
+      customerName?: string;
+      type?: string;
+      shape?: Shape;
+      text?: string;
+      decoration?: string;
+      size?: number;
+    },
+  ): Promise<ResultPaged<OrderItemRowDto>> {
+    const today = this.getToday();
+
+    return this.listOrderItems(page, limit, {
+      ...filters,
+      deliveryDateFrom: today,
+      statuses: [OrderStatus.TODO, OrderStatus.INPROGRESS],
+    });
   }
 
   async getOrderById(id: string): Promise<OrderEntity> {
@@ -312,5 +413,35 @@ export class OrderService {
       ...order,
       orderItems: (order.orderItems ?? []).map(({ order: _, ...item }) => item),
     } as OrderEntity;
+  }
+
+  private getToday(): string {
+    const now = new Date();
+    const todayStart = new Date(
+      now.getFullYear(),
+      now.getMonth(),
+      now.getDate(),
+    );
+
+    return formatDate(todayStart);
+  }
+
+  private toOrderItemRowDto(item: OrderItemEntity): OrderItemRowDto {
+    const order = item.order as OrderEntity;
+
+    return {
+      orderId: order.id,
+      itemId: item.id,
+      orderStatus: order.orderStatus,
+      customerName: order.customerName,
+      deliveryDate: order.deliveryDate,
+      deliveryStartTime: order.deliveryStartTime,
+      deliveryEndTime: order.deliveryEndTime,
+      type: item.type,
+      shape: item.shape,
+      text: item.text,
+      decoration: item.decoration,
+      size: item.size,
+    };
   }
 }

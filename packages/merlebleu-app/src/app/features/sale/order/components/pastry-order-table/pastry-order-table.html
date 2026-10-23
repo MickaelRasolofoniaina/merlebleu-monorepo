@@ -1,0 +1,152 @@
+<div class="flex flex-wrap gap-3 items-center mb-4">
+  <input
+    pInputText
+    [(ngModel)]="filters.customerName"
+    placeholder="Nom du client..."
+    class="w-52"
+  />
+  <p-datepicker
+    [(ngModel)]="filters.deliveryDate"
+    [showIcon]="true"
+    dateFormat="dd/mm/yy"
+    placeholder="Date de livraison"
+    class="w-52"
+  />
+  <p-select
+    [(ngModel)]="filters.type"
+    [options]="patisserieItems"
+    optionLabel="label"
+    optionValue="label"
+    [filter]="true"
+    filterPlaceholder="Rechercher un type..."
+    placeholder="Type"
+    class="w-44"
+    [showClear]="true"
+  />
+  <p-select
+    [(ngModel)]="filters.shape"
+    [options]="shapes"
+    placeholder="Forme"
+    class="w-44"
+    [showClear]="true"
+  />
+  <div class="w-40">
+    <p-inputNumber
+      [(ngModel)]="filters.size"
+      placeholder="Taille/Nombre"
+      [style]="{ width: '100%' }"
+      inputStyleClass="w-full"
+    />
+  </div>
+  <p-button
+    label="Filtrer"
+    icon="pi pi-search"
+    (onClick)="applyFilters()"
+    [disabled]="loading()"
+    severity="info"
+  />
+  <p-button
+    label="Réinitialiser"
+    icon="pi pi-refresh"
+    severity="contrast"
+    (onClick)="resetFilters()"
+    [disabled]="loading()"
+  />
+</div>
+
+<p-table
+  [value]="rows()"
+  [loading]="loading()"
+  [tableStyle]="{ 'min-width': '50rem' }"
+  [stripedRows]="true"
+  [paginator]="true"
+  [rows]="pageSize()"
+  [first]="first()"
+  [totalRecords]="totalRecords()"
+  [lazy]="true"
+  (onPage)="onPageChange($event)"
+>
+  <ng-template #header>
+    <tr>
+      <th>Client</th>
+      <th>Date de livraison</th>
+      <th>Priorité</th>
+      <th>Type</th>
+      <th>Forme</th>
+      <th>Texte</th>
+      <th>Décoration</th>
+      <th class="text-right!">Taille/Nombre</th>
+      <th>Statut</th>
+      @if (hasActions()) {
+      <th class="text-center!">Actions</th>
+      }
+    </tr>
+  </ng-template>
+  <ng-template #body let-row>
+    <tr>
+      <td>{{ row.customerName }}</td>
+      <td>
+        {{ row.deliveryDate | date: 'dd/MM/yyyy' }} de {{ row.deliveryStartTime.slice(0, 5) }} à
+        {{ row.deliveryEndTime.slice(0, 5) }}
+      </td>
+      <td>
+        <p-badge
+          [value]="getPriorityLabel(row)"
+          [severity]="getPriorityColor(row)"
+          style="height: fit-content"
+        ></p-badge>
+      </td>
+      <td>{{ row.type }}</td>
+      <td>{{ row.shape }}</td>
+      <td>{{ row.text || '-' }}</td>
+      <td>{{ row.decoration || '-' }}</td>
+      <td class="text-right!">{{ row.size }}</td>
+      <td>
+        <p-badge
+          [value]="getStatus(row.orderStatus)"
+          [severity]="getStatusColor(row.orderStatus)"
+          style="height: fit-content"
+        ></p-badge>
+      </td>
+      @if (hasActions()) {
+      <td class="text-center!">
+        @if (showDetailAction()) {
+        <p-button
+          icon="pi pi-info-circle"
+          severity="info"
+          class="mr-2"
+          (onClick)="onViewDetail(row)"
+          size="small"
+        />
+        }
+        @if (showEditAction()) {
+        <p-button
+          icon="pi pi-pencil"
+          severity="warn"
+          class="mr-2"
+          (onClick)="onEdit(row)"
+          size="small"
+        />
+        }
+        @if (showCompleteAction()) {
+        <p-button
+          icon="pi pi-check"
+          [loading]="isCompleting(row.orderId)"
+          (onClick)="onComplete(row)"
+          severity="success"
+          [disabled]="isOrderCompleted(row)"
+          size="small"
+        />
+        }
+      </td>
+      }
+    </tr>
+  </ng-template>
+  <ng-template #emptymessage>
+    <tr>
+      <td [attr.colspan]="hasActions() ? 10 : 9" class="text-center-important py-6">
+        Aucune ligne à afficher
+      </td>
+    </tr>
+  </ng-template>
+</p-table>

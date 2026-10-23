@@ -7,23 +7,28 @@ import {
   CreateOrderDto,
   DEFAULT_PAGE_SIZE,
   Order,
+  OrderDisplayMode,
+  OrderItemRowDto,
   OrderStatus,
   UpdateOrderDto,
 } from '@merlebleu/shared';
-import { OrderService } from '../../order.service';
+import { OrderItemRowFilters, OrderService } from '../../order.service';
 import { ShopService } from '@features/shop/shop-list/shop.service';
 import { Button } from 'primeng/button';
 import { BadgeModule } from 'primeng/badge';
 import { InputTextModule } from 'primeng/inputtext';
 import { DatePickerModule } from 'primeng/datepicker';
 import { SelectModule } from 'primeng/select';
+import { SelectButtonModule } from 'primeng/selectbutton';
 import { formatDate } from '@shared/utils/date';
 import { getPageFromFirstRows } from '@shared/utils/pagination';
 import { ORDER_STATUSES, getOrderStatusLabel, getOrderStatusColor } from '@shared/utils/order';
 import { getUserShopId } from '@shared/utils/user';
 import { Shop } from '@merlebleu/shared';
+import { UserPreferencesService } from '@shared/services/user-preferences.service';
 import { OrderDetailDialog } from '../../components/order-detail-dialog/order-detail-dialog';
 import { OrderFormDialog } from '../../components/order-form-dialog/order-form-dialog';
+import { PastryOrderTable } from '../../components/pastry-order-table/pastry-order-table';
 
 @Component({
   selector: 'list-order',
@@ -36,8 +41,10 @@ import { OrderFormDialog } from '../../components/order-form-dialog/order-form-d
     InputTextModule,
     DatePickerModule,
     SelectModule,
+    SelectButtonModule,
     OrderDetailDialog,
     OrderFormDialog,
+    PastryOrderTable,
   ],
   templateUrl: './list-order.html',
   styleUrl: './list-order.scss',
@@ -47,8 +54,18 @@ export class ListOrder implements OnInit {
 
   private readonly orderService = inject(OrderService);
   private readonly shopService = inject(ShopService);
+  private readonly userPreferencesService = inject(UserPreferencesService);
+
+  protected readonly OrderDisplayMode = OrderDisplayMode;
+  protected displayMode = signal<OrderDisplayMode>(OrderDisplayMode.STANDARD);
+  protected displayModeOptions = [
+    { label: 'Standard', value: OrderDisplayMode.STANDARD },
+    { label: 'Pâtissier', value: OrderDisplayMode.PASTRY },
+  ];
 
   protected orders = signal<Order[]>([]);
+  protected orderItemRows = signal<OrderItemRowDto[]>([]);
+  protected pastryFilters: OrderItemRowFilters = {};
   protected shops = signal<Shop[]>([]);
   protected isLoading = false;
   protected totalRecords = 0;
@@ -78,10 +95,29 @@ export class ListOrder implements OnInit {
 
   ngOnInit(): void {
     this.shopService.getAll().subscribe((shops) => this.shops.set(shops));
-    this.loadOrders();
+
+    this.userPreferencesService.getCurrentUser().subscribe({
+      next: (user) => {
+        this.displayMode.set(user.defaultOrderDisplayMode ?? OrderDisplayMode.STANDARD);
+        this.loadOrders();
+      },
+      error: () => {
+        this.loadOrders();
+      },
+    });
+  }
+
+  protected onDisplayModeChange(): void {
+    this.first = 0;
+    this.loadOrders(1, this.rows);
   }
 
   protected loadOrders(page = 1, limit = this.rows): void {
+    if (this.displayMode() === OrderDisplayMode.PASTRY) {
+      this.loadOrderItemRows(page, limit);
+      return;
+    }
+
     this.isLoading = true;
 
     const filterParams: Record<string, unknown> = {};
@@ -114,6 +150,36 @@ export class ListOrder implements OnInit {
           this.totalRecords = response.total;
         },
       });
+  }
+
+  private loadOrderItemRows(page: number, limit: number): void {
+    this.isLoading = true;
+
+    this.orderService
+      .listOrderItems({ page, limit }, this.pastryFilters)
+      .pipe(
+        finalize(() => {
+          this.isLoading = false;
+        }),
+      )
+      .subscribe({
+        next: (response) => {
+          this.orderItemRows.set(response.data);
+          this.totalRecords = response.total;
+        },
+      });
+  }
+
+  protected onPastryFilter(filters: OrderItemRowFilters): void {
+    this.pastryFilters = filters;
+    this.first = 0;
+    this.loadOrders(1, this.rows);
+  }
+
+  protected onPastryReset(): void {
+    this.pastryFilters = {};
+    this.first = 0;
+    this.loadOrders(1, this.rows);
   }
 
   protected onPageChange(event: { first: number; rows: number }): void {
@@ -152,6 +218,18 @@ export class ListOrder implements OnInit {
   protected openOrderDetail(order: Order): void {
     this.selectedOrder.set(order);
     this.displayOrderDetailDialog = true;
+  }
+
+  protected onPastryViewDetail(orderId: string): void {
+    this.orderService.getOrderById(orderId).subscribe((order) => {
+      this.openOrderDetail(order);
+    });
+  }
+
+  protected onPastryEdit(orderId: string): void {
+    this.orderService.getOrderById(orderId).subscribe((order) => {
+      this.openEditOrder(order);
+    });
   }
 
   private truncate(value: string, maxLength: number): string {

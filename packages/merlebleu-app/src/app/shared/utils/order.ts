@@ -93,3 +93,43 @@ export function getOrderStatusConfig(
 
   return ORDER_STATUSES.find((s) => s.value === orderStatus);
 }
+
+function getDeliveryDayDiff(deliveryDate: string): number {
+  const [year, month, day] = deliveryDate.split('-').map(Number);
+  const deliveryUtc = Date.UTC(year, month - 1, day);
+
+  const now = new Date();
+  const todayUtc = Date.UTC(now.getFullYear(), now.getMonth(), now.getDate());
+
+  return Math.round((deliveryUtc - todayUtc) / (24 * 60 * 60 * 1000));
+}
+
+export function getDeliveryPriorityLabel(deliveryDate: string): string {
+  const dayDiff = getDeliveryDayDiff(deliveryDate);
+
+  if (dayDiff <= 1) {
+    return 'Urgent';
+  }
+
+  if (dayDiff <= 3) {
+    return 'Bientôt';
+  }
+
+  return 'Plus tard';
+}
+
+export function getDeliveryPriorityColor(
+  deliveryDate: string,
+): 'danger' | 'warn' | 'info' {
+  const dayDiff = getDeliveryDayDiff(deliveryDate);
+
+  if (dayDiff <= 1) {
+    return 'danger';
+  }
+
+  if (dayDiff <= 3) {
+    return 'warn';
+  }
+
+  return 'info';
+}

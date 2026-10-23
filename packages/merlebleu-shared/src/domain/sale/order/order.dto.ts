@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { Shape } from "./order";
+import { OrderStatus, Shape } from "./order";
 
 export const createOrderItemSchema = z.object({
   type: z
@@ -128,3 +128,18 @@ export type CreateOrderDto = z.infer<typeof createOrderSchema>;
 export type UpdateOrderDto = z.infer<typeof updateOrderSchema>;
 
 export type OrderItemDto = z.infer<typeof createOrderItemSchema>;
+
+export interface OrderItemRowDto {
+  orderId: string;
+  itemId: string;
+  orderStatus?: OrderStatus;
+  customerName: string;
+  deliveryDate: string;
+  deliveryStartTime: string;
+  deliveryEndTime: string;
+  type: string;
+  shape: Shape;
+  text?: string;
+  decoration?: string;
+  size: number;
+}
