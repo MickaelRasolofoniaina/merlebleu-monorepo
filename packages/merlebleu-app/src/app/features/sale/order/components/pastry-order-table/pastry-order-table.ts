@@ -11,6 +11,7 @@ import { BadgeModule } from 'primeng/badge';
 import { DEFAULT_PAGE_SIZE, Item, ItemType, OrderItemRowDto, OrderStatus, Shape } from '@merlebleu/shared';
 import { formatDate } from '@shared/utils/date';
 import {
+  DELIVERY_PRIORITIES,
   getDeliveryPriorityColor,
   getDeliveryPriorityLabel,
   getOrderStatusColor,
@@ -42,7 +43,6 @@ export class PastryOrderTable implements OnInit {
   totalRecords = input(0);
   pageSize = input(DEFAULT_PAGE_SIZE);
   first = input(0);
-  showDetailAction = input(false);
   showEditAction = input(false);
   showCompleteAction = input(false);
   completingOrderIds = input<Set<string>>(new Set());
@@ -55,6 +55,7 @@ export class PastryOrderTable implements OnInit {
   complete = output<string>();
 
   protected readonly OrderStatus = OrderStatus;
+  protected readonly priorities = DELIVERY_PRIORITIES;
   protected shapes = Object.values(Shape);
   protected patisserieItems: Item[] = [];
 
@@ -75,7 +76,7 @@ export class PastryOrderTable implements OnInit {
   }
 
   protected hasActions(): boolean {
-    return this.showDetailAction() || this.showEditAction() || this.showCompleteAction();
+    return this.showEditAction() || this.showCompleteAction();
   }
 
   protected onPageChange(event: { first: number; rows: number }): void {

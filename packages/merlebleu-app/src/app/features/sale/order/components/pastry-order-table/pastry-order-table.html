@@ -54,6 +54,15 @@
   />
 </div>
 
+<div class="flex flex-wrap gap-4 mb-3">
+  @for (priority of priorities; track priority.label) {
+  <div class="flex items-center gap-2">
+    <p-badge [value]="priority.label" [severity]="priority.severity" style="height: fit-content" />
+    <span class="text-sm font-bold text-gray-500">{{ priority.description }}</span>
+  </div>
+  }
+</div>
+
 <p-table
   [value]="rows()"
   [loading]="loading()"
@@ -84,7 +93,13 @@
   </ng-template>
   <ng-template #body let-row>
     <tr>
-      <td>{{ row.customerName }}</td>
+      <td>
+        <span
+          class="cursor-pointer text-[#1b4fb6] dark:text-blue-400 hover:underline"
+          (click)="onViewDetail(row)"
+          >{{ row.customerName }}</span
+        >
+      </td>
       <td>
         {{ row.deliveryDate | date: 'dd/MM/yyyy' }} de {{ row.deliveryStartTime.slice(0, 5) }} à
         {{ row.deliveryEndTime.slice(0, 5) }}
@@ -110,15 +125,6 @@
       </td>
       @if (hasActions()) {
       <td class="text-center!">
-        @if (showDetailAction()) {
-        <p-button
-          icon="pi pi-info-circle"
-          severity="info"
-          class="mr-2"
-          (onClick)="onViewDetail(row)"
-          size="small"
-        />
-        }
         @if (showEditAction()) {
         <p-button
           icon="pi pi-pencil"

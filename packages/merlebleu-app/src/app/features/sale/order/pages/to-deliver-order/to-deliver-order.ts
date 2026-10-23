@@ -61,7 +61,7 @@ export class ToDeliverOrder implements OnInit {
   protected displayMode = signal<ToDeliverDisplayMode>(OrderDisplayMode.STANDARD);
   protected displayModeOptions = [
     { label: 'Standard', value: OrderDisplayMode.STANDARD },
-    { label: 'Pâtissier', value: OrderDisplayMode.PASTRY },
+    { label: 'Détaillé', value: OrderDisplayMode.PASTRY },
     { label: 'Calendrier', value: CALENDAR_VIEW },
   ];
 
@@ -263,6 +263,12 @@ export class ToDeliverOrder implements OnInit {
   protected openOrderDetail(order: Order): void {
     this.selectedOrder.set(order);
     this.displayOrderDetailDialog = true;
+  }
+
+  protected onPastryViewDetail(orderId: string): void {
+    this.orderService.getOrderById(orderId).subscribe((order) => {
+      this.openOrderDetail(order);
+    });
   }
 
   protected getStatus(orderStatus: OrderStatus | undefined): string {

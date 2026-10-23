@@ -21,6 +21,7 @@
   (pageChange)="onPageChange($event)"
   (filter)="onPastryFilter($event)"
   (resetFilter)="onPastryReset()"
+  (viewDetail)="onPastryViewDetail($event)"
 />
 } @else if (displayMode() === CALENDAR_VIEW) {
 <order-calendar-view
@@ -99,12 +100,17 @@
       <th>Boutique</th>
       <th class="text-right!">Reste</th>
       <th class="text-right!">Statut</th>
-      <th class="text-center!">Actions</th>
     </tr>
   </ng-template>
   <ng-template #body let-order>
     <tr>
-      <td>{{ order.customerName }}</td>
+      <td>
+        <span
+          class="cursor-pointer text-[#1b4fb6] dark:text-blue-400 hover:underline"
+          (click)="openOrderDetail(order)"
+          >{{ order.customerName }}</span
+        >
+      </td>
       <td>{{ order.orderDate | date: 'dd/MM/yyyy' }}</td>
       <td>
         {{ order.deliveryDate | date: 'dd/MM/yyyy' }} de {{ order.deliveryStartTime }} à
@@ -119,19 +125,11 @@
           style="height: fit-content"
         ></p-badge>
       </td>
-      <td class="text-center!">
-        <p-button
-          icon="pi pi-info-circle"
-          severity="info"
-          (onClick)="openOrderDetail(order)"
-          size="small"
-        />
-      </td>
     </tr>
   </ng-template>
   <ng-template #emptymessage>
     <tr>
-      <td colspan="7" class="text-center-important py-6">Aucune commande à livrer</td>
+      <td colspan="6" class="text-center-important py-6">Aucune commande à livrer</td>
     </tr>
   </ng-template>
 </p-table>

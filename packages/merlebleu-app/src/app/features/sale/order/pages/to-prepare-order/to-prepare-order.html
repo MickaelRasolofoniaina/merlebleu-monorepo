@@ -11,6 +11,8 @@
   />
 </div>
 
+<p-confirm-dialog />
+
 @if (displayMode() === OrderDisplayMode.PASTRY) {
 <pastry-order-table
   [rows]="orderItemRows()"
@@ -23,6 +25,7 @@
   (pageChange)="onPageChange($event)"
   (filter)="onPastryFilter($event)"
   (resetFilter)="onPastryReset()"
+  (viewDetail)="onPastryViewDetail($event)"
   (complete)="onComplete($event)"
 />
 } @else if (displayMode() === CALENDAR_VIEW) {
@@ -83,8 +86,6 @@
 
 </div>
 
-<p-confirm-dialog />
-
 <p-table
   [value]="orders()"
   [loading]="isLoading"
@@ -110,7 +111,13 @@
   </ng-template>
   <ng-template #body let-order>
     <tr>
-      <td>{{ order.customerName }}</td>
+      <td>
+        <span
+          class="cursor-pointer text-[#1b4fb6] dark:text-blue-400 hover:underline"
+          (click)="openOrderDetail(order)"
+          >{{ order.customerName }}</span
+        >
+      </td>
       <td>{{ order.orderDate | date: 'dd/MM/yyyy' }}</td>
       <td>
         {{ order.deliveryDate | date: 'dd/MM/yyyy' }} de {{ order.deliveryStartTime }} à
@@ -126,13 +133,6 @@
         ></p-badge>
       </td>
       <td class="text-center!">
-        <p-button
-          icon="pi pi-info-circle"
-          severity="info"
-          class="mr-2"
-          (onClick)="openOrderDetail(order)"
-          size="small"
-        />
         <p-button
           icon="pi pi-check"
           [loading]="isCompleting(order.id)"

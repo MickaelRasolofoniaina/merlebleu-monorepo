@@ -104,32 +104,49 @@ function getDeliveryDayDiff(deliveryDate: string): number {
   return Math.round((deliveryUtc - todayUtc) / (24 * 60 * 60 * 1000));
 }
 
-export function getDeliveryPriorityLabel(deliveryDate: string): string {
+export interface DeliveryPriorityConfig {
+  label: string;
+  description: string;
+  severity: 'danger' | 'warn' | 'info';
+  maxDayDiff: number;
+}
+
+export const DELIVERY_PRIORITIES: DeliveryPriorityConfig[] = [
+  {
+    label: 'Urgent',
+    description: 'Livraison aujourd’hui ou demain',
+    severity: 'danger',
+    maxDayDiff: 1,
+  },
+  {
+    label: 'Bientôt',
+    description: 'Livraison dans 2 à 3 jours',
+    severity: 'warn',
+    maxDayDiff: 3,
+  },
+  {
+    label: 'Plus tard',
+    description: 'Livraison dans plus de 3 jours',
+    severity: 'info',
+    maxDayDiff: Infinity,
+  },
+];
+
+function getDeliveryPriorityConfig(deliveryDate: string): DeliveryPriorityConfig {
   const dayDiff = getDeliveryDayDiff(deliveryDate);
 
-  if (dayDiff <= 1) {
-    return 'Urgent';
-  }
+  return (
+    DELIVERY_PRIORITIES.find((priority) => dayDiff <= priority.maxDayDiff) ??
+    DELIVERY_PRIORITIES[DELIVERY_PRIORITIES.length - 1]
+  );
+}
 
-  if (dayDiff <= 3) {
-    return 'Bientôt';
-  }
-
-  return 'Plus tard';
+export function getDeliveryPriorityLabel(deliveryDate: string): string {
+  return getDeliveryPriorityConfig(deliveryDate).label;
 }
 
 export function getDeliveryPriorityColor(
   deliveryDate: string,
 ): 'danger' | 'warn' | 'info' {
-  const dayDiff = getDeliveryDayDiff(deliveryDate);
-
-  if (dayDiff <= 1) {
-    return 'danger';
-  }
-
-  if (dayDiff <= 3) {
-    return 'warn';
-  }
-
-  return 'info';
+  return getDeliveryPriorityConfig(deliveryDate).severity;
 }

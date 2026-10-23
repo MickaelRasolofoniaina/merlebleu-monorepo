@@ -66,7 +66,7 @@ export class ToPrepareOrder implements OnInit {
   protected displayMode = signal<ToPrepareDisplayMode>(OrderDisplayMode.STANDARD);
   protected displayModeOptions = [
     { label: 'Standard', value: OrderDisplayMode.STANDARD },
-    { label: 'Pâtissier', value: OrderDisplayMode.PASTRY },
+    { label: 'Détaillé', value: OrderDisplayMode.PASTRY },
     { label: 'Calendrier', value: CALENDAR_VIEW },
   ];
 
@@ -271,6 +271,12 @@ export class ToPrepareOrder implements OnInit {
     this.displayOrderDetailDialog = true;
   }
 
+  protected onPastryViewDetail(orderId: string): void {
+    this.orderService.getOrderById(orderId).subscribe((order) => {
+      this.openOrderDetail(order);
+    });
+  }
+
   protected getStatus(orderStatus: OrderStatus | undefined): string {
     return getOrderStatusLabel(orderStatus);
   }
@@ -295,8 +301,8 @@ export class ToPrepareOrder implements OnInit {
 
   protected onComplete(orderId: string): void {
     this.confirmationService.confirm({
-      message: 'Marquer la commande comme terminée?',
-      header: 'Terminer la commande',
+      message: 'Marquer cette commande comme préparée et prêt à être livrée?',
+      header: 'Commande terminée',
       acceptLabel: 'Oui',
       rejectLabel: 'Non',
       acceptButtonStyleClass: 'p-button-success',

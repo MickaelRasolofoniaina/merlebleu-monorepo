@@ -66,7 +66,7 @@ export class ListOrder implements OnInit {
   protected displayMode = signal<ListOrderDisplayMode>(OrderDisplayMode.STANDARD);
   protected displayModeOptions = [
     { label: 'Standard', value: OrderDisplayMode.STANDARD },
-    { label: 'Pâtissier', value: OrderDisplayMode.PASTRY },
+    { label: 'Détaillé', value: OrderDisplayMode.PASTRY },
     { label: 'Calendrier', value: CALENDAR_VIEW },
   ];
 
