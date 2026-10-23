@@ -165,9 +165,7 @@ export class OrderService {
       customerName,
       shopId,
       status,
-      statuses: status
-        ? undefined
-        : [OrderStatus.TODO, OrderStatus.INPROGRESS],
+      statuses: status ? undefined : [OrderStatus.TODO, OrderStatus.INPROGRESS],
       orderDate,
       deliveryDate,
     });
@@ -366,6 +364,33 @@ export class OrderService {
     await this.orderRepository.save(existingOrder);
 
     return true;
+  }
+
+  async deliverOrder(
+    id: string,
+    paymentMethodId: string,
+  ): Promise<OrderEntity> {
+    const existingOrder = await this.orderRepository.findOne({
+      where: { id },
+      relations: { orderItems: true, paymentMethod: true, shop: true },
+    });
+
+    if (!existingOrder) {
+      throw new NotFoundException(`Order with id ${id} not found`);
+    }
+
+    const paymentMethod =
+      await this.paymentService.getPaymentMethod(paymentMethodId);
+
+    existingOrder.paymentMethod = paymentMethod;
+    existingOrder.paidAmount =
+      existingOrder.totalAmount + existingOrder.deliveryFee;
+    existingOrder.balanceAmount = 0;
+    existingOrder.orderStatus = OrderStatus.DELIVERED;
+
+    const savedOrder = await this.orderRepository.save(existingOrder);
+
+    return this.sanitizeOrder(savedOrder);
   }
 
   async deleteOrder(id: string): Promise<void> {

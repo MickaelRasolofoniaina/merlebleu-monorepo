@@ -11,6 +11,7 @@ import {
 import { OrderService } from './order.service';
 import {
   CreateOrderDto,
+  DeliverOrderDto,
   UpdateOrderDto,
   UpdateOrderStatusDto,
 } from './order.dto';
@@ -183,6 +184,11 @@ export class OrderController {
     @Body() body: UpdateOrderStatusDto,
   ) {
     return this.orderService.updateOrderStatus(id, body.status);
+  }
+
+  @Put(':id/deliver')
+  deliverOrder(@Param('id') id: string, @Body() body: DeliverOrderDto) {
+    return this.orderService.deliverOrder(id, body.paymentMethodId);
   }
 
   @Delete(':id')

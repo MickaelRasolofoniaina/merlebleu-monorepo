@@ -191,6 +191,10 @@ export class OrderService {
     return this.http.put<Order>(`${this.apiUrl}/${id}/status`, { status });
   }
 
+  deliverOrder(id: string, paymentMethodId: string): Observable<Order> {
+    return this.http.put<Order>(`${this.apiUrl}/${id}/deliver`, { paymentMethodId });
+  }
+
   deleteOrder(id: string): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/${id}`);
   }

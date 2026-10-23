@@ -31,3 +31,12 @@
 ::ng-deep .order-status-contrast {
   background-color: #64748b;
 }
+
+:host-context(.dark) {
+  ::ng-deep .fc-col-header-cell-cushion,
+  ::ng-deep .fc-daygrid-day-number,
+  ::ng-deep .fc-toolbar-title,
+  ::ng-deep .fc-list-day-cushion {
+    color: #e2e8f0;
+  }
+}

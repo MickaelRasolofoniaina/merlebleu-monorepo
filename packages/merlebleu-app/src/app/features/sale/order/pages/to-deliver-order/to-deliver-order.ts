@@ -7,16 +7,19 @@ import { InputTextModule } from 'primeng/inputtext';
 import { SelectModule } from 'primeng/select';
 import { SelectButtonModule } from 'primeng/selectbutton';
 import { DatePickerModule } from 'primeng/datepicker';
+import { DialogModule } from 'primeng/dialog';
 import {
   DEFAULT_PAGE_SIZE,
   Order,
   OrderDisplayMode,
   OrderItemRowDto,
   OrderStatus,
+  PaymentMethod,
   Shop,
 } from '@merlebleu/shared';
 import { OrderItemRowFilters, OrderService } from '../../order.service';
 import { ShopService } from '@features/shop/shop-list/shop.service';
+import { PaymentService } from '@features/sale/payment/payment.service';
 import { Button } from 'primeng/button';
 import { BadgeModule } from 'primeng/badge';
 import { formatDate } from '@shared/utils/date';
@@ -40,6 +43,7 @@ type ToDeliverDisplayMode = OrderDisplayMode | typeof CALENDAR_VIEW;
     SelectModule,
     SelectButtonModule,
     DatePickerModule,
+    DialogModule,
     Button,
     BadgeModule,
     DatePipe,
@@ -54,6 +58,7 @@ type ToDeliverDisplayMode = OrderDisplayMode | typeof CALENDAR_VIEW;
 export class ToDeliverOrder implements OnInit {
   private readonly orderService = inject(OrderService);
   private readonly shopService = inject(ShopService);
+  private readonly paymentService = inject(PaymentService);
   private readonly userPreferencesService = inject(UserPreferencesService);
 
   protected readonly OrderDisplayMode = OrderDisplayMode;
@@ -79,6 +84,12 @@ export class ToDeliverOrder implements OnInit {
   protected selectedOrder = signal<Order | null>(null);
   protected displayOrderDetailDialog = false;
 
+  protected paymentMethods = signal<PaymentMethod[]>([]);
+  protected orderToDeliver = signal<Order | null>(null);
+  protected displayDeliverDialog = false;
+  protected deliverPaymentMethodId: string | null = null;
+  protected isDelivering = false;
+
   protected filters = {
     orderDate: null as Date | null,
     deliveryDate: null as Date | null,
@@ -96,6 +107,9 @@ export class ToDeliverOrder implements OnInit {
 
   ngOnInit(): void {
     this.shopService.getAll().subscribe((shops) => this.shops.set(shops));
+    this.paymentService.getAllPaymentMethods().subscribe((paymentMethods) => {
+      this.paymentMethods.set(paymentMethods);
+    });
 
     this.userPreferencesService.getCurrentUser().subscribe({
       next: (user) => {
@@ -111,6 +125,12 @@ export class ToDeliverOrder implements OnInit {
         }
       },
     });
+  }
+
+  protected displayedCount(): number {
+    return this.displayMode() === CALENDAR_VIEW
+      ? this.calendarOrders().length
+      : this.totalRecords;
   }
 
   protected onDisplayModeChange(): void {
@@ -271,6 +291,12 @@ export class ToDeliverOrder implements OnInit {
     });
   }
 
+  protected onPastryDeliver(orderId: string): void {
+    this.orderService.getOrderById(orderId).subscribe((order) => {
+      this.openDeliverDialog(order);
+    });
+  }
+
   protected getStatus(orderStatus: OrderStatus | undefined): string {
     return getOrderStatusLabel(orderStatus);
   }
@@ -279,5 +305,42 @@ export class ToDeliverOrder implements OnInit {
     orderStatus: OrderStatus | undefined,
   ): 'info' | 'success' | 'warn' | 'danger' | 'contrast' {
     return getOrderStatusColor(orderStatus);
+  }
+
+  protected openDeliverDialog(order: Order): void {
+    this.orderToDeliver.set(order);
+    this.deliverPaymentMethodId = order.paymentMethod?.id ?? null;
+    this.displayDeliverDialog = true;
+  }
+
+  protected cancelDeliver(): void {
+    this.displayDeliverDialog = false;
+    this.orderToDeliver.set(null);
+    this.deliverPaymentMethodId = null;
+  }
+
+  protected confirmDeliver(): void {
+    const order = this.orderToDeliver();
+    if (!order || !this.deliverPaymentMethodId) {
+      return;
+    }
+
+    this.isDelivering = true;
+
+    this.orderService
+      .deliverOrder(order.id, this.deliverPaymentMethodId)
+      .pipe(
+        finalize(() => {
+          this.isDelivering = false;
+        }),
+      )
+      .subscribe({
+        next: () => {
+          this.displayDeliverDialog = false;
+          this.orderToDeliver.set(null);
+          this.deliverPaymentMethodId = null;
+          this.loadOrders(getPageFromFirstRows(this.first, this.rows), this.rows);
+        },
+      });
   }
 }

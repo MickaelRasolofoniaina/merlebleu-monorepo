@@ -119,6 +119,12 @@ export class ToPrepareOrder implements OnInit {
     });
   }
 
+  protected displayedCount(): number {
+    return this.displayMode() === CALENDAR_VIEW
+      ? this.calendarOrders().length
+      : this.totalRecords;
+  }
+
   protected onDisplayModeChange(): void {
     this.hasManualDisplayMode = true;
     this.first = 0;
@@ -301,7 +307,7 @@ export class ToPrepareOrder implements OnInit {
 
   protected onComplete(orderId: string): void {
     this.confirmationService.confirm({
-      message: 'Marquer cette commande comme préparée et prêt à être livrée?',
+      message: 'Marquer cette commande comme préparée et prête à être livrée?',
       header: 'Commande terminée',
       acceptLabel: 'Oui',
       rejectLabel: 'Non',

@@ -45,6 +45,7 @@ export class PastryOrderTable implements OnInit {
   first = input(0);
   showEditAction = input(false);
   showCompleteAction = input(false);
+  showDeliverAction = input(false);
   completingOrderIds = input<Set<string>>(new Set());
 
   pageChange = output<{ first: number; rows: number }>();
@@ -53,6 +54,7 @@ export class PastryOrderTable implements OnInit {
   viewDetail = output<string>();
   editOrder = output<string>();
   complete = output<string>();
+  deliver = output<string>();
 
   protected readonly OrderStatus = OrderStatus;
   protected readonly priorities = DELIVERY_PRIORITIES;
@@ -76,7 +78,7 @@ export class PastryOrderTable implements OnInit {
   }
 
   protected hasActions(): boolean {
-    return this.showEditAction() || this.showCompleteAction();
+    return this.showEditAction() || this.showCompleteAction() || this.showDeliverAction();
   }
 
   protected onPageChange(event: { first: number; rows: number }): void {
@@ -140,5 +142,9 @@ export class PastryOrderTable implements OnInit {
 
   protected onComplete(row: OrderItemRowDto): void {
     this.complete.emit(row.orderId);
+  }
+
+  protected onDeliver(row: OrderItemRowDto): void {
+    this.deliver.emit(row.orderId);
   }
 }

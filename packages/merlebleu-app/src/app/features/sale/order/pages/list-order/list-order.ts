@@ -81,6 +81,8 @@ export class ListOrder implements OnInit {
   protected totalRecords = 0;
   protected rows = DEFAULT_PAGE_SIZE;
   protected first = 0;
+  protected toPrepareCount = signal(0);
+  protected toDeliverCount = signal(0);
 
   protected filters = {
     orderDate: null as Date | null,
@@ -107,6 +109,7 @@ export class ListOrder implements OnInit {
 
   ngOnInit(): void {
     this.shopService.getAll().subscribe((shops) => this.shops.set(shops));
+    this.loadStatusCounts();
 
     this.userPreferencesService.getCurrentUser().subscribe({
       next: (user) => {
@@ -191,6 +194,16 @@ export class ListOrder implements OnInit {
           this.totalRecords = response.total;
         },
       });
+  }
+
+  private loadStatusCounts(): void {
+    this.orderService
+      .listOrdersToPrepare({ page: 1, limit: 1 })
+      .subscribe((response) => this.toPrepareCount.set(response.total));
+
+    this.orderService
+      .listOrdersToDeliver({ page: 1, limit: 1 })
+      .subscribe((response) => this.toDeliverCount.set(response.total));
   }
 
   private getDefaultCalendarRange(): { from: string; to: string } {
@@ -341,6 +354,7 @@ export class ListOrder implements OnInit {
             this.orderFormDialog.resetForm();
           }
           this.loadOrders(getPageFromFirstRows(this.first, this.rows), this.rows);
+          this.loadStatusCounts();
         },
       });
   }
