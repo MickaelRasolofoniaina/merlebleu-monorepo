@@ -16,6 +16,7 @@
       <th>Nom</th>
       <th>Email</th>
       <th>Boutique</th>
+      <th>Rôle</th>
       <th>Mot de passe</th>
       <th style="width: 10rem" class="text-center!">Actions</th>
     </tr>
@@ -25,6 +26,7 @@
       <td>{{ user.name }}</td>
       <td>{{ user.email }}</td>
       <td>{{ user.shop?.address ?? '—' }}</td>
+      <td>{{ getUserRoleLabel(user.role) }}</td>
       <td>********</td>
       <td class="text-center!">
         <p-button
@@ -142,6 +144,21 @@
         appendTo="body"
       />
     </div>
+    <div>
+      <label for="createUserRole" class="block mb-2">Rôle</label>
+      <p-select
+        inputId="createUserRole"
+        [(ngModel)]="createUserDto.role"
+        [options]="roleOptions"
+        optionLabel="label"
+        optionValue="value"
+        class="w-full"
+        appendTo="body"
+      />
+      @if (getCreateFieldError('role')) {
+      <small class="text-red-500 mt-1 block">{{ getCreateFieldError('role') }}</small>
+      }
+    </div>
   </div>
 
   <ng-template pTemplate="footer">
@@ -248,6 +265,21 @@
         class="w-full"
         appendTo="body"
       />
+    </div>
+    <div>
+      <label for="editUserRole" class="block mb-2">Rôle</label>
+      <p-select
+        inputId="editUserRole"
+        [(ngModel)]="editUserDto.role"
+        [options]="roleOptions"
+        optionLabel="label"
+        optionValue="value"
+        class="w-full"
+        appendTo="body"
+      />
+      @if (getEditFieldError('role')) {
+      <small class="text-red-500 mt-1 block">{{ getEditFieldError('role') }}</small>
+      }
     </div>
   </div>
 

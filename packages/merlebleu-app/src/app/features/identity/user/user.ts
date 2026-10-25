@@ -14,10 +14,12 @@ import {
   CreateUserDto,
   UserDto,
   UpdateUserDto,
+  UserRole,
   Shop,
 } from '@merlebleu/shared';
 import { UserService } from './user.service';
 import { ShopService } from '@features/shop/shop-list/shop.service';
+import { USER_ROLES, getUserRoleLabel } from '@shared/utils/user-role';
 
 @Component({
   selector: 'app-user',
@@ -39,6 +41,8 @@ export class User implements OnInit {
   private readonly shopService = inject(ShopService);
   users = signal<UserDto[]>([]);
   shops: Shop[] = [];
+  roleOptions = USER_ROLES;
+  getUserRoleLabel = getUserRoleLabel;
   isLoadingUsers = false;
   displayCreateModal = false;
   displayEditModal = false;
@@ -47,6 +51,7 @@ export class User implements OnInit {
     name: '',
     email: '',
     password: '',
+    role: UserRole.CASHIER,
     shopId: null,
   };
   newUserPasswordConfirm = '';
@@ -59,6 +64,7 @@ export class User implements OnInit {
     name: '',
     email: '',
     password: '',
+    role: UserRole.CASHIER,
     shopId: null,
   };
   editUserPasswordConfirm = '';
@@ -121,6 +127,7 @@ export class User implements OnInit {
       name: '',
       email: '',
       password: '',
+      role: UserRole.CASHIER,
       shopId: null,
     };
     this.newUserPasswordConfirm = '';
@@ -153,6 +160,7 @@ export class User implements OnInit {
       name: user.name,
       email: user.email,
       password: '',
+      role: user.role,
       shopId: user.shop?.id ?? null,
     };
     this.displayEditModal = true;
@@ -221,6 +229,7 @@ export class User implements OnInit {
       name: '',
       email: '',
       password: '',
+      role: UserRole.CASHIER,
       shopId: null,
     };
     this.editUserPasswordConfirm = '';
@@ -230,13 +239,13 @@ export class User implements OnInit {
     this.editPasswordConfirmError = '';
   }
 
-  getCreateFieldError(field: 'name' | 'email' | 'password'): string {
+  getCreateFieldError(field: 'name' | 'email' | 'password' | 'role'): string {
     return (
       this.createValidationError?.issues.find((issue) => issue.path[0] === field)?.message ?? ''
     );
   }
 
-  getEditFieldError(field: 'name' | 'email' | 'password'): string {
+  getEditFieldError(field: 'name' | 'email' | 'password' | 'role'): string {
     return this.editValidationError?.issues.find((issue) => issue.path[0] === field)?.message ?? '';
   }
 

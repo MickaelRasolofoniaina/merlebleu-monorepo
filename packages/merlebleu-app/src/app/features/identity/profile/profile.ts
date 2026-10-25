@@ -4,8 +4,9 @@ import { finalize } from 'rxjs';
 import { MessageService } from 'primeng/api';
 import { SelectButtonModule } from 'primeng/selectbutton';
 import { Button } from 'primeng/button';
-import { OrderDisplayMode } from '@merlebleu/shared';
+import { OrderDisplayMode, UserRole } from '@merlebleu/shared';
 import { UserPreferencesService } from '@shared/services/user-preferences.service';
+import { getUserRoleLabel } from '@shared/utils/user-role';
 
 @Component({
   selector: 'profile',
@@ -19,8 +20,10 @@ export class Profile implements OnInit {
 
   protected name = signal('');
   protected email = signal('');
+  protected role = signal<UserRole | undefined>(undefined);
   protected selectedDisplayMode = signal<OrderDisplayMode>(OrderDisplayMode.STANDARD);
   protected isSaving = false;
+  protected getUserRoleLabel = getUserRoleLabel;
 
   protected displayModeOptions = [
     { label: 'Standard', value: OrderDisplayMode.STANDARD },
@@ -31,6 +34,7 @@ export class Profile implements OnInit {
     this.userPreferencesService.getCurrentUser().subscribe((user) => {
       this.name.set(user.name);
       this.email.set(user.email);
+      this.role.set(user.role);
       this.selectedDisplayMode.set(user.defaultOrderDisplayMode ?? OrderDisplayMode.STANDARD);
     });
   }
