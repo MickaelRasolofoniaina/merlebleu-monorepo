@@ -11,6 +11,22 @@
   </div>
   <div class="flex items-center">
     <p>{{ name() }}</p>
+    <p-overlay-badge
+      [value]="notificationService.unreadCount()"
+      [badgeDisabled]="notificationService.unreadCount() === 0"
+      severity="danger"
+      class="ml-2"
+    >
+      <p-button
+        icon="pi pi-bell"
+        [text]="true"
+        severity="secondary"
+        (onClick)="notifPopover.toggle($event)"
+      />
+    </p-overlay-badge>
+    <p-popover #notifPopover>
+      <app-notification-panel />
+    </p-popover>
     <p-button
       [icon]="themeService.isDarkMode() ? 'pi pi-sun' : 'pi pi-moon'"
       [text]="true"

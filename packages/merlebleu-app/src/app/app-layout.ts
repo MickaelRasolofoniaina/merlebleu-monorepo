@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnDestroy, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterOutlet } from '@angular/router';
 import { MenuItem } from 'primeng/api';
@@ -6,20 +6,35 @@ import { MenuModule } from 'primeng/menu';
 import { RippleModule } from 'primeng/ripple';
 import { AvatarModule } from 'primeng/avatar';
 import { Button } from 'primeng/button';
+import { Popover } from 'primeng/popover';
+import { OverlayBadge } from 'primeng/overlaybadge';
 import { Router } from '@angular/router';
 import { AuthService } from './shared/services/auth.service';
 import { ThemeService } from './shared/services/theme.service';
+import { NotificationService } from './shared/services/notification.service';
+import { NotificationPanelComponent } from './shared/components/notification-panel/notification-panel';
 
 @Component({
   selector: 'app-layout',
-  imports: [CommonModule, RouterOutlet, MenuModule, RippleModule, AvatarModule, Button],
+  imports: [
+    CommonModule,
+    RouterOutlet,
+    MenuModule,
+    RippleModule,
+    AvatarModule,
+    Button,
+    Popover,
+    OverlayBadge,
+    NotificationPanelComponent,
+  ],
   templateUrl: './app-layout.html',
   styleUrl: './app-layout.scss',
 })
-export class AppLayout {
+export class AppLayout implements OnInit, OnDestroy {
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
   protected readonly themeService = inject(ThemeService);
+  protected readonly notificationService = inject(NotificationService);
   protected readonly sidebarOpen = signal(true);
   protected readonly name = signal('');
 
@@ -127,6 +142,7 @@ export class AppLayout {
         {
           label: 'Notifications',
           icon: 'pi pi-bell',
+          routerLink: ['/notification'],
         },
         {
           label: 'Autres',
@@ -139,6 +155,14 @@ export class AppLayout {
   ngOnInit(): void {
     const name = localStorage.getItem('user_name') ?? '';
     this.name.set(name);
+
+    this.notificationService.connect();
+    this.notificationService.loadRecent();
+    this.notificationService.refreshUnreadCount();
+  }
+
+  ngOnDestroy(): void {
+    this.notificationService.disconnect();
   }
 
   toggleSidebar(): void {
