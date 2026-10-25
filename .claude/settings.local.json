@@ -31,7 +31,12 @@
       "Bash(npm test *)",
       "Bash(git diff *)",
       "Bash(git checkout *)",
-      "Bash(git fetch *)"
+      "Bash(git fetch *)",
+      "Bash(git ls-remote *)",
+      "Bash(gh pr *)",
+      "PowerShell(gh *)",
+      "PowerShell(winget install *)",
+      "PowerShell(foreach \\($c in @\\('choco','scoop'\\)\\) { $cmd = Get-Command $c -ErrorAction SilentlyContinue; if \\($cmd\\) { Write-Output \"$c found: $\\($cmd.Source\\)\" } else { Write-Output \"$c not found\" } })"
     ]
   }
 }
