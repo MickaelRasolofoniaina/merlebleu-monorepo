@@ -35,6 +35,7 @@ export class UserService {
       id: user.id,
       name: user.name,
       email: user.email,
+      role: user.role,
       shop: user.shop ?? undefined,
       defaultOrderDisplayMode: user.defaultOrderDisplayMode ?? undefined,
     };
@@ -47,6 +48,7 @@ export class UserService {
         name: createUserDto.name,
         email: createUserDto.email,
         password: hashedPassword,
+        role: createUserDto.role,
       });
 
       if (createUserDto.shopId) {
@@ -114,6 +116,7 @@ export class UserService {
       id: user.id,
       name: user.name,
       email: user.email,
+      role: user.role,
       shop: user.shop ?? undefined,
       defaultOrderDisplayMode: user.defaultOrderDisplayMode ?? undefined,
     }));

@@ -16,6 +16,10 @@
           <i class="pi pi-envelope text-xs"></i>
           <span>{{ email() }}</span>
         </div>
+        <div class="flex items-center gap-1.5 text-sm text-slate-500 dark:text-slate-400 truncate">
+          <i class="pi pi-id-card text-xs"></i>
+          <span>{{ getUserRoleLabel(role()) }}</span>
+        </div>
       </div>
     </div>
 
