@@ -10,8 +10,9 @@
   @for (notification of notificationService.recent(); track notification.id) {
     <div
       class="flex gap-3 px-4 py-3 border-b border-surface-200 dark:border-surface-700"
-      [class.bg-blue-100]="!notification.isRead"
-      [class.dark:bg-blue-950]="!notification.isRead"
+      [style.background-color]="
+        !notification.isRead ? 'var(--p-tag-info-background)' : null
+      "
     >
       <p-tag
         [icon]="getNotificationTypeMeta(notification.type).icon"
@@ -19,7 +20,13 @@
         [rounded]="true"
       />
       <div class="flex-1 min-w-0">
-        <div class="text-sm" [class.font-bold]="!notification.isRead">
+        <div
+          class="text-sm"
+          [class.font-bold]="!notification.isRead"
+          [style.color]="
+            !notification.isRead ? 'var(--p-tag-info-color)' : null
+          "
+        >
           {{ getNotificationTypeMeta(notification.type).title }}
         </div>
         <div class="text-sm text-surface-600 dark:text-surface-300">

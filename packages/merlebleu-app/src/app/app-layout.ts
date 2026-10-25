@@ -57,6 +57,11 @@ export class AppLayout implements OnInit, OnDestroy {
           icon: 'pi pi-truck',
           routerLink: ['/sale/order/to-deliver'],
         },
+        {
+          label: 'Notifications',
+          icon: 'pi pi-bell',
+          routerLink: ['/notification'],
+        },
       ],
     },
     {
@@ -138,11 +143,6 @@ export class AppLayout implements OnInit, OnDestroy {
           label: 'Methode de paiement',
           icon: 'pi pi-credit-card',
           routerLink: ['/sale/payment'],
-        },
-        {
-          label: 'Notifications',
-          icon: 'pi pi-bell',
-          routerLink: ['/notification'],
         },
         {
           label: 'Autres',

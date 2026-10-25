@@ -4,8 +4,9 @@
   <h2 class="text-2xl font-bold">Notifications</h2>
   <p-button
     icon="pi pi-check"
-    severity="help"
+    severity="contrast"
     (onClick)="confirmMarkAllAsRead()"
+    label="Marquer tout comme lue"
   />
 </div>
 
@@ -29,7 +30,7 @@
     </tr>
   </ng-template>
   <ng-template #body let-notification>
-    <tr [class.font-bold]="!notification.isRead">
+    <tr [class.font-bold]="!notification.isRead" [class.italic]="notification.isRead">
       <td>{{ formatNotificationDate(notification.createdAt) }}</td>
       <td>
         <p-tag

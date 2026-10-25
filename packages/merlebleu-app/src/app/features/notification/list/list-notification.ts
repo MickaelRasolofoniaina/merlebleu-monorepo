@@ -65,10 +65,10 @@ export class ListNotificationComponent implements OnInit {
   confirmMarkAllAsRead(): void {
     this.confirmationService.confirm({
       message: 'Marquer toutes les notifications comme lues ?',
-      header: 'Tout marquer comme lue',
+      header: 'Marquer tout comme lue',
       acceptLabel: 'Oui',
       rejectLabel: 'Non',
-      acceptButtonStyleClass: 'p-button-help',
+      acceptButtonStyleClass: 'p-button-success',
       rejectButtonStyleClass: 'p-button-danger',
       accept: () => this.markAllAsRead(),
     });
