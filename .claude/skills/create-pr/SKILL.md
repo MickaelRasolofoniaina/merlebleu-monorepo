@@ -1,6 +1,6 @@
 ---
 name: create-pr
-description: Use this skill when the user asks to create, open, or submit a pull request (PR) to merge a branch into develop — e.g. "crée une PR", "ouvre une PR vers develop", "create a PR for this branch". Builds a French title and a frontend/backend change list from git history, then runs `gh pr create`.
+description: Use this skill when the user asks to create, open, or submit a pull request (PR) to merge a branch into develop — e.g. "crée une PR", "ouvre une PR vers develop", "create a PR for this branch". Builds a French title and a change list from git history grouped by area (INTERFACE WEB, API) and, when `.claude/` config changed, by Claude configuration type (SKILLS, COMMANDS, AGENTS, SETTINGS, ...), then runs `gh pr create`.
 ---
 
 Create a GitHub pull request targeting `develop` for a given branch, with a standardized French title and body.
@@ -22,8 +22,13 @@ This skill takes one optional argument: the name of the branch to merge into `de
    - `packages/merlebleu-app/**` → INTERFACE WEB
    - `packages/merlebleu-api/**` → API
    - `packages/merlebleu-shared/**` → API by default (shared DTOs/types are almost always driven by an API contract), unless the diff clearly shows a UI-only concern
-   - Files outside these three packages (docs, CI, lockfiles, root config) → omit from the list
-9. **Build the exhaustive change list**, grouped by frontend/backend: don't just copy commit subjects verbatim (they're terse, English, conventional-commit style like `feature(order): ...` / `fix(order): ...`). Group commits by the real deliverable they represent and write each line in French, house style: "Ajout de…", "Gestion de…", "Correction de…", "Mise à jour de…". Collapse multiple incremental commits for the same feature into one line rather than listing every intermediate commit.
+   - `.claude/skills/**` → SKILLS
+   - `.claude/commands/**` → COMMANDS
+   - `.claude/agents/**` → AGENTS
+   - `.claude/settings*.json` → SETTINGS
+   - any other path under `.claude/**` not covered above → CLAUDE
+   - Files outside these groups (docs, CI, lockfiles, root config) → omit from the list
+9. **Build the exhaustive change list**, grouped by area: don't just copy commit subjects verbatim (they're terse, English, conventional-commit style like `feature(order): ...` / `fix(order): ...`). Group commits by the real deliverable they represent and write each line in French, house style: "Ajout de…", "Gestion de…", "Correction de…", "Mise à jour de…". Collapse multiple incremental commits for the same feature into one line rather than listing every intermediate commit. Each `.claude/**` group (SKILLS, COMMANDS, AGENTS, SETTINGS, CLAUDE) is listed separately from INTERFACE WEB/API — never fold a Claude config change into the app/API lists just because it shipped in the same commit.
 10. **Decide the title**:
     - If the commit range contains at least one `feature(...)` commit, write a short French summary of the feature, no prefix (e.g. "Gestion des rôles").
     - If the commit range contains only `fix(...)`/`chore(...)`/etc. commits (no `feature(...)`), the title must start with "Correction" (e.g. "Correction de la commande en doublon").
@@ -32,14 +37,18 @@ This skill takes one optional argument: the name of the branch to merge into `de
 12. **Create the PR** via the Bash tool, using a heredoc for the multi-line body:
     ```bash
     gh pr create --base develop --head <branch> --title "<title>" --body "$(cat <<'EOF'
-    frontend
+    INTERFACE WEB
     1. ...
-    backend
+    API
+    1. ...
+    SKILLS
+    1. ...
+    COMMANDS
     1. ...
     EOF
     )"
     ```
-    Omit a section entirely (`frontend` or `backend`) if it has no entries.
+    Omit any section with no entries. Keep INTERFACE WEB and API first (in that order, when present), followed by the `.claude/**` groups (SKILLS, COMMANDS, AGENTS, SETTINGS, CLAUDE) in whatever order they appear with changes.
 13. **Report the PR URL** printed by `gh pr create`.
 14. If `gh pr create` fails because a PR already exists for that branch, surface the error and suggest `gh pr view <branch>` instead of retrying.
 
