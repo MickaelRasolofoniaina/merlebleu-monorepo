@@ -1,16 +1,16 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { DetailOrder } from './detail-order';
+import { OrderFormDialog } from './order-form-dialog';
 
-describe('DetailOrder', () => {
-  let component: DetailOrder;
-  let fixture: ComponentFixture<DetailOrder>;
+describe('OrderFormDialog', () => {
+  let component: OrderFormDialog;
+  let fixture: ComponentFixture<OrderFormDialog>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [DetailOrder],
+      imports: [OrderFormDialog],
     }).compileComponents();
 
-    fixture = TestBed.createComponent(DetailOrder);
+    fixture = TestBed.createComponent(OrderFormDialog);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

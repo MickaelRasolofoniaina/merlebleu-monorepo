@@ -1,21 +1,37 @@
 <header class="flex justify-between items-center p-4 bg-white dark:bg-slate-800 shadow">
-  <h1>Patisserie Le Merlebleu</h1>
   <div class="flex items-center">
-    <p-avatar [label]="userInitials" class="mr-2" size="large" shape="circle" />
-    <div class="mx-2">
-      <p-button
-        [icon]="themeService.isDarkMode() ? 'pi pi-sun' : 'pi pi-moon'"
-        [severity]="themeService.isDarkMode() ? 'warn' : 'secondary'"
-        (onClick)="themeService.toggleTheme()"
-      />
-    </div>
-    <p-button severity="info" icon="pi pi-sign-out" label="Deconnexion" (onClick)="logout()" />
+    <p-button
+      icon="pi pi-bars"
+      [text]="true"
+      severity="secondary"
+      class="mr-2"
+      (onClick)="toggleSidebar()"
+    />
+    <h1>Le Merlebleu</h1>
+  </div>
+  <div class="flex items-center">
+    <p>{{ name() }}</p>
+    <p-button
+      [icon]="themeService.isDarkMode() ? 'pi pi-sun' : 'pi pi-moon'"
+      [text]="true"
+      severity="secondary"
+      class="ml-2"
+      (onClick)="themeService.toggleTheme()"
+    />
+    <p-button
+      icon="pi pi-sign-out"
+      [text]="true"
+      severity="secondary"
+      (onClick)="logout()"
+    />
   </div>
 </header>
 <main class="main">
+  @if (sidebarOpen()) {
   <div class="sidebar">
     <p-menu [model]="items" class="menu" />
   </div>
+  }
   <div class="content">
     <router-outlet />
   </div>

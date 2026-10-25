@@ -1,12 +1,17 @@
-import { Order, OrderItem, OrderStatus } from '@merlebleu/shared';
+import { Order, OrderItem, OrderStatus, Shape } from '@merlebleu/shared';
 import { EntitySchema } from 'typeorm';
 import { PaymentMethodEntity } from '../payment/payment.entity';
+import { ShopEntity } from '../../shop/shop.entity';
 
 export class OrderItemEntity implements OrderItem {
   id: string;
-  description: string;
+  type: string;
   size: number;
+  unitPrice: number;
   totalAmount: number;
+  shape: Shape;
+  text?: string | undefined;
+  decoration?: string | undefined;
   remarks?: string | undefined;
   photos?: string[] | undefined;
   order?: OrderEntity;
@@ -18,14 +23,18 @@ export class OrderEntity implements Order {
   customerPhoneNumber: string;
   customerFacebookName?: string | undefined;
   deliveryDate: string;
-  deliveryAddress: string;
+  deliveryStartTime: string;
+  deliveryEndTime: string;
+  deliveryAddress?: string | undefined;
   isFromFacebook: boolean;
   orderItems: OrderItemEntity[];
   remarks?: string | undefined;
   totalAmount: number;
+  deliveryFee: number;
   paidAmount: number;
   balanceAmount: number;
   paymentMethod: PaymentMethodEntity;
+  shop: ShopEntity;
   orderDate: string;
   orderStatus?: OrderStatus;
 }
@@ -41,14 +50,30 @@ export const OrderItemSchema = new EntitySchema<OrderItemEntity>({
       primary: true,
       generated: 'uuid',
     },
-    description: {
+    type: {
       type: 'varchar',
     },
     size: {
       type: 'int',
     },
+    unitPrice: {
+      type: 'integer',
+      default: 0,
+    },
     totalAmount: {
       type: 'integer',
+    },
+    shape: {
+      type: 'enum',
+      enum: Shape,
+    },
+    text: {
+      type: 'varchar',
+      nullable: true,
+    },
+    decoration: {
+      type: 'varchar',
+      nullable: true,
     },
     remarks: {
       type: 'varchar',
@@ -95,14 +120,25 @@ export const OrderSchema = new EntitySchema<OrderEntity>({
     deliveryDate: {
       type: 'date',
     },
+    deliveryStartTime: {
+      type: 'time',
+    },
+    deliveryEndTime: {
+      type: 'time',
+    },
     deliveryAddress: {
       type: 'varchar',
+      nullable: true,
     },
     isFromFacebook: {
       type: 'boolean',
     },
     totalAmount: {
       type: 'integer',
+    },
+    deliveryFee: {
+      type: 'integer',
+      default: 0,
     },
     paidAmount: {
       type: 'integer',
@@ -135,6 +171,14 @@ export const OrderSchema = new EntitySchema<OrderEntity>({
       target: () => PaymentMethodEntity,
       joinColumn: {
         name: 'paymentMethodId',
+        referencedColumnName: 'id',
+      },
+    },
+    shop: {
+      type: 'many-to-one',
+      target: () => ShopEntity,
+      joinColumn: {
+        name: 'shopId',
         referencedColumnName: 'id',
       },
     },

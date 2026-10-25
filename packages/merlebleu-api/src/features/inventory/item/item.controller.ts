@@ -9,10 +9,12 @@ import {
   Query,
   DefaultValuePipe,
   ParseIntPipe,
+  ParseEnumPipe,
 } from '@nestjs/common';
 import { ApiQuery } from '@nestjs/swagger';
 import { ItemService } from './item.service';
 import { CreateItemDto, UpdateItemDto } from './item.dto';
+import { ItemType } from '@merlebleu/shared';
 
 @Controller('item')
 export class ItemController {
@@ -39,16 +41,30 @@ export class ItemController {
     type: String,
     description: 'Filter items by label substring',
   })
+  @ApiQuery({
+    name: 'type',
+    required: false,
+    enum: ItemType,
+    description: 'Filter items by type',
+  })
   @Get()
   async findItems(
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
     @Query('limit', new DefaultValuePipe(20), ParseIntPipe) limit: number,
     @Query('labelContains') labelContains?: string,
+    @Query('type', new ParseEnumPipe(ItemType, { optional: true }))
+    type?: ItemType,
   ) {
-    return this.itemService.findItems(
-      page,
-      limit,
-      labelContains ? { labelContains } : undefined,
-    );
+    return this.itemService.findItems(page, limit, {
+      ...(labelContains ? { labelContains } : {}),
+      ...(type ? { type } : {}),
+    });
+  }
+
+  @Get('type/:type')
+  async findItemsByType(
+    @Param('type', new ParseEnumPipe(ItemType)) type: ItemType,
+  ) {
+    return this.itemService.findItemsByType(type);
   }
 }

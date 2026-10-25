@@ -1,11 +1,14 @@
-import { User } from '@merlebleu/shared';
+import { OrderDisplayMode, User } from '@merlebleu/shared';
 import { EntitySchema } from 'typeorm';
+import { ShopEntity } from '../../shop/shop.entity';
 
 export class UserEntity implements User {
   id: string;
   name: string;
   email: string;
   password: string;
+  shop?: ShopEntity;
+  defaultOrderDisplayMode?: OrderDisplayMode;
 }
 
 export const UserSchema = new EntitySchema<UserEntity>({
@@ -33,6 +36,22 @@ export const UserSchema = new EntitySchema<UserEntity>({
       type: 'varchar',
       nullable: false,
       length: 255,
+    },
+    defaultOrderDisplayMode: {
+      type: 'enum',
+      enum: OrderDisplayMode,
+      nullable: true,
+    },
+  },
+  relations: {
+    shop: {
+      type: 'many-to-one',
+      target: () => ShopEntity,
+      joinColumn: {
+        name: 'shopId',
+        referencedColumnName: 'id',
+      },
+      nullable: true,
     },
   },
 });

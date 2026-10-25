@@ -26,13 +26,20 @@ import {
   OrderItemDto,
   PaymentMethod,
   createOrderSchema,
+  Item,
+  ItemType,
+  Shape,
+  Shop,
 } from '@merlebleu/shared';
 import { buildZodErrorMap } from '@shared/utils/zod-errors';
-import { formatDate, parseDate } from '@shared/utils/date';
+import { addDays, formatDate, formatTime, parseDate, parseTime } from '@shared/utils/date';
 import { PaymentService } from '@features/sale/payment/payment.service';
+import { ItemService } from '@features/inventory/item/item.service';
+import { ShopService } from '@features/shop/shop-list/shop.service';
 
 @Component({
   selector: 'order-form',
+  providers: [ItemService],
   imports: [
     DatePickerModule,
     FormsModule,
@@ -56,27 +63,41 @@ export class OrderForm implements OnInit, OnChanges {
 
   protected order: CreateOrderDto | UpdateOrderDto = this.buildDefaultOrder();
 
+  protected now: Date = new Date();
+
   protected orderDateValue: Date | null = null;
   protected deliveryDateValue: Date | null = null;
+  protected deliveryStartTimeValue: Date | null = null;
+  protected deliveryEndTimeValue: Date | null = null;
 
   protected validationErrors: Record<string, string> = {};
 
   protected paymentMethods: PaymentMethod[] = [];
+  protected patisserieItems: Item[] = [];
+  protected shops: Shop[] = [];
+  protected shapes = Object.values(Shape);
 
   constructor(
     private paymentService: PaymentService,
     private messageService: MessageService,
+    private itemService: ItemService,
+    private shopService: ShopService,
   ) {}
 
   ngOnInit(): void {
     this.loadPaymentMethods();
+    this.loadPatisserieItems();
+    this.loadShops();
+    this.applyUserShopDefault();
     this.syncDateValuesFromOrder();
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes['orderData'] && this.orderData) {
-      this.order = this.deepCopyOrder(this.orderData);
+    if (changes['orderData']) {
+      this.order = this.orderData ? this.deepCopyOrder(this.orderData) : this.buildDefaultOrder();
+      this.applyUserShopDefault();
       this.syncDateValuesFromOrder();
+      this.validationErrors = {};
     }
   }
 
@@ -84,6 +105,46 @@ export class OrderForm implements OnInit, OnChanges {
     this.paymentService.getAllPaymentMethods().subscribe((methods) => {
       this.paymentMethods = methods;
     });
+  }
+
+  protected loadShops(): void {
+    this.shopService.getAll().subscribe((shops) => {
+      this.shops = shops;
+    });
+  }
+
+  protected applyUserShopDefault(): void {
+    if (this.orderData) {
+      return;
+    }
+    const raw = localStorage.getItem('user_shop');
+    if (raw) {
+      try {
+        const shop: Shop = JSON.parse(raw);
+        this.order.shopId = shop.id;
+      } catch {
+        // ignore corrupted localStorage value
+      }
+    }
+  }
+
+  protected loadPatisserieItems(): void {
+    this.itemService.getItemsByType(ItemType.CAKE).subscribe((items) => {
+      this.patisserieItems = items;
+    });
+  }
+
+  protected onArticleSelected(item: OrderItemDto): void {
+    const selected = this.patisserieItems.find((article) => article.label === item.type);
+    if (selected) {
+      item.unitPrice = selected.unitPrice;
+    }
+    this.syncItemAmount(item);
+  }
+
+  protected syncItemAmount(item: OrderItemDto): void {
+    item.totalAmount = (Number(item.unitPrice) || 0) * (Number(item.size) || 0);
+    this.syncTotalFromItems();
   }
 
   protected addOrderItem(): void {
@@ -109,8 +170,9 @@ export class OrderForm implements OnInit, OnChanges {
 
   protected updateBalanceAmount(): void {
     const total = Number(this.order.totalAmount) || 0;
+    const deliveryFee = Number(this.order.deliveryFee) || 0;
     const paid = Number(this.order.paidAmount) || 0;
-    this.order.balanceAmount = Math.max(total - paid, 0);
+    this.order.balanceAmount = Math.max(total + deliveryFee - paid, 0);
   }
 
   protected submit(): void {
@@ -132,7 +194,7 @@ export class OrderForm implements OnInit, OnChanges {
     this.orderSubmit.emit(this.order);
   }
 
-  protected reset(): void {
+  public reset(): void {
     if (this.orderData) {
       this.order = this.deepCopyOrder(this.orderData);
     } else {
@@ -153,6 +215,16 @@ export class OrderForm implements OnInit, OnChanges {
     this.order.deliveryDate = formatDate(value);
   }
 
+  protected onDeliveryStartTimeChange(value: Date | null): void {
+    this.deliveryStartTimeValue = value;
+    this.order.deliveryStartTime = formatTime(value);
+  }
+
+  protected onDeliveryEndTimeChange(value: Date | null): void {
+    this.deliveryEndTimeValue = value;
+    this.order.deliveryEndTime = formatTime(value);
+  }
+
   protected trackByIndex(index: number): number {
     return index;
   }
@@ -167,23 +239,31 @@ export class OrderForm implements OnInit, OnChanges {
       customerName: '',
       customerPhoneNumber: '',
       customerFacebookName: '',
-      deliveryDate: formatDate(new Date()),
+      deliveryDate: formatDate(addDays(new Date(), 1)),
+      deliveryStartTime: '08:00',
+      deliveryEndTime: '10:00',
       deliveryAddress: '',
       isFromFacebook: false,
       orderItems: [this.buildOrderItem()],
       remarks: '',
       totalAmount: 0,
+      deliveryFee: 0,
       paidAmount: 0,
       balanceAmount: 0,
       paymentMethodId: '',
+      shopId: '',
     };
   }
 
   private buildOrderItem(): OrderItemDto {
     return {
-      description: '',
+      type: '',
       size: 0,
+      unitPrice: 0,
       totalAmount: 0,
+      shape: '' as Shape,
+      text: '',
+      decoration: '',
       remarks: '',
       photos: [],
     };
@@ -192,12 +272,19 @@ export class OrderForm implements OnInit, OnChanges {
   private deepCopyOrder(dto: CreateOrderDto | UpdateOrderDto): CreateOrderDto | UpdateOrderDto {
     return {
       ...dto,
-      orderItems: dto.orderItems.map((item) => ({ ...item })),
+      orderItems: dto.orderItems.map((item) => ({
+        ...item,
+        unitPrice: item.unitPrice || (item.size ? item.totalAmount / item.size : 0),
+      })),
     };
   }
 
   private syncDateValuesFromOrder(): void {
     this.orderDateValue = parseDate(this.order.orderDate);
     this.deliveryDateValue = parseDate(this.order.deliveryDate);
+    this.deliveryStartTimeValue = parseTime(this.order.deliveryStartTime);
+    this.deliveryEndTimeValue = parseTime(this.order.deliveryEndTime);
+    this.order.deliveryStartTime = formatTime(this.deliveryStartTimeValue);
+    this.order.deliveryEndTime = formatTime(this.deliveryEndTimeValue);
   }
 }

@@ -12,6 +12,8 @@
 - Use Tailwind utility classes exclusively for styling — do not write custom CSS classes
 - In tables, right-align all numeric columns (quantities, prices, totals, etc.) by using tailwind css class text-right!
 - In tables, center-align the Actions column header by using tailwind css class text-center!
+- Add `appendTo="body"` on every `p-select` (and other PrimeNG overlay-panel components) placed inside a `p-dialog` — without it, the dropdown panel is clipped/scrolls incorrectly inside the dialog's overflow container, causing a vertical scroll bug
+- Form `<label>` elements must include `dark:text-white` alongside their light-mode text color class (e.g. `class="font-semibold text-slate-900 dark:text-white"`) so labels stay readable in dark mode
 - Do not add an `error` callback in `.subscribe()` — errors are handled globally by `httpErrorInterceptor`; only provide `next` and `finalize` via `pipe` if needed for example to set loading indicator:
   ```ts
   this.orderService
@@ -27,4 +29,35 @@
         this.totalRecords = response.total;
       },
     });
+  ```
+- Same rule applies inside `ConfirmationService.confirm()`'s `accept` callback: do not add error handling for the underlying HTTP call — `httpErrorInterceptor` already handles it globally. Only manage loading/local state via `finalize`:
+  ```ts
+  this.confirmationService.confirm({
+    message: 'Mark the order as completed?',
+    header: 'Complete order',
+    acceptLabel: 'Yes',
+    rejectLabel: 'No',
+    acceptButtonStyleClass: 'p-button-danger',
+    rejectButtonStyleClass: 'p-button-secondary',
+    accept: () => {
+      const ids = new Set(this.completingIds());
+      ids.add(order.id);
+      this.completingIds.set(ids);
+
+      this.orderService
+        .updateOrderStatus(order.id, OrderStatus.TODELIVER)
+        .pipe(
+          finalize(() => {
+            const updatedIds = new Set(this.completingIds());
+            updatedIds.delete(order.id);
+            this.completingIds.set(updatedIds);
+          }),
+        )
+        .subscribe({
+          next: () => {
+            // update local state on success
+          },
+        });
+    },
+  });
   ```

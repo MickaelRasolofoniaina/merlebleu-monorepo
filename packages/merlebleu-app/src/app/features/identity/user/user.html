@@ -15,6 +15,7 @@
     <tr>
       <th>Nom</th>
       <th>Email</th>
+      <th>Boutique</th>
       <th>Mot de passe</th>
       <th style="width: 10rem" class="text-center!">Actions</th>
     </tr>
@@ -23,20 +24,19 @@
     <tr>
       <td>{{ user.name }}</td>
       <td>{{ user.email }}</td>
+      <td>{{ user.shop?.address ?? '—' }}</td>
       <td>********</td>
-      <td>
+      <td class="text-center!">
         <p-button
           icon="pi pi-pencil"
-          [rounded]="true"
-          [outlined]="true"
+          size="small"
           severity="warn"
           class="mr-2"
           (onClick)="openEditUserModal(user)"
         />
         <p-button
           icon="pi pi-trash"
-          [rounded]="true"
-          [outlined]="true"
+          size="small"
           severity="danger"
           (onClick)="openDeleteUserModal(user)"
         />
@@ -63,7 +63,7 @@
         placeholder="Entrez le nom"
       />
       @if (getCreateFieldError('name')) {
-        <small class="text-red-500 mt-1 block">{{ getCreateFieldError('name') }}</small>
+      <small class="text-red-500 mt-1 block">{{ getCreateFieldError('name') }}</small>
       }
     </div>
     <div>
@@ -77,7 +77,7 @@
         placeholder="Entrez l'email"
       />
       @if (getCreateFieldError('email')) {
-        <small class="text-red-500 mt-1 block">{{ getCreateFieldError('email') }}</small>
+      <small class="text-red-500 mt-1 block">{{ getCreateFieldError('email') }}</small>
       }
     </div>
     <div>
@@ -101,7 +101,7 @@
         </p-inputgroup-addon>
       </p-inputgroup>
       @if (getCreateFieldError('password')) {
-        <small class="text-red-500 mt-1 block">{{ getCreateFieldError('password') }}</small>
+      <small class="text-red-500 mt-1 block">{{ getCreateFieldError('password') }}</small>
       }
     </div>
     <div>
@@ -125,8 +125,22 @@
         </p-inputgroup-addon>
       </p-inputgroup>
       @if (passwordConfirmError) {
-        <small class="text-red-500 mt-1 block">{{ passwordConfirmError }}</small>
+      <small class="text-red-500 mt-1 block">{{ passwordConfirmError }}</small>
       }
+    </div>
+    <div>
+      <label for="createUserShop" class="block mb-2">Boutique (optionnel)</label>
+      <p-select
+        inputId="createUserShop"
+        [(ngModel)]="createUserDto.shopId"
+        [options]="shops"
+        optionLabel="address"
+        optionValue="id"
+        placeholder="Aucune boutique"
+        [showClear]="true"
+        class="w-full"
+        appendTo="body"
+      />
     </div>
   </div>
 
@@ -156,7 +170,7 @@
         placeholder="Entrez le nom"
       />
       @if (getEditFieldError('name')) {
-        <small class="text-red-500 mt-1 block">{{ getEditFieldError('name') }}</small>
+      <small class="text-red-500 mt-1 block">{{ getEditFieldError('name') }}</small>
       }
     </div>
     <div>
@@ -170,7 +184,7 @@
         placeholder="Entrez l'email"
       />
       @if (getEditFieldError('email')) {
-        <small class="text-red-500 mt-1 block">{{ getEditFieldError('email') }}</small>
+      <small class="text-red-500 mt-1 block">{{ getEditFieldError('email') }}</small>
       }
     </div>
     <div>
@@ -194,7 +208,7 @@
         </p-inputgroup-addon>
       </p-inputgroup>
       @if (getEditFieldError('password')) {
-        <small class="text-red-500 mt-1 block">{{ getEditFieldError('password') }}</small>
+      <small class="text-red-500 mt-1 block">{{ getEditFieldError('password') }}</small>
       }
     </div>
     <div>
@@ -218,8 +232,22 @@
         </p-inputgroup-addon>
       </p-inputgroup>
       @if (editPasswordConfirmError) {
-        <small class="text-red-500 mt-1 block">{{ editPasswordConfirmError }}</small>
+      <small class="text-red-500 mt-1 block">{{ editPasswordConfirmError }}</small>
       }
+    </div>
+    <div>
+      <label for="editUserShop" class="block mb-2">Boutique (optionnel)</label>
+      <p-select
+        inputId="editUserShop"
+        [(ngModel)]="editUserDto.shopId"
+        [options]="shops"
+        optionLabel="address"
+        optionValue="id"
+        placeholder="Aucune boutique"
+        [showClear]="true"
+        class="w-full"
+        appendTo="body"
+      />
     </div>
   </div>
 

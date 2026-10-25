@@ -64,19 +64,17 @@
       <td class="text-right!">{{ purchase.quantity }}</td>
       <td class="text-right!">{{ formatUnitPrice(purchase.ingredient.unitPrice) }}</td>
       <td class="text-right!">{{ formatUnitPrice(getTotalPrice(purchase)) }}</td>
-      <td>
+      <td class="text-center!">
         <p-button
           icon="pi pi-pencil"
-          [rounded]="true"
-          [outlined]="true"
+          size="small"
           severity="warn"
           class="mr-2"
           (onClick)="openEditModal(purchase)"
         />
         <p-button
           icon="pi pi-trash"
-          [rounded]="true"
-          [outlined]="true"
+          size="small"
           severity="danger"
           (onClick)="openDeleteModal(purchase)"
         />

@@ -12,3 +12,7 @@ export class UpdateOrderDto extends createZodDto(updateOrderSchema) {}
 export class UpdateOrderStatusDto {
   status!: OrderStatus;
 }
+
+export class DeliverOrderDto {
+  paymentMethodId!: string;
+}

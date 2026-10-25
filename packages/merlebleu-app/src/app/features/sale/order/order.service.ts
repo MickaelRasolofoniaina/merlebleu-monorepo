@@ -2,7 +2,26 @@ import { inject, Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '@env/environment';
-import { CreateOrderDto, UpdateOrderDto, Order, OrderStatus, PaginationParams, ResultPaged } from '@merlebleu/shared';
+import {
+  CreateOrderDto,
+  UpdateOrderDto,
+  Order,
+  OrderItemRowDto,
+  OrderStatus,
+  PaginationParams,
+  ResultPaged,
+  Shape,
+} from '@merlebleu/shared';
+
+export interface OrderItemRowFilters {
+  customerName?: string;
+  deliveryDate?: string;
+  type?: string;
+  shape?: Shape;
+  text?: string;
+  decoration?: string;
+  size?: number;
+}
 
 @Injectable({
   providedIn: 'root',
@@ -38,6 +57,128 @@ export class OrderService {
     return this.http.get<ResultPaged<Order>>(queryString);
   }
 
+  listOrdersToDeliver(
+    paginationParams: PaginationParams,
+    customerName?: string,
+    shopId?: string,
+    status?: OrderStatus,
+    orderDate?: string,
+    deliveryDate?: string,
+  ): Observable<ResultPaged<Order>> {
+    const { page = 1, limit = 20 } = paginationParams;
+    let queryString = `${this.apiUrl}/to-deliver?page=${page}&limit=${limit}`;
+
+    if (customerName) {
+      queryString += `&customerName=${encodeURIComponent(customerName)}`;
+    }
+
+    if (shopId) {
+      queryString += `&shopId=${encodeURIComponent(shopId)}`;
+    }
+
+    if (status) {
+      queryString += `&status=${encodeURIComponent(status)}`;
+    }
+
+    if (orderDate) {
+      queryString += `&orderDate=${encodeURIComponent(orderDate)}`;
+    }
+
+    if (deliveryDate) {
+      queryString += `&deliveryDate=${encodeURIComponent(deliveryDate)}`;
+    }
+
+    return this.http.get<ResultPaged<Order>>(queryString);
+  }
+
+  listOrdersToPrepare(
+    paginationParams: PaginationParams,
+    customerName?: string,
+    shopId?: string,
+    status?: OrderStatus,
+    orderDate?: string,
+    deliveryDate?: string,
+  ): Observable<ResultPaged<Order>> {
+    const { page = 1, limit = 20 } = paginationParams;
+    let queryString = `${this.apiUrl}/to-prepare?page=${page}&limit=${limit}`;
+
+    if (customerName) {
+      queryString += `&customerName=${encodeURIComponent(customerName)}`;
+    }
+
+    if (shopId) {
+      queryString += `&shopId=${encodeURIComponent(shopId)}`;
+    }
+
+    if (status) {
+      queryString += `&status=${encodeURIComponent(status)}`;
+    }
+
+    if (orderDate) {
+      queryString += `&orderDate=${encodeURIComponent(orderDate)}`;
+    }
+
+    if (deliveryDate) {
+      queryString += `&deliveryDate=${encodeURIComponent(deliveryDate)}`;
+    }
+
+    return this.http.get<ResultPaged<Order>>(queryString);
+  }
+
+  listOrderItems(
+    paginationParams: PaginationParams,
+    filters?: OrderItemRowFilters,
+  ): Observable<ResultPaged<OrderItemRowDto>> {
+    const { page = 1, limit = 20 } = paginationParams;
+    let queryString = `${this.apiUrl}/items?page=${page}&limit=${limit}`;
+
+    if (filters) {
+      Object.entries(filters).forEach(([key, value]) => {
+        if (value !== null && value !== undefined && value !== '') {
+          queryString += `&${key}=${encodeURIComponent(String(value))}`;
+        }
+      });
+    }
+
+    return this.http.get<ResultPaged<OrderItemRowDto>>(queryString);
+  }
+
+  listOrderItemsToPrepare(
+    paginationParams: PaginationParams,
+    filters?: OrderItemRowFilters,
+  ): Observable<ResultPaged<OrderItemRowDto>> {
+    const { page = 1, limit = 20 } = paginationParams;
+    let queryString = `${this.apiUrl}/items/to-prepare?page=${page}&limit=${limit}`;
+
+    if (filters) {
+      Object.entries(filters).forEach(([key, value]) => {
+        if (value !== null && value !== undefined && value !== '') {
+          queryString += `&${key}=${encodeURIComponent(String(value))}`;
+        }
+      });
+    }
+
+    return this.http.get<ResultPaged<OrderItemRowDto>>(queryString);
+  }
+
+  listOrderItemsToDeliver(
+    paginationParams: PaginationParams,
+    filters?: OrderItemRowFilters,
+  ): Observable<ResultPaged<OrderItemRowDto>> {
+    const { page = 1, limit = 20 } = paginationParams;
+    let queryString = `${this.apiUrl}/items/to-deliver?page=${page}&limit=${limit}`;
+
+    if (filters) {
+      Object.entries(filters).forEach(([key, value]) => {
+        if (value !== null && value !== undefined && value !== '') {
+          queryString += `&${key}=${encodeURIComponent(String(value))}`;
+        }
+      });
+    }
+
+    return this.http.get<ResultPaged<OrderItemRowDto>>(queryString);
+  }
+
   getOrderById(id: string): Observable<Order> {
     return this.http.get<Order>(`${this.apiUrl}/${id}`);
   }
@@ -48,6 +189,10 @@ export class OrderService {
 
   updateOrderStatus(id: string, status: OrderStatus): Observable<Order> {
     return this.http.put<Order>(`${this.apiUrl}/${id}/status`, { status });
+  }
+
+  deliverOrder(id: string, paymentMethodId: string): Observable<Order> {
+    return this.http.put<Order>(`${this.apiUrl}/${id}/deliver`, { paymentMethodId });
   }
 
   deleteOrder(id: string): Observable<void> {

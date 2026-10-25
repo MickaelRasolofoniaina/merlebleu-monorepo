@@ -8,7 +8,9 @@ import {
   Post,
 } from '@nestjs/common';
 import { UserService } from './user.service';
-import { CreateUserDto, UpdateUserDto } from './user.dto';
+import { CreateUserDto, UpdateUserDto, UpdateUserPreferencesDto } from './user.dto';
+import { CurrentUser } from '@shared/auth/current-user.decorator';
+import type { CurrentUserPayload } from '@shared/auth/current-user.decorator';
 
 @Controller('user')
 export class UserController {
@@ -20,6 +22,19 @@ export class UserController {
     body: CreateUserDto,
   ) {
     return this.userService.createUser(body);
+  }
+
+  @Get('me')
+  getMe(@CurrentUser() currentUser: CurrentUserPayload) {
+    return this.userService.findUserById(currentUser.sub);
+  }
+
+  @Patch('me')
+  updateMe(
+    @CurrentUser() currentUser: CurrentUserPayload,
+    @Body() body: UpdateUserPreferencesDto,
+  ) {
+    return this.userService.updateUserPreferences(currentUser.sub, body);
   }
 
   @Patch(':id')

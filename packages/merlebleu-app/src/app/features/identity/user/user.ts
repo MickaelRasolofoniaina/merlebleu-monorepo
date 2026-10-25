@@ -6,6 +6,7 @@ import { DialogModule } from 'primeng/dialog';
 import { InputTextModule } from 'primeng/inputtext';
 import { InputGroupModule } from 'primeng/inputgroup';
 import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
+import { SelectModule } from 'primeng/select';
 import { FormsModule } from '@angular/forms';
 import {
   createUserSchema,
@@ -13,8 +14,10 @@ import {
   CreateUserDto,
   UserDto,
   UpdateUserDto,
+  Shop,
 } from '@merlebleu/shared';
 import { UserService } from './user.service';
+import { ShopService } from '@features/shop/shop-list/shop.service';
 
 @Component({
   selector: 'app-user',
@@ -25,6 +28,7 @@ import { UserService } from './user.service';
     InputTextModule,
     InputGroupModule,
     InputGroupAddonModule,
+    SelectModule,
     FormsModule,
   ],
   templateUrl: './user.html',
@@ -32,7 +36,9 @@ import { UserService } from './user.service';
 })
 export class User implements OnInit {
   private readonly userService = inject(UserService);
+  private readonly shopService = inject(ShopService);
   users = signal<UserDto[]>([]);
+  shops: Shop[] = [];
   isLoadingUsers = false;
   displayCreateModal = false;
   displayEditModal = false;
@@ -41,6 +47,7 @@ export class User implements OnInit {
     name: '',
     email: '',
     password: '',
+    shopId: null,
   };
   newUserPasswordConfirm = '';
   showPassword = false;
@@ -52,6 +59,7 @@ export class User implements OnInit {
     name: '',
     email: '',
     password: '',
+    shopId: null,
   };
   editUserPasswordConfirm = '';
   showEditPassword = false;
@@ -63,6 +71,9 @@ export class User implements OnInit {
 
   ngOnInit(): void {
     this.getAllUsers();
+    this.shopService.getAll().subscribe((shops) => {
+      this.shops = shops;
+    });
   }
 
   createUser(data: CreateUserDto): void {
@@ -110,6 +121,7 @@ export class User implements OnInit {
       name: '',
       email: '',
       password: '',
+      shopId: null,
     };
     this.newUserPasswordConfirm = '';
     this.showPassword = false;
@@ -141,6 +153,7 @@ export class User implements OnInit {
       name: user.name,
       email: user.email,
       password: '',
+      shopId: user.shop?.id ?? null,
     };
     this.displayEditModal = true;
   }
@@ -208,6 +221,7 @@ export class User implements OnInit {
       name: '',
       email: '',
       password: '',
+      shopId: null,
     };
     this.editUserPasswordConfirm = '';
     this.showEditPassword = false;

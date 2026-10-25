@@ -1,0 +1,48 @@
+<div class="flex justify-center">
+  <div
+    class="w-full max-w-lg bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-[0_8px_30px_rgba(0,0,0,0.06)] p-8"
+  >
+    <div class="flex items-center gap-4 pb-6 mb-6 border-b border-slate-200 dark:border-slate-700">
+      <div
+        class="w-16 h-16 flex-none rounded-full flex items-center justify-center font-bold text-xl bg-emerald-50 text-emerald-600 border border-emerald-200 dark:bg-emerald-950 dark:text-emerald-400 dark:border-emerald-800"
+      >
+        {{ getInitials(name()) }}
+      </div>
+      <div class="min-w-0">
+        <h2 class="text-xl font-bold text-slate-900 dark:text-white truncate">
+          {{ name() || 'Mon profil' }}
+        </h2>
+        <div class="flex items-center gap-1.5 text-sm text-slate-500 dark:text-slate-400 truncate">
+          <i class="pi pi-envelope text-xs"></i>
+          <span>{{ email() }}</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="flex flex-col gap-2">
+      <h3 class="flex items-center gap-2 font-semibold text-slate-900 dark:text-white">
+        <i class="pi pi-table text-slate-400"></i>
+        Affichage par défaut des commandes
+      </h3>
+      <p class="text-sm text-slate-500 dark:text-slate-400">
+        Choisissez la vue qui s'affiche au chargement des listes de commandes (Toutes, A préparer,
+        A livrer).
+      </p>
+
+      <div
+        class="flex flex-col gap-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 p-4 mt-2"
+      >
+        <p-selectButton
+          [options]="displayModeOptions"
+          [(ngModel)]="selectedDisplayMode"
+          optionLabel="label"
+          optionValue="value"
+        />
+      </div>
+    </div>
+
+    <div class="flex justify-end mt-8">
+      <p-button label="Enregistrer" icon="pi pi-save" [loading]="isSaving" (onClick)="save()" />
+    </div>
+  </div>
+</div>

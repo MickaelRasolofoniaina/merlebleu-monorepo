@@ -30,19 +30,17 @@
   <ng-template #body let-unit>
     <tr>
       <td>{{ capitalizeFirstLetter(unit.label) }}</td>
-      <td>
+      <td class="text-center!">
         <p-button
           icon="pi pi-pencil"
-          [rounded]="true"
-          [outlined]="true"
+          size="small"
           severity="warn"
           class="mr-2"
           (onClick)="openEditModal(unit)"
         />
         <p-button
           icon="pi pi-trash"
-          [rounded]="true"
-          [outlined]="true"
+          size="small"
           severity="danger"
           (onClick)="openDeleteModal(unit)"
         />

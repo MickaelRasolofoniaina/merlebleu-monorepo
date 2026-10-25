@@ -1,0 +1,14 @@
+<div class="flex flex-wrap gap-2 mb-3">
+  @for (status of statuses; track status.value) {
+  <p-badge [value]="status.label" [severity]="status.badgeSeverity" style="height: fit-content" />
+  }
+</div>
+
+<div class="relative">
+  @if (loading()) {
+  <div class="absolute inset-0 bg-white/60 z-10 flex items-center justify-center">
+    <i class="pi pi-spin pi-spinner text-2xl"></i>
+  </div>
+  }
+  <full-calendar #calendar [options]="calendarOptions" />
+</div>

@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterOutlet } from '@angular/router';
 import { MenuItem } from 'primeng/api';
@@ -12,14 +12,7 @@ import { ThemeService } from './shared/services/theme.service';
 
 @Component({
   selector: 'app-layout',
-  imports: [
-    CommonModule,
-    RouterOutlet,
-    MenuModule,
-    RippleModule,
-    AvatarModule,
-    Button,
-  ],
+  imports: [CommonModule, RouterOutlet, MenuModule, RippleModule, AvatarModule, Button],
   templateUrl: './app-layout.html',
   styleUrl: './app-layout.scss',
 })
@@ -27,24 +20,27 @@ export class AppLayout {
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
   protected readonly themeService = inject(ThemeService);
-  userInitials = '';
+  protected readonly sidebarOpen = signal(true);
+  protected readonly name = signal('');
 
   protected items: MenuItem[] = [
     {
-      label: 'Ventes',
+      label: 'Commandes',
       items: [
         {
-          label: 'Journalier',
-          icon: 'pi pi-plus',
-        },
-        {
-          label: 'Commande',
+          label: 'Toutes',
           icon: 'pi pi-cart-minus',
-          routerLink: ['/sale/order/'],
+          routerLink: ['/sale/order/list'],
         },
         {
-          label: 'Caisse',
-          icon: 'pi pi-dollar',
+          label: 'A préparer',
+          icon: 'pi pi-box',
+          routerLink: ['/sale/order/to-prepare'],
+        },
+        {
+          label: 'A livrer',
+          icon: 'pi pi-truck',
+          routerLink: ['/sale/order/to-deliver'],
         },
       ],
     },
@@ -110,8 +106,18 @@ export class AppLayout {
           routerLink: ['/identity/user'],
         },
         {
+          label: 'Mon profil',
+          icon: 'pi pi-id-card',
+          routerLink: ['/identity/profile'],
+        },
+        {
           label: 'Roles',
           icon: 'pi pi-users',
+        },
+        {
+          label: 'Boutique',
+          icon: 'pi pi-shop',
+          routerLink: ['/shop'],
         },
         {
           label: 'Methode de paiement',
@@ -132,7 +138,11 @@ export class AppLayout {
 
   ngOnInit(): void {
     const name = localStorage.getItem('user_name') ?? '';
-    this.userInitials = name.slice(0, 2).toUpperCase() || '??';
+    this.name.set(name);
+  }
+
+  toggleSidebar(): void {
+    this.sidebarOpen.update((open) => !open);
   }
 
   logout(): void {
