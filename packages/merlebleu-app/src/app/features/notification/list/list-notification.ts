@@ -1,5 +1,6 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
-import { DEFAULT_PAGE_SIZE, NotificationDto } from '@merlebleu/shared';
+import { Router } from '@angular/router';
+import { DEFAULT_PAGE_SIZE, NotificationDto, NotificationType } from '@merlebleu/shared';
 import { TableModule, TablePageEvent } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
 import { TagModule } from 'primeng/tag';
@@ -29,6 +30,7 @@ export class ListNotificationComponent implements OnInit {
 
   private readonly notificationService = inject(NotificationService);
   private readonly confirmationService = inject(ConfirmationService);
+  private readonly router = inject(Router);
 
   ngOnInit(): void {
     this.fetchNotifications();
@@ -50,6 +52,20 @@ export class ListNotificationComponent implements OnInit {
     this.rows = event.rows;
     this.first.set(event.first);
     this.fetchNotifications();
+  }
+
+  onNotificationRowClick(notification: NotificationDto): void {
+    if (!notification.isRead) {
+      this.markAsRead(notification);
+    }
+
+    if (notification.type === NotificationType.ORDER_DELETED) {
+      return;
+    }
+
+    void this.router.navigate(['/sale/order/list'], {
+      queryParams: { orderId: notification.orderId },
+    });
   }
 
   markAsRead(notification: NotificationDto): void {

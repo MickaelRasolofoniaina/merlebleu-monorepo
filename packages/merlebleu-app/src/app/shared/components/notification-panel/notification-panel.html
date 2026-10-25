@@ -9,7 +9,8 @@
 
   @for (notification of notificationService.recent(); track notification.id) {
     <div
-      class="flex gap-3 px-4 py-3 border-b border-surface-200 dark:border-surface-700"
+      class="flex gap-3 px-4 py-3 border-b border-surface-200 dark:border-surface-700 cursor-pointer"
+      (click)="onNotificationClick(notification)"
       [style.background-color]="
         !notification.isRead ? 'var(--p-tag-info-background)' : null
       "

@@ -30,7 +30,12 @@
     </tr>
   </ng-template>
   <ng-template #body let-notification>
-    <tr [class.font-bold]="!notification.isRead" [class.italic]="notification.isRead">
+    <tr
+      [class.font-bold]="!notification.isRead"
+      [class.italic]="notification.isRead"
+      class="cursor-pointer"
+      (click)="onNotificationRowClick(notification)"
+    >
       <td>{{ formatNotificationDate(notification.createdAt) }}</td>
       <td>
         <p-tag
@@ -55,7 +60,7 @@
             icon="pi pi-check"
             severity="success"
             size="small"
-            (onClick)="markAsRead(notification)"
+            (onClick)="markAsRead(notification); $event.stopPropagation()"
           />
         }
       </td>
