@@ -1,3 +1,8 @@
+---
+name: commit-changes
+description: Use this skill when the user asks to commit, or commit and push, the current changes (e.g. "commit", "commit and push", "commit my changes"). Generates a conventional commit message from the diff and recent log style, then commits and pushes to the current branch.
+---
+
 Generate a conventional commit message for all current changes, then commit and push to the current branch.
 
 ## Steps
