@@ -1,0 +1,209 @@
+<div class="flex justify-between items-center mb-4">
+  <h2 class="text-2xl font-bold">Commandes en retard</h2>
+</div>
+
+<div
+  class="inline-flex items-center gap-3 mb-4 px-4 py-2.5 rounded-lg bg-orange-500/10 dark:bg-orange-400/10 border border-orange-500/30 dark:border-orange-400/30"
+>
+  <i class="pi pi-exclamation-triangle text-xl text-orange-600 dark:text-orange-400"></i>
+  <span class="text-2xl font-bold text-orange-600 dark:text-orange-400">{{ totalRecords }}</span>
+  <span class="text-sm font-semibold text-orange-600 dark:text-orange-400">
+    commande{{ totalRecords > 1 ? 's' : '' }} en retard
+  </span>
+</div>
+
+<div class="flex justify-start mb-4">
+  <p-selectButton
+    [options]="displayModeOptions"
+    [(ngModel)]="displayMode"
+    (onChange)="onDisplayModeChange()"
+    optionLabel="label"
+    optionValue="value"
+  />
+</div>
+
+@if (displayMode() === OrderDisplayMode.PASTRY) {
+<pastry-order-table
+  [rows]="orderItemRows()"
+  [loading]="isLoading"
+  [totalRecords]="totalRecords"
+  [first]="first"
+  [pageSize]="rows"
+  [showDeliverAction]="true"
+  (pageChange)="onPageChange($event)"
+  (filter)="onPastryFilter($event)"
+  (resetFilter)="onPastryReset()"
+  (viewDetail)="onPastryViewDetail($event)"
+  (deliver)="onPastryDeliver($event)"
+/>
+} @else {
+<div class="flex flex-wrap gap-3 items-center mb-4">
+  <input
+    pInputText
+    [(ngModel)]="filters.customerName"
+    placeholder="Nom du client..."
+    class="w-52"
+  />
+  <p-datepicker
+    [(ngModel)]="filters.orderDate"
+    [showIcon]="true"
+    dateFormat="dd/mm/yy"
+    placeholder="Date de commande"
+    class="w-52"
+  />
+  <p-datepicker
+    [(ngModel)]="filters.deliveryDate"
+    [showIcon]="true"
+    dateFormat="dd/mm/yy"
+    placeholder="Date de livraison"
+    class="w-52"
+  />
+  <p-select
+    [(ngModel)]="filters.shopId"
+    [options]="shops()"
+    optionLabel="address"
+    optionValue="id"
+    placeholder="Toutes boutiques"
+    class="w-52"
+    [showClear]="true"
+  />
+  <p-select
+    [(ngModel)]="filters.orderStatus"
+    [options]="statusOptions"
+    optionLabel="label"
+    optionValue="value"
+    placeholder="Tout statuts"
+    class="w-52"
+    [showClear]="true"
+  />
+  <p-button label="Filtrer" icon="pi pi-search" (onClick)="applyFilters()" [disabled]="isLoading" severity="info" />
+  <p-button
+    label="Réinitialiser"
+    icon="pi pi-refresh"
+    severity="contrast"
+    (onClick)="resetFilters()"
+    [disabled]="isLoading"
+  />
+</div>
+
+<p-table
+  [value]="orders()"
+  [loading]="isLoading"
+  [tableStyle]="{ 'min-width': '40rem' }"
+  [stripedRows]="true"
+  [paginator]="true"
+  [rows]="rows"
+  [first]="first"
+  [totalRecords]="totalRecords"
+  [lazy]="true"
+  (onPage)="onPageChange($event)"
+>
+  <ng-template #header>
+    <tr>
+      <th>Client</th>
+      <th>Date</th>
+      <th>Date de livraison</th>
+      <th>Boutique</th>
+      <th class="text-right!">Reste</th>
+      <th class="text-right!">Statut</th>
+      <th class="text-center!">Action</th>
+    </tr>
+  </ng-template>
+  <ng-template #body let-order>
+    <tr>
+      <td>
+        <span
+          class="cursor-pointer text-[#1b4fb6] dark:text-blue-400 hover:underline"
+          (click)="openOrderDetail(order)"
+          >{{ order.customerName }}</span
+        >
+      </td>
+      <td>{{ order.orderDate | date: 'dd/MM/yyyy' }}</td>
+      <td class="text-red-600 dark:text-red-400 font-semibold">
+        @if (order.deliveryStartTime === order.deliveryEndTime) {
+        {{ order.deliveryDate | date: 'dd/MM/yyyy' }} à {{ order.deliveryStartTime.slice(0, 5) }}
+        } @else {
+        {{ order.deliveryDate | date: 'dd/MM/yyyy' }} de {{ order.deliveryStartTime.slice(0, 5) }} à
+        {{ order.deliveryEndTime.slice(0, 5) }}
+        }
+      </td>
+      <td>{{ order.shop.address }}</td>
+      <td class="text-right!">{{ order.balanceAmount | number: '1.0-2' }}</td>
+      <td class="text-right!">
+        <p-badge
+          [value]="getStatus(order.orderStatus)"
+          [severity]="getStatusColor(order.orderStatus)"
+          style="height: fit-content"
+        ></p-badge>
+      </td>
+      <td class="text-center!">
+        @if (order.orderStatus === OrderStatus.TODELIVER) {
+        <p-button
+          icon="pi pi-truck"
+          severity="success"
+          (onClick)="openDeliverDialog(order)"
+          size="small"
+        />
+        }
+      </td>
+    </tr>
+  </ng-template>
+  <ng-template #emptymessage>
+    <tr>
+      <td colspan="7" class="text-center-important py-6">Aucune commande en retard</td>
+    </tr>
+  </ng-template>
+</p-table>
+}
+
+<order-detail-dialog [order]="selectedOrder()" [(visible)]="displayOrderDetailDialog" />
+
+<p-dialog
+  [(visible)]="displayDeliverDialog"
+  [modal]="true"
+  [style]="{ width: '28rem' }"
+  header="Livrer la commande"
+>
+  @if (orderToDeliver(); as order) {
+  <div class="flex flex-col gap-4">
+    <div
+      class="flex items-center justify-between rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 p-3"
+    >
+      <span class="text-slate-500">Reste à payer</span>
+      <span class="font-bold text-slate-900 dark:text-white">{{
+        order.balanceAmount | number: '1.0-2'
+      }}</span>
+    </div>
+    @if (order.balanceAmount > 0) {
+    <div class="flex flex-col gap-2">
+      <label class="font-semibold text-slate-900 dark:text-white">Méthode de paiement du reste</label>
+      <p-select
+        [(ngModel)]="deliverPaymentMethodId"
+        [options]="paymentMethods()"
+        optionLabel="name"
+        optionValue="id"
+        placeholder="Sélectionner une méthode"
+        appendTo="body"
+        class="w-full"
+      />
+    </div>
+    }
+  </div>
+  }
+  <div class="flex justify-end gap-2 mt-6">
+    <p-button
+      label="Annuler"
+      severity="contrast"
+      (onClick)="cancelDeliver()"
+      [disabled]="isDelivering"
+    />
+    <p-button
+      label="Marquer comme livré"
+      icon="pi pi-check"
+      severity="success"
+      (onClick)="confirmDeliver()"
+      [loading]="isDelivering"
+      [disabled]="!deliverPaymentMethodId"
+    />
+  </div>
+</p-dialog>

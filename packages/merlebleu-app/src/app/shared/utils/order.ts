@@ -104,6 +104,17 @@ function getDeliveryDayDiff(deliveryDate: string): number {
   return Math.round((deliveryUtc - todayUtc) / (24 * 60 * 60 * 1000));
 }
 
+export function isOrderLate(order: {
+  deliveryDate: string;
+  orderStatus?: OrderStatus;
+}): boolean {
+  return (
+    getDeliveryDayDiff(order.deliveryDate) < 0 &&
+    order.orderStatus !== OrderStatus.DELIVERED &&
+    order.orderStatus !== OrderStatus.CANCELLED
+  );
+}
+
 export interface DeliveryPriorityConfig {
   label: string;
   description: string;

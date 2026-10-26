@@ -58,6 +58,11 @@ export class AppLayout implements OnInit, OnDestroy {
           routerLink: ['/sale/order/to-deliver'],
         },
         {
+          label: 'En retard',
+          icon: 'pi pi-exclamation-triangle',
+          routerLink: ['/sale/order/late'],
+        },
+        {
           label: 'Notifications',
           icon: 'pi pi-bell',
           routerLink: ['/notification'],

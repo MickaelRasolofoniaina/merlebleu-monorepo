@@ -144,7 +144,7 @@
           size="small"
         />
         }
-        @if (showDeliverAction()) {
+        @if (showDeliverAction() && isOrderCompleted(row)) {
         <p-button
           icon="pi pi-truck"
           severity="success"
