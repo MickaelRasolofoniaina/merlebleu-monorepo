@@ -1,0 +1,54 @@
+<div class="w-96">
+  <div class="px-4 py-3 font-bold border-b border-surface-200 dark:border-surface-700">
+    Notifications
+  </div>
+
+  @if (notificationService.recent().length === 0) {
+    <div class="px-4 py-6 text-center text-surface-500">Aucune notification</div>
+  }
+
+  @for (notification of notificationService.recent(); track notification.id) {
+    <div
+      class="flex gap-3 px-4 py-3 border-b border-surface-200 dark:border-surface-700 cursor-pointer"
+      (click)="onNotificationClick(notification)"
+      [style.background-color]="
+        !notification.isRead ? 'var(--p-tag-info-background)' : null
+      "
+    >
+      <p-tag
+        [icon]="getNotificationTypeMeta(notification.type).icon"
+        [severity]="getNotificationTypeMeta(notification.type).severity"
+        [rounded]="true"
+      />
+      <div class="flex-1 min-w-0">
+        <div
+          class="text-sm"
+          [class.font-bold]="!notification.isRead"
+          [style.color]="
+            !notification.isRead ? 'var(--p-tag-info-color)' : null
+          "
+        >
+          {{ getNotificationTypeMeta(notification.type).title }}
+        </div>
+        <div class="text-sm text-surface-600 dark:text-surface-300">
+          {{
+            getNotificationTypeMeta(notification.type).description(
+              notification.customerName,
+              notification.actorName
+            )
+          }}
+        </div>
+        <div class="text-xs italic text-right text-surface-400 mt-1">
+          {{ formatNotificationDate(notification.createdAt) }}
+        </div>
+      </div>
+    </div>
+  }
+
+  <a
+    routerLink="/notification"
+    class="block text-center py-3 text-sm font-semibold text-primary cursor-pointer"
+  >
+    Voir toutes les notifications →
+  </a>
+</div>

@@ -41,6 +41,13 @@ export const routes: Routes = [
         loadChildren: () =>
           import('./features/shop/shop.routes').then((m) => m.SHOP_ROUTES),
       },
+      {
+        path: 'notification',
+        loadChildren: () =>
+          import('./features/notification/notification.routes').then(
+            (m) => m.NOTIFICATION_ROUTES,
+          ),
+      },
     ],
   },
 ];

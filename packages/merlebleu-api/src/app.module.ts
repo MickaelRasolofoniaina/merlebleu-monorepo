@@ -8,6 +8,7 @@ import { IdentityModule } from './features/identity/identity.module';
 import { ItemModule } from './features/inventory/item/item.module';
 import { IngredientModule } from './features/ingredient/ingredient.module';
 import { ShopModule } from './features/shop/shop.module';
+import { NotificationModule } from './features/notification/notification.module';
 
 @Module({
   imports: [
@@ -33,6 +34,7 @@ import { ShopModule } from './features/shop/shop.module';
     ItemModule,
     IngredientModule,
     ShopModule,
+    NotificationModule,
   ],
   controllers: [AppController],
   providers: [AppService],

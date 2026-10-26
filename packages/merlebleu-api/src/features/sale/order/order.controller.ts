@@ -16,14 +16,19 @@ import {
   UpdateOrderStatusDto,
 } from './order.dto';
 import { OrderStatus, Shape } from '@merlebleu/shared';
+import { CurrentUser } from '@shared/auth/current-user.decorator';
+import type { CurrentUserPayload } from '@shared/auth/current-user.decorator';
 
 @Controller('order')
 export class OrderController {
   constructor(private readonly orderService: OrderService) {}
 
   @Post()
-  addOrder(@Body() body: CreateOrderDto) {
-    return this.orderService.addOrder(body);
+  addOrder(
+    @Body() body: CreateOrderDto,
+    @CurrentUser() currentUser: CurrentUserPayload,
+  ) {
+    return this.orderService.addOrder(body, currentUser.name);
   }
 
   @Get()
@@ -174,16 +179,25 @@ export class OrderController {
   }
 
   @Put(':id')
-  updateOrder(@Param('id') id: string, @Body() body: UpdateOrderDto) {
-    return this.orderService.updateOrder(id, body);
+  updateOrder(
+    @Param('id') id: string,
+    @Body() body: UpdateOrderDto,
+    @CurrentUser() currentUser: CurrentUserPayload,
+  ) {
+    return this.orderService.updateOrder(id, body, currentUser.name);
   }
 
   @Put(':id/status')
   updateOrderStatus(
     @Param('id') id: string,
     @Body() body: UpdateOrderStatusDto,
+    @CurrentUser() currentUser: CurrentUserPayload,
   ) {
-    return this.orderService.updateOrderStatus(id, body.status);
+    return this.orderService.updateOrderStatus(
+      id,
+      body.status,
+      currentUser.name,
+    );
   }
 
   @Put(':id/deliver')
@@ -192,7 +206,10 @@ export class OrderController {
   }
 
   @Delete(':id')
-  deleteOrder(@Param('id') id: string) {
-    return this.orderService.deleteOrder(id);
+  deleteOrder(
+    @Param('id') id: string,
+    @CurrentUser() currentUser: CurrentUserPayload,
+  ) {
+    return this.orderService.deleteOrder(id, currentUser.name);
   }
 }

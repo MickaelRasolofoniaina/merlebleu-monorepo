@@ -4,16 +4,22 @@ import { Repository } from 'typeorm';
 import { OrderEntity, OrderItemEntity, OrderItemSchema } from './order.entity';
 import { CreateOrderDto, UpdateOrderDto } from './order.dto';
 import {
+  NotificationType,
   OrderItemDto,
   OrderItemRowDto,
   OrderStatus,
   ResultPaged,
   Shape,
+  UserRole,
 } from '@merlebleu/shared';
 import { getPaginationParams } from '@shared/pagination/pagination.utils';
 import { formatDate } from '@shared/date/date.utils';
 import { PaymentService } from '../payment/payment.service';
 import { ShopService } from '../../shop/shop.service';
+import { NotificationService } from '../../notification/notification.service';
+
+const PASTRY_NOTIFICATION_ROLES = [UserRole.PASTRY_CHEF, UserRole.ADMIN];
+const CASHIER_NOTIFICATION_ROLES = [UserRole.CASHIER, UserRole.ADMIN];
 
 @Injectable()
 export class OrderService {
@@ -24,9 +30,13 @@ export class OrderService {
     private orderItemRepository: Repository<OrderItemEntity>,
     private paymentService: PaymentService,
     private shopService: ShopService,
+    private notificationService: NotificationService,
   ) {}
 
-  async addOrder(order: CreateOrderDto): Promise<OrderEntity> {
+  async addOrder(
+    order: CreateOrderDto,
+    actorName: string,
+  ): Promise<OrderEntity> {
     const paymentMethod = await this.paymentService.getPaymentMethod(
       order.paymentMethodId,
     );
@@ -42,6 +52,13 @@ export class OrderService {
     orderEntity.orderItems = this.buildOrderItems(orderItems, orderEntity);
 
     const savedOrder = await this.orderRepository.save(orderEntity);
+
+    await this.notificationService.create(NotificationType.ORDER_CREATED, {
+      orderId: savedOrder.id,
+      customerName: savedOrder.customerName,
+      actorName,
+      targetRoles: PASTRY_NOTIFICATION_ROLES,
+    });
 
     return this.sanitizeOrder(savedOrder);
   }
@@ -319,7 +336,11 @@ export class OrderService {
     return this.sanitizeOrder(order);
   }
 
-  async updateOrder(id: string, order: UpdateOrderDto): Promise<OrderEntity> {
+  async updateOrder(
+    id: string,
+    order: UpdateOrderDto,
+    actorName: string,
+  ): Promise<OrderEntity> {
     const existingOrder = await this.orderRepository.findOne({
       where: { id },
       relations: { orderItems: true, paymentMethod: true, shop: true },
@@ -346,10 +367,21 @@ export class OrderService {
 
     const savedOrder = await this.orderRepository.save(existingOrder);
 
+    await this.notificationService.create(NotificationType.ORDER_UPDATED, {
+      orderId: savedOrder.id,
+      customerName: savedOrder.customerName,
+      actorName,
+      targetRoles: PASTRY_NOTIFICATION_ROLES,
+    });
+
     return this.sanitizeOrder(savedOrder);
   }
 
-  async updateOrderStatus(id: string, status: OrderStatus): Promise<boolean> {
+  async updateOrderStatus(
+    id: string,
+    status: OrderStatus,
+    actorName: string,
+  ): Promise<boolean> {
     const existingOrder = await this.orderRepository.findOne({
       where: { id },
       relations: { orderItems: false, paymentMethod: false },
@@ -362,6 +394,15 @@ export class OrderService {
     existingOrder.orderStatus = status;
 
     await this.orderRepository.save(existingOrder);
+
+    if (status === OrderStatus.TODELIVER) {
+      await this.notificationService.create(NotificationType.ORDER_READY, {
+        orderId: existingOrder.id,
+        customerName: existingOrder.customerName,
+        actorName,
+        targetRoles: CASHIER_NOTIFICATION_ROLES,
+      });
+    }
 
     return true;
   }
@@ -393,12 +434,21 @@ export class OrderService {
     return this.sanitizeOrder(savedOrder);
   }
 
-  async deleteOrder(id: string): Promise<void> {
-    const deleteResult = await this.orderRepository.delete(id);
+  async deleteOrder(id: string, actorName: string): Promise<void> {
+    const existingOrder = await this.orderRepository.findOneBy({ id });
 
-    if (!deleteResult.affected) {
+    if (!existingOrder) {
       throw new NotFoundException(`Order with id ${id} not found`);
     }
+
+    await this.orderRepository.delete(id);
+
+    await this.notificationService.create(NotificationType.ORDER_DELETED, {
+      orderId: id,
+      customerName: existingOrder.customerName,
+      actorName,
+      targetRoles: PASTRY_NOTIFICATION_ROLES,
+    });
   }
 
   private buildOrderItems(

@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, ViewChild, inject, signal } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { finalize } from 'rxjs';
 import { TableModule } from 'primeng/table';
@@ -60,6 +61,8 @@ export class ListOrder implements OnInit {
   private readonly orderService = inject(OrderService);
   private readonly shopService = inject(ShopService);
   private readonly userPreferencesService = inject(UserPreferencesService);
+  private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
 
   protected readonly OrderDisplayMode = OrderDisplayMode;
   protected readonly CALENDAR_VIEW = CALENDAR_VIEW;
@@ -110,6 +113,7 @@ export class ListOrder implements OnInit {
   ngOnInit(): void {
     this.shopService.getAll().subscribe((shops) => this.shops.set(shops));
     this.loadStatusCounts();
+    this.openOrderFromQueryParam();
 
     this.userPreferencesService.getCurrentUser().subscribe({
       next: (user) => {
@@ -124,6 +128,23 @@ export class ListOrder implements OnInit {
           this.loadOrders();
         }
       },
+    });
+  }
+
+  private openOrderFromQueryParam(): void {
+    const orderId = this.route.snapshot.queryParamMap.get('orderId');
+    if (!orderId) {
+      return;
+    }
+
+    this.orderService.getOrderById(orderId).subscribe((order) => {
+      this.openOrderDetail(order);
+    });
+
+    void this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: {},
+      replaceUrl: true,
     });
   }
 

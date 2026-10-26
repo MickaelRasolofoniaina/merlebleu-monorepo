@@ -50,3 +50,29 @@ export const parseTime = (value?: string): Date | null => {
   result.setHours(hours, minutes, 0, 0);
   return result;
 };
+
+const isSameDay = (a: Date, b: Date): boolean =>
+  a.getFullYear() === b.getFullYear() &&
+  a.getMonth() === b.getMonth() &&
+  a.getDate() === b.getDate();
+
+export const formatNotificationDate = (value: string): string => {
+  const date = new Date(value);
+  const now = new Date();
+  const time = formatTime(date);
+
+  if (isSameDay(date, now)) {
+    return `Aujourd'hui à ${time}`;
+  }
+
+  const yesterday = addDays(now, -1);
+  if (isSameDay(date, yesterday)) {
+    return `Hier à ${time}`;
+  }
+
+  const day = String(date.getDate()).padStart(2, '0');
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const year = date.getFullYear();
+
+  return `${day}/${month}/${year} à ${time}`;
+};
