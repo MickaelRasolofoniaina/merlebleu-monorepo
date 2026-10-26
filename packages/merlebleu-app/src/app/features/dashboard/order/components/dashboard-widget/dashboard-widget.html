@@ -1,0 +1,17 @@
+<p-card>
+  <ng-template #title>
+    <div class="flex items-center justify-between gap-2">
+      <span class="text-lg">{{ heading() }}</span>
+      <p-selectbutton
+        [options]="viewOptions"
+        [ngModel]="view()"
+        (ngModelChange)="view.set($event)"
+        optionLabel="label"
+        optionValue="value"
+        [allowEmpty]="false"
+        size="small"
+      />
+    </div>
+  </ng-template>
+  <ng-content />
+</p-card>

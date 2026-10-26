@@ -2,15 +2,13 @@
   <h2 class="text-2xl font-bold">Commandes à préparer</h2>
 </div>
 
-<div
-  class="inline-flex items-center gap-3 mb-4 px-4 py-2.5 rounded-lg bg-red-500/10 dark:bg-red-400/10 border border-red-500/30 dark:border-red-400/30"
->
-  <i class="pi pi-box text-xl text-red-600 dark:text-red-400"></i>
-  <span class="text-2xl font-bold text-red-600 dark:text-red-400">{{ displayedCount() }}</span>
-  <span class="text-sm font-semibold text-red-600 dark:text-red-400">
-    commande{{ displayedCount() > 1 ? 's' : '' }} à préparer
-  </span>
-</div>
+<order-count-card
+  class="mb-4"
+  color="red"
+  icon="pi pi-box"
+  [count]="displayedCount()"
+  label="à préparer"
+/>
 
 <div class="flex justify-start mb-4">
   <p-selectButton

@@ -3,33 +3,24 @@
 </div>
 
 <div class="flex flex-wrap gap-3 mb-4">
-  <div
-    class="inline-flex items-center gap-3 px-4 py-2.5 rounded-lg bg-red-500/10 dark:bg-red-400/10 border border-red-500/30 dark:border-red-400/30"
-  >
-    <i class="pi pi-box text-xl text-red-600 dark:text-red-400"></i>
-    <span class="text-2xl font-bold text-red-600 dark:text-red-400">{{ toPrepareCount() }}</span>
-    <span class="text-sm font-semibold text-red-600 dark:text-red-400">
-      commande{{ toPrepareCount() > 1 ? 's' : '' }} à préparer
-    </span>
-  </div>
-  <div
-    class="inline-flex items-center gap-3 px-4 py-2.5 rounded-lg bg-green-500/10 dark:bg-green-400/10 border border-green-500/30 dark:border-green-400/30"
-  >
-    <i class="pi pi-truck text-xl text-green-600 dark:text-green-400"></i>
-    <span class="text-2xl font-bold text-green-600 dark:text-green-400">{{ toDeliverCount() }}</span>
-    <span class="text-sm font-semibold text-green-600 dark:text-green-400">
-      commande{{ toDeliverCount() > 1 ? 's' : '' }} à livrer
-    </span>
-  </div>
-  <div
-    class="inline-flex items-center gap-3 px-4 py-2.5 rounded-lg bg-orange-500/10 dark:bg-orange-400/10 border border-orange-500/30 dark:border-orange-400/30"
-  >
-    <i class="pi pi-exclamation-triangle text-xl text-orange-600 dark:text-orange-400"></i>
-    <span class="text-2xl font-bold text-orange-600 dark:text-orange-400">{{ lateCount() }}</span>
-    <span class="text-sm font-semibold text-orange-600 dark:text-orange-400">
-      commande{{ lateCount() > 1 ? 's' : '' }} en retard
-    </span>
-  </div>
+  <order-count-card
+    color="red"
+    icon="pi pi-box"
+    [count]="toPrepareCount()"
+    label="à préparer"
+  />
+  <order-count-card
+    color="green"
+    icon="pi pi-truck"
+    [count]="toDeliverCount()"
+    label="à livrer"
+  />
+  <order-count-card
+    color="orange"
+    icon="pi pi-exclamation-triangle"
+    [count]="lateCount()"
+    label="en retard"
+  />
 </div>
 
 <div class="flex justify-between items-center mb-4">

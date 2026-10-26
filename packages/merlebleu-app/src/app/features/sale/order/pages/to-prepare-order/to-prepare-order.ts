@@ -29,6 +29,7 @@ import { UserPreferencesService } from '@shared/services/user-preferences.servic
 import { OrderDetailDialog } from '../../components/order-detail-dialog/order-detail-dialog';
 import { PastryOrderTable } from '../../components/pastry-order-table/pastry-order-table';
 import { OrderCalendarView } from '../../components/order-calendar-view/order-calendar-view';
+import { OrderCountCard } from '@shared/components/order-count-card/order-count-card';
 
 const CALENDAR_VIEW = 'CALENDAR' as const;
 type ToPrepareDisplayMode = OrderDisplayMode | typeof CALENDAR_VIEW;
@@ -49,6 +50,7 @@ type ToPrepareDisplayMode = OrderDisplayMode | typeof CALENDAR_VIEW;
     OrderDetailDialog,
     PastryOrderTable,
     OrderCalendarView,
+    OrderCountCard,
   ],
   templateUrl: './to-prepare-order.html',
   styleUrl: './to-prepare-order.scss',

@@ -1,0 +1,7 @@
+@if (hasData()) {
+<p-chart type="pie" [data]="data()" [options]="options()" height="18rem" />
+} @else {
+<div class="flex items-center justify-center h-72 text-slate-500 dark:text-slate-400">
+  Aucune commande sur cette période
+</div>
+}

@@ -57,7 +57,7 @@ export class Login {
         } else {
           localStorage.removeItem('user_shop');
         }
-        void this.router.navigate(['/sale/order']);
+        void this.router.navigate(['/dashboard/order']);
       },
       error: (error) => {
         if (error?.status === 401) {
