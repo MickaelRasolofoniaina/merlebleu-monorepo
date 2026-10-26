@@ -1,7 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, of, shareReplay, tap } from 'rxjs';
-import { OrderDisplayMode, UserDto } from '@merlebleu/shared';
+import { OrderDisplayMode, UpdateProfileDto, UserDto } from '@merlebleu/shared';
 import { environment } from '../../../environments/environment';
 
 @Injectable({
@@ -30,5 +30,13 @@ export class UserPreferencesService {
           this.cachedUser$ = of(user);
         }),
       );
+  }
+
+  updateProfile(profile: UpdateProfileDto): Observable<UserDto> {
+    return this.http.patch<UserDto>(`${this.apiUrl}/me/profile`, profile).pipe(
+      tap((user) => {
+        this.cachedUser$ = of(user);
+      }),
+    );
   }
 }

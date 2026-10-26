@@ -8,7 +8,12 @@ import {
   Post,
 } from '@nestjs/common';
 import { UserService } from './user.service';
-import { CreateUserDto, UpdateUserDto, UpdateUserPreferencesDto } from './user.dto';
+import {
+  CreateUserDto,
+  UpdateProfileDto,
+  UpdateUserDto,
+  UpdateUserPreferencesDto,
+} from './user.dto';
 import { CurrentUser } from '@shared/auth/current-user.decorator';
 import type { CurrentUserPayload } from '@shared/auth/current-user.decorator';
 
@@ -35,6 +40,14 @@ export class UserController {
     @Body() body: UpdateUserPreferencesDto,
   ) {
     return this.userService.updateUserPreferences(currentUser.sub, body);
+  }
+
+  @Patch('me/profile')
+  updateMyProfile(
+    @CurrentUser() currentUser: CurrentUserPayload,
+    @Body() body: UpdateProfileDto,
+  ) {
+    return this.userService.updateProfile(currentUser.sub, body);
   }
 
   @Patch(':id')

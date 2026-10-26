@@ -55,9 +55,29 @@ export const updateUserPreferencesSchema = z.object({
   defaultOrderDisplayMode: z.enum(OrderDisplayMode),
 });
 
+export const updateProfileSchema = z
+  .object({
+    name: z.string().min(1, "Veuillez remplir le nom de l'utilisateur"),
+    currentPassword: z.string().optional(),
+    newPassword: z
+      .string()
+      .min(8, "Le mot de passe doit contenir au moins 8 caractères")
+      .regex(/\d/, "Le mot de passe doit contenir au moins un chiffre")
+      .regex(
+        /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/,
+        "Le mot de passe doit contenir au moins un caractère spécial",
+      )
+      .optional(),
+  })
+  .refine((data) => !data.newPassword || !!data.currentPassword, {
+    message: "Veuillez saisir le mot de passe actuel",
+    path: ["currentPassword"],
+  });
+
 export type CreateUserDto = z.infer<typeof createUserSchema>;
 export type UpdateUserDto = z.infer<typeof updateUserSchema>;
 export type UpdateUserPreferencesDto = z.infer<typeof updateUserPreferencesSchema>;
+export type UpdateProfileDto = z.infer<typeof updateProfileSchema>;
 export type UserDto = {
   id: string;
   name: string;

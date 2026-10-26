@@ -1,6 +1,6 @@
 <div class="flex justify-center">
   <div
-    class="w-full max-w-lg bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-[0_8px_30px_rgba(0,0,0,0.06)] p-8"
+    class="w-full bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-[0_8px_30px_rgba(0,0,0,0.06)] p-8"
   >
     <div class="flex items-center gap-4 pb-6 mb-6 border-b border-slate-200 dark:border-slate-700">
       <div
@@ -23,30 +23,111 @@
       </div>
     </div>
 
-    <div class="flex flex-col gap-2">
-      <h3 class="flex items-center gap-2 font-semibold text-slate-900 dark:text-white">
-        <i class="pi pi-table text-slate-400"></i>
-        Affichage par défaut des commandes
-      </h3>
-      <p class="text-sm text-slate-500 dark:text-slate-400">
-        Choisissez la vue qui s'affiche au chargement des listes de commandes (Toutes, A préparer,
-        A livrer).
-      </p>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+      <section class="flex flex-col gap-4">
+        <h3 class="flex items-center gap-2 font-semibold text-slate-900 dark:text-white">
+          <i class="pi pi-user-edit text-slate-400"></i>
+          Informations personnelles
+        </h3>
 
-      <div
-        class="flex flex-col gap-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 p-4 mt-2"
-      >
-        <p-selectButton
-          [options]="displayModeOptions"
-          [(ngModel)]="selectedDisplayMode"
-          optionLabel="label"
-          optionValue="value"
-        />
-      </div>
-    </div>
+        <div>
+          <label for="profileName" class="block mb-2">Nom</label>
+          <input
+            id="profileName"
+            type="text"
+            pInputText
+            [(ngModel)]="nameInput"
+            class="w-full"
+            placeholder="Entrez votre nom"
+          />
+          @if (getProfileFieldError('name')) {
+          <small class="text-red-500 mt-1 block">{{ getProfileFieldError('name') }}</small>
+          }
+        </div>
 
-    <div class="flex justify-end mt-8">
-      <p-button label="Enregistrer" icon="pi pi-save" [loading]="isSaving" (onClick)="save()" />
+        <h4 class="font-semibold text-slate-900 dark:text-white mt-2">Changer le mot de passe</h4>
+        <p class="text-sm text-slate-500 dark:text-slate-400 -mt-2">
+          Laissez ces champs vides si vous ne souhaitez pas modifier votre mot de passe.
+        </p>
+
+        <div>
+          <label for="profileCurrentPassword" class="block mb-2">Mot de passe actuel</label>
+          <input
+            id="profileCurrentPassword"
+            type="password"
+            pInputText
+            [(ngModel)]="currentPassword"
+            class="w-full"
+            placeholder="Entrez votre mot de passe actuel"
+          />
+          @if (getProfileFieldError('currentPassword')) {
+          <small class="text-red-500 mt-1 block">{{ getProfileFieldError('currentPassword') }}</small>
+          }
+        </div>
+        <div>
+          <label for="profileNewPassword" class="block mb-2">Nouveau mot de passe</label>
+          <input
+            id="profileNewPassword"
+            type="password"
+            pInputText
+            [(ngModel)]="newPassword"
+            class="w-full"
+            placeholder="Entrez le nouveau mot de passe"
+          />
+          @if (getProfileFieldError('newPassword')) {
+          <small class="text-red-500 mt-1 block">{{ getProfileFieldError('newPassword') }}</small>
+          }
+        </div>
+        <div>
+          <label for="profileNewPasswordConfirm" class="block mb-2">Valider le mot de passe</label>
+          <input
+            id="profileNewPasswordConfirm"
+            type="password"
+            pInputText
+            [(ngModel)]="newPasswordConfirm"
+            class="w-full"
+            placeholder="Confirmez le nouveau mot de passe"
+          />
+          @if (passwordConfirmError) {
+          <small class="text-red-500 mt-1 block">{{ passwordConfirmError }}</small>
+          }
+        </div>
+
+        <div class="flex justify-end mt-auto">
+          <p-button
+            label="Enregistrer le profil"
+            icon="pi pi-save"
+            [loading]="isSavingProfile"
+            (onClick)="saveProfile()"
+          />
+        </div>
+      </section>
+
+      <section class="flex flex-col gap-4">
+        <h3 class="flex items-center gap-2 font-semibold text-slate-900 dark:text-white">
+          <i class="pi pi-table text-slate-400"></i>
+          Affichage par défaut des commandes
+        </h3>
+        <p class="text-sm text-slate-500 dark:text-slate-400">
+          Choisissez la vue qui s'affiche au chargement des listes de commandes (Toutes, A préparer,
+          A livrer).
+        </p>
+
+        <div
+          class="flex flex-col gap-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 p-4"
+        >
+          <p-selectButton
+            [options]="displayModeOptions"
+            [(ngModel)]="selectedDisplayMode"
+            optionLabel="label"
+            optionValue="value"
+          />
+        </div>
+
+        <div class="flex justify-end mt-auto">
+          <p-button label="Enregistrer" icon="pi pi-save" [loading]="isSaving" (onClick)="save()" />
+        </div>
+      </section>
     </div>
   </div>
 </div>
