@@ -134,13 +134,12 @@
           size="small"
         />
         }
-        @if (showCompleteAction()) {
+        @if (showCompleteAction() && !isOrderCompleted(row)) {
         <p-button
           icon="pi pi-check"
           [loading]="isCompleting(row.orderId)"
           (onClick)="onComplete(row)"
           severity="success"
-          [disabled]="isOrderCompleted(row)"
           size="small"
         />
         }

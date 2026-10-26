@@ -8,6 +8,8 @@ import { SelectModule } from 'primeng/select';
 import { SelectButtonModule } from 'primeng/selectbutton';
 import { DatePickerModule } from 'primeng/datepicker';
 import { DialogModule } from 'primeng/dialog';
+import { ConfirmationService, MessageService } from 'primeng/api';
+import { ConfirmDialog } from 'primeng/confirmdialog';
 import {
   DEFAULT_PAGE_SIZE,
   Order,
@@ -44,6 +46,7 @@ const LATE_ORDER_STATUSES = [OrderStatus.TODO, OrderStatus.INPROGRESS, OrderStat
     DialogModule,
     Button,
     BadgeModule,
+    ConfirmDialog,
     DatePipe,
     DecimalPipe,
     OrderDetailDialog,
@@ -51,12 +54,15 @@ const LATE_ORDER_STATUSES = [OrderStatus.TODO, OrderStatus.INPROGRESS, OrderStat
   ],
   templateUrl: './late-order.html',
   styleUrl: './late-order.scss',
+  providers: [ConfirmationService],
 })
 export class LateOrder implements OnInit {
   private readonly orderService = inject(OrderService);
   private readonly shopService = inject(ShopService);
   private readonly paymentService = inject(PaymentService);
   private readonly userPreferencesService = inject(UserPreferencesService);
+  private readonly confirmationService = inject(ConfirmationService);
+  private readonly messageService = inject(MessageService);
 
   protected readonly OrderDisplayMode = OrderDisplayMode;
   protected readonly OrderStatus = OrderStatus;
@@ -82,6 +88,7 @@ export class LateOrder implements OnInit {
   protected displayDeliverDialog = false;
   protected deliverPaymentMethodId: string | null = null;
   protected isDelivering = false;
+  protected completingIds = signal<Set<string>>(new Set());
 
   protected filters = {
     orderDate: null as Date | null,
@@ -225,6 +232,47 @@ export class LateOrder implements OnInit {
   protected onPastryDeliver(orderId: string): void {
     this.orderService.getOrderById(orderId).subscribe((order) => {
       this.openDeliverDialog(order);
+    });
+  }
+
+  protected isCompleting(orderId: string): boolean {
+    return this.completingIds().has(orderId);
+  }
+
+  protected onComplete(orderId: string): void {
+    this.confirmationService.confirm({
+      message: 'Marquer cette commande comme préparée et prête à être livrée?',
+      header: 'Commande terminée',
+      acceptLabel: 'Oui',
+      rejectLabel: 'Non',
+      acceptButtonStyleClass: 'p-button-success',
+      rejectButtonStyleClass: 'p-button-danger',
+      accept: () => {
+        const ids = new Set(this.completingIds());
+        ids.add(orderId);
+        this.completingIds.set(ids);
+
+        this.orderService
+          .updateOrderStatus(orderId, OrderStatus.TODELIVER)
+          .pipe(
+            finalize(() => {
+              const updatedIds = new Set(this.completingIds());
+              updatedIds.delete(orderId);
+              this.completingIds.set(updatedIds);
+            }),
+          )
+          .subscribe({
+            next: () => {
+              this.loadOrders(getPageFromFirstRows(this.first, this.rows), this.rows);
+              this.messageService.add({
+                severity: 'success',
+                summary: 'Commande terminée',
+                detail: 'La commande est prête à être livrée.',
+                life: 3000,
+              });
+            },
+          });
+      },
     });
   }
 

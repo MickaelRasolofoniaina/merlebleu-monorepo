@@ -22,6 +22,8 @@
   />
 </div>
 
+<p-confirm-dialog />
+
 @if (displayMode() === OrderDisplayMode.PASTRY) {
 <pastry-order-table
   [rows]="orderItemRows()"
@@ -29,11 +31,14 @@
   [totalRecords]="totalRecords"
   [first]="first"
   [pageSize]="rows"
+  [showCompleteAction]="true"
+  [completingOrderIds]="completingIds()"
   [showDeliverAction]="true"
   (pageChange)="onPageChange($event)"
   (filter)="onPastryFilter($event)"
   (resetFilter)="onPastryReset()"
   (viewDetail)="onPastryViewDetail($event)"
+  (complete)="onComplete($event)"
   (deliver)="onPastryDeliver($event)"
 />
 } @else {
@@ -142,6 +147,14 @@
           icon="pi pi-truck"
           severity="success"
           (onClick)="openDeliverDialog(order)"
+          size="small"
+        />
+        } @else {
+        <p-button
+          icon="pi pi-check"
+          [loading]="isCompleting(order.id)"
+          (onClick)="onComplete(order.id)"
+          severity="success"
           size="small"
         />
         }
