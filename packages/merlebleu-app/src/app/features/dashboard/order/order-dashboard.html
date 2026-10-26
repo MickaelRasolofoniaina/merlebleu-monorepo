@@ -1,0 +1,57 @@
+<div class="flex flex-wrap justify-between items-center gap-3 mb-4">
+  <h2 class="text-2xl font-bold">Tableau de bord des commandes</h2>
+  <div class="flex items-center gap-2">
+    <span class="text-sm text-slate-500 dark:text-slate-400">Période</span>
+    <p-select
+      [(ngModel)]="selectedMonth"
+      [options]="monthOptions"
+      optionLabel="label"
+      optionValue="value"
+      class="w-40"
+    />
+    <p-select
+      [(ngModel)]="selectedYear"
+      [options]="yearOptions"
+      optionLabel="label"
+      optionValue="value"
+      class="w-28"
+    />
+  </div>
+</div>
+
+<div class="flex flex-wrap gap-3 mb-4">
+  <order-count-card color="red" icon="pi pi-box" [count]="toPrepareCount()" label="à préparer" />
+  <order-count-card color="green" icon="pi pi-truck" [count]="toDeliverCount()" label="à livrer" />
+  <order-count-card
+    color="orange"
+    icon="pi pi-exclamation-triangle"
+    [count]="lateCount()"
+    label="en retard"
+  />
+</div>
+
+<div class="grid grid-cols-1 xl:grid-cols-2 gap-4">
+  <dashboard-widget heading="Commandes" [(view)]="countView">
+    <orders-bar-chart [labels]="barLabels()" [values]="barValues()" />
+  </dashboard-widget>
+
+  <dashboard-widget heading="Montant total" [(view)]="amountView">
+    <div class="flex flex-col items-center justify-center gap-4 h-72">
+      <span class="text-5xl font-bold text-slate-900 dark:text-white">
+        {{ formatAmount(amount().total) }}
+      </span>
+      <p-tag
+        severity="info"
+        [value]="'sur ' + amount().ordersCount + ' commande' + (amount().ordersCount > 1 ? 's' : '')"
+      />
+    </div>
+  </dashboard-widget>
+
+  <dashboard-widget heading="Commandes par type" [(view)]="typeView">
+    <orders-pie-chart [points]="typePoints()" />
+  </dashboard-widget>
+
+  <dashboard-widget heading="Commandes par forme" [(view)]="shapeView">
+    <orders-pie-chart [points]="shapePoints()" />
+  </dashboard-widget>
+</div>

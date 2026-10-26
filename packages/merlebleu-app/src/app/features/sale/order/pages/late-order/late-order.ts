@@ -31,6 +31,7 @@ import { getUserShopId } from '@shared/utils/user';
 import { UserPreferencesService } from '@shared/services/user-preferences.service';
 import { OrderDetailDialog } from '../../components/order-detail-dialog/order-detail-dialog';
 import { PastryOrderTable } from '../../components/pastry-order-table/pastry-order-table';
+import { OrderCountCard } from '@shared/components/order-count-card/order-count-card';
 
 const LATE_ORDER_STATUSES = [OrderStatus.TODO, OrderStatus.INPROGRESS, OrderStatus.TODELIVER];
 
@@ -51,6 +52,7 @@ const LATE_ORDER_STATUSES = [OrderStatus.TODO, OrderStatus.INPROGRESS, OrderStat
     DecimalPipe,
     OrderDetailDialog,
     PastryOrderTable,
+    OrderCountCard,
   ],
   templateUrl: './late-order.html',
   styleUrl: './late-order.scss',

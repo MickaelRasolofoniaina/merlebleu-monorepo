@@ -40,6 +40,16 @@ export class AppLayout implements OnInit, OnDestroy {
 
   protected items: MenuItem[] = [
     {
+      label: 'Tableau de bord',
+      items: [
+        {
+          label: 'Commandes',
+          icon: 'pi pi-chart-bar',
+          routerLink: ['/dashboard/order'],
+        },
+      ],
+    },
+    {
       label: 'Commandes',
       items: [
         {

@@ -17,6 +17,8 @@ export * from "./domain/inventory/item/item.dto";
 export * from "./domain/inventory/item/item";
 export * from "./domain/notification/notification.dto";
 export * from "./domain/notification/notification";
+export * from "./domain/sale/dashboard/dashboard.dto";
+export * from "./domain/sale/dashboard/dashboard";
 export * from "./domain/sale/order/order.dto";
 export * from "./domain/sale/order/order";
 export * from "./domain/sale/payment/payment.dto";

@@ -2,15 +2,13 @@
   <h2 class="text-2xl font-bold">Commandes à livrer</h2>
 </div>
 
-<div
-  class="inline-flex items-center gap-3 mb-4 px-4 py-2.5 rounded-lg bg-green-500/10 dark:bg-green-400/10 border border-green-500/30 dark:border-green-400/30"
->
-  <i class="pi pi-truck text-xl text-green-600 dark:text-green-400"></i>
-  <span class="text-2xl font-bold text-green-600 dark:text-green-400">{{ displayedCount() }}</span>
-  <span class="text-sm font-semibold text-green-600 dark:text-green-400">
-    commande{{ displayedCount() > 1 ? 's' : '' }} à livrer
-  </span>
-</div>
+<order-count-card
+  class="mb-4"
+  color="green"
+  icon="pi pi-truck"
+  [count]="displayedCount()"
+  label="à livrer"
+/>
 
 <div class="flex justify-start mb-4">
   <p-selectButton

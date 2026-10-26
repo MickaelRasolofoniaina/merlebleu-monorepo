@@ -6,7 +6,7 @@ import { authGuard } from './shared/guards/auth.guard';
 export const routes: Routes = [
   {
     path: '',
-    redirectTo: 'identity/login',
+    redirectTo: 'dashboard/order',
     pathMatch: 'full',
   },
   {
@@ -18,6 +18,11 @@ export const routes: Routes = [
     component: AppLayout,
     canActivateChild: [authGuard],
     children: [
+      {
+        path: 'dashboard',
+        loadChildren: () =>
+          import('./features/dashboard/dashboard.routes').then((m) => m.DASHBOARD_ROUTES),
+      },
       {
         path: 'sale',
         loadChildren: () => import('./features/sale/sale.routes').then((m) => m.SALE_ROUTES),

@@ -2,15 +2,13 @@
   <h2 class="text-2xl font-bold">Commandes en retard</h2>
 </div>
 
-<div
-  class="inline-flex items-center gap-3 mb-4 px-4 py-2.5 rounded-lg bg-orange-500/10 dark:bg-orange-400/10 border border-orange-500/30 dark:border-orange-400/30"
->
-  <i class="pi pi-exclamation-triangle text-xl text-orange-600 dark:text-orange-400"></i>
-  <span class="text-2xl font-bold text-orange-600 dark:text-orange-400">{{ totalRecords }}</span>
-  <span class="text-sm font-semibold text-orange-600 dark:text-orange-400">
-    commande{{ totalRecords > 1 ? 's' : '' }} en retard
-  </span>
-</div>
+<order-count-card
+  class="mb-4"
+  color="orange"
+  icon="pi pi-exclamation-triangle"
+  [count]="totalRecords"
+  label="en retard"
+/>
 
 <div class="flex justify-start mb-4">
   <p-selectButton
