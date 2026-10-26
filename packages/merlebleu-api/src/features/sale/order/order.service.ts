@@ -20,6 +20,11 @@ import { NotificationService } from '../../notification/notification.service';
 
 const PASTRY_NOTIFICATION_ROLES = [UserRole.PASTRY_CHEF, UserRole.ADMIN];
 const CASHIER_NOTIFICATION_ROLES = [UserRole.CASHIER, UserRole.ADMIN];
+const LATE_ORDER_STATUSES = [
+  OrderStatus.TODO,
+  OrderStatus.INPROGRESS,
+  OrderStatus.TODELIVER,
+];
 
 @Injectable()
 export class OrderService {
@@ -188,6 +193,28 @@ export class OrderService {
     });
   }
 
+  async listOrdersLate(
+    page = 1,
+    limit = 20,
+    customerName?: string,
+    shopId?: string,
+    status?: OrderStatus,
+    orderDate?: string,
+    deliveryDate?: string,
+  ): Promise<ResultPaged<OrderEntity>> {
+    const today = this.getToday();
+
+    return this.listOrders(page, limit, {
+      deliveryDateTo: today,
+      customerName,
+      shopId,
+      status: status && LATE_ORDER_STATUSES.includes(status) ? status : undefined,
+      statuses: LATE_ORDER_STATUSES,
+      orderDate,
+      deliveryDate,
+    });
+  }
+
   async listOrderItems(
     page = 1,
     limit = 20,
@@ -299,6 +326,27 @@ export class OrderService {
       ...filters,
       deliveryDateFrom: today,
       statuses: [OrderStatus.TODELIVER],
+    });
+  }
+
+  async listOrderItemsLate(
+    page = 1,
+    limit = 20,
+    filters?: {
+      customerName?: string;
+      type?: string;
+      shape?: Shape;
+      text?: string;
+      decoration?: string;
+      size?: number;
+    },
+  ): Promise<ResultPaged<OrderItemRowDto>> {
+    const today = this.getToday();
+
+    return this.listOrderItems(page, limit, {
+      ...filters,
+      deliveryDateTo: today,
+      statuses: LATE_ORDER_STATUSES,
     });
   }
 

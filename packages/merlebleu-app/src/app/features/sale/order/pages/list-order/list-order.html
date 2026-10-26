@@ -21,6 +21,15 @@
       commande{{ toDeliverCount() > 1 ? 's' : '' }} à livrer
     </span>
   </div>
+  <div
+    class="inline-flex items-center gap-3 px-4 py-2.5 rounded-lg bg-orange-500/10 dark:bg-orange-400/10 border border-orange-500/30 dark:border-orange-400/30"
+  >
+    <i class="pi pi-exclamation-triangle text-xl text-orange-600 dark:text-orange-400"></i>
+    <span class="text-2xl font-bold text-orange-600 dark:text-orange-400">{{ lateCount() }}</span>
+    <span class="text-sm font-semibold text-orange-600 dark:text-orange-400">
+      commande{{ lateCount() > 1 ? 's' : '' }} en retard
+    </span>
+  </div>
 </div>
 
 <div class="flex justify-between items-center mb-4">
@@ -138,7 +147,7 @@
         >
       </td>
       <td>{{ order.orderDate | date: 'dd/MM/yyyy' }}</td>
-      <td>
+      <td [class]="isOrderLate(order) ? 'text-red-600 dark:text-red-400 font-semibold' : ''">
         @if (order.deliveryStartTime === order.deliveryEndTime) {
         {{ order.deliveryDate | date: 'dd/MM/yyyy' }} à {{ order.deliveryStartTime.slice(0, 5) }}
         } @else {

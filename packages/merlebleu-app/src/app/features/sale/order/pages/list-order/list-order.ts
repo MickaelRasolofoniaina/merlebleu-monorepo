@@ -23,7 +23,12 @@ import { SelectModule } from 'primeng/select';
 import { SelectButtonModule } from 'primeng/selectbutton';
 import { formatDate } from '@shared/utils/date';
 import { getPageFromFirstRows } from '@shared/utils/pagination';
-import { ORDER_STATUSES, getOrderStatusLabel, getOrderStatusColor } from '@shared/utils/order';
+import {
+  ORDER_STATUSES,
+  getOrderStatusLabel,
+  getOrderStatusColor,
+  isOrderLate,
+} from '@shared/utils/order';
 import { getUserShopId } from '@shared/utils/user';
 import { Shop } from '@merlebleu/shared';
 import { UserPreferencesService } from '@shared/services/user-preferences.service';
@@ -86,6 +91,8 @@ export class ListOrder implements OnInit {
   protected first = 0;
   protected toPrepareCount = signal(0);
   protected toDeliverCount = signal(0);
+  protected lateCount = signal(0);
+  protected readonly isOrderLate = isOrderLate;
 
   protected filters = {
     orderDate: null as Date | null,
@@ -225,6 +232,10 @@ export class ListOrder implements OnInit {
     this.orderService
       .listOrdersToDeliver({ page: 1, limit: 1 })
       .subscribe((response) => this.toDeliverCount.set(response.total));
+
+    this.orderService
+      .listOrdersLate({ page: 1, limit: 1 })
+      .subscribe((response) => this.lateCount.set(response.total));
   }
 
   private getDefaultCalendarRange(): { from: string; to: string } {

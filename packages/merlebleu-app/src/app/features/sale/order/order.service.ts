@@ -125,6 +125,40 @@ export class OrderService {
     return this.http.get<ResultPaged<Order>>(queryString);
   }
 
+  listOrdersLate(
+    paginationParams: PaginationParams,
+    customerName?: string,
+    shopId?: string,
+    status?: OrderStatus,
+    orderDate?: string,
+    deliveryDate?: string,
+  ): Observable<ResultPaged<Order>> {
+    const { page = 1, limit = 20 } = paginationParams;
+    let queryString = `${this.apiUrl}/late?page=${page}&limit=${limit}`;
+
+    if (customerName) {
+      queryString += `&customerName=${encodeURIComponent(customerName)}`;
+    }
+
+    if (shopId) {
+      queryString += `&shopId=${encodeURIComponent(shopId)}`;
+    }
+
+    if (status) {
+      queryString += `&status=${encodeURIComponent(status)}`;
+    }
+
+    if (orderDate) {
+      queryString += `&orderDate=${encodeURIComponent(orderDate)}`;
+    }
+
+    if (deliveryDate) {
+      queryString += `&deliveryDate=${encodeURIComponent(deliveryDate)}`;
+    }
+
+    return this.http.get<ResultPaged<Order>>(queryString);
+  }
+
   listOrderItems(
     paginationParams: PaginationParams,
     filters?: OrderItemRowFilters,
@@ -167,6 +201,24 @@ export class OrderService {
   ): Observable<ResultPaged<OrderItemRowDto>> {
     const { page = 1, limit = 20 } = paginationParams;
     let queryString = `${this.apiUrl}/items/to-deliver?page=${page}&limit=${limit}`;
+
+    if (filters) {
+      Object.entries(filters).forEach(([key, value]) => {
+        if (value !== null && value !== undefined && value !== '') {
+          queryString += `&${key}=${encodeURIComponent(String(value))}`;
+        }
+      });
+    }
+
+    return this.http.get<ResultPaged<OrderItemRowDto>>(queryString);
+  }
+
+  listOrderItemsLate(
+    paginationParams: PaginationParams,
+    filters?: OrderItemRowFilters,
+  ): Observable<ResultPaged<OrderItemRowDto>> {
+    const { page = 1, limit = 20 } = paginationParams;
+    let queryString = `${this.apiUrl}/items/late?page=${page}&limit=${limit}`;
 
     if (filters) {
       Object.entries(filters).forEach(([key, value]) => {

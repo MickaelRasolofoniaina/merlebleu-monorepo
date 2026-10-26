@@ -5,6 +5,7 @@ import { ShopEntity } from '../../shop/shop.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import {
   CreateUserDto,
+  UpdateProfileDto,
   UpdateUserDto,
   UpdateUserPreferencesDto,
   UserDto,
@@ -133,6 +134,34 @@ export class UserService {
     }
 
     Object.assign(user, updates);
+
+    await this.userRepository.save(user);
+
+    return this.findUserById(id);
+  }
+
+  async updateProfile(id: string, updates: UpdateProfileDto): Promise<UserDto> {
+    const user = await this.userRepository.findOne({ where: { id } });
+
+    if (!user) {
+      throw new NotFoundException(`User with id ${id} not found`);
+    }
+
+    if (updates.newPassword) {
+      const bcrypt = await import('bcrypt');
+      const isCurrentPasswordValid = await bcrypt.compare(
+        updates.currentPassword ?? '',
+        user.password,
+      );
+
+      if (!isCurrentPasswordValid) {
+        throw new BadRequestException('Le mot de passe actuel est incorrect.');
+      }
+
+      user.password = await this.hashPassword(updates.newPassword);
+    }
+
+    user.name = updates.name;
 
     await this.userRepository.save(user);
 

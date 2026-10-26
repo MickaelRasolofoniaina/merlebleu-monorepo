@@ -2,6 +2,7 @@ import { Routes } from '@angular/router';
 import { ListOrder } from './pages/list-order/list-order';
 import { ToPrepareOrder } from './pages/to-prepare-order/to-prepare-order';
 import { ToDeliverOrder } from './pages/to-deliver-order/to-deliver-order';
+import { LateOrder } from './pages/late-order/late-order';
 
 export const ORDER_ROUTES: Routes = [
   {
@@ -18,6 +19,10 @@ export const ORDER_ROUTES: Routes = [
       {
         path: 'to-deliver',
         component: ToDeliverOrder,
+      },
+      {
+        path: 'late',
+        component: LateOrder,
       },
       {
         path: '',

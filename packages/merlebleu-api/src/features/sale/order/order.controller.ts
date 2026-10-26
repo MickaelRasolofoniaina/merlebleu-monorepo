@@ -102,6 +102,29 @@ export class OrderController {
     );
   }
 
+  @Get('late')
+  listOrdersLate(
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
+    @Query('customerName') customerName?: string,
+    @Query('shopId') shopId?: string,
+    @Query('status') status?: OrderStatus,
+    @Query('orderDate') orderDate?: string,
+    @Query('deliveryDate') deliveryDate?: string,
+  ) {
+    const pageNumber = page ? Number.parseInt(page, 10) : 1;
+    const limitNumber = limit ? Number.parseInt(limit, 10) : 20;
+    return this.orderService.listOrdersLate(
+      pageNumber,
+      limitNumber,
+      customerName,
+      shopId,
+      status,
+      orderDate,
+      deliveryDate,
+    );
+  }
+
   @Get('items')
   listOrderItems(
     @Query('page') page?: string,
@@ -164,6 +187,29 @@ export class OrderController {
     const pageNumber = page ? Number.parseInt(page, 10) : 1;
     const limitNumber = limit ? Number.parseInt(limit, 10) : 20;
     return this.orderService.listOrderItemsToDeliver(pageNumber, limitNumber, {
+      customerName,
+      type,
+      shape,
+      text,
+      decoration,
+      size: size ? Number.parseInt(size, 10) : undefined,
+    });
+  }
+
+  @Get('items/late')
+  listOrderItemsLate(
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
+    @Query('customerName') customerName?: string,
+    @Query('type') type?: string,
+    @Query('shape') shape?: Shape,
+    @Query('text') text?: string,
+    @Query('decoration') decoration?: string,
+    @Query('size') size?: string,
+  ) {
+    const pageNumber = page ? Number.parseInt(page, 10) : 1;
+    const limitNumber = limit ? Number.parseInt(limit, 10) : 20;
+    return this.orderService.listOrderItemsLate(pageNumber, limitNumber, {
       customerName,
       type,
       shape,

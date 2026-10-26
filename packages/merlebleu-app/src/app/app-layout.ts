@@ -58,22 +58,14 @@ export class AppLayout implements OnInit, OnDestroy {
           routerLink: ['/sale/order/to-deliver'],
         },
         {
+          label: 'En retard',
+          icon: 'pi pi-exclamation-triangle',
+          routerLink: ['/sale/order/late'],
+        },
+        {
           label: 'Notifications',
           icon: 'pi pi-bell',
           routerLink: ['/notification'],
-        },
-      ],
-    },
-    {
-      label: 'Depenses',
-      items: [
-        {
-          label: 'Salaires',
-          icon: 'pi pi-wallet',
-        },
-        {
-          label: 'Autres',
-          icon: 'pi pi-receipt',
         },
       ],
     },
@@ -131,10 +123,6 @@ export class AppLayout implements OnInit, OnDestroy {
           routerLink: ['/identity/profile'],
         },
         {
-          label: 'Roles',
-          icon: 'pi pi-users',
-        },
-        {
           label: 'Boutique',
           icon: 'pi pi-shop',
           routerLink: ['/shop'],
@@ -143,10 +131,6 @@ export class AppLayout implements OnInit, OnDestroy {
           label: 'Methode de paiement',
           icon: 'pi pi-credit-card',
           routerLink: ['/sale/payment'],
-        },
-        {
-          label: 'Autres',
-          icon: 'pi pi-wrench',
         },
       ],
     },
