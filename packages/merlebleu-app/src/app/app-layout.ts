@@ -65,19 +65,6 @@ export class AppLayout implements OnInit, OnDestroy {
       ],
     },
     {
-      label: 'Depenses',
-      items: [
-        {
-          label: 'Salaires',
-          icon: 'pi pi-wallet',
-        },
-        {
-          label: 'Autres',
-          icon: 'pi pi-receipt',
-        },
-      ],
-    },
-    {
       label: 'Ingredients',
       items: [
         {
@@ -131,10 +118,6 @@ export class AppLayout implements OnInit, OnDestroy {
           routerLink: ['/identity/profile'],
         },
         {
-          label: 'Roles',
-          icon: 'pi pi-users',
-        },
-        {
           label: 'Boutique',
           icon: 'pi pi-shop',
           routerLink: ['/shop'],
@@ -143,10 +126,6 @@ export class AppLayout implements OnInit, OnDestroy {
           label: 'Methode de paiement',
           icon: 'pi pi-credit-card',
           routerLink: ['/sale/payment'],
-        },
-        {
-          label: 'Autres',
-          icon: 'pi pi-wrench',
         },
       ],
     },
