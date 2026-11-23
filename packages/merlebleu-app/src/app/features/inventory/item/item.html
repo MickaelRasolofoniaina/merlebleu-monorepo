@@ -36,7 +36,6 @@
       <th>Nom</th>
       <th>Prix Unitaire</th>
       <th>Type</th>
-      <th class="text-right!">Jours de Rétention</th>
       <th style="width: 12rem" class="text-center!">Actions</th>
     </tr>
   </ng-template>
@@ -45,7 +44,6 @@
       <td>{{ capitalizeFirstLetter(item.label) }}</td>
       <td>{{ formatUnitPrice(item.unitPrice) }}</td>
       <td>{{ capitalizeFirstLetter(item.type) }}</td>
-      <td class="text-right!">{{ item.maxRetentionDays }}</td>
       <td class="text-center!">
         <p-button
           icon="pi pi-pencil"

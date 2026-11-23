@@ -50,14 +50,12 @@ export class ItemListComponent {
     label: '',
     unitPrice: 0,
     type: ItemType.PASTRY,
-    maxRetentionDays: 0,
   };
 
   updateItemDto: UpdateItemDto = {
     label: '',
     unitPrice: 0,
     type: ItemType.PASTRY,
-    maxRetentionDays: 0,
   };
 
   private itemService = inject(ItemService);

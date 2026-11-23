@@ -22,7 +22,7 @@ describe('ItemService', () => {
 
   it('should fetch items', () => {
     const mockItems: Item[] = [
-      { label: 'Croissant', unitPrice: 1.2, type: ItemType.PASTRY, maxRetentionDays: 2 },
+      { label: 'Croissant', unitPrice: 1.2, type: ItemType.PASTRY },
     ];
     service.getItems('', 1, 10).subscribe(({ items, total }) => {
       expect(items.length).toBe(1);
@@ -34,7 +34,7 @@ describe('ItemService', () => {
   });
 
   it('should add item', () => {
-    const item: Item = { label: 'Cake', unitPrice: 5, type: ItemType.CAKE, maxRetentionDays: 3 };
+    const item: Item = { label: 'Cake', unitPrice: 5, type: ItemType.CAKE };
     service.addItem(item).subscribe(res => {
       expect(res).toEqual(item);
     });
@@ -44,7 +44,7 @@ describe('ItemService', () => {
   });
 
   it('should edit item', () => {
-    const item: Item = { label: 'Cake', unitPrice: 5, type: ItemType.CAKE, maxRetentionDays: 3 };
+    const item: Item = { label: 'Cake', unitPrice: 5, type: ItemType.CAKE };
     service.editItem(item).subscribe(res => {
       expect(res).toEqual(item);
     });
@@ -54,7 +54,7 @@ describe('ItemService', () => {
   });
 
   it('should delete item', () => {
-    const item: Item = { label: 'Cake', unitPrice: 5, type: ItemType.CAKE, maxRetentionDays: 3 };
+    const item: Item = { label: 'Cake', unitPrice: 5, type: ItemType.CAKE };
     service.deleteItem(item).subscribe(res => {
       expect(res).toBeUndefined();
     });

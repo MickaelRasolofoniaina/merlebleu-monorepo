@@ -6,7 +6,6 @@ export class ItemEntity implements Item {
   label: string;
   unitPrice: number;
   type: ItemType;
-  maxRetentionDays: number;
 }
 
 export const ItemSchema = new EntitySchema<ItemEntity>({
@@ -28,9 +27,6 @@ export const ItemSchema = new EntitySchema<ItemEntity>({
     type: {
       type: 'enum',
       enum: ItemType,
-    },
-    maxRetentionDays: {
-      type: 'int',
     },
   },
 });
