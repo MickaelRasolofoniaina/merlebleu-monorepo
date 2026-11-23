@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, ViewChild, inject, signal } from '@angular/core';
+import { Component, DestroyRef, OnInit, ViewChild, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { finalize } from 'rxjs';
@@ -70,6 +71,7 @@ export class ListOrder implements OnInit {
   private readonly userPreferencesService = inject(UserPreferencesService);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
+  private readonly destroyRef = inject(DestroyRef);
 
   protected readonly OrderDisplayMode = OrderDisplayMode;
   protected readonly CALENDAR_VIEW = CALENDAR_VIEW;
@@ -141,19 +143,21 @@ export class ListOrder implements OnInit {
   }
 
   private openOrderFromQueryParam(): void {
-    const orderId = this.route.snapshot.queryParamMap.get('orderId');
-    if (!orderId) {
-      return;
-    }
+    this.route.queryParamMap.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((params) => {
+      const orderId = params.get('orderId');
+      if (!orderId) {
+        return;
+      }
 
-    this.orderService.getOrderById(orderId).subscribe((order) => {
-      this.openOrderDetail(order);
-    });
+      this.orderService.getOrderById(orderId).subscribe((order) => {
+        this.openOrderDetail(order);
+      });
 
-    void this.router.navigate([], {
-      relativeTo: this.route,
-      queryParams: {},
-      replaceUrl: true,
+      void this.router.navigate([], {
+        relativeTo: this.route,
+        queryParams: {},
+        replaceUrl: true,
+      });
     });
   }
 
