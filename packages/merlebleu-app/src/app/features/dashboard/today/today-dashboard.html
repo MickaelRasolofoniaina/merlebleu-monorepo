@@ -1,0 +1,46 @@
+<div class="mb-4">
+  <h2 class="text-2xl font-bold">Aujourd'hui</h2>
+  <p class="text-sm text-slate-500 dark:text-slate-400 first-letter:uppercase">{{ today }}</p>
+</div>
+
+<section class="mb-6">
+  <h3 class="text-xl font-semibold mb-3">Commandes</h3>
+  <div class="flex flex-wrap gap-3">
+    <order-count-card
+      color="blue"
+      icon="pi pi-plus-circle"
+      [count]="summary().createdCount"
+      label="créée aujourd'hui"
+    />
+    <order-count-card
+      color="red"
+      icon="pi pi-box"
+      [count]="summary().toPrepareCount"
+      label="à préparer aujourd'hui"
+    />
+    <order-count-card
+      color="orange"
+      icon="pi pi-truck"
+      [count]="summary().toDeliverCount"
+      label="à livrer aujourd'hui"
+    />
+    <order-count-card
+      color="green"
+      icon="pi pi-check-circle"
+      [count]="summary().deliveredCount"
+      label="livrée aujourd'hui"
+    />
+  </div>
+</section>
+
+<section>
+  <h3 class="text-xl font-semibold mb-3">Finance</h3>
+  <p-card class="max-w-md block">
+    <div class="flex flex-col items-center justify-center gap-2 py-4">
+      <span class="text-slate-500 dark:text-slate-400">Recette encaissée</span>
+      <span class="text-5xl font-bold text-slate-900 dark:text-white">
+        {{ formatAmount(summary().collectedAmount) }} Ar
+      </span>
+    </div>
+  </p-card>
+</section>

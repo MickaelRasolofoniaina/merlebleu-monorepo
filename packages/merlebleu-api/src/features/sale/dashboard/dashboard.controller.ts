@@ -25,4 +25,9 @@ export class DashboardController {
   getOrdersAmount(@Query() query: DashboardQueryDto) {
     return this.dashboardService.getOrdersAmount(query);
   }
+
+  @Get('today-summary')
+  getTodaySummary() {
+    return this.dashboardService.getTodaySummary();
+  }
 }

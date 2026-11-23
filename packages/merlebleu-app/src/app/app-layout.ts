@@ -43,6 +43,11 @@ export class AppLayout implements OnInit, OnDestroy {
       label: 'Tableau de bord',
       items: [
         {
+          label: "Aujourd'hui",
+          icon: 'pi pi-calendar',
+          routerLink: ['/dashboard/today'],
+        },
+        {
           label: 'Commandes',
           icon: 'pi pi-chart-bar',
           routerLink: ['/dashboard/order'],

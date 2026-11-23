@@ -7,6 +7,7 @@ import {
   DashboardCountPoint,
   DashboardDistributionPoint,
   DashboardQueryDto,
+  DashboardTodaySummary,
 } from '@merlebleu/shared';
 
 @Injectable({
@@ -38,6 +39,10 @@ export class DashboardService {
     return this.http.get<DashboardAmount>(`${this.apiUrl}/orders-amount`, {
       params: this.toParams(query),
     });
+  }
+
+  getTodaySummary(): Observable<DashboardTodaySummary> {
+    return this.http.get<DashboardTodaySummary>(`${this.apiUrl}/today-summary`);
   }
 
   private toParams(query: DashboardQueryDto): HttpParams {
