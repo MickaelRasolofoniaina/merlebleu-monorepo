@@ -20,6 +20,8 @@ import { NotificationService } from '../../notification/notification.service';
 
 const PASTRY_NOTIFICATION_ROLES = [UserRole.PASTRY_CHEF, UserRole.ADMIN];
 const CASHIER_NOTIFICATION_ROLES = [UserRole.CASHIER, UserRole.ADMIN];
+const TODAY_TO_DELIVER_STATUSES = [OrderStatus.TODO, OrderStatus.TODELIVER];
+
 const LATE_ORDER_STATUSES = [
   OrderStatus.TODO,
   OrderStatus.INPROGRESS,
@@ -149,28 +151,6 @@ export class OrderService {
     };
   }
 
-  async listOrdersToDeliver(
-    page = 1,
-    limit = 20,
-    customerName?: string,
-    shopId?: string,
-    status?: OrderStatus,
-    orderDate?: string,
-    deliveryDate?: string,
-  ): Promise<ResultPaged<OrderEntity>> {
-    const today = this.getToday();
-
-    return this.listOrders(page, limit, {
-      deliveryDateFrom: today,
-      customerName,
-      shopId,
-      status,
-      statuses: status ? undefined : [OrderStatus.TODELIVER],
-      orderDate,
-      deliveryDate,
-    });
-  }
-
   async listOrdersToPrepare(
     page = 1,
     limit = 20,
@@ -180,14 +160,12 @@ export class OrderService {
     orderDate?: string,
     deliveryDate?: string,
   ): Promise<ResultPaged<OrderEntity>> {
-    const today = this.getToday();
-
     return this.listOrders(page, limit, {
-      deliveryDateFrom: today,
+      deliveryDateFrom: this.getDayAfterTomorrow(),
       customerName,
       shopId,
-      status,
-      statuses: status ? undefined : [OrderStatus.TODO, OrderStatus.INPROGRESS],
+      status: status === OrderStatus.TODO ? status : undefined,
+      statuses: [OrderStatus.TODO],
       orderDate,
       deliveryDate,
     });
@@ -215,7 +193,7 @@ export class OrderService {
     });
   }
 
-  /** Orders to prepare today: delivery tomorrow and status TODO. */
+  /** Orders to prepare today: delivery today or tomorrow and status TODO. */
   async listOrdersTodayToPrepare(
     page = 1,
     limit = 20,
@@ -223,14 +201,15 @@ export class OrderService {
     shopId?: string,
   ): Promise<ResultPaged<OrderEntity>> {
     return this.listOrders(page, limit, {
-      deliveryDate: this.getTomorrow(),
+      deliveryDateFrom: this.getToday(),
+      deliveryDateTo: this.getDayAfterTomorrow(),
       status: OrderStatus.TODO,
       customerName,
       shopId,
     });
   }
 
-  /** Orders to deliver today: delivery date is today, any status. */
+  /** Orders to deliver today: delivery date is today, status TODO or TODELIVER. */
   async listOrdersTodayToDeliver(
     page = 1,
     limit = 20,
@@ -240,7 +219,8 @@ export class OrderService {
   ): Promise<ResultPaged<OrderEntity>> {
     return this.listOrders(page, limit, {
       deliveryDate: this.getToday(),
-      status,
+      status: status && TODAY_TO_DELIVER_STATUSES.includes(status) ? status : undefined,
+      statuses: TODAY_TO_DELIVER_STATUSES,
       customerName,
       shopId,
     });
@@ -260,7 +240,8 @@ export class OrderService {
   ): Promise<ResultPaged<OrderItemRowDto>> {
     return this.listOrderItems(page, limit, {
       ...filters,
-      deliveryDate: this.getTomorrow(),
+      deliveryDateFrom: this.getToday(),
+      deliveryDateTo: this.getDayAfterTomorrow(),
       statuses: [OrderStatus.TODO],
     });
   }
@@ -275,11 +256,18 @@ export class OrderService {
       text?: string;
       decoration?: string;
       size?: number;
+      status?: OrderStatus;
     },
   ): Promise<ResultPaged<OrderItemRowDto>> {
+    const { status, ...rest } = filters ?? {};
+
     return this.listOrderItems(page, limit, {
-      ...filters,
+      ...rest,
       deliveryDate: this.getToday(),
+      statuses:
+        status && TODAY_TO_DELIVER_STATUSES.includes(status)
+          ? [status]
+          : TODAY_TO_DELIVER_STATUSES,
     });
   }
 
@@ -430,12 +418,10 @@ export class OrderService {
       size?: number;
     },
   ): Promise<ResultPaged<OrderItemRowDto>> {
-    const today = this.getToday();
-
     return this.listOrderItems(page, limit, {
       ...filters,
-      deliveryDateFrom: today,
-      statuses: [OrderStatus.TODO, OrderStatus.INPROGRESS],
+      deliveryDateFrom: this.getDayAfterTomorrow(),
+      statuses: [OrderStatus.TODO],
     });
   }
 
@@ -617,15 +603,15 @@ export class OrderService {
     return formatDate(todayStart);
   }
 
-  private getTomorrow(): string {
+  private getDayAfterTomorrow(): string {
     const now = new Date();
-    const tomorrowStart = new Date(
+    const dayAfterTomorrowStart = new Date(
       now.getFullYear(),
       now.getMonth(),
-      now.getDate() + 1,
+      now.getDate() + 2,
     );
 
-    return formatDate(tomorrowStart);
+    return formatDate(dayAfterTomorrowStart);
   }
 
   private toOrderItemRowDto(item: OrderItemEntity): OrderItemRowDto {

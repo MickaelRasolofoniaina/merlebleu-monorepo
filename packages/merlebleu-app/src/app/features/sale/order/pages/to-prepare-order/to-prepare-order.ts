@@ -23,7 +23,7 @@ import { OrderItemRowFilters, OrderService } from '../../order.service';
 import { ShopService } from '@features/shop/shop-list/shop.service';
 import { formatDate } from '@shared/utils/date';
 import { getPageFromFirstRows } from '@shared/utils/pagination';
-import { ORDER_STATUSES, getOrderStatusLabel, getOrderStatusColor } from '@shared/utils/order';
+import { getOrderStatusLabel, getOrderStatusColor } from '@shared/utils/order';
 import { getUserShopId } from '@shared/utils/user';
 import { UserPreferencesService } from '@shared/services/user-preferences.service';
 import { OrderDetailDialog } from '../../components/order-detail-dialog/order-detail-dialog';
@@ -95,11 +95,6 @@ export class ToPrepareOrder implements OnInit {
     shopId: getUserShopId(),
     orderStatus: '',
   };
-
-  protected statusOptions = ORDER_STATUSES.map((s) => ({
-    label: s.label,
-    value: s.value,
-  }));
 
   private hasManualDisplayMode = false;
 
@@ -204,9 +199,12 @@ export class ToPrepareOrder implements OnInit {
   private loadCalendarOrders(): void {
     this.isCalendarLoading = true;
 
-    const today = formatDate(new Date());
+    const now = new Date();
+    const dayAfterTomorrow = formatDate(
+      new Date(now.getFullYear(), now.getMonth(), now.getDate() + 2),
+    );
     const deliveryDateFrom =
-      this.calendarRange.from < today ? today : this.calendarRange.from;
+      this.calendarRange.from < dayAfterTomorrow ? dayAfterTomorrow : this.calendarRange.from;
 
     const filterParams: Record<string, unknown> = {
       deliveryDateFrom,
@@ -216,9 +214,7 @@ export class ToPrepareOrder implements OnInit {
       filterParams['shopId'] = this.filters.shopId;
     }
 
-    const statuses = this.filters.orderStatus
-      ? [this.filters.orderStatus as OrderStatus]
-      : [OrderStatus.TODO, OrderStatus.INPROGRESS];
+    const statuses = [OrderStatus.TODO];
 
     this.orderService
       .listOrders({ page: 1, limit: 1000 }, filterParams)

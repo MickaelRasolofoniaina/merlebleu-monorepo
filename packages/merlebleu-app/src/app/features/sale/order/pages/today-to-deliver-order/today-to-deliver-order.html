@@ -2,13 +2,26 @@
   <h2 class="text-2xl font-bold">Aujourd'hui - Commandes à livrer</h2>
 </div>
 
-<order-count-card
-  class="mb-4"
-  color="green"
-  icon="pi pi-truck"
-  [count]="totalRecords"
-  label="à livrer aujourd'hui"
-/>
+<div class="flex flex-wrap gap-3 mb-4">
+    <order-count-card
+    color="blue"
+    icon="pi pi-list"
+    [count]="totalCount()"
+    label="au total à livrer"
+  />
+  <order-count-card
+    color="green"
+    icon="pi pi-truck"
+    [count]="readyCount()"
+    label="prête{{ readyCount() > 1 ? 's' : '' }}"
+  />
+  <order-count-card
+    color="red"
+    icon="pi pi-clock"
+    [count]="toPrepareCount()"
+    label="encore à préparer"
+  />
+</div>
 
 <div class="flex justify-start mb-4">
   <p-selectButton
@@ -31,6 +44,8 @@
   [totalRecords]="totalRecords"
   [first]="first"
   [pageSize]="rows"
+  [showStatusFilter]="true"
+  [statusFilterOptions]="statusOptions"
   [showDeliverAction]="true"
   (pageChange)="onPageChange($event)"
   (filter)="onPastryFilter($event)"

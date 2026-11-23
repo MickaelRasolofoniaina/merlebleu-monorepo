@@ -45,6 +45,9 @@ export class PastryOrderTable implements OnInit {
   pageSize = input(DEFAULT_PAGE_SIZE);
   first = input(0);
   showStatusFilter = input(false);
+  statusFilterOptions = input<{ label: string; value: OrderStatus }[]>(
+    ORDER_STATUSES.map((s) => ({ label: s.label, value: s.value as OrderStatus })),
+  );
   showEditAction = input(false);
   showCompleteAction = input(false);
   showDeliverAction = input(false);
@@ -62,7 +65,6 @@ export class PastryOrderTable implements OnInit {
   protected readonly priorities = DELIVERY_PRIORITIES;
   protected shapes = Object.values(Shape);
   protected patisserieItems: Item[] = [];
-  protected statusOptions = ORDER_STATUSES.map((s) => ({ label: s.label, value: s.value }));
 
   protected filters = {
     customerName: '',

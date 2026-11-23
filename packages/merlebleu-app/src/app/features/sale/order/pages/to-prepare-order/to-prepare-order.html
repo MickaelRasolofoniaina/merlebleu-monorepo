@@ -79,15 +79,6 @@
     class="w-52"
     [showClear]="true"
   />
-  <p-select
-    [(ngModel)]="filters.orderStatus"
-    [options]="statusOptions"
-    optionLabel="label"
-    optionValue="value"
-    placeholder="Tous les statuts"
-    class="w-52"
-    [showClear]="true"
-  />
   <p-button label="Filtrer" icon="pi pi-search" (onClick)="applyFilters()" [disabled]="isLoading" severity="info" />
   <p-button
     label="Réinitialiser"

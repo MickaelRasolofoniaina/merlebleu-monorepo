@@ -58,40 +58,6 @@ export class OrderService {
     return this.http.get<ResultPaged<Order>>(queryString);
   }
 
-  listOrdersToDeliver(
-    paginationParams: PaginationParams,
-    customerName?: string,
-    shopId?: string,
-    status?: OrderStatus,
-    orderDate?: string,
-    deliveryDate?: string,
-  ): Observable<ResultPaged<Order>> {
-    const { page = 1, limit = 20 } = paginationParams;
-    let queryString = `${this.apiUrl}/to-deliver?page=${page}&limit=${limit}`;
-
-    if (customerName) {
-      queryString += `&customerName=${encodeURIComponent(customerName)}`;
-    }
-
-    if (shopId) {
-      queryString += `&shopId=${encodeURIComponent(shopId)}`;
-    }
-
-    if (status) {
-      queryString += `&status=${encodeURIComponent(status)}`;
-    }
-
-    if (orderDate) {
-      queryString += `&orderDate=${encodeURIComponent(orderDate)}`;
-    }
-
-    if (deliveryDate) {
-      queryString += `&deliveryDate=${encodeURIComponent(deliveryDate)}`;
-    }
-
-    return this.http.get<ResultPaged<Order>>(queryString);
-  }
-
   listOrdersToPrepare(
     paginationParams: PaginationParams,
     customerName?: string,

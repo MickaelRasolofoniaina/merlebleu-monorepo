@@ -88,12 +88,6 @@ export class AppLayout implements OnInit, OnDestroy {
           styleClass: 'menu-sub-item',
         },
         {
-          label: 'A livrer',
-          icon: 'pi pi-truck',
-          routerLink: ['/sale/order/to-deliver'],
-          styleClass: 'menu-sub-item',
-        },
-        {
           label: 'En retard',
           icon: 'pi pi-exclamation-triangle',
           routerLink: ['/sale/order/late'],

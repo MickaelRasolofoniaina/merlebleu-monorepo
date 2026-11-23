@@ -15,7 +15,7 @@
   @if (showStatusFilter()) {
   <p-select
     [(ngModel)]="filters.status"
-    [options]="statusOptions"
+    [options]="statusFilterOptions()"
     optionLabel="label"
     optionValue="value"
     placeholder="Tous les statuts"

@@ -86,14 +86,30 @@ export class TodayToDeliverOrder implements OnInit {
     orderStatus: '',
   };
 
-  protected statusOptions = ORDER_STATUSES.map((s) => ({
+  protected statusOptions = ORDER_STATUSES.filter((s) =>
+    [OrderStatus.TODO, OrderStatus.TODELIVER].includes(s.value as OrderStatus),
+  ).map((s) => ({
     label: s.label,
-    value: s.value,
+    value: s.value as OrderStatus,
   }));
+
+  protected readonly readyCount = signal(0);
+  protected readonly totalCount = signal(0);
+  protected readonly toPrepareCount = signal(0);
 
   private hasManualDisplayMode = false;
 
+  private loadCounts(): void {
+    const countOf = (status?: OrderStatus) =>
+      this.orderService.listOrdersTodayToDeliver({ page: 1, limit: 1 }, undefined, undefined, status);
+
+    countOf(OrderStatus.TODELIVER).subscribe((r) => this.readyCount.set(r.total));
+    countOf().subscribe((r) => this.totalCount.set(r.total));
+    countOf(OrderStatus.TODO).subscribe((r) => this.toPrepareCount.set(r.total));
+  }
+
   ngOnInit(): void {
+    this.loadCounts();
     this.shopService.getAll().subscribe((shops) => this.shops.set(shops));
     this.paymentService.getAllPaymentMethods().subscribe((paymentMethods) => {
       this.paymentMethods.set(paymentMethods);
@@ -259,6 +275,7 @@ export class TodayToDeliverOrder implements OnInit {
           this.displayDeliverDialog = false;
           this.orderToDeliver.set(null);
           this.deliverPaymentMethodId = null;
+          this.loadCounts();
           this.loadOrders(getPageFromFirstRows(this.first, this.rows), this.rows);
         },
       });

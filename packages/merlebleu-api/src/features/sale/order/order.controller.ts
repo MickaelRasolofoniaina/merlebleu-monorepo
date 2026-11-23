@@ -56,29 +56,6 @@ export class OrderController {
     });
   }
 
-  @Get('to-deliver')
-  listOrdersToDeliver(
-    @Query('page') page?: string,
-    @Query('limit') limit?: string,
-    @Query('customerName') customerName?: string,
-    @Query('shopId') shopId?: string,
-    @Query('status') status?: OrderStatus,
-    @Query('orderDate') orderDate?: string,
-    @Query('deliveryDate') deliveryDate?: string,
-  ) {
-    const pageNumber = page ? Number.parseInt(page, 10) : 1;
-    const limitNumber = limit ? Number.parseInt(limit, 10) : 20;
-    return this.orderService.listOrdersToDeliver(
-      pageNumber,
-      limitNumber,
-      customerName,
-      shopId,
-      status,
-      orderDate,
-      deliveryDate,
-    );
-  }
-
   @Get('to-prepare')
   listOrdersToPrepare(
     @Query('page') page?: string,
@@ -294,6 +271,7 @@ export class OrderController {
     @Query('text') text?: string,
     @Query('decoration') decoration?: string,
     @Query('size') size?: string,
+    @Query('status') status?: OrderStatus,
   ) {
     const pageNumber = page ? Number.parseInt(page, 10) : 1;
     const limitNumber = limit ? Number.parseInt(limit, 10) : 20;
@@ -307,6 +285,7 @@ export class OrderController {
         text,
         decoration,
         size: size ? Number.parseInt(size, 10) : undefined,
+        status,
       },
     );
   }
