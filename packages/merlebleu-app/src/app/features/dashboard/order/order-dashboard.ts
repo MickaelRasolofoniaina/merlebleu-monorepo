@@ -51,6 +51,8 @@ export class OrderDashboard implements OnInit {
   protected readonly toPrepareCount = signal(0);
   protected readonly toDeliverCount = signal(0);
   protected readonly lateCount = signal(0);
+  protected readonly todayToPrepareCount = signal(0);
+  protected readonly todayToDeliverCount = signal(0);
 
   protected readonly monthOptions = MONTH_LABELS.map((_, index) => {
     const name = new Date(2000, index, 1).toLocaleDateString('fr-FR', { month: 'long' });
@@ -107,6 +109,14 @@ export class OrderDashboard implements OnInit {
   );
 
   ngOnInit(): void {
+    this.orderService
+      .listOrdersTodayToPrepare({ page: 1, limit: 1 })
+      .subscribe((response) => this.todayToPrepareCount.set(response.total));
+
+    this.orderService
+      .listOrdersTodayToDeliver({ page: 1, limit: 1 })
+      .subscribe((response) => this.todayToDeliverCount.set(response.total));
+
     this.orderService
       .listOrdersToPrepare({ page: 1, limit: 1 })
       .subscribe((response) => this.toPrepareCount.set(response.total));
