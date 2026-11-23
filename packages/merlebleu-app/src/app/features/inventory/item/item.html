@@ -34,7 +34,7 @@
   <ng-template #header>
     <tr>
       <th>Nom</th>
-      <th>Prix Unitaire</th>
+      <th class="text-right!">Prix Unitaire</th>
       <th>Type</th>
       <th style="width: 12rem" class="text-center!">Actions</th>
     </tr>
@@ -42,7 +42,7 @@
   <ng-template #body let-item>
     <tr>
       <td>{{ capitalizeFirstLetter(item.label) }}</td>
-      <td>{{ formatUnitPrice(item.unitPrice) }}</td>
+      <td class="text-right!">{{ formatUnitPrice(item.unitPrice) }}</td>
       <td>{{ capitalizeFirstLetter(item.type) }}</td>
       <td class="text-center!">
         <p-button

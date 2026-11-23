@@ -219,6 +219,96 @@ export class OrderController {
     });
   }
 
+  @Get('today/to-prepare')
+  listOrdersTodayToPrepare(
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
+    @Query('customerName') customerName?: string,
+    @Query('shopId') shopId?: string,
+  ) {
+    const pageNumber = page ? Number.parseInt(page, 10) : 1;
+    const limitNumber = limit ? Number.parseInt(limit, 10) : 20;
+    return this.orderService.listOrdersTodayToPrepare(
+      pageNumber,
+      limitNumber,
+      customerName,
+      shopId,
+    );
+  }
+
+  @Get('today/to-deliver')
+  listOrdersTodayToDeliver(
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
+    @Query('customerName') customerName?: string,
+    @Query('shopId') shopId?: string,
+    @Query('status') status?: OrderStatus,
+  ) {
+    const pageNumber = page ? Number.parseInt(page, 10) : 1;
+    const limitNumber = limit ? Number.parseInt(limit, 10) : 20;
+    return this.orderService.listOrdersTodayToDeliver(
+      pageNumber,
+      limitNumber,
+      customerName,
+      shopId,
+      status,
+    );
+  }
+
+  @Get('items/today/to-prepare')
+  listOrderItemsTodayToPrepare(
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
+    @Query('customerName') customerName?: string,
+    @Query('type') type?: string,
+    @Query('shape') shape?: Shape,
+    @Query('text') text?: string,
+    @Query('decoration') decoration?: string,
+    @Query('size') size?: string,
+  ) {
+    const pageNumber = page ? Number.parseInt(page, 10) : 1;
+    const limitNumber = limit ? Number.parseInt(limit, 10) : 20;
+    return this.orderService.listOrderItemsTodayToPrepare(
+      pageNumber,
+      limitNumber,
+      {
+        customerName,
+        type,
+        shape,
+        text,
+        decoration,
+        size: size ? Number.parseInt(size, 10) : undefined,
+      },
+    );
+  }
+
+  @Get('items/today/to-deliver')
+  listOrderItemsTodayToDeliver(
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
+    @Query('customerName') customerName?: string,
+    @Query('type') type?: string,
+    @Query('shape') shape?: Shape,
+    @Query('text') text?: string,
+    @Query('decoration') decoration?: string,
+    @Query('size') size?: string,
+  ) {
+    const pageNumber = page ? Number.parseInt(page, 10) : 1;
+    const limitNumber = limit ? Number.parseInt(limit, 10) : 20;
+    return this.orderService.listOrderItemsTodayToDeliver(
+      pageNumber,
+      limitNumber,
+      {
+        customerName,
+        type,
+        shape,
+        text,
+        decoration,
+        size: size ? Number.parseInt(size, 10) : undefined,
+      },
+    );
+  }
+
   @Get(':id')
   getOrderById(@Param('id') id: string) {
     return this.orderService.getOrderById(id);

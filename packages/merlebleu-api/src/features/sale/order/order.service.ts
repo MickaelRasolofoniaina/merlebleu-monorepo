@@ -215,6 +215,74 @@ export class OrderService {
     });
   }
 
+  /** Orders to prepare today: delivery tomorrow and status TODO. */
+  async listOrdersTodayToPrepare(
+    page = 1,
+    limit = 20,
+    customerName?: string,
+    shopId?: string,
+  ): Promise<ResultPaged<OrderEntity>> {
+    return this.listOrders(page, limit, {
+      deliveryDate: this.getTomorrow(),
+      status: OrderStatus.TODO,
+      customerName,
+      shopId,
+    });
+  }
+
+  /** Orders to deliver today: delivery date is today, any status. */
+  async listOrdersTodayToDeliver(
+    page = 1,
+    limit = 20,
+    customerName?: string,
+    shopId?: string,
+    status?: OrderStatus,
+  ): Promise<ResultPaged<OrderEntity>> {
+    return this.listOrders(page, limit, {
+      deliveryDate: this.getToday(),
+      status,
+      customerName,
+      shopId,
+    });
+  }
+
+  async listOrderItemsTodayToPrepare(
+    page = 1,
+    limit = 20,
+    filters?: {
+      customerName?: string;
+      type?: string;
+      shape?: Shape;
+      text?: string;
+      decoration?: string;
+      size?: number;
+    },
+  ): Promise<ResultPaged<OrderItemRowDto>> {
+    return this.listOrderItems(page, limit, {
+      ...filters,
+      deliveryDate: this.getTomorrow(),
+      statuses: [OrderStatus.TODO],
+    });
+  }
+
+  async listOrderItemsTodayToDeliver(
+    page = 1,
+    limit = 20,
+    filters?: {
+      customerName?: string;
+      type?: string;
+      shape?: Shape;
+      text?: string;
+      decoration?: string;
+      size?: number;
+    },
+  ): Promise<ResultPaged<OrderItemRowDto>> {
+    return this.listOrderItems(page, limit, {
+      ...filters,
+      deliveryDate: this.getToday(),
+    });
+  }
+
   async listOrderItems(
     page = 1,
     limit = 20,
@@ -547,6 +615,17 @@ export class OrderService {
     );
 
     return formatDate(todayStart);
+  }
+
+  private getTomorrow(): string {
+    const now = new Date();
+    const tomorrowStart = new Date(
+      now.getFullYear(),
+      now.getMonth(),
+      now.getDate() + 1,
+    );
+
+    return formatDate(tomorrowStart);
   }
 
   private toOrderItemRowDto(item: OrderItemEntity): OrderItemRowDto {

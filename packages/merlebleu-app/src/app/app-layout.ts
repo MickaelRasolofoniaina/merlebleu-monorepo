@@ -58,6 +58,24 @@ export class AppLayout implements OnInit, OnDestroy {
           routerLink: ['/sale/order/list'],
         },
         {
+          label: "Aujourd'hui",
+          icon: 'pi pi-calendar',
+          disabled: true,
+          styleClass: 'menu-parent-item',
+        },
+        {
+          label: 'A préparer',
+          icon: 'pi pi-box',
+          routerLink: ['/sale/order/today/to-prepare'],
+          styleClass: 'menu-sub-item',
+        },
+        {
+          label: 'A livrer',
+          icon: 'pi pi-truck',
+          routerLink: ['/sale/order/today/to-deliver'],
+          styleClass: 'menu-sub-item',
+        },
+        {
           label: 'A préparer',
           icon: 'pi pi-box',
           routerLink: ['/sale/order/to-prepare'],
