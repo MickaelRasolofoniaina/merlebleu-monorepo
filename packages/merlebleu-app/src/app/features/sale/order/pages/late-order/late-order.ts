@@ -80,6 +80,7 @@ export class LateOrder implements OnInit {
   protected shops = signal<Shop[]>([]);
   protected isLoading = false;
   protected totalRecords = 0;
+  protected itemsCount = signal(0);
   protected rows = DEFAULT_PAGE_SIZE;
   protected first = 0;
   protected selectedOrder = signal<Order | null>(null);
@@ -137,7 +138,16 @@ export class LateOrder implements OnInit {
     this.loadOrders(1, this.rows);
   }
 
+  // the card counts order lines (items), not parent orders
+  private loadItemsCount(): void {
+    this.orderService
+      .listOrderItemsLate({ page: 1, limit: 1 })
+      .subscribe((response) => this.itemsCount.set(response.total));
+  }
+
   protected loadOrders(page = 1, limit = this.rows): void {
+    this.loadItemsCount();
+
     if (this.displayMode() === OrderDisplayMode.PASTRY) {
       this.loadOrderItemRows(page, limit);
       return;

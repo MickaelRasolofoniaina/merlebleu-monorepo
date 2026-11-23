@@ -81,6 +81,7 @@ export class ToDeliverOrder implements OnInit {
   protected shops = signal<Shop[]>([]);
   protected isLoading = false;
   protected totalRecords = 0;
+  protected itemsCount = signal(0);
   protected rows = DEFAULT_PAGE_SIZE;
   protected first = 0;
   protected selectedOrder = signal<Order | null>(null);
@@ -129,19 +130,22 @@ export class ToDeliverOrder implements OnInit {
     });
   }
 
-  protected displayedCount(): number {
-    return this.displayMode() === CALENDAR_VIEW
-      ? this.calendarOrders().length
-      : this.totalRecords;
-  }
-
   protected onDisplayModeChange(): void {
     this.hasManualDisplayMode = true;
     this.first = 0;
     this.loadOrders(1, this.rows);
   }
 
+  // the card counts order lines (items), not parent orders
+  private loadItemsCount(): void {
+    this.orderService
+      .listOrderItemsToDeliver({ page: 1, limit: 1 })
+      .subscribe((response) => this.itemsCount.set(response.total));
+  }
+
   protected loadOrders(page = 1, limit = this.rows): void {
+    this.loadItemsCount();
+
     if (this.displayMode() === CALENDAR_VIEW) {
       this.loadCalendarOrders();
       return;

@@ -110,23 +110,23 @@ export class OrderDashboard implements OnInit {
 
   ngOnInit(): void {
     this.orderService
-      .listOrdersTodayToPrepare({ page: 1, limit: 1 })
+      .listOrderItemsTodayToPrepare({ page: 1, limit: 1 })
       .subscribe((response) => this.todayToPrepareCount.set(response.total));
 
     this.orderService
-      .listOrdersTodayToDeliver({ page: 1, limit: 1 })
+      .listOrderItemsTodayToDeliver({ page: 1, limit: 1 })
       .subscribe((response) => this.todayToDeliverCount.set(response.total));
 
     this.orderService
-      .listOrdersToPrepare({ page: 1, limit: 1 })
+      .listOrderItemsToPrepare({ page: 1, limit: 1 })
       .subscribe((response) => this.toPrepareCount.set(response.total));
 
     this.orderService
-      .listOrdersToDeliver({ page: 1, limit: 1 })
+      .listOrderItemsToDeliver({ page: 1, limit: 1 })
       .subscribe((response) => this.toDeliverCount.set(response.total));
 
     this.orderService
-      .listOrdersLate({ page: 1, limit: 1 })
+      .listOrderItemsLate({ page: 1, limit: 1 })
       .subscribe((response) => this.lateCount.set(response.total));
   }
 
