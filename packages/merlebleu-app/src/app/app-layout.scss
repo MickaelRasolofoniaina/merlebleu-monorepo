@@ -9,6 +9,15 @@ header {
   }
 }
 
+.profile-button {
+  display: flex;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: none;
+  cursor: pointer;
+}
+
 .main {
   display: flex;
   flex-direction: row;

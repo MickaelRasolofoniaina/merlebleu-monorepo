@@ -10,7 +10,6 @@
     <h1>Le Merlebleu</h1>
   </div>
   <div class="flex items-center">
-    <p>{{ name() }}</p>
     <p-overlay-badge
       [value]="notificationService.unreadCount()"
       [badgeDisabled]="notificationService.unreadCount() === 0"
@@ -27,19 +26,37 @@
     <p-popover #notifPopover>
       <app-notification-panel (notificationOpened)="notifPopover.hide()" />
     </p-popover>
-    <p-button
-      [icon]="themeService.isDarkMode() ? 'pi pi-sun' : 'pi pi-moon'"
-      [text]="true"
-      severity="secondary"
-      class="ml-2"
-      (onClick)="themeService.toggleTheme()"
-    />
-    <p-button
-      icon="pi pi-sign-out"
-      [text]="true"
-      severity="secondary"
-      (onClick)="logout()"
-    />
+    <button
+      type="button"
+      class="profile-button ml-2"
+      aria-label="Profil"
+      (click)="profilePopover.toggle($event)"
+    >
+      <p-avatar icon="pi pi-user" shape="circle" />
+    </button>
+    <p-popover #profilePopover>
+      <div class="flex flex-col gap-1 min-w-48">
+        <p class="font-semibold px-2 py-1">{{ name() }}</p>
+        <p-button
+          [label]="themeService.isDarkMode() ? 'Mode clair' : 'Mode sombre'"
+          [icon]="themeService.isDarkMode() ? 'pi pi-sun' : 'pi pi-moon'"
+          [text]="true"
+          severity="secondary"
+          class="w-full"
+          styleClass="w-full !justify-start"
+          (onClick)="themeService.toggleTheme()"
+        />
+        <p-button
+          label="Se déconnecter"
+          icon="pi pi-sign-out"
+          [text]="true"
+          severity="secondary"
+          class="w-full"
+          styleClass="w-full !justify-start"
+          (onClick)="profilePopover.hide(); logout()"
+        />
+      </div>
+    </p-popover>
   </div>
 </header>
 <main class="main">
