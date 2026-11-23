@@ -12,10 +12,13 @@ import {
   OrderDisplayMode,
   OrderItemRowDto,
   OrderStatus,
+  PaymentMethod,
   UpdateOrderDto,
 } from '@merlebleu/shared';
 import { OrderItemRowFilters, OrderService } from '../../order.service';
 import { ShopService } from '@features/shop/shop-list/shop.service';
+import { PaymentService } from '@features/sale/payment/payment.service';
+import { DialogModule } from 'primeng/dialog';
 import { Button } from 'primeng/button';
 import { BadgeModule } from 'primeng/badge';
 import { InputTextModule } from 'primeng/inputtext';
@@ -54,6 +57,7 @@ type ListOrderDisplayMode = OrderDisplayMode | typeof CALENDAR_VIEW;
     DatePickerModule,
     SelectModule,
     SelectButtonModule,
+    DialogModule,
     OrderDetailDialog,
     OrderFormDialog,
     PastryOrderTable,
@@ -68,6 +72,7 @@ export class ListOrder implements OnInit {
 
   private readonly orderService = inject(OrderService);
   private readonly shopService = inject(ShopService);
+  private readonly paymentService = inject(PaymentService);
   private readonly userPreferencesService = inject(UserPreferencesService);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
@@ -77,9 +82,9 @@ export class ListOrder implements OnInit {
   protected readonly CALENDAR_VIEW = CALENDAR_VIEW;
   protected displayMode = signal<ListOrderDisplayMode>(OrderDisplayMode.STANDARD);
   protected displayModeOptions = [
-    { label: 'Standard', value: OrderDisplayMode.STANDARD },
-    { label: 'Détaillé', value: OrderDisplayMode.PASTRY },
-    { label: 'Calendrier', value: CALENDAR_VIEW },
+    { label: 'Standard', icon: 'pi pi-list', value: OrderDisplayMode.STANDARD },
+    { label: 'Détaillé', icon: 'pi pi-table', value: OrderDisplayMode.PASTRY },
+    { label: 'Calendrier', icon: 'pi pi-calendar', value: CALENDAR_VIEW },
   ];
 
   protected orders = signal<Order[]>([]);
@@ -119,10 +124,20 @@ export class ListOrder implements OnInit {
   protected isFormLoading = false;
   protected displayOrderFormDialog = false;
 
+  protected paymentMethods = signal<PaymentMethod[]>([]);
+  protected orderToDeliver = signal<Order | null>(null);
+  protected displayDeliverDialog = false;
+  protected deliverPaymentMethodId: string | null = null;
+  protected isDelivering = false;
+  protected readonly OrderStatus = OrderStatus;
+
   private hasManualDisplayMode = false;
 
   ngOnInit(): void {
     this.shopService.getAll().subscribe((shops) => this.shops.set(shops));
+    this.paymentService.getAllPaymentMethods().subscribe((paymentMethods) => {
+      this.paymentMethods.set(paymentMethods);
+    });
     this.loadStatusCounts();
     this.openOrderFromQueryParam();
 
@@ -369,6 +384,48 @@ export class ListOrder implements OnInit {
       shopId: order.shop?.id ?? '',
     } as UpdateOrderDto;
     this.displayOrderFormDialog = true;
+  }
+
+  protected onPastryDeliver(orderId: string): void {
+    this.orderService.getOrderById(orderId).subscribe((order) => {
+      this.openDeliverDialog(order);
+    });
+  }
+
+  protected openDeliverDialog(order: Order): void {
+    this.orderToDeliver.set(order);
+    this.deliverPaymentMethodId = order.paymentMethod?.id ?? null;
+    this.displayDeliverDialog = true;
+  }
+
+  protected cancelDeliver(): void {
+    this.displayDeliverDialog = false;
+    this.orderToDeliver.set(null);
+    this.deliverPaymentMethodId = null;
+  }
+
+  protected confirmDeliver(): void {
+    const order = this.orderToDeliver();
+    if (!order || !this.deliverPaymentMethodId) {
+      return;
+    }
+
+    this.isDelivering = true;
+
+    this.orderService
+      .deliverOrder(order.id, this.deliverPaymentMethodId)
+      .pipe(
+        finalize(() => {
+          this.isDelivering = false;
+        }),
+      )
+      .subscribe({
+        next: () => {
+          this.cancelDeliver();
+          this.loadOrders(getPageFromFirstRows(this.first, this.rows), this.rows);
+          this.loadStatusCounts();
+        },
+      });
   }
 
   protected handleOrderSubmit(order: CreateOrderDto | UpdateOrderDto): void {

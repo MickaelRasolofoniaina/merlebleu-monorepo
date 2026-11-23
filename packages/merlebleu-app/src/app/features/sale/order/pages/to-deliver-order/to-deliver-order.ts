@@ -67,9 +67,9 @@ export class ToDeliverOrder implements OnInit {
   protected readonly CALENDAR_VIEW = CALENDAR_VIEW;
   protected displayMode = signal<ToDeliverDisplayMode>(OrderDisplayMode.STANDARD);
   protected displayModeOptions = [
-    { label: 'Standard', value: OrderDisplayMode.STANDARD },
-    { label: 'Détaillé', value: OrderDisplayMode.PASTRY },
-    { label: 'Calendrier', value: CALENDAR_VIEW },
+    { label: 'Standard', icon: 'pi pi-list', value: OrderDisplayMode.STANDARD },
+    { label: 'Détaillé', icon: 'pi pi-table', value: OrderDisplayMode.PASTRY },
+    { label: 'Calendrier', icon: 'pi pi-calendar', value: CALENDAR_VIEW },
   ];
 
   protected orders = signal<Order[]>([]);

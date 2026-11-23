@@ -12,6 +12,7 @@ import { DEFAULT_PAGE_SIZE, Item, ItemType, OrderItemRowDto, OrderStatus, Shape 
 import { formatDate } from '@shared/utils/date';
 import {
   DELIVERY_PRIORITIES,
+  ORDER_STATUSES,
   getDeliveryPriorityColor,
   getDeliveryPriorityLabel,
   getOrderStatusColor,
@@ -43,6 +44,7 @@ export class PastryOrderTable implements OnInit {
   totalRecords = input(0);
   pageSize = input(DEFAULT_PAGE_SIZE);
   first = input(0);
+  showStatusFilter = input(false);
   showEditAction = input(false);
   showCompleteAction = input(false);
   showDeliverAction = input(false);
@@ -60,9 +62,11 @@ export class PastryOrderTable implements OnInit {
   protected readonly priorities = DELIVERY_PRIORITIES;
   protected shapes = Object.values(Shape);
   protected patisserieItems: Item[] = [];
+  protected statusOptions = ORDER_STATUSES.map((s) => ({ label: s.label, value: s.value }));
 
   protected filters = {
     customerName: '',
+    status: null as OrderStatus | null,
     deliveryDate: null as Date | null,
     type: '',
     shape: null as Shape | null,
@@ -88,6 +92,7 @@ export class PastryOrderTable implements OnInit {
   protected applyFilters(): void {
     this.filter.emit({
       customerName: this.filters.customerName || undefined,
+      status: this.showStatusFilter() ? (this.filters.status ?? undefined) : undefined,
       deliveryDate: this.filters.deliveryDate ? formatDate(this.filters.deliveryDate) : undefined,
       type: this.filters.type || undefined,
       shape: this.filters.shape ?? undefined,
@@ -98,6 +103,7 @@ export class PastryOrderTable implements OnInit {
   protected resetFilters(): void {
     this.filters = {
       customerName: '',
+      status: null,
       deliveryDate: null,
       type: '',
       shape: null,

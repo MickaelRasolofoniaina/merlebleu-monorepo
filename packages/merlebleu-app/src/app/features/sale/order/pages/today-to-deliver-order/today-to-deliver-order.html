@@ -17,7 +17,11 @@
     (onChange)="onDisplayModeChange()"
     optionLabel="label"
     optionValue="value"
-  />
+  >
+    <ng-template #item let-item>
+      <i [class]="item.icon" [attr.title]="item.label"></i>
+    </ng-template>
+  </p-selectButton>
 </div>
 
 @if (displayMode() === OrderDisplayMode.PASTRY) {
@@ -178,7 +182,7 @@
       [disabled]="isDelivering"
     />
     <p-button
-      label="Marquer comme livré"
+      label="Livrer"
       icon="pi pi-check"
       severity="success"
       (onClick)="confirmDeliver()"

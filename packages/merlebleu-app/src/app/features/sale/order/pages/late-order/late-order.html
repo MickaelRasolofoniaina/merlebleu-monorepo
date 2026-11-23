@@ -17,7 +17,11 @@
     (onChange)="onDisplayModeChange()"
     optionLabel="label"
     optionValue="value"
-  />
+  >
+    <ng-template #item let-item>
+      <i [class]="item.icon" [attr.title]="item.label"></i>
+    </ng-template>
+  </p-selectButton>
 </div>
 
 <p-confirm-dialog />

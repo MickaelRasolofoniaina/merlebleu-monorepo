@@ -30,7 +30,11 @@
     (onChange)="onDisplayModeChange()"
     optionLabel="label"
     optionValue="value"
-  />
+  >
+    <ng-template #item let-item>
+      <i [class]="item.icon" [attr.title]="item.label"></i>
+    </ng-template>
+  </p-selectButton>
   <p-button label="Ajouter" icon="pi pi-plus" severity="primary" (onClick)="openAddOrder()" />
 </div>
 
@@ -41,12 +45,15 @@
   [totalRecords]="totalRecords"
   [first]="first"
   [pageSize]="rows"
+  [showStatusFilter]="true"
   [showEditAction]="true"
+  [showDeliverAction]="true"
   (pageChange)="onPageChange($event)"
   (filter)="onPastryFilter($event)"
   (resetFilter)="onPastryReset()"
   (viewDetail)="onPastryViewDetail($event)"
   (editOrder)="onPastryEdit($event)"
+  (deliver)="onPastryDeliver($event)"
 />
 } @else if (displayMode() === CALENDAR_VIEW) {
 <order-calendar-view
@@ -156,12 +163,22 @@
         ></p-badge>
       </td>
       <td class="text-center!">
-        <p-button
-          icon="pi pi-pencil"
-          severity="warn"
-          (onClick)="openEditOrder(order)"
-          size="small"
-        />
+        <div class="flex flex-wrap items-center justify-center gap-2">
+          <p-button
+            icon="pi pi-pencil"
+            severity="warn"
+            (onClick)="openEditOrder(order)"
+            size="small"
+          />
+          @if (order.orderStatus === OrderStatus.TODELIVER) {
+          <p-button
+            icon="pi pi-truck"
+            severity="success"
+            (onClick)="openDeliverDialog(order)"
+            size="small"
+          />
+          }
+        </div>
       </td>
     </tr>
   </ng-template>
@@ -182,3 +199,53 @@
   [(visible)]="displayOrderFormDialog"
   (orderSubmit)="handleOrderSubmit($event)"
 />
+
+<p-dialog
+  [(visible)]="displayDeliverDialog"
+  [modal]="true"
+  [style]="{ width: '28rem' }"
+  header="Livrer la commande"
+>
+  @if (orderToDeliver(); as order) {
+  <div class="flex flex-col gap-4">
+    <div
+      class="flex items-center justify-between rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 p-3"
+    >
+      <span class="text-slate-500">Reste à payer</span>
+      <span class="font-bold text-slate-900 dark:text-white">{{
+        order.balanceAmount | number: '1.0-2'
+      }}</span>
+    </div>
+    @if (order.balanceAmount > 0) {
+    <div class="flex flex-col gap-2">
+      <label class="font-semibold text-slate-900 dark:text-white">Méthode de paiement du reste</label>
+      <p-select
+        [(ngModel)]="deliverPaymentMethodId"
+        [options]="paymentMethods()"
+        optionLabel="name"
+        optionValue="id"
+        placeholder="Sélectionner une méthode"
+        appendTo="body"
+        class="w-full"
+      />
+    </div>
+    }
+  </div>
+  }
+  <div class="flex justify-end gap-2 mt-6">
+    <p-button
+      label="Annuler"
+      severity="contrast"
+      (onClick)="cancelDeliver()"
+      [disabled]="isDelivering"
+    />
+    <p-button
+      label="Livrer"
+      icon="pi pi-check"
+      severity="success"
+      (onClick)="confirmDeliver()"
+      [loading]="isDelivering"
+      [disabled]="!deliverPaymentMethodId"
+    />
+  </div>
+</p-dialog>

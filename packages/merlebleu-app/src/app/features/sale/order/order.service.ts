@@ -21,6 +21,7 @@ export interface OrderItemRowFilters {
   text?: string;
   decoration?: string;
   size?: number;
+  status?: OrderStatus;
 }
 
 @Injectable({

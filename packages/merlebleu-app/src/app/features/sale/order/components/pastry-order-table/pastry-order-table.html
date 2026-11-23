@@ -12,6 +12,17 @@
     placeholder="Date de livraison"
     class="w-52"
   />
+  @if (showStatusFilter()) {
+  <p-select
+    [(ngModel)]="filters.status"
+    [options]="statusOptions"
+    optionLabel="label"
+    optionValue="value"
+    placeholder="Tous les statuts"
+    class="w-52"
+    [showClear]="true"
+  />
+  }
   <p-select
     [(ngModel)]="filters.type"
     [options]="patisserieItems"
@@ -125,32 +136,33 @@
       </td>
       @if (hasActions()) {
       <td class="text-center!">
-        @if (showEditAction()) {
-        <p-button
-          icon="pi pi-pencil"
-          severity="warn"
-          class="mr-2"
-          (onClick)="onEdit(row)"
-          size="small"
-        />
-        }
-        @if (showCompleteAction() && !isOrderCompleted(row)) {
-        <p-button
-          icon="pi pi-check"
-          [loading]="isCompleting(row.orderId)"
-          (onClick)="onComplete(row)"
-          severity="success"
-          size="small"
-        />
-        }
-        @if (showDeliverAction() && isOrderCompleted(row)) {
-        <p-button
-          icon="pi pi-truck"
-          severity="success"
-          (onClick)="onDeliver(row)"
-          size="small"
-        />
-        }
+        <div class="flex flex-wrap items-center justify-center gap-2">
+          @if (showEditAction()) {
+          <p-button
+            icon="pi pi-pencil"
+            severity="warn"
+            (onClick)="onEdit(row)"
+            size="small"
+          />
+          }
+          @if (showCompleteAction() && !isOrderCompleted(row)) {
+          <p-button
+            icon="pi pi-check"
+            [loading]="isCompleting(row.orderId)"
+            (onClick)="onComplete(row)"
+            severity="success"
+            size="small"
+          />
+          }
+          @if (showDeliverAction() && isOrderCompleted(row)) {
+          <p-button
+            icon="pi pi-truck"
+            severity="success"
+            (onClick)="onDeliver(row)"
+            size="small"
+          />
+          }
+        </div>
       </td>
       }
     </tr>

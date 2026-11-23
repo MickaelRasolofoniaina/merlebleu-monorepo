@@ -136,6 +136,7 @@ export class OrderController {
     @Query('text') text?: string,
     @Query('decoration') decoration?: string,
     @Query('size') size?: string,
+    @Query('status') status?: OrderStatus,
   ) {
     const pageNumber = page ? Number.parseInt(page, 10) : 1;
     const limitNumber = limit ? Number.parseInt(limit, 10) : 20;
@@ -147,6 +148,7 @@ export class OrderController {
       text,
       decoration,
       size: size ? Number.parseInt(size, 10) : undefined,
+      statuses: status ? [status] : undefined,
     });
   }
 

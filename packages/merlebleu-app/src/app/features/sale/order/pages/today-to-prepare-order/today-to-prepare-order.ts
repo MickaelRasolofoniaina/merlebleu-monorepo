@@ -59,8 +59,8 @@ export class TodayToPrepareOrder implements OnInit {
   protected readonly OrderDisplayMode = OrderDisplayMode;
   protected displayMode = signal<OrderDisplayMode>(OrderDisplayMode.STANDARD);
   protected displayModeOptions = [
-    { label: 'Standard', value: OrderDisplayMode.STANDARD },
-    { label: 'Détaillé', value: OrderDisplayMode.PASTRY },
+    { label: 'Standard', icon: 'pi pi-list', value: OrderDisplayMode.STANDARD },
+    { label: 'Détaillé', icon: 'pi pi-table', value: OrderDisplayMode.PASTRY },
   ];
 
   protected orders = signal<Order[]>([]);
