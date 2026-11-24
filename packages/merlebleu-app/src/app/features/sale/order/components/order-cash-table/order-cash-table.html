@@ -48,9 +48,9 @@
         }
       </td>
       <td class="text-sm text-slate-600 tabular-nums dark:text-slate-300">
-        {{ order.totalAmount | number: '1.0-2' }}
+        {{ order.totalAmount | number: '1.0-2' }} Ar
         <span class="text-slate-400">·</span>
-        payé {{ order.paidAmount | number: '1.0-2' }}
+        payé {{ order.paidAmount | number: '1.0-2' }} Ar
       </td>
       <td>
         <div [class]="isLate(order) ? 'font-semibold text-red-600 dark:text-red-400' : 'font-medium'">

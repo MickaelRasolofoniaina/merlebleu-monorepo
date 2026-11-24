@@ -208,7 +208,11 @@
                   : 'text-emerald-700 dark:text-emerald-400'
               "
             >
-              {{ order.balanceAmount | number: '1.0-2' }} Ar
+              @if (order.balanceAmount > 0) {
+                {{ order.balanceAmount | number: '1.0-2' }} Ar
+              } @else {
+                Soldé 0 Ar
+              }
             </div>
           </div>
           <div

@@ -25,3 +25,10 @@ export interface DashboardTodaySummary {
   deliveredCount: number;
   collectedAmount: number;
 }
+
+export interface DashboardOrderListSummary {
+  balanceToCollect: number;
+  collectedToday: number;
+  toDeliverToday: number;
+  toDeliverThisWeek: number;
+}

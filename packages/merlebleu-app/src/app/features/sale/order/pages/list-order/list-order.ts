@@ -3,10 +3,12 @@ import { Component, DestroyRef, OnInit, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { finalize } from 'rxjs';
+import { Subject, debounceTime, finalize } from 'rxjs';
 import { PaginatorModule } from 'primeng/paginator';
+import { Popover, PopoverModule } from 'primeng/popover';
 import {
   CreateOrderDto,
+  DashboardOrderListSummary,
   DEFAULT_PAGE_SIZE,
   Order,
   OrderDisplayMode,
@@ -15,6 +17,8 @@ import {
   UpdateOrderDto,
 } from '@merlebleu/shared';
 import { OrderService } from '../../order.service';
+import { DashboardService } from '@features/dashboard/dashboard.service';
+import { formatUnitPrice } from '@shared/utils/number';
 import { ShopService } from '@features/shop/shop-list/shop.service';
 import { PaymentService } from '@features/sale/payment/payment.service';
 import { DialogModule } from 'primeng/dialog';
@@ -51,6 +55,7 @@ type ListOrderDisplayMode = OrderDisplayMode | typeof CALENDAR_VIEW;
     CommonModule,
     FormsModule,
     PaginatorModule,
+    PopoverModule,
     Button,
     BadgeModule,
     InputTextModule,
@@ -72,6 +77,7 @@ export class ListOrder implements OnInit {
   private readonly orderService = inject(OrderService);
   private readonly shopService = inject(ShopService);
   private readonly paymentService = inject(PaymentService);
+  private readonly dashboardService = inject(DashboardService);
   private readonly userPreferencesService = inject(UserPreferencesService);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
@@ -98,6 +104,12 @@ export class ListOrder implements OnInit {
   protected toPrepareCount = signal(0);
   protected toDeliverCount = signal(0);
   protected lateCount = signal(0);
+  protected orderListSummary = signal<DashboardOrderListSummary>({
+    balanceToCollect: 0,
+    collectedToday: 0,
+    toDeliverToday: 0,
+    toDeliverThisWeek: 0,
+  });
   protected readonly isOrderLate = isOrderLate;
 
   protected filters = {
@@ -107,6 +119,15 @@ export class ListOrder implements OnInit {
     orderStatus: '',
     shopId: getUserShopId(),
   };
+
+  protected draft = {
+    orderDate: null as Date | null,
+    deliveryDate: null as Date | null,
+    orderStatus: '',
+    shopId: getUserShopId(),
+  };
+
+  private readonly searchChange$ = new Subject<void>();
 
   protected statusOptions = ORDER_STATUSES.map((s) => ({
     label: s.label,
@@ -131,6 +152,9 @@ export class ListOrder implements OnInit {
   private hasManualDisplayMode = false;
 
   ngOnInit(): void {
+    this.searchChange$
+      .pipe(debounceTime(400), takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => this.applyFilters());
     this.shopService.getAll().subscribe((shops) => this.shops.set(shops));
     this.paymentService.getAllPaymentMethods().subscribe((paymentMethods) => {
       this.paymentMethods.set(paymentMethods);
@@ -219,7 +243,15 @@ export class ListOrder implements OnInit {
       });
   }
 
+  protected formatAmount(value: number): string {
+    return `${formatUnitPrice(value)} Ar`;
+  }
+
   private loadStatusCounts(): void {
+    this.dashboardService
+      .getOrderListSummary()
+      .subscribe((summary) => this.orderListSummary.set(summary));
+
     this.orderService
       .listOrderItemsToPrepare({ page: 1, limit: 1 })
       .subscribe((response) => this.toPrepareCount.set(response.total));
@@ -278,6 +310,55 @@ export class ListOrder implements OnInit {
     this.first = event.first;
     this.rows = event.rows;
     this.loadOrders(getPageFromFirstRows(event.first, event.rows), event.rows);
+  }
+
+  protected onSearchChange(): void {
+    this.searchChange$.next();
+  }
+
+  protected get activeFilterCount(): number {
+    return this.activeChips.length;
+  }
+
+  protected get activeChips(): { key: 'orderDate' | 'deliveryDate' | 'shopId' | 'orderStatus'; label: string }[] {
+    const chips: { key: 'orderDate' | 'deliveryDate' | 'shopId' | 'orderStatus'; label: string }[] = [];
+    const { shopId, orderStatus, orderDate, deliveryDate } = this.filters;
+
+    if (shopId) {
+      const shop = this.shops().find((s) => s.id === shopId);
+      chips.push({ key: 'shopId', label: `Boutique : ${shop?.address ?? '...'}` });
+    }
+    if (orderStatus) {
+      chips.push({ key: 'orderStatus', label: `Statut : ${getOrderStatusLabel(orderStatus as OrderStatus)}` });
+    }
+    if (deliveryDate) {
+      chips.push({ key: 'deliveryDate', label: `Livraison : ${deliveryDate.toLocaleDateString('fr-FR')}` });
+    }
+    if (orderDate) {
+      chips.push({ key: 'orderDate', label: `Commande : ${orderDate.toLocaleDateString('fr-FR')}` });
+    }
+
+    return chips;
+  }
+
+  protected openFilters(popover: Popover, event: Event): void {
+    this.draft = {
+      orderDate: this.filters.orderDate,
+      deliveryDate: this.filters.deliveryDate,
+      orderStatus: this.filters.orderStatus,
+      shopId: this.filters.shopId,
+    };
+    popover.toggle(event);
+  }
+
+  protected applyDraft(): void {
+    this.filters = { ...this.filters, ...this.draft };
+    this.applyFilters();
+  }
+
+  protected removeFilter(key: 'orderDate' | 'deliveryDate' | 'shopId' | 'orderStatus'): void {
+    this.filters = { ...this.filters, [key]: key === 'orderStatus' ? '' : null };
+    this.applyFilters();
   }
 
   protected applyFilters(): void {

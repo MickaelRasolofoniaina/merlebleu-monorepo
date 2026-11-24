@@ -31,8 +31,10 @@ const COLOR_CLASSES: Record<OrderCountCardColor, { container: string; text: stri
 export class OrderCountCard {
   color = input.required<OrderCountCardColor>();
   icon = input.required<string>();
-  count = input.required<number>();
+  count = input<number>(0);
   label = input.required<string>();
+  // replaces the count with a preformatted value (an amount for example); the label is then shown as is
+  valueText = input<string>();
 
   protected readonly classes = computed(() => COLOR_CLASSES[this.color()]);
 }

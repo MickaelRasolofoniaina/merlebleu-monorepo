@@ -6,6 +6,7 @@ import {
   DashboardAmount,
   DashboardCountPoint,
   DashboardDistributionPoint,
+  DashboardOrderListSummary,
   DashboardQueryDto,
   DashboardTodaySummary,
 } from '@merlebleu/shared';
@@ -43,6 +44,10 @@ export class DashboardService {
 
   getTodaySummary(): Observable<DashboardTodaySummary> {
     return this.http.get<DashboardTodaySummary>(`${this.apiUrl}/today-summary`);
+  }
+
+  getOrderListSummary(): Observable<DashboardOrderListSummary> {
+    return this.http.get<DashboardOrderListSummary>(`${this.apiUrl}/order-list-summary`);
   }
 
   private toParams(query: DashboardQueryDto): HttpParams {

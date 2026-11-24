@@ -1,10 +1,11 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { In, Not, Repository, SelectQueryBuilder } from 'typeorm';
+import { Between, In, Not, Repository, SelectQueryBuilder } from 'typeorm';
 import {
   DashboardAmount,
   DashboardCountPoint,
   DashboardDistributionPoint,
+  DashboardOrderListSummary,
   DashboardQueryDto,
   DashboardTodaySummary,
   DashboardView,
@@ -146,6 +147,63 @@ export class DashboardService {
       toDeliverCount,
       deliveredCount: Number(delivered?.count ?? 0),
       collectedAmount: Number(delivered?.amount ?? 0),
+    };
+  }
+
+  /**
+   * Figures shown above the order list. The collected amount follows the same
+   * rule as the today summary. "This week" runs from Monday to Sunday and
+   * includes today; only orders still to deliver are counted.
+   */
+  async getOrderListSummary(): Promise<DashboardOrderListSummary> {
+    const now = new Date();
+    const today = formatDate(now);
+    const daysSinceMonday = (now.getDay() + 6) % 7;
+    const weekStart = formatDate(
+      new Date(now.getFullYear(), now.getMonth(), now.getDate() - daysSinceMonday),
+    );
+    const weekEnd = formatDate(
+      new Date(
+        now.getFullYear(),
+        now.getMonth(),
+        now.getDate() - daysSinceMonday + 6,
+      ),
+    );
+    const closedStatuses = [OrderStatus.DELIVERED, OrderStatus.CANCELLED];
+
+    const [balance, collected, toDeliverToday, toDeliverThisWeek] =
+      await Promise.all([
+        this.orderRepository
+          .createQueryBuilder('orders')
+          .select('COALESCE(SUM(orders.balanceAmount), 0)', 'amount')
+          .where('orders.orderStatus NOT IN (:...closedStatuses)', {
+            closedStatuses,
+          })
+          .getRawOne<{ amount: string }>(),
+        this.orderRepository
+          .createQueryBuilder('orders')
+          .select('COALESCE(SUM(orders.paidAmount), 0)', 'amount')
+          .where('orders.deliveryDate = :today', { today })
+          .andWhere('orders.orderStatus = :delivered', {
+            delivered: OrderStatus.DELIVERED,
+          })
+          .getRawOne<{ amount: string }>(),
+        this.orderRepository.count({
+          where: { deliveryDate: today, orderStatus: Not(In(closedStatuses)) },
+        }),
+        this.orderRepository.count({
+          where: {
+            deliveryDate: Between(weekStart, weekEnd),
+            orderStatus: Not(In(closedStatuses)),
+          },
+        }),
+      ]);
+
+    return {
+      balanceToCollect: Number(balance?.amount ?? 0),
+      collectedToday: Number(collected?.amount ?? 0),
+      toDeliverToday,
+      toDeliverThisWeek,
     };
   }
 

@@ -30,4 +30,9 @@ export class DashboardController {
   getTodaySummary() {
     return this.dashboardService.getTodaySummary();
   }
+
+  @Get('order-list-summary')
+  getOrderListSummary() {
+    return this.dashboardService.getOrderListSummary();
+  }
 }
