@@ -278,7 +278,7 @@
             (ngModelChange)="onDeliveryDateChange($event)"
             [showIcon]="true"
             dateFormat="dd/mm/yy"
-            [minDate]="now"
+            [minDate]="isEdit ? null : now"
             class="w-full"
             appendTo="body"
           />

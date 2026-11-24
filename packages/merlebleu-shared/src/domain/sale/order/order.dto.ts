@@ -19,7 +19,31 @@ export const createOrderItemSchema = z.object({
   photos: z.array(z.string()).optional(),
 });
 
-export const createOrderSchema = z
+const baseDeliveryDateSchema = z
+  .string()
+  .min(1, "La date de livraison ne peut pas être vide")
+  .refine(
+    (val) => {
+      const date = new Date(val);
+      return !isNaN(date.getTime());
+    },
+    { message: "La date de livraison doit être une date valide" },
+  );
+
+const futureDeliveryDateSchema = baseDeliveryDateSchema.refine(
+  (val) => {
+    const deliveryDate = new Date(val);
+    const startOfToday = new Date();
+    startOfToday.setHours(0, 0, 0, 0);
+    return deliveryDate >= startOfToday;
+  },
+  {
+    message: "La date de livraison doit être aujourd'hui ou une date future",
+  },
+);
+
+const buildOrderSchema = (deliveryDate: z.ZodType<string>) =>
+  z
   .object({
     orderDate: z
       .string()
@@ -40,28 +64,7 @@ export const createOrderSchema = z
         "Le numéro de téléphone doit commencer par 034, 032, 033, 038 ou 036 et contenir exactement 10 chiffres (séparés par des espaces si plusieurs)",
       ),
     customerFacebookName: z.string().optional(),
-    deliveryDate: z
-      .string()
-      .min(1, "La date de livraison ne peut pas être vide")
-      .refine(
-        (val) => {
-          const date = new Date(val);
-          return !isNaN(date.getTime());
-        },
-        { message: "La date de livraison doit être une date valide" },
-      )
-      .refine(
-        (val) => {
-          const deliveryDate = new Date(val);
-          const startOfToday = new Date();
-          startOfToday.setHours(0, 0, 0, 0);
-          return deliveryDate >= startOfToday;
-        },
-        {
-          message:
-            "La date de livraison doit être aujourd'hui ou une date future",
-        },
-      ),
+    deliveryDate,
     deliveryStartTime: z
       .string()
       .regex(
@@ -122,10 +125,26 @@ export const createOrderSchema = z
     path: ["deliveryEndTime"],
   });
 
-export const updateOrderSchema = createOrderSchema;
+export const createOrderSchema = buildOrderSchema(futureDeliveryDateSchema);
+
+// A late order (delivery date already past) must remain editable.
+export const updateOrderSchema = buildOrderSchema(baseDeliveryDateSchema);
+
+export const updateOrderStatusSchema = z.object({
+  status: z.enum(OrderStatus, "Statut de commande invalide"),
+});
+
+export const deliverOrderSchema = z.object({
+  paymentMethodId: z
+    .string()
+    .min(1, "Veuillez sélectionner une méthode de paiement"),
+});
 
 export type CreateOrderDto = z.infer<typeof createOrderSchema>;
 export type UpdateOrderDto = z.infer<typeof updateOrderSchema>;
+
+export type UpdateOrderStatusDto = z.infer<typeof updateOrderStatusSchema>;
+export type DeliverOrderDto = z.infer<typeof deliverOrderSchema>;
 
 export type OrderItemDto = z.infer<typeof createOrderItemSchema>;
 

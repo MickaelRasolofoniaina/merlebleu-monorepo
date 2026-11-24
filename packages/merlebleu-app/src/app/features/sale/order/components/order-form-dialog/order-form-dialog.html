@@ -7,6 +7,7 @@
 >
   <order-form
     [orderData]="orderData()"
+    [isEdit]="isEdit()"
     [isLoading]="isLoading()"
     (orderSubmit)="orderSubmit.emit($event)"
   />

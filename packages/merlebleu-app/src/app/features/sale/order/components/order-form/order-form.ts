@@ -26,6 +26,7 @@ import {
   OrderItemDto,
   PaymentMethod,
   createOrderSchema,
+  updateOrderSchema,
   Item,
   ItemType,
   Shape,
@@ -57,6 +58,7 @@ import { ShopService } from '@features/shop/shop-list/shop.service';
 })
 export class OrderForm implements OnInit, OnChanges {
   @Input() orderData?: CreateOrderDto | UpdateOrderDto;
+  @Input() isEdit = false;
   @Input() isLoading = false;
   @Output() orderSubmit = new EventEmitter<CreateOrderDto | UpdateOrderDto>();
   @Output() orderReset = new EventEmitter<void>();
@@ -177,7 +179,8 @@ export class OrderForm implements OnInit, OnChanges {
 
   protected submit(): void {
     this.validationErrors = {};
-    const result = createOrderSchema.safeParse(this.order);
+    const schema = this.isEdit ? updateOrderSchema : createOrderSchema;
+    const result = schema.safeParse(this.order);
     if (!result.success) {
       this.validationErrors = buildZodErrorMap(result.error.issues);
       this.messageService.add({

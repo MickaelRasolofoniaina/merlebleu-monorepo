@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { OrderEntity, OrderItemEntity, OrderItemSchema } from './order.entity';
@@ -429,6 +433,15 @@ export class OrderService {
 
     if (!existingOrder) {
       throw new NotFoundException(`Order with id ${id} not found`);
+    }
+
+    if (
+      existingOrder.orderStatus === OrderStatus.CANCELLED ||
+      existingOrder.orderStatus === OrderStatus.DELIVERED
+    ) {
+      throw new BadRequestException(
+        'Une commande annulée ou déjà livrée ne peut pas être livrée.',
+      );
     }
 
     const paymentMethod =

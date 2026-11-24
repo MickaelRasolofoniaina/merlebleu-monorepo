@@ -11,10 +11,10 @@ export enum OrderStatus {
 
 export enum Shape {
   RECTANGLE = "Rectangle",
-  ROND = "Rond",
-  COEUR = "Coeur",
-  CARREE = "Carrée",
-  PERSONNALISE = "Personnalisé",
+  ROUND = "Rond",
+  HEART = "Coeur",
+  SQUARE = "Carrée",
+  CUSTOM = "Personnalisé",
 }
 
 export enum OrderDisplayMode {
