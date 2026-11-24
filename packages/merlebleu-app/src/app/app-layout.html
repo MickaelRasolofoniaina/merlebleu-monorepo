@@ -89,7 +89,7 @@
       class="flex w-56 flex-col border-r border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-800"
     >
       <div
-        class="flex h-14 shrink-0 items-center border-b border-slate-200 px-4 font-semibold text-slate-900 dark:border-slate-700 dark:text-white"
+        class="flex h-14 shrink-0 items-center bg-blue-500 px-4 font-semibold text-white"
       >
         {{ selectedSection().label }}
       </div>
@@ -119,17 +119,18 @@
   }
   <div class="flex min-w-0 flex-1 flex-col">
     <header
-      class="flex h-14 shrink-0 items-center justify-between bg-white px-5 shadow dark:bg-slate-800"
+      class="flex h-14 shrink-0 items-center justify-between bg-slate-800 px-5 shadow"
     >
       <div class="flex items-center gap-2">
         <p-button
-          icon="pi pi-bars"
+          [icon]="sidebarOpen() ? 'pi pi-angle-double-left' : 'pi pi-angle-double-right'"
           [text]="true"
           severity="secondary"
+          styleClass="!text-slate-300 hover:!bg-slate-700"
           [attr.aria-label]="sidebarOpen() ? 'Masquer le menu' : 'Afficher le menu'"
           (onClick)="toggleSidebar()"
         />
-        <h1 class="m-0 text-lg font-semibold text-blue-600 dark:text-blue-400">Le Merlebleu</h1>
+        <h1 class="m-0 text-lg font-semibold text-white">GESTION PATISSERIE MERLEBLEU</h1>
       </div>
     </header>
     <main class="flex-1 p-4">
