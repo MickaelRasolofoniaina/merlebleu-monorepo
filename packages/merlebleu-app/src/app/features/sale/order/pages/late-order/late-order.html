@@ -26,54 +26,106 @@
 
 <p-confirm-dialog />
 
-<div class="flex flex-wrap gap-3 items-center mb-4">
+<div class="flex flex-wrap gap-3 items-center mb-3">
   <input
     pInputText
     [(ngModel)]="filters.customerName"
-    placeholder="Nom du client..."
-    class="w-52"
+    (ngModelChange)="onSearchChange()"
+    placeholder="Rechercher un client..."
+    aria-label="Rechercher un client"
+    class="w-full max-w-sm"
   />
-  <p-datepicker
-    [(ngModel)]="filters.orderDate"
-    [showIcon]="true"
-    dateFormat="dd/mm/yy"
-    placeholder="Date de commande"
-    class="w-52"
-  />
-  <p-datepicker
-    [(ngModel)]="filters.deliveryDate"
-    [showIcon]="true"
-    dateFormat="dd/mm/yy"
-    placeholder="Date de livraison"
-    class="w-52"
-  />
-  <p-select
-    [(ngModel)]="filters.shopId"
-    [options]="shops()"
-    optionLabel="address"
-    optionValue="id"
-    placeholder="Toutes boutiques"
-    class="w-52"
-    [showClear]="true"
-  />
-  <p-select
-    [(ngModel)]="filters.orderStatus"
-    [options]="statusOptions"
-    optionLabel="label"
-    optionValue="value"
-    placeholder="Tout statuts"
-    class="w-52"
-    [showClear]="true"
-  />
-  <p-button label="Filtrer" icon="pi pi-search" (onClick)="applyFilters()" [disabled]="isLoading" severity="info" />
   <p-button
-    label="Réinitialiser"
-    icon="pi pi-refresh"
-    severity="contrast"
-    (onClick)="resetFilters()"
-    [disabled]="isLoading"
-  />
+    icon="pi pi-filter"
+    label="Filtres"
+    [outlined]="activeFilterCount === 0"
+    severity="info"
+    (onClick)="openFilters(filterPopover, $event)"
+  >
+    @if (activeFilterCount > 0) {
+    <p-badge [value]="activeFilterCount" severity="contrast" />
+    }
+  </p-button>
+  <p-popover #filterPopover>
+    <div class="flex w-80 flex-col gap-4">
+      <h3 class="font-semibold text-slate-900 dark:text-white">Filtres</h3>
+      <div class="flex flex-col gap-3">
+        <div class="flex flex-col gap-1">
+          <label class="text-xs font-semibold text-slate-600 dark:text-white">Date de commande</label>
+          <p-datepicker
+            [(ngModel)]="draft.orderDate"
+            [showIcon]="true"
+            dateFormat="dd/mm/yy"
+            placeholder="jj/mm/aaaa"
+            appendTo="body"
+            [showClear]="true"
+          />
+        </div>
+        <div class="flex flex-col gap-1">
+          <label class="text-xs font-semibold text-slate-600 dark:text-white">Date de livraison</label>
+          <p-datepicker
+            [(ngModel)]="draft.deliveryDate"
+            [showIcon]="true"
+            dateFormat="dd/mm/yy"
+            placeholder="jj/mm/aaaa"
+            appendTo="body"
+            [showClear]="true"
+          />
+        </div>
+      </div>
+      <div class="flex flex-col gap-1">
+        <label class="text-xs font-semibold text-slate-600 dark:text-white">Boutique</label>
+        <p-select
+          [(ngModel)]="draft.shopId"
+          [options]="shops()"
+          optionLabel="address"
+          optionValue="id"
+          placeholder="Toutes les boutiques"
+          appendTo="body"
+          [showClear]="true"
+        />
+      </div>
+      <div class="flex flex-col gap-1">
+        <label class="text-xs font-semibold text-slate-600 dark:text-white">Statut</label>
+        <p-select
+          [(ngModel)]="draft.orderStatus"
+          [options]="statusOptions"
+          optionLabel="label"
+          optionValue="value"
+          placeholder="Tous les statuts"
+          appendTo="body"
+          [showClear]="true"
+        />
+      </div>
+      <div class="flex items-center justify-between">
+        <p-button
+          label="Réinitialiser"
+          severity="secondary"
+          [text]="true"
+          (onClick)="resetFilters(); filterPopover.hide()"
+        />
+        <p-button label="Appliquer" (onClick)="applyDraft(); filterPopover.hide()" outlined severity="info" />
+      </div>
+    </div>
+  </p-popover>
 </div>
+
+@if (activeChips.length) {
+<div class="flex flex-wrap items-center gap-2 mb-4">
+  @for (chip of activeChips; track chip.key) {
+  <span class="inline-flex items-center gap-1.5">
+    <p-badge [value]="chip.label" severity="info" size="large" style="height: fit-content" />
+    <button
+      type="button"
+      class="pi pi-times cursor-pointer text-xs text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white"
+      [attr.aria-label]="'Retirer le filtre ' + chip.label"
+      (click)="removeFilter(chip.key)"
+    ></button>
+  </span>
+  }
+  <p-button label="Tout effacer" severity="secondary" [text]="true" size="small" (onClick)="resetFilters()" />
+</div>
+}
 
 @if (displayMode() === OrderDisplayMode.STANDARD) {
 <order-cash-table

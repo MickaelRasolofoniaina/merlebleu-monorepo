@@ -131,7 +131,7 @@ export class ListNotificationComponent implements OnInit {
       acceptLabel: 'Oui',
       rejectLabel: 'Non',
       acceptButtonStyleClass: 'p-button-success',
-      rejectButtonStyleClass: 'p-button-danger',
+      rejectButtonProps: { severity: 'contrast' },
       accept: () => this.markAllAsRead(),
     });
   }

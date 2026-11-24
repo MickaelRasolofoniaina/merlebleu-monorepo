@@ -1,7 +1,10 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, DestroyRef, OnInit, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { DecimalPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { finalize } from 'rxjs';
+import { Subject, debounceTime, finalize } from 'rxjs';
+import { Popover, PopoverModule } from 'primeng/popover';
+import { BadgeModule } from 'primeng/badge';
 import { InputTextModule } from 'primeng/inputtext';
 import { SelectModule } from 'primeng/select';
 import { SelectButtonModule } from 'primeng/selectbutton';
@@ -23,7 +26,7 @@ import { PaymentService } from '@features/sale/payment/payment.service';
 import { Button } from 'primeng/button';
 import { formatDate } from '@shared/utils/date';
 import { getPageFromFirstRows } from '@shared/utils/pagination';
-import { ORDER_STATUSES } from '@shared/utils/order';
+import { ORDER_STATUSES, getOrderStatusLabel } from '@shared/utils/order';
 import { getUserShopId } from '@shared/utils/user';
 import { UserPreferencesService } from '@shared/services/user-preferences.service';
 import { OrderDetailDialog } from '../../components/order-detail-dialog/order-detail-dialog';
@@ -33,10 +36,14 @@ import { OrderCountCard } from '@shared/components/order-count-card/order-count-
 
 const LATE_ORDER_STATUSES = [OrderStatus.TODO, OrderStatus.INPROGRESS, OrderStatus.TODELIVER];
 
+type FilterKey = 'orderDate' | 'deliveryDate' | 'shopId' | 'orderStatus';
+
 @Component({
   selector: 'late-order',
   imports: [
     FormsModule,
+    PopoverModule,
+    BadgeModule,
     InputTextModule,
     SelectModule,
     SelectButtonModule,
@@ -61,6 +68,7 @@ export class LateOrder implements OnInit {
   private readonly userPreferencesService = inject(UserPreferencesService);
   private readonly confirmationService = inject(ConfirmationService);
   private readonly messageService = inject(MessageService);
+  private readonly destroyRef = inject(DestroyRef);
 
   protected readonly OrderDisplayMode = OrderDisplayMode;
   protected displayMode = signal<OrderDisplayMode>(OrderDisplayMode.STANDARD);
@@ -101,9 +109,21 @@ export class LateOrder implements OnInit {
     }),
   );
 
+  protected draft = {
+    orderDate: null as Date | null,
+    deliveryDate: null as Date | null,
+    orderStatus: '',
+    shopId: getUserShopId(),
+  };
+
+  private readonly searchChange$ = new Subject<void>();
+
   private hasManualDisplayMode = false;
 
   ngOnInit(): void {
+    this.searchChange$
+      .pipe(debounceTime(400), takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => this.applyFilters());
     this.shopService.getAll().subscribe((shops) => this.shops.set(shops));
     this.paymentService.getAllPaymentMethods().subscribe((paymentMethods) => {
       this.paymentMethods.set(paymentMethods);
@@ -171,6 +191,55 @@ export class LateOrder implements OnInit {
     this.loadOrders(getPageFromFirstRows(event.first, event.rows), event.rows);
   }
 
+  protected onSearchChange(): void {
+    this.searchChange$.next();
+  }
+
+  protected get activeFilterCount(): number {
+    return this.activeChips.length;
+  }
+
+  protected get activeChips(): { key: FilterKey; label: string }[] {
+    const chips: { key: FilterKey; label: string }[] = [];
+    const { shopId, orderStatus, orderDate, deliveryDate } = this.filters;
+
+    if (shopId) {
+      const shop = this.shops().find((s) => s.id === shopId);
+      chips.push({ key: 'shopId', label: `Boutique : ${shop?.address ?? '...'}` });
+    }
+    if (orderStatus) {
+      chips.push({ key: 'orderStatus', label: `Statut : ${getOrderStatusLabel(orderStatus as OrderStatus)}` });
+    }
+    if (deliveryDate) {
+      chips.push({ key: 'deliveryDate', label: `Livraison : ${deliveryDate.toLocaleDateString('fr-FR')}` });
+    }
+    if (orderDate) {
+      chips.push({ key: 'orderDate', label: `Commande : ${orderDate.toLocaleDateString('fr-FR')}` });
+    }
+
+    return chips;
+  }
+
+  protected openFilters(popover: Popover, event: Event): void {
+    this.draft = {
+      orderDate: this.filters.orderDate,
+      deliveryDate: this.filters.deliveryDate,
+      orderStatus: this.filters.orderStatus,
+      shopId: this.filters.shopId,
+    };
+    popover.toggle(event);
+  }
+
+  protected applyDraft(): void {
+    this.filters = { ...this.filters, ...this.draft };
+    this.applyFilters();
+  }
+
+  protected removeFilter(key: FilterKey): void {
+    this.filters = { ...this.filters, [key]: key === 'orderStatus' ? '' : null };
+    this.applyFilters();
+  }
+
   protected applyFilters(): void {
     this.first = 0;
     this.loadOrders(1, this.rows);
@@ -200,7 +269,7 @@ export class LateOrder implements OnInit {
       acceptLabel: 'Oui',
       rejectLabel: 'Non',
       acceptButtonStyleClass: 'p-button-success',
-      rejectButtonStyleClass: 'p-button-danger',
+      rejectButtonProps: { severity: 'contrast' },
       accept: () => {
         const ids = new Set(this.completingIds());
         ids.add(orderId);

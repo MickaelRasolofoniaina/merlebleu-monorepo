@@ -152,7 +152,7 @@ export class TodayToPrepareOrder implements OnInit {
       acceptLabel: 'Oui',
       rejectLabel: 'Non',
       acceptButtonStyleClass: 'p-button-success',
-      rejectButtonStyleClass: 'p-button-danger',
+      rejectButtonProps: { severity: 'contrast' },
       accept: () => {
         const ids = new Set(this.completingIds());
         ids.add(orderId);
