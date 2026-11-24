@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Between, In, Not, Repository, SelectQueryBuilder } from 'typeorm';
+import { In, Not, Repository, SelectQueryBuilder } from 'typeorm';
 import {
   DashboardAmount,
   DashboardCountPoint,
@@ -112,13 +112,17 @@ export class DashboardService {
         this.orderRepository.count({
           where: { orderDate: today, orderStatus: Not(OrderStatus.CANCELLED) },
         }),
-        // same rule as the "to prepare" page: delivery today or tomorrow
-        this.orderRepository.count({
-          where: {
-            orderStatus: OrderStatus.TODO,
-            deliveryDate: Between(today, tomorrow),
-          },
-        }),
+        // same rule as the "to prepare" page: delivery today or tomorrow,
+        // counted per order item (child) rather than per order (parent)
+        this.orderItemRepository
+          .createQueryBuilder('orderItems')
+          .innerJoin('orderItems.order', 'orders')
+          .where('orders.orderStatus = :todo', { todo: OrderStatus.TODO })
+          .andWhere('orders.deliveryDate BETWEEN :today AND :tomorrow', {
+            today,
+            tomorrow,
+          })
+          .getCount(),
         this.orderRepository.count({
           where: {
             deliveryDate: today,
