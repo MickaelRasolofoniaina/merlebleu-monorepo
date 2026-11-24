@@ -44,7 +44,7 @@
   <div class="w-40">
     <p-inputNumber
       [(ngModel)]="filters.size"
-      placeholder="Taille/Nombre"
+      placeholder="Taille"
       [style]="{ width: '100%' }"
       inputStyleClass="w-full"
     />
@@ -94,8 +94,8 @@
       <th>Type</th>
       <th>Forme</th>
       <th>Texte</th>
-      <th>Décoration</th>
-      <th class="text-right!">Taille/Nombre</th>
+      <th>Décoration/Remarques</th>
+      <th class="text-right!">Taille</th>
       <th>Statut</th>
       @if (hasActions()) {
       <th class="text-center!">Actions</th>
@@ -112,7 +112,8 @@
         >
       </td>
       <td>
-        {{ row.deliveryDate | date: 'dd/MM/yyyy' }} de {{ row.deliveryStartTime.slice(0, 5) }} à
+        {{ row.deliveryDate | date: 'dd/MM/yyyy' }} <br>
+        De {{ row.deliveryStartTime.slice(0, 5) }} à
         {{ row.deliveryEndTime.slice(0, 5) }}
       </td>
       <td>
@@ -125,8 +126,8 @@
       <td>{{ row.type }}</td>
       <td>{{ row.shape }}</td>
       <td>{{ row.text || '-' }}</td>
-      <td>{{ row.decoration || '-' }}</td>
-      <td class="text-right!">{{ row.size }}</td>
+      <td>{{ row.decoration || '-' }} <br>{{ row.remarks || '-' }}</td>
+      <td class="text-right!">{{ row.size }} personnes</td>
       <td>
         <p-badge
           [value]="getStatus(row.orderStatus)"
