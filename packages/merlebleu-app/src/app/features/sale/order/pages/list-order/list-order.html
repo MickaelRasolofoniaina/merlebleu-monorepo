@@ -1,5 +1,6 @@
 <div class="flex justify-between items-center mb-4">
   <h2 class="text-2xl font-bold">Toutes les commandes</h2>
+  <p-button label="Nouvelle commande" icon="pi pi-plus" severity="primary" (onClick)="openAddOrder()" />
 </div>
 
 <div class="flex justify-between items-center mb-4">
@@ -14,7 +15,6 @@
       <i [class]="item.icon" [attr.title]="item.label"></i>
     </ng-template>
   </p-selectButton>
-  <p-button label="Nouvelle commande" icon="pi pi-plus" severity="primary" (onClick)="openAddOrder()" />
 </div>
 
 <div class="flex flex-wrap gap-3 mb-4">
