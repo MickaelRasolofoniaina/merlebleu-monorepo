@@ -83,6 +83,15 @@
     aria-label="Rechercher un client"
     class="w-full max-w-sm"
   />
+  <div class="flex items-center gap-2">
+    <p-checkbox
+      inputId="includeDelivered"
+      [(ngModel)]="includeDelivered"
+      [binary]="true"
+      (onChange)="applyFilters()"
+    />
+    <label for="includeDelivered" class="text-sm cursor-pointer">Inclure les commandes livrées</label>
+  </div>
   <p-button
     icon="pi pi-filter"
     label="Filtres"

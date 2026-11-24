@@ -22,6 +22,7 @@ import { ShopService } from '@features/shop/shop-list/shop.service';
 import { PaymentService } from '@features/sale/payment/payment.service';
 import { DialogModule } from 'primeng/dialog';
 import { Button } from 'primeng/button';
+import { CheckboxModule } from 'primeng/checkbox';
 import { BadgeModule } from 'primeng/badge';
 import { InputTextModule } from 'primeng/inputtext';
 import { DatePickerModule } from 'primeng/datepicker';
@@ -55,6 +56,7 @@ type ListOrderDisplayMode = OrderDisplayMode | typeof CALENDAR_VIEW;
     FormsModule,
     PopoverModule,
     Button,
+    CheckboxModule,
     BadgeModule,
     InputTextModule,
     DatePickerModule,
@@ -117,6 +119,8 @@ export class ListOrder implements OnInit {
     orderStatus: '',
     shopId: getUserShopId(),
   };
+
+  protected includeDelivered = false;
 
   protected draft = {
     orderDate: null as Date | null,
@@ -224,6 +228,9 @@ export class ListOrder implements OnInit {
     }
     if (this.filters.shopId) {
       filterParams['shopId'] = this.filters.shopId;
+    }
+    if (!this.includeDelivered) {
+      filterParams['excludeDelivered'] = true;
     }
 
     this.orderService

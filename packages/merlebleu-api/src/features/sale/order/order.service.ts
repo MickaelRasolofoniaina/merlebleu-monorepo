@@ -80,6 +80,7 @@ export class OrderService {
       customerName?: string;
       status?: OrderStatus;
       statuses?: OrderStatus[];
+      excludeDelivered?: boolean;
       shopId?: string;
     },
   ): Promise<ResultPaged<OrderEntity>> {
@@ -131,6 +132,10 @@ export class OrderService {
     } else if (filters?.statuses?.length) {
       query.andWhere('orders.orderStatus IN (:...statuses)', {
         statuses: filters.statuses,
+      });
+    } else if (filters?.excludeDelivered) {
+      query.andWhere('orders.orderStatus != :deliveredStatus', {
+        deliveredStatus: OrderStatus.DELIVERED,
       });
     }
 

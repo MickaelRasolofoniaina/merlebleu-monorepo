@@ -41,6 +41,7 @@ export class OrderController {
     @Query('deliveryDateTo') deliveryDateTo?: string,
     @Query('customerName') customerName?: string,
     @Query('status') status?: OrderStatus,
+    @Query('excludeDelivered') excludeDelivered?: string,
     @Query('shopId') shopId?: string,
   ) {
     const pageNumber = page ? Number.parseInt(page, 10) : 1;
@@ -52,6 +53,7 @@ export class OrderController {
       deliveryDateTo,
       customerName,
       status,
+      excludeDelivered: excludeDelivered === 'true',
       shopId,
     });
   }
