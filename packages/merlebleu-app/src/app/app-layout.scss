@@ -26,8 +26,12 @@ header {
 }
 
 .sidebar {
+  position: sticky;
+  top: 16px;
+  align-self: flex-start;
+  flex-shrink: 0;
   width: 250px;
-  height: calc(100vh - 85px);
+  height: calc(100vh - 32px);
 
   .menu {
     display: block;
@@ -41,6 +45,17 @@ header {
 
 .p-menu {
   height: 100%;
+}
+
+:host ::ng-deep .sidebar .p-menu {
+  height: 100%;
+  overflow-y: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
 }
 
 :host ::ng-deep .p-menu-item-link-active {

@@ -210,6 +210,18 @@ export class OrderForm implements OnInit, OnChanges {
     this.order.orderDate = formatDate(value);
   }
 
+  /** Formats the delivery date as "Sam 23 Oct". */
+  protected formatDeliveryDate(): string {
+    const date = this.deliveryDateValue;
+    if (!date) {
+      return '';
+    }
+    const capitalize = (text: string): string => text.charAt(0).toUpperCase() + text.slice(1);
+    const weekday = date.toLocaleDateString('fr-FR', { weekday: 'short' }).replace('.', '');
+    const month = date.toLocaleDateString('fr-FR', { month: 'short' }).replace('.', '');
+    return `${capitalize(weekday)} ${date.getDate()} ${capitalize(month)}`;
+  }
+
   protected onDeliveryDateChange(value: Date | null): void {
     this.deliveryDateValue = value;
     this.order.deliveryDate = formatDate(value);

@@ -1,5 +1,7 @@
 <form class="flex flex-col gap-6 lg:flex-row lg:items-start">
-<div class="flex min-w-0 flex-1 flex-col gap-6">
+<div
+  class="flex min-w-0 flex-1 flex-col gap-6 rounded-xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-900"
+>
   <p class="text-sm text-slate-500">
     Les champs marqués d'un <span class="text-red-500" aria-hidden="true">*</span> sont obligatoires.
   </p>
@@ -96,6 +98,7 @@
         <h4 class="text-base font-semibold">Article {{ i + 1 }}</h4>
         <p-button
           icon="pi pi-trash"
+          label="Supprimer"
           severity="danger"
           [outlined]="true"
           [disabled]="order.orderItems.length === 1"
@@ -237,6 +240,7 @@
       styleClass="w-full"
       class="block w-full"
       (onClick)="addOrderItem()"
+      severity="contrast"
     />
   </p-fieldset>
 
@@ -364,8 +368,10 @@
 
 </div>
 
-  <aside class="flex w-full flex-col gap-4 lg:sticky lg:top-0 lg:w-80 lg:shrink-0">
-    <section class="border border-slate-200 rounded-xl p-5 flex flex-col gap-4">
+  <aside
+    class="flex w-full flex-col gap-4 rounded-xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-900 lg:sticky lg:top-0 lg:w-96 lg:shrink-0"
+  >
+    <section class="flex flex-col gap-4">
       <h2 class="text-base font-bold text-slate-900 dark:text-white">4 · Récapitulatif</h2>
 
       <dl class="grid grid-cols-[1fr_auto] gap-x-3 gap-y-2 text-sm">
@@ -375,7 +381,7 @@
         </ng-container>
         <dt class="text-slate-500">Livraison</dt>
         <dd class="text-right">
-          {{ order.deliveryDate }} {{ order.deliveryStartTime }}-{{ order.deliveryEndTime }}
+          {{ formatDeliveryDate() }} {{ order.deliveryStartTime }}-{{ order.deliveryEndTime }}
         </dd>
         <dt class="text-slate-500">Montant des commandes</dt>
         <dd class="text-right">{{ order.totalAmount | number }} Ar</dd>
