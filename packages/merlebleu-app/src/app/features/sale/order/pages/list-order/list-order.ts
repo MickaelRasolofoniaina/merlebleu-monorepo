@@ -10,12 +10,11 @@ import {
   DEFAULT_PAGE_SIZE,
   Order,
   OrderDisplayMode,
-  OrderItemRowDto,
   OrderStatus,
   PaymentMethod,
   UpdateOrderDto,
 } from '@merlebleu/shared';
-import { OrderItemRowFilters, OrderService } from '../../order.service';
+import { OrderService } from '../../order.service';
 import { ShopService } from '@features/shop/shop-list/shop.service';
 import { PaymentService } from '@features/sale/payment/payment.service';
 import { DialogModule } from 'primeng/dialog';
@@ -38,7 +37,7 @@ import { Shop } from '@merlebleu/shared';
 import { UserPreferencesService } from '@shared/services/user-preferences.service';
 import { OrderDetailDialog } from '../../components/order-detail-dialog/order-detail-dialog';
 import { OrderFormDialog } from '../../components/order-form-dialog/order-form-dialog';
-import { PastryOrderTable } from '../../components/pastry-order-table/pastry-order-table';
+import { OrderCashTable } from '../../components/order-cash-table/order-cash-table';
 import { OrderAgendaView } from '../../components/order-agenda-view/order-agenda-view';
 import { OrderCalendarView } from '../../components/order-calendar-view/order-calendar-view';
 import { OrderCountCard } from '@shared/components/order-count-card/order-count-card';
@@ -61,7 +60,7 @@ type ListOrderDisplayMode = OrderDisplayMode | typeof CALENDAR_VIEW;
     DialogModule,
     OrderDetailDialog,
     OrderFormDialog,
-    PastryOrderTable,
+    OrderCashTable,
     OrderCalendarView,
     OrderAgendaView,
     OrderCountCard,
@@ -88,8 +87,6 @@ export class ListOrder implements OnInit {
   ];
 
   protected orders = signal<Order[]>([]);
-  protected orderItemRows = signal<OrderItemRowDto[]>([]);
-  protected pastryFilters: OrderItemRowFilters = {};
   protected calendarOrders = signal<Order[]>([]);
   protected isCalendarLoading = false;
   private calendarRange = this.getDefaultCalendarRange();
@@ -188,11 +185,6 @@ export class ListOrder implements OnInit {
       return;
     }
 
-    if (this.displayMode() === OrderDisplayMode.STANDARD) {
-      this.loadOrderItemRows(page, limit);
-      return;
-    }
-
     this.isLoading = true;
 
     const filterParams: Record<string, unknown> = {};
@@ -222,24 +214,6 @@ export class ListOrder implements OnInit {
       .subscribe({
         next: (response) => {
           this.orders.set(response.data);
-          this.totalRecords = response.total;
-        },
-      });
-  }
-
-  private loadOrderItemRows(page: number, limit: number): void {
-    this.isLoading = true;
-
-    this.orderService
-      .listOrderItems({ page, limit }, this.pastryFilters)
-      .pipe(
-        finalize(() => {
-          this.isLoading = false;
-        }),
-      )
-      .subscribe({
-        next: (response) => {
-          this.orderItemRows.set(response.data);
           this.totalRecords = response.total;
         },
       });
@@ -300,18 +274,6 @@ export class ListOrder implements OnInit {
     this.loadCalendarOrders();
   }
 
-  protected onPastryFilter(filters: OrderItemRowFilters): void {
-    this.pastryFilters = filters;
-    this.first = 0;
-    this.loadOrders(1, this.rows);
-  }
-
-  protected onPastryReset(): void {
-    this.pastryFilters = {};
-    this.first = 0;
-    this.loadOrders(1, this.rows);
-  }
-
   protected onPageChange(event: { first: number; rows: number }): void {
     this.first = event.first;
     this.rows = event.rows;
@@ -350,18 +312,6 @@ export class ListOrder implements OnInit {
     this.displayOrderDetailDialog = true;
   }
 
-  protected onPastryViewDetail(orderId: string): void {
-    this.orderService.getOrderById(orderId).subscribe((order) => {
-      this.openOrderDetail(order);
-    });
-  }
-
-  protected onPastryEdit(orderId: string): void {
-    this.orderService.getOrderById(orderId).subscribe((order) => {
-      this.openEditOrder(order);
-    });
-  }
-
   private truncate(value: string, maxLength: number): string {
     if (value.length <= maxLength) {
       return value;
@@ -382,12 +332,6 @@ export class ListOrder implements OnInit {
       shopId: order.shop?.id ?? '',
     } as UpdateOrderDto;
     this.displayOrderFormDialog = true;
-  }
-
-  protected onPastryDeliver(orderId: string): void {
-    this.orderService.getOrderById(orderId).subscribe((order) => {
-      this.openDeliverDialog(order);
-    });
   }
 
   protected openDeliverDialog(order: Order): void {
