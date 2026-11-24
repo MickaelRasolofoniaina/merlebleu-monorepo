@@ -1,34 +1,73 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
-import { DEFAULT_PAGE_SIZE, NotificationDto, NotificationType } from '@merlebleu/shared';
-import { TableModule, TablePageEvent } from 'primeng/table';
+import { NotificationDto, NotificationType } from '@merlebleu/shared';
+import { PaginatorModule, PaginatorState } from 'primeng/paginator';
 import { ButtonModule } from 'primeng/button';
-import { TagModule } from 'primeng/tag';
 import { ConfirmationService } from 'primeng/api';
 import { ConfirmDialog } from 'primeng/confirmdialog';
+import { finalize } from 'rxjs';
 import { NotificationService } from '@shared/services/notification.service';
 import { getPageFromFirstRows } from '@shared/utils/pagination';
-import { formatNotificationDate } from '@shared/utils/date';
-import { getNotificationTypeMeta } from '@shared/utils/notification-type';
+import {
+  formatNotificationDayLabel,
+  formatTime,
+} from '@shared/utils/date';
+import {
+  getNotificationTypeMeta,
+  NotificationTypeMeta,
+} from '@shared/utils/notification-type';
+
+const NOTIFICATIONS_PAGE_SIZE = 10;
+
+interface NotificationGroup {
+  label: string;
+  items: NotificationDto[];
+}
 
 @Component({
   selector: 'app-list-notification',
   templateUrl: './list-notification.html',
-  imports: [TableModule, ButtonModule, TagModule, ConfirmDialog],
+  imports: [PaginatorModule, ButtonModule, ConfirmDialog],
   providers: [ConfirmationService],
 })
 export class ListNotificationComponent implements OnInit {
   protected readonly getNotificationTypeMeta = getNotificationTypeMeta;
-  protected readonly formatNotificationDate = formatNotificationDate;
+
+  protected readonly titleClasses: Record<
+    NotificationTypeMeta['severity'],
+    string
+  > = {
+    success: 'text-green-800 dark:text-green-400',
+    warn: 'text-amber-800 dark:text-amber-400',
+    danger: 'text-red-800 dark:text-red-400',
+    info: 'text-blue-800 dark:text-blue-400',
+  };
 
   notifications = signal<NotificationDto[]>([]);
   page = signal(1);
-  rows = DEFAULT_PAGE_SIZE;
+  rows = NOTIFICATIONS_PAGE_SIZE;
   first = signal(0);
   totalRecords = signal(0);
   isLoading = signal(false);
 
-  private readonly notificationService = inject(NotificationService);
+  protected readonly groups = computed<NotificationGroup[]>(() => {
+    const groups: NotificationGroup[] = [];
+
+    for (const notification of this.notifications()) {
+      const label = formatNotificationDayLabel(notification.createdAt);
+      const last = groups[groups.length - 1];
+
+      if (last?.label === label) {
+        last.items.push(notification);
+      } else {
+        groups.push({ label, items: [notification] });
+      }
+    }
+
+    return groups;
+  });
+
+  protected readonly notificationService = inject(NotificationService);
   private readonly confirmationService = inject(ConfirmationService);
   private readonly router = inject(Router);
 
@@ -36,21 +75,28 @@ export class ListNotificationComponent implements OnInit {
     this.fetchNotifications();
   }
 
+  protected formatTimeOf(notification: NotificationDto): string {
+    return formatTime(new Date(notification.createdAt));
+  }
+
   fetchNotifications(): void {
     this.isLoading.set(true);
     this.notificationService
       .loadPaginated(this.page(), this.rows)
+      .pipe(finalize(() => this.isLoading.set(false)))
       .subscribe(({ data, total }) => {
         this.notifications.set(data);
         this.totalRecords.set(total);
-        this.isLoading.set(false);
       });
   }
 
-  onTablePage(event: TablePageEvent): void {
-    this.page.set(getPageFromFirstRows(event.first, event.rows));
-    this.rows = event.rows;
-    this.first.set(event.first);
+  onPageChange(event: PaginatorState): void {
+    const first = event.first ?? 0;
+    const rows = event.rows ?? this.rows;
+
+    this.page.set(getPageFromFirstRows(first, rows));
+    this.rows = rows;
+    this.first.set(first);
     this.fetchNotifications();
   }
 
