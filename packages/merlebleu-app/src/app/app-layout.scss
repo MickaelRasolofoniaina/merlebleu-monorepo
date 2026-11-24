@@ -66,6 +66,7 @@ header {
   background-color: white;
   border-radius: var(--p-menu-border-radius);
   flex: 1;
+  min-width: 0;
 }
 
 :host-context(.dark) .content {

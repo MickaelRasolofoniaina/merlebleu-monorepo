@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, DestroyRef, OnInit, ViewChild, inject, signal } from '@angular/core';
+import { Component, DestroyRef, OnInit, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -68,8 +68,6 @@ type ListOrderDisplayMode = OrderDisplayMode | typeof CALENDAR_VIEW;
   styleUrl: './list-order.scss',
 })
 export class ListOrder implements OnInit {
-  @ViewChild(OrderFormDialog) private orderFormDialog!: OrderFormDialog;
-
   private readonly orderService = inject(OrderService);
   private readonly shopService = inject(ShopService);
   private readonly paymentService = inject(PaymentService);
@@ -371,9 +369,7 @@ export class ListOrder implements OnInit {
   }
 
   protected openAddOrder(): void {
-    this.editingOrderId = null;
-    this.editingOrder = undefined;
-    this.displayOrderFormDialog = true;
+    void this.router.navigate(['/sale/order/add']);
   }
 
   protected openEditOrder(order: Order): void {
@@ -445,9 +441,6 @@ export class ListOrder implements OnInit {
       .subscribe({
         next: () => {
           this.displayOrderFormDialog = false;
-          if (!isEditing) {
-            this.orderFormDialog.resetForm();
-          }
           this.loadOrders(getPageFromFirstRows(this.first, this.rows), this.rows);
           this.loadStatusCounts();
         },

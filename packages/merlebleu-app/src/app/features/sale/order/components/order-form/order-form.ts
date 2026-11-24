@@ -225,6 +225,12 @@ export class OrderForm implements OnInit, OnChanges {
     this.order.deliveryEndTime = formatTime(value);
   }
 
+  protected onFromFacebookChange(isFromFacebook: boolean): void {
+    if (!isFromFacebook) {
+      this.order.customerFacebookName = '';
+    }
+  }
+
   protected trackByIndex(index: number): number {
     return index;
   }
