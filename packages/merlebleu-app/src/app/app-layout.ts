@@ -1,6 +1,8 @@
-import { Component, OnDestroy, OnInit, inject, signal } from '@angular/core';
+import { Component, DestroyRef, OnDestroy, OnInit, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
-import { RouterOutlet } from '@angular/router';
+import { NavigationEnd, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { filter, interval } from 'rxjs';
 import { MenuItem } from 'primeng/api';
 import { MenuModule } from 'primeng/menu';
 import { RippleModule } from 'primeng/ripple';
@@ -8,10 +10,12 @@ import { AvatarModule } from 'primeng/avatar';
 import { Button } from 'primeng/button';
 import { Popover } from 'primeng/popover';
 import { OverlayBadge } from 'primeng/overlaybadge';
+import { BadgeModule } from 'primeng/badge';
 import { Router } from '@angular/router';
 import { AuthService } from './shared/services/auth.service';
 import { ThemeService } from './shared/services/theme.service';
 import { NotificationService } from './shared/services/notification.service';
+import { MenuCounterService } from './shared/services/menu-counter.service';
 import { NotificationPanelComponent } from './shared/components/notification-panel/notification-panel';
 
 @Component({
@@ -19,6 +23,9 @@ import { NotificationPanelComponent } from './shared/components/notification-pan
   imports: [
     CommonModule,
     RouterOutlet,
+    RouterLink,
+    RouterLinkActive,
+    BadgeModule,
     MenuModule,
     RippleModule,
     AvatarModule,
@@ -35,6 +42,8 @@ export class AppLayout implements OnInit, OnDestroy {
   private readonly router = inject(Router);
   protected readonly themeService = inject(ThemeService);
   protected readonly notificationService = inject(NotificationService);
+  protected readonly menuCounterService = inject(MenuCounterService);
+  private readonly destroyRef = inject(DestroyRef);
   protected readonly sidebarOpen = signal(true);
   protected readonly name = signal('');
 
@@ -69,12 +78,14 @@ export class AppLayout implements OnInit, OnDestroy {
           styleClass: 'menu-parent-item',
         },
         {
+          id: 'today-to-prepare',
           label: 'A préparer',
           icon: 'pi pi-box',
           routerLink: ['/sale/order/today/to-prepare'],
           styleClass: 'menu-sub-item',
         },
         {
+          id: 'today-to-deliver',
           label: 'A livrer',
           icon: 'pi pi-truck',
           routerLink: ['/sale/order/today/to-deliver'],
@@ -93,11 +104,13 @@ export class AppLayout implements OnInit, OnDestroy {
           styleClass: 'menu-sub-item',
         },
         {
+          id: 'late',
           label: 'En retard',
           icon: 'pi pi-exclamation-triangle',
           routerLink: ['/sale/order/late'],
         },
         {
+          id: 'notifications',
           label: 'Notifications',
           icon: 'pi pi-bell',
           routerLink: ['/notification'],
@@ -171,6 +184,20 @@ export class AppLayout implements OnInit, OnDestroy {
     },
   ];
 
+  protected getBadge(
+    id: string | undefined,
+  ): { value: number; severity: 'danger' | 'success' | 'warn' | 'info' } | null {
+    const badges = {
+      'today-to-prepare': { value: this.menuCounterService.todayToPrepare(), severity: 'danger' },
+      'today-to-deliver': { value: this.menuCounterService.todayToDeliver(), severity: 'success' },
+      late: { value: this.menuCounterService.late(), severity: 'warn' },
+      notifications: { value: this.notificationService.unreadCount(), severity: 'info' },
+    } as const;
+    const badge = id ? (badges as Record<string, (typeof badges)[keyof typeof badges]>)[id] : null;
+
+    return badge && badge.value > 0 ? badge : null;
+  }
+
   ngOnInit(): void {
     const name = localStorage.getItem('user_name') ?? '';
     this.name.set(name);
@@ -178,6 +205,18 @@ export class AppLayout implements OnInit, OnDestroy {
     this.notificationService.connect();
     this.notificationService.loadRecent();
     this.notificationService.refreshUnreadCount();
+
+    // counters change when orders are updated on any page, so refresh on each navigation
+    this.menuCounterService.refresh();
+    this.router.events
+      .pipe(
+        filter((event) => event instanceof NavigationEnd),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe(() => this.menuCounterService.refresh());
+    interval(60_000)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => this.menuCounterService.refresh());
   }
 
   ngOnDestroy(): void {

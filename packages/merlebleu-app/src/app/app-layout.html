@@ -62,7 +62,29 @@
 <main class="main">
   @if (sidebarOpen()) {
   <div class="sidebar">
-    <p-menu [model]="items" class="menu" />
+    <p-menu [model]="items" class="menu">
+      <ng-template #item let-item>
+        @if (item.routerLink) {
+        <a
+          pRipple
+          class="p-menu-item-link flex items-center gap-2"
+          [routerLink]="item.routerLink"
+          routerLinkActive="p-menu-item-link-active"
+        >
+          <span class="p-menu-item-icon" [class]="item.icon"></span>
+          <span class="p-menu-item-label">{{ item.label }}</span>
+          @if (getBadge(item.id); as badge) {
+          <p-badge class="ml-auto" [value]="badge.value" [severity]="badge.severity" />
+          }
+        </a>
+        } @else {
+        <a class="p-menu-item-link flex items-center gap-2">
+          <span class="p-menu-item-icon" [class]="item.icon"></span>
+          <span class="p-menu-item-label">{{ item.label }}</span>
+        </a>
+        }
+      </ng-template>
+    </p-menu>
   </div>
   }
   <div class="content">
