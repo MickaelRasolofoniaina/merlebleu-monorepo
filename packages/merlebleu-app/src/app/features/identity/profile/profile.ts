@@ -2,7 +2,6 @@ import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { finalize } from 'rxjs';
 import { MessageService } from 'primeng/api';
-import { SelectButtonModule } from 'primeng/selectbutton';
 import { Button } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
 import {
@@ -16,7 +15,7 @@ import { getUserRoleLabel } from '@shared/utils/user-role';
 
 @Component({
   selector: 'profile',
-  imports: [FormsModule, SelectButtonModule, Button, InputTextModule],
+  imports: [FormsModule, Button, InputTextModule],
   templateUrl: './profile.html',
   styleUrl: './profile.scss',
 })
@@ -39,6 +38,8 @@ export class Profile implements OnInit {
   protected passwordConfirmError = '';
   protected profileValidationError: ReturnType<typeof updateProfileSchema.safeParse>['error'] | null =
     null;
+
+  protected displayModes = OrderDisplayMode;
 
   protected displayModeOptions = [
     { label: 'Standard', value: OrderDisplayMode.STANDARD },
@@ -114,6 +115,11 @@ export class Profile implements OnInit {
           });
         },
       });
+  }
+
+  protected saveAll(): void {
+    this.saveProfile();
+    this.save();
   }
 
   protected save(): void {
