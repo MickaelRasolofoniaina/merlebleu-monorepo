@@ -26,22 +26,6 @@
 
 <p-confirm-dialog />
 
-@if (displayMode() === OrderDisplayMode.PASTRY) {
-<pastry-order-table
-  [rows]="orderItemRows()"
-  [loading]="isLoading"
-  [totalRecords]="totalRecords"
-  [first]="first"
-  [pageSize]="rows"
-  [showCompleteAction]="true"
-  [completingOrderIds]="completingIds()"
-  (pageChange)="onPageChange($event)"
-  (filter)="onPastryFilter($event)"
-  (resetFilter)="onPastryReset()"
-  (viewDetail)="onPastryViewDetail($event)"
-  (complete)="onComplete($event)"
-/>
-} @else {
 <div class="flex flex-wrap gap-3 items-center mb-4">
   <input
     pInputText
@@ -68,69 +52,35 @@
   />
 </div>
 
-<p-table
-  [value]="orders()"
+@if (displayMode() === OrderDisplayMode.STANDARD) {
+<order-cash-table
+  [orders]="orders()"
   [loading]="isLoading"
-  [tableStyle]="{ 'min-width': '40rem' }"
-  [stripedRows]="true"
-  [paginator]="true"
-  [rows]="rows"
-  [first]="first"
   [totalRecords]="totalRecords"
-  [lazy]="true"
-  (onPage)="onPageChange($event)"
->
-  <ng-template #header>
-    <tr>
-      <th>Client</th>
-      <th>Date</th>
-      <th>Date de livraison</th>
-      <th>Boutique</th>
-      <th class="text-right!">Reste</th>
-      <th class="text-right!">Statut</th>
-      <th class="text-center!">Action</th>
-    </tr>
-  </ng-template>
-  <ng-template #body let-order>
-    <tr>
-      <td>
-        <span
-          class="cursor-pointer text-[#1b4fb6] dark:text-blue-400 hover:underline"
-          (click)="openOrderDetail(order)"
-          >{{ order.customerName }}</span
-        >
-      </td>
-      <td>{{ order.orderDate | date: 'dd/MM/yyyy' }}</td>
-      <td>
-        {{ order.deliveryDate | date: 'dd/MM/yyyy' }} de {{ order.deliveryStartTime.slice(0, 5) }} à
-        {{ order.deliveryEndTime.slice(0, 5) }}
-      </td>
-      <td>{{ order.shop.address }}</td>
-      <td class="text-right!">{{ order.balanceAmount | number: '1.0-2' }}</td>
-      <td class="text-right!">
-        <p-badge
-          [value]="getStatus(order.orderStatus)"
-          [severity]="getStatusColor(order.orderStatus)"
-          style="height: fit-content"
-        ></p-badge>
-      </td>
-      <td class="text-center!">
-        <p-button
-          icon="pi pi-check"
-          [loading]="isCompleting(order.id)"
-          (onClick)="onComplete(order.id)"
-          severity="success"
-          size="small"
-        />
-      </td>
-    </tr>
-  </ng-template>
-  <ng-template #emptymessage>
-    <tr>
-      <td colspan="7" class="text-center-important py-6">Aucune commande à préparer</td>
-    </tr>
-  </ng-template>
-</p-table>
+  [first]="first"
+  [pageSize]="rows"
+  [showEditAction]="false"
+  [showDeliverAction]="false"
+  [showCompleteAction]="true"
+  [completingOrderIds]="completingIds()"
+  (pageChange)="onPageChange($event)"
+  (viewDetail)="openOrderDetail($event)"
+  (complete)="onComplete($event)"
+/>
+} @else {
+<order-agenda-view
+  [orders]="orders()"
+  [loading]="isLoading"
+  [totalRecords]="totalRecords"
+  [first]="first"
+  [pageSize]="rows"
+  [showCompleteAction]="true"
+  [showDeliverAction]="false"
+  [completingOrderIds]="completingIds()"
+  (pageChange)="onPageChange($event)"
+  (viewDetail)="openOrderDetail($event)"
+  (complete)="onComplete($event)"
+/>
 }
 
 <order-detail-dialog [order]="selectedOrder()" [(visible)]="displayOrderDetailDialog" />

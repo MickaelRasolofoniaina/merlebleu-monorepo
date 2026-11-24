@@ -67,7 +67,17 @@
       </td>
       <td class="text-center!">
         <div class="flex flex-wrap items-center justify-center gap-2">
-          @if (order.orderStatus === OrderStatus.TODELIVER) {
+          @if (canComplete(order)) {
+          <p-button
+            icon="pi pi-check"
+            severity="success"
+            size="small"
+            ariaLabel="Marquer comme préparée"
+            [loading]="isCompleting(order.id)"
+            (onClick)="complete.emit(order.id)"
+          />
+          }
+          @if (showDeliverAction() && order.orderStatus === OrderStatus.TODELIVER) {
           <p-button
             [label]="order.balanceAmount > 0 ? 'Livrer et encaisser' : 'Livrer'"
             severity="success"
@@ -75,6 +85,7 @@
             (onClick)="deliver.emit(order)"
           />
           }
+          @if (showEditAction()) {
           <p-button
             icon="pi pi-pencil"
             severity="warn"
@@ -82,6 +93,7 @@
             ariaLabel="Modifier"
             (onClick)="editOrder.emit(order)"
           />
+          }
         </div>
       </td>
     </tr>

@@ -191,13 +191,11 @@
 <order-agenda-view
   [orders]="orders()"
   [loading]="isLoading"
-  (viewDetail)="openOrderDetail($event)"
-/>
-<p-paginator
-  [first]="first"
-  [rows]="rows"
   [totalRecords]="totalRecords"
-  (onPageChange)="onPageChange({ first: $event.first ?? 0, rows: $event.rows ?? rows })"
+  [first]="first"
+  [pageSize]="rows"
+  (pageChange)="onPageChange($event)"
+  (viewDetail)="openOrderDetail($event)"
 />
 }
 }

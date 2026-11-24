@@ -4,7 +4,6 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { Subject, debounceTime, finalize } from 'rxjs';
-import { PaginatorModule } from 'primeng/paginator';
 import { Popover, PopoverModule } from 'primeng/popover';
 import {
   CreateOrderDto,
@@ -54,7 +53,6 @@ type ListOrderDisplayMode = OrderDisplayMode | typeof CALENDAR_VIEW;
   imports: [
     CommonModule,
     FormsModule,
-    PaginatorModule,
     PopoverModule,
     Button,
     BadgeModule,

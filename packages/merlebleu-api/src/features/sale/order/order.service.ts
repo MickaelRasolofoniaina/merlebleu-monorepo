@@ -9,7 +9,6 @@ import {
   OrderItemRowDto,
   OrderStatus,
   ResultPaged,
-  Shape,
   UserRole,
 } from '@merlebleu/shared';
 import { getPaginationParams } from '@shared/pagination/pagination.utils';
@@ -229,17 +228,8 @@ export class OrderService {
   async listOrderItemsTodayToPrepare(
     page = 1,
     limit = 20,
-    filters?: {
-      customerName?: string;
-      type?: string;
-      shape?: Shape;
-      text?: string;
-      decoration?: string;
-      size?: number;
-    },
   ): Promise<ResultPaged<OrderItemRowDto>> {
     return this.listOrderItems(page, limit, {
-      ...filters,
       deliveryDateFrom: this.getToday(),
       deliveryDateTo: this.getDayAfterTomorrow(),
       statuses: [OrderStatus.TODO],
@@ -249,42 +239,51 @@ export class OrderService {
   async listOrderItemsTodayToDeliver(
     page = 1,
     limit = 20,
-    filters?: {
-      customerName?: string;
-      type?: string;
-      shape?: Shape;
-      text?: string;
-      decoration?: string;
-      size?: number;
-      status?: OrderStatus;
-    },
   ): Promise<ResultPaged<OrderItemRowDto>> {
-    const { status, ...rest } = filters ?? {};
-
     return this.listOrderItems(page, limit, {
-      ...rest,
       deliveryDate: this.getToday(),
-      statuses:
-        status && TODAY_TO_DELIVER_STATUSES.includes(status)
-          ? [status]
-          : TODAY_TO_DELIVER_STATUSES,
+      statuses: TODAY_TO_DELIVER_STATUSES,
     });
   }
 
-  async listOrderItems(
+  async listOrderItemsToDeliver(
     page = 1,
     limit = 20,
-    filters?: {
-      customerName?: string;
+  ): Promise<ResultPaged<OrderItemRowDto>> {
+    return this.listOrderItems(page, limit, {
+      deliveryDateFrom: this.getToday(),
+      statuses: [OrderStatus.TODELIVER],
+    });
+  }
+
+  async listOrderItemsLate(
+    page = 1,
+    limit = 20,
+  ): Promise<ResultPaged<OrderItemRowDto>> {
+    return this.listOrderItems(page, limit, {
+      deliveryDateTo: this.getToday(),
+      statuses: LATE_ORDER_STATUSES,
+    });
+  }
+
+  async listOrderItemsToPrepare(
+    page = 1,
+    limit = 20,
+  ): Promise<ResultPaged<OrderItemRowDto>> {
+    return this.listOrderItems(page, limit, {
+      deliveryDateFrom: this.getDayAfterTomorrow(),
+      statuses: [OrderStatus.TODO],
+    });
+  }
+
+  private async listOrderItems(
+    page: number,
+    limit: number,
+    filters: {
       deliveryDate?: string;
       deliveryDateFrom?: string;
       deliveryDateTo?: string;
-      type?: string;
-      shape?: Shape;
-      text?: string;
-      decoration?: string;
-      size?: number;
-      statuses?: OrderStatus[];
+      statuses: OrderStatus[];
     },
   ): Promise<ResultPaged<OrderItemRowDto>> {
     const pagination = getPaginationParams({ page, limit });
@@ -296,61 +295,27 @@ export class OrderService {
       .addOrderBy('orders.deliveryStartTime', 'ASC')
       .addOrderBy('orders.id', 'ASC');
 
-    if (filters?.customerName) {
-      query.andWhere('orders.customerName ILIKE :customerName', {
-        customerName: `%${filters.customerName}%`,
-      });
-    }
-
-    if (filters?.deliveryDate) {
+    if (filters.deliveryDate) {
       query.andWhere('orders.deliveryDate = :deliveryDate', {
         deliveryDate: filters.deliveryDate,
       });
     }
 
-    if (filters?.deliveryDateFrom) {
+    if (filters.deliveryDateFrom) {
       query.andWhere('orders.deliveryDate >= :deliveryDateFrom', {
         deliveryDateFrom: filters.deliveryDateFrom,
       });
     }
 
-    if (filters?.deliveryDateTo) {
+    if (filters.deliveryDateTo) {
       query.andWhere('orders.deliveryDate < :deliveryDateTo', {
         deliveryDateTo: filters.deliveryDateTo,
       });
     }
 
-    if (filters?.type) {
-      query.andWhere('orderItems.type ILIKE :type', {
-        type: `%${filters.type}%`,
-      });
-    }
-
-    if (filters?.shape) {
-      query.andWhere('orderItems.shape = :shape', { shape: filters.shape });
-    }
-
-    if (filters?.text) {
-      query.andWhere('orderItems.text ILIKE :text', {
-        text: `%${filters.text}%`,
-      });
-    }
-
-    if (filters?.decoration) {
-      query.andWhere('orderItems.decoration ILIKE :decoration', {
-        decoration: `%${filters.decoration}%`,
-      });
-    }
-
-    if (filters?.size !== undefined) {
-      query.andWhere('orderItems.size = :size', { size: filters.size });
-    }
-
-    if (filters?.statuses?.length) {
-      query.andWhere('orders.orderStatus IN (:...statuses)', {
-        statuses: filters.statuses,
-      });
-    }
+    query.andWhere('orders.orderStatus IN (:...statuses)', {
+      statuses: filters.statuses,
+    });
 
     query.take(pagination.limit).skip(pagination.skip);
 
@@ -362,67 +327,6 @@ export class OrderService {
       page: pagination.page,
       limit: pagination.limit,
     };
-  }
-
-  async listOrderItemsToDeliver(
-    page = 1,
-    limit = 20,
-    filters?: {
-      customerName?: string;
-      type?: string;
-      shape?: Shape;
-      text?: string;
-      decoration?: string;
-      size?: number;
-    },
-  ): Promise<ResultPaged<OrderItemRowDto>> {
-    const today = this.getToday();
-
-    return this.listOrderItems(page, limit, {
-      ...filters,
-      deliveryDateFrom: today,
-      statuses: [OrderStatus.TODELIVER],
-    });
-  }
-
-  async listOrderItemsLate(
-    page = 1,
-    limit = 20,
-    filters?: {
-      customerName?: string;
-      type?: string;
-      shape?: Shape;
-      text?: string;
-      decoration?: string;
-      size?: number;
-    },
-  ): Promise<ResultPaged<OrderItemRowDto>> {
-    const today = this.getToday();
-
-    return this.listOrderItems(page, limit, {
-      ...filters,
-      deliveryDateTo: today,
-      statuses: LATE_ORDER_STATUSES,
-    });
-  }
-
-  async listOrderItemsToPrepare(
-    page = 1,
-    limit = 20,
-    filters?: {
-      customerName?: string;
-      type?: string;
-      shape?: Shape;
-      text?: string;
-      decoration?: string;
-      size?: number;
-    },
-  ): Promise<ResultPaged<OrderItemRowDto>> {
-    return this.listOrderItems(page, limit, {
-      ...filters,
-      deliveryDateFrom: this.getDayAfterTomorrow(),
-      statuses: [OrderStatus.TODO],
-    });
   }
 
   async getOrderById(id: string): Promise<OrderEntity> {

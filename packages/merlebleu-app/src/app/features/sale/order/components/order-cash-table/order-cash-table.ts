@@ -18,11 +18,16 @@ export class OrderCashTable {
   totalRecords = input(0);
   first = input(0);
   pageSize = input(DEFAULT_PAGE_SIZE);
+  showEditAction = input(true);
+  showDeliverAction = input(true);
+  showCompleteAction = input(false);
+  completingOrderIds = input<Set<string>>(new Set());
 
   pageChange = output<{ first: number; rows: number }>();
   viewDetail = output<Order>();
   editOrder = output<Order>();
   deliver = output<Order>();
+  complete = output<string>();
 
   protected readonly OrderStatus = OrderStatus;
 
@@ -31,6 +36,17 @@ export class OrderCashTable {
       .filter((order) => order.orderStatus !== OrderStatus.CANCELLED)
       .reduce((sum, order) => sum + order.balanceAmount, 0),
   );
+
+  protected canComplete(order: Order): boolean {
+    return (
+      this.showCompleteAction() &&
+      (order.orderStatus === OrderStatus.TODO || order.orderStatus === OrderStatus.INPROGRESS)
+    );
+  }
+
+  protected isCompleting(orderId: string): boolean {
+    return this.completingOrderIds().has(orderId);
+  }
 
   protected isLate(order: Order): boolean {
     return isOrderLate(order);

@@ -1,7 +1,9 @@
 import { CommonModule } from '@angular/common';
 import { Component, computed, input, output } from '@angular/core';
 import { BadgeModule } from 'primeng/badge';
-import { Order, OrderStatus } from '@merlebleu/shared';
+import { Button } from 'primeng/button';
+import { PaginatorModule } from 'primeng/paginator';
+import { DEFAULT_PAGE_SIZE, Order, OrderStatus } from '@merlebleu/shared';
 import {
   getDeliveryPriorityColor,
   getDeliveryPriorityLabel,
@@ -23,15 +25,24 @@ const LATE_GROUP_KEY = 'late';
 
 @Component({
   selector: 'order-agenda-view',
-  imports: [CommonModule, BadgeModule],
+  imports: [CommonModule, BadgeModule, Button, PaginatorModule],
   templateUrl: './order-agenda-view.html',
   styleUrl: './order-agenda-view.scss',
 })
 export class OrderAgendaView {
   orders = input<Order[]>([]);
   loading = input(false);
+  totalRecords = input(0);
+  first = input(0);
+  pageSize = input(DEFAULT_PAGE_SIZE);
+  showDeliverAction = input(false);
+  showCompleteAction = input(false);
+  completingOrderIds = input<Set<string>>(new Set());
 
+  pageChange = output<{ first: number; rows: number }>();
   viewDetail = output<Order>();
+  deliver = output<Order>();
+  complete = output<string>();
 
   protected groups = computed<AgendaGroup[]>(() => {
     const lateOrders = this.orders().filter((order) => isOrderLate(order));
@@ -69,6 +80,35 @@ export class OrderAgendaView {
     const start = order.deliveryStartTime.slice(0, 5);
     const end = order.deliveryEndTime.slice(0, 5);
     return start === end ? start : `${start}-${end}`;
+  }
+
+  protected canComplete(order: Order): boolean {
+    return (
+      this.showCompleteAction() &&
+      (order.orderStatus === OrderStatus.TODO || order.orderStatus === OrderStatus.INPROGRESS)
+    );
+  }
+
+  protected canDeliver(order: Order): boolean {
+    return this.showDeliverAction() && order.orderStatus === OrderStatus.TODELIVER;
+  }
+
+  protected isCompleting(orderId: string): boolean {
+    return this.completingOrderIds().has(orderId);
+  }
+
+  protected onComplete(event: Event, orderId: string): void {
+    event.stopPropagation();
+    this.complete.emit(orderId);
+  }
+
+  protected onDeliver(event: Event, order: Order): void {
+    event.stopPropagation();
+    this.deliver.emit(order);
+  }
+
+  protected onPage(event: { first?: number; rows?: number }): void {
+    this.pageChange.emit({ first: event.first ?? 0, rows: event.rows ?? this.pageSize() });
   }
 
   protected getPriorityLabel(order: Order): string {

@@ -1,8 +1,7 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
-import { DatePipe, DecimalPipe } from '@angular/common';
+import { DecimalPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { finalize } from 'rxjs';
-import { TableModule } from 'primeng/table';
 import { InputTextModule } from 'primeng/inputtext';
 import { SelectModule } from 'primeng/select';
 import { SelectButtonModule } from 'primeng/selectbutton';
@@ -14,23 +13,22 @@ import {
   DEFAULT_PAGE_SIZE,
   Order,
   OrderDisplayMode,
-  OrderItemRowDto,
   OrderStatus,
   PaymentMethod,
   Shop,
 } from '@merlebleu/shared';
-import { OrderItemRowFilters, OrderService } from '../../order.service';
+import { OrderService } from '../../order.service';
 import { ShopService } from '@features/shop/shop-list/shop.service';
 import { PaymentService } from '@features/sale/payment/payment.service';
 import { Button } from 'primeng/button';
-import { BadgeModule } from 'primeng/badge';
 import { formatDate } from '@shared/utils/date';
 import { getPageFromFirstRows } from '@shared/utils/pagination';
-import { ORDER_STATUSES, getOrderStatusLabel, getOrderStatusColor } from '@shared/utils/order';
+import { ORDER_STATUSES } from '@shared/utils/order';
 import { getUserShopId } from '@shared/utils/user';
 import { UserPreferencesService } from '@shared/services/user-preferences.service';
 import { OrderDetailDialog } from '../../components/order-detail-dialog/order-detail-dialog';
-import { PastryOrderTable } from '../../components/pastry-order-table/pastry-order-table';
+import { OrderCashTable } from '../../components/order-cash-table/order-cash-table';
+import { OrderAgendaView } from '../../components/order-agenda-view/order-agenda-view';
 import { OrderCountCard } from '@shared/components/order-count-card/order-count-card';
 
 const LATE_ORDER_STATUSES = [OrderStatus.TODO, OrderStatus.INPROGRESS, OrderStatus.TODELIVER];
@@ -39,19 +37,17 @@ const LATE_ORDER_STATUSES = [OrderStatus.TODO, OrderStatus.INPROGRESS, OrderStat
   selector: 'late-order',
   imports: [
     FormsModule,
-    TableModule,
     InputTextModule,
     SelectModule,
     SelectButtonModule,
     DatePickerModule,
     DialogModule,
     Button,
-    BadgeModule,
     ConfirmDialog,
-    DatePipe,
     DecimalPipe,
     OrderDetailDialog,
-    PastryOrderTable,
+    OrderCashTable,
+    OrderAgendaView,
     OrderCountCard,
   ],
   templateUrl: './late-order.html',
@@ -67,16 +63,13 @@ export class LateOrder implements OnInit {
   private readonly messageService = inject(MessageService);
 
   protected readonly OrderDisplayMode = OrderDisplayMode;
-  protected readonly OrderStatus = OrderStatus;
   protected displayMode = signal<OrderDisplayMode>(OrderDisplayMode.STANDARD);
   protected displayModeOptions = [
-    { label: 'Standard', icon: 'pi pi-list', value: OrderDisplayMode.STANDARD },
-    { label: 'Détaillé', icon: 'pi pi-table', value: OrderDisplayMode.PASTRY },
+    { label: 'Liste', icon: 'pi pi-list', value: OrderDisplayMode.STANDARD },
+    { label: 'Carte', icon: 'pi pi-table', value: OrderDisplayMode.PASTRY },
   ];
 
   protected orders = signal<Order[]>([]);
-  protected orderItemRows = signal<OrderItemRowDto[]>([]);
-  protected pastryFilters: OrderItemRowFilters = {};
   protected shops = signal<Shop[]>([]);
   protected isLoading = false;
   protected totalRecords = 0;
@@ -148,11 +141,6 @@ export class LateOrder implements OnInit {
   protected loadOrders(page = 1, limit = this.rows): void {
     this.loadItemsCount();
 
-    if (this.displayMode() === OrderDisplayMode.PASTRY) {
-      this.loadOrderItemRows(page, limit);
-      return;
-    }
-
     this.isLoading = true;
 
     this.orderService
@@ -175,36 +163,6 @@ export class LateOrder implements OnInit {
           this.totalRecords = response.total;
         },
       });
-  }
-
-  private loadOrderItemRows(page: number, limit: number): void {
-    this.isLoading = true;
-
-    this.orderService
-      .listOrderItemsLate({ page, limit }, this.pastryFilters)
-      .pipe(
-        finalize(() => {
-          this.isLoading = false;
-        }),
-      )
-      .subscribe({
-        next: (response) => {
-          this.orderItemRows.set(response.data);
-          this.totalRecords = response.total;
-        },
-      });
-  }
-
-  protected onPastryFilter(filters: OrderItemRowFilters): void {
-    this.pastryFilters = filters;
-    this.first = 0;
-    this.loadOrders(1, this.rows);
-  }
-
-  protected onPastryReset(): void {
-    this.pastryFilters = {};
-    this.first = 0;
-    this.loadOrders(1, this.rows);
   }
 
   protected onPageChange(event: { first: number; rows: number }): void {
@@ -233,22 +191,6 @@ export class LateOrder implements OnInit {
   protected openOrderDetail(order: Order): void {
     this.selectedOrder.set(order);
     this.displayOrderDetailDialog = true;
-  }
-
-  protected onPastryViewDetail(orderId: string): void {
-    this.orderService.getOrderById(orderId).subscribe((order) => {
-      this.openOrderDetail(order);
-    });
-  }
-
-  protected onPastryDeliver(orderId: string): void {
-    this.orderService.getOrderById(orderId).subscribe((order) => {
-      this.openDeliverDialog(order);
-    });
-  }
-
-  protected isCompleting(orderId: string): boolean {
-    return this.completingIds().has(orderId);
   }
 
   protected onComplete(orderId: string): void {
@@ -286,16 +228,6 @@ export class LateOrder implements OnInit {
           });
       },
     });
-  }
-
-  protected getStatus(orderStatus: OrderStatus | undefined): string {
-    return getOrderStatusLabel(orderStatus);
-  }
-
-  protected getStatusColor(
-    orderStatus: OrderStatus | undefined,
-  ): 'info' | 'success' | 'warn' | 'danger' | 'contrast' {
-    return getOrderStatusColor(orderStatus);
   }
 
   protected openDeliverDialog(order: Order): void {

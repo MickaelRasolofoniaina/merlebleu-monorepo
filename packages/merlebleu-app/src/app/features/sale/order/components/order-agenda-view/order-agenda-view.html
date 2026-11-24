@@ -100,6 +100,30 @@
           <span class="text-slate-500">Remarque commande :</span> {{ order.remarks }}
         </div>
         }
+
+        @if (canComplete(order) || canDeliver(order)) {
+        <div class="mt-auto flex justify-end gap-2">
+          @if (canComplete(order)) {
+          <p-button
+            icon="pi pi-check"
+            label="Terminée"
+            severity="success"
+            size="small"
+            [loading]="isCompleting(order.id)"
+            (onClick)="onComplete($event, order.id)"
+          />
+          }
+          @if (canDeliver(order)) {
+          <p-button
+            [label]="order.balanceAmount > 0 ? 'Livrer et encaisser' : 'Livrer'"
+            icon="pi pi-truck"
+            severity="success"
+            size="small"
+            (onClick)="onDeliver($event, order)"
+          />
+          }
+        </div>
+        }
       </article>
       }
     </div>
@@ -108,3 +132,10 @@
   <div class="py-10 text-center text-slate-500">Aucune commande à afficher</div>
   } }
 </div>
+
+<p-paginator
+  [first]="first()"
+  [rows]="pageSize()"
+  [totalRecords]="totalRecords()"
+  (onPageChange)="onPage($event)"
+/>
