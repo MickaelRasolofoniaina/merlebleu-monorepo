@@ -123,11 +123,26 @@
           style="height: fit-content"
         ></p-badge>
       </td>
-      <td>{{ row.type }}</td>
-      <td>{{ row.shape }}</td>
+      <td>
+        <span
+          class="rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-0.5 text-xs font-semibold text-emerald-700 dark:border-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-300"
+          >{{ row.type }}</span
+        >
+      </td>
+      <td>
+        <span
+          class="rounded-full border border-blue-200 bg-blue-50 px-2.5 py-0.5 text-xs font-semibold text-blue-700 dark:border-blue-800 dark:bg-blue-950/50 dark:text-blue-300"
+          >{{ row.shape }}</span
+        >
+      </td>
       <td>{{ row.text || '-' }}</td>
       <td>{{ row.decoration || '-' }} <br>{{ row.remarks || '-' }}</td>
-      <td class="text-right!">{{ row.size }} personnes</td>
+      <td class="text-right!">
+        <span
+          class="rounded-full border border-violet-200 bg-violet-50 px-2.5 py-0.5 text-xs font-semibold text-violet-700 dark:border-violet-800 dark:bg-violet-950/50 dark:text-violet-300"
+          >{{ row.size }} personnes</span
+        >
+      </td>
       <td>
         <p-badge
           [value]="getStatus(row.orderStatus)"
