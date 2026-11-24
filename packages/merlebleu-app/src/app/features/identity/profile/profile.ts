@@ -42,8 +42,8 @@ export class Profile implements OnInit {
   protected displayModes = OrderDisplayMode;
 
   protected displayModeOptions = [
-    { label: 'Standard', value: OrderDisplayMode.STANDARD },
-    { label: 'Pâtissier', value: OrderDisplayMode.PASTRY },
+    { label: 'Liste', value: OrderDisplayMode.STANDARD },
+    { label: 'Carte', value: OrderDisplayMode.PASTRY },
   ];
 
   ngOnInit(): void {

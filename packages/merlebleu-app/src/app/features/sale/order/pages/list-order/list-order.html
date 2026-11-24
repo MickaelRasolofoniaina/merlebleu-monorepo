@@ -38,7 +38,7 @@
   <p-button label="Nouvelle commande" icon="pi pi-plus" severity="primary" (onClick)="openAddOrder()" />
 </div>
 
-@if (displayMode() === OrderDisplayMode.PASTRY) {
+@if (displayMode() === OrderDisplayMode.STANDARD) {
 <pastry-order-table
   [rows]="orderItemRows()"
   [loading]="isLoading"
@@ -112,82 +112,17 @@
   />
 </div>
 
-<p-table
-  [value]="orders()"
+<order-agenda-view
+  [orders]="orders()"
   [loading]="isLoading"
-  [tableStyle]="{ 'min-width': '60rem' }"
-  [stripedRows]="true"
-  [paginator]="true"
-  [rows]="rows"
+  (viewDetail)="openOrderDetail($event)"
+/>
+<p-paginator
   [first]="first"
+  [rows]="rows"
   [totalRecords]="totalRecords"
-  [lazy]="true"
-  (onPage)="onPageChange($event)"
->
-  <ng-template #header>
-    <tr>
-      <th>Client</th>
-      <th>Date</th>
-      <th>Date de livraison</th>
-      <th>Boutique</th>
-      <th class="text-right!">Reste</th>
-      <th class="text-right!">Statut</th>
-      <th class="text-center!">Actions</th>
-    </tr>
-  </ng-template>
-  <ng-template #body let-order>
-    <tr>
-      <td>
-        <span
-          class="cursor-pointer text-[#1b4fb6] dark:text-blue-400 hover:underline"
-          (click)="openOrderDetail(order)"
-          >{{ order.customerName }}</span
-        >
-      </td>
-      <td>{{ order.orderDate | date: 'dd/MM/yyyy' }}</td>
-      <td [class]="isOrderLate(order) ? 'text-red-600 dark:text-red-400 font-semibold' : ''">
-        @if (order.deliveryStartTime === order.deliveryEndTime) {
-        {{ order.deliveryDate | date: 'dd/MM/yyyy' }} à {{ order.deliveryStartTime.slice(0, 5) }}
-        } @else {
-        {{ order.deliveryDate | date: 'dd/MM/yyyy' }} de {{ order.deliveryStartTime.slice(0, 5) }} à
-        {{ order.deliveryEndTime.slice(0, 5) }}
-        }
-      </td>
-      <td>{{ order.shop.address }}</td>
-      <td class="text-right!">{{ order.balanceAmount | number: '1.0-2' }}</td>
-      <td class="text-right!">
-        <p-badge
-          [value]="getStatus(order.orderStatus)"
-          [severity]="getStatusColor(order.orderStatus)"
-          style="height: fit-content"
-        ></p-badge>
-      </td>
-      <td class="text-center!">
-        <div class="flex flex-wrap items-center justify-center gap-2">
-          <p-button
-            icon="pi pi-pencil"
-            severity="warn"
-            (onClick)="openEditOrder(order)"
-            size="small"
-          />
-          @if (order.orderStatus === OrderStatus.TODELIVER) {
-          <p-button
-            icon="pi pi-truck"
-            severity="success"
-            (onClick)="openDeliverDialog(order)"
-            size="small"
-          />
-          }
-        </div>
-      </td>
-    </tr>
-  </ng-template>
-  <ng-template #emptymessage>
-    <tr>
-      <td colspan="9" class="text-center-important py-6">Aucune commande à afficher</td>
-    </tr>
-  </ng-template>
-</p-table>
+  (onPageChange)="onPageChange({ first: $event.first ?? 0, rows: $event.rows ?? rows })"
+/>
 }
 
 <order-detail-dialog [order]="selectedOrder()" [(visible)]="displayOrderDetailDialog" />

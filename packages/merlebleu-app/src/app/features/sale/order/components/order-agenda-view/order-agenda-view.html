@@ -1,0 +1,110 @@
+<div class="relative flex flex-col gap-5">
+  @if (loading()) {
+  <div class="absolute inset-0 z-10 flex items-center justify-center bg-white/60 dark:bg-slate-900/60">
+    <i class="pi pi-spin pi-spinner text-2xl"></i>
+  </div>
+  }
+
+  @for (group of groups(); track group.key) {
+  <section class="flex flex-col gap-3">
+    <header
+      class="flex flex-wrap items-center justify-between gap-2 rounded-lg bg-slate-800 px-4 py-2.5 text-white"
+    >
+      <span class="flex items-center gap-2 font-bold">
+        @if (group.isLate) {
+        <i class="pi pi-exclamation-triangle text-red-400"></i>
+        }
+        {{ group.title }}
+        <span class="text-sm font-medium text-slate-300"> · {{ group.subtitle }}</span>
+      </span>
+      <span class="text-sm text-slate-300">
+        {{ group.orders.length }} commande{{ group.orders.length > 1 ? 's' : '' }} ·
+        {{ group.itemCount }} gâteau{{ group.itemCount > 1 ? 'x' : '' }} à préparer
+      </span>
+    </header>
+
+    <div class="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
+      @for (order of group.orders; track order.id) {
+      <article
+        class="flex cursor-pointer flex-col gap-3 rounded-xl border bg-white p-4 transition-shadow hover:shadow-md dark:bg-slate-900"
+        [class]="
+          group.isLate
+            ? 'border-red-300 dark:border-red-800'
+            : 'border-slate-200 dark:border-slate-700'
+        "
+        (click)="viewDetail.emit(order)"
+      >
+        <div class="flex items-start justify-between gap-2">
+          <div>
+            <div class="text-2xl font-bold tabular-nums leading-none">
+              {{ getTime(order) }}
+            </div>
+            <div class="mt-1 text-xs text-slate-500">
+              {{ order.deliveryDate | date: 'dd/MM/yyyy' }}
+            </div>
+          </div>
+          <div class="flex flex-col items-end gap-1">
+            <p-badge
+              [value]="getPriorityLabel(order)"
+              [severity]="getPriorityColor(order)"
+              style="height: fit-content"
+            />
+            <p-badge
+              [value]="getStatus(order.orderStatus)"
+              [severity]="getStatusColor(order.orderStatus)"
+              style="height: fit-content"
+            />
+          </div>
+        </div>
+
+        <div class="font-semibold text-[#1b4fb6] dark:text-blue-400">{{ order.customerName }}</div>
+
+        <div class="flex flex-col gap-2">
+          @for (item of order.orderItems; track $index) {
+          <div
+            class="flex flex-col gap-1.5 rounded-lg bg-slate-50 p-3 dark:bg-slate-800/60"
+          >
+            <div class="flex flex-wrap items-center gap-1.5">
+              <span class="text-base font-bold">{{ item.type }}</span>
+              <span
+                class="rounded-full border border-violet-200 bg-violet-50 px-2.5 py-0.5 text-xs font-semibold text-violet-700 dark:border-violet-800 dark:bg-violet-950/50 dark:text-violet-300"
+                >{{ item.size }} personnes</span
+              >
+              <span
+                class="rounded-full border border-blue-200 bg-blue-50 px-2.5 py-0.5 text-xs font-semibold text-blue-700 dark:border-blue-800 dark:bg-blue-950/50 dark:text-blue-300"
+                >{{ item.shape }}</span
+              >
+            </div>
+            @if (item.text) {
+            <div class="text-sm">
+              <span class="text-slate-500">Texte :</span>
+              <span class="font-semibold"> « {{ item.text }} »</span>
+            </div>
+            }
+            @if (item.decoration) {
+            <div class="text-sm">
+              <span class="text-slate-500">Décoration :</span> {{ item.decoration }}
+            </div>
+            }
+            @if (item.remarks) {
+            <div class="text-sm font-medium text-amber-700 dark:text-amber-400">
+              <i class="pi pi-exclamation-circle mr-1"></i>{{ item.remarks }}
+            </div>
+            }
+          </div>
+          }
+        </div>
+
+        @if (order.remarks) {
+        <div class="text-sm text-slate-600 dark:text-slate-300">
+          <span class="text-slate-500">Remarque commande :</span> {{ order.remarks }}
+        </div>
+        }
+      </article>
+      }
+    </div>
+  </section>
+  } @empty { @if (!loading()) {
+  <div class="py-10 text-center text-slate-500">Aucune commande à afficher</div>
+  } }
+</div>

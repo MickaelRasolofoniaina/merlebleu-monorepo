@@ -4,7 +4,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { finalize } from 'rxjs';
-import { TableModule } from 'primeng/table';
+import { PaginatorModule } from 'primeng/paginator';
 import {
   CreateOrderDto,
   DEFAULT_PAGE_SIZE,
@@ -39,6 +39,7 @@ import { UserPreferencesService } from '@shared/services/user-preferences.servic
 import { OrderDetailDialog } from '../../components/order-detail-dialog/order-detail-dialog';
 import { OrderFormDialog } from '../../components/order-form-dialog/order-form-dialog';
 import { PastryOrderTable } from '../../components/pastry-order-table/pastry-order-table';
+import { OrderAgendaView } from '../../components/order-agenda-view/order-agenda-view';
 import { OrderCalendarView } from '../../components/order-calendar-view/order-calendar-view';
 import { OrderCountCard } from '@shared/components/order-count-card/order-count-card';
 
@@ -50,7 +51,7 @@ type ListOrderDisplayMode = OrderDisplayMode | typeof CALENDAR_VIEW;
   imports: [
     CommonModule,
     FormsModule,
-    TableModule,
+    PaginatorModule,
     Button,
     BadgeModule,
     InputTextModule,
@@ -62,6 +63,7 @@ type ListOrderDisplayMode = OrderDisplayMode | typeof CALENDAR_VIEW;
     OrderFormDialog,
     PastryOrderTable,
     OrderCalendarView,
+    OrderAgendaView,
     OrderCountCard,
   ],
   templateUrl: './list-order.html',
@@ -80,8 +82,8 @@ export class ListOrder implements OnInit {
   protected readonly CALENDAR_VIEW = CALENDAR_VIEW;
   protected displayMode = signal<ListOrderDisplayMode>(OrderDisplayMode.STANDARD);
   protected displayModeOptions = [
-    { label: 'Standard', icon: 'pi pi-list', value: OrderDisplayMode.STANDARD },
-    { label: 'Détaillé', icon: 'pi pi-table', value: OrderDisplayMode.PASTRY },
+    { label: 'Liste', icon: 'pi pi-list', value: OrderDisplayMode.STANDARD },
+    { label: 'Carte', icon: 'pi pi-table', value: OrderDisplayMode.PASTRY },
     { label: 'Calendrier', icon: 'pi pi-calendar', value: CALENDAR_VIEW },
   ];
 
@@ -186,7 +188,7 @@ export class ListOrder implements OnInit {
       return;
     }
 
-    if (this.displayMode() === OrderDisplayMode.PASTRY) {
+    if (this.displayMode() === OrderDisplayMode.STANDARD) {
       this.loadOrderItemRows(page, limit);
       return;
     }
