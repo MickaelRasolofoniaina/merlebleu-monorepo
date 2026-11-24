@@ -1,11 +1,9 @@
-import { Component, DestroyRef, OnDestroy, OnInit, inject, signal } from '@angular/core';
+import { Component, DestroyRef, OnDestroy, OnInit, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { NavigationEnd, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { filter, interval } from 'rxjs';
-import { MenuItem } from 'primeng/api';
-import { MenuModule } from 'primeng/menu';
-import { RippleModule } from 'primeng/ripple';
+import { TooltipModule } from 'primeng/tooltip';
 import { AvatarModule } from 'primeng/avatar';
 import { Button } from 'primeng/button';
 import { Popover } from 'primeng/popover';
@@ -18,6 +16,23 @@ import { NotificationService } from './shared/services/notification.service';
 import { MenuCounterService } from './shared/services/menu-counter.service';
 import { NotificationPanelComponent } from './shared/components/notification-panel/notification-panel';
 
+interface MenuEntry {
+  id?: string;
+  label: string;
+  icon?: string;
+  routerLink?: string[];
+  heading?: boolean;
+}
+
+interface MenuSection {
+  id: string;
+  label: string;
+  shortLabel: string;
+  icon: string;
+  prefixes: string[];
+  items: MenuEntry[];
+}
+
 @Component({
   selector: 'app-layout',
   imports: [
@@ -26,8 +41,7 @@ import { NotificationPanelComponent } from './shared/components/notification-pan
     RouterLink,
     RouterLinkActive,
     BadgeModule,
-    MenuModule,
-    RippleModule,
+    TooltipModule,
     AvatarModule,
     Button,
     Popover,
@@ -35,7 +49,6 @@ import { NotificationPanelComponent } from './shared/components/notification-pan
     NotificationPanelComponent,
   ],
   templateUrl: './app-layout.html',
-  styleUrl: './app-layout.scss',
 })
 export class AppLayout implements OnInit, OnDestroy {
   private readonly authService = inject(AuthService);
@@ -47,62 +60,42 @@ export class AppLayout implements OnInit, OnDestroy {
   protected readonly sidebarOpen = signal(true);
   protected readonly name = signal('');
 
-  protected items: MenuItem[] = [
+  protected readonly sections: MenuSection[] = [
     {
+      id: 'dashboard',
       label: 'Tableau de bord',
+      shortLabel: 'Bord',
+      icon: 'pi pi-chart-bar',
+      prefixes: ['/dashboard'],
       items: [
-        {
-          label: "Aujourd'hui",
-          icon: 'pi pi-calendar',
-          routerLink: ['/dashboard/today'],
-        },
-        {
-          label: 'Commandes',
-          icon: 'pi pi-chart-bar',
-          routerLink: ['/dashboard/order'],
-        },
+        { label: "Aujourd'hui", icon: 'pi pi-calendar', routerLink: ['/dashboard/today'] },
+        { label: 'Commandes', icon: 'pi pi-chart-bar', routerLink: ['/dashboard/order'] },
       ],
     },
     {
+      id: 'orders',
       label: 'Commandes',
+      shortLabel: 'Cmd.',
+      icon: 'pi pi-shopping-cart',
+      prefixes: ['/sale/order', '/notification'],
       items: [
-        {
-          label: 'Toutes',
-          icon: 'pi pi-cart-minus',
-          routerLink: ['/sale/order/list'],
-        },
-        {
-          label: "Aujourd'hui",
-          icon: 'pi pi-calendar',
-          disabled: true,
-          styleClass: 'menu-parent-item',
-        },
+        { label: 'Toutes', icon: 'pi pi-cart-minus', routerLink: ['/sale/order/list'] },
+        { label: "Aujourd'hui", heading: true },
         {
           id: 'today-to-prepare',
-          label: 'A préparer',
+          label: 'À préparer',
           icon: 'pi pi-box',
           routerLink: ['/sale/order/today/to-prepare'],
-          styleClass: 'menu-sub-item',
         },
         {
           id: 'today-to-deliver',
-          label: 'A livrer',
+          label: 'À livrer',
           icon: 'pi pi-truck',
           routerLink: ['/sale/order/today/to-deliver'],
-          styleClass: 'menu-sub-item',
         },
-        {
-          label: 'A venir',
-          icon: 'pi pi-calendar-plus',
-          disabled: true,
-          styleClass: 'menu-parent-item',
-        },
-        {
-          label: 'A préparer',
-          icon: 'pi pi-box',
-          routerLink: ['/sale/order/to-prepare'],
-          styleClass: 'menu-sub-item',
-        },
+        { label: 'À venir', heading: true },
+        { label: 'À préparer', icon: 'pi pi-box', routerLink: ['/sale/order/to-prepare'] },
+        { label: 'Suivi', heading: true },
         {
           id: 'late',
           label: 'En retard',
@@ -118,71 +111,65 @@ export class AppLayout implements OnInit, OnDestroy {
       ],
     },
     {
-      label: 'Ingredients',
+      id: 'ingredients',
+      label: 'Ingrédients',
+      shortLabel: 'Ingr.',
+      icon: 'pi pi-database',
+      prefixes: ['/ingredient'],
       items: [
-        {
-          label: 'Achat',
-          icon: 'pi pi-wallet',
-          routerLink: ['/ingredient/purchase'],
-        },
-        {
-          label: 'Inventaire',
-          icon: 'pi pi-clipboard',
-          routerLink: ['/ingredient/inventory'],
-        },
-        {
-          label: 'Liste',
-          icon: 'pi pi-database',
-          routerLink: ['/ingredient/ingredient'],
-        },
-        {
-          label: 'Catégorie',
-          icon: 'pi pi-hashtag',
-          routerLink: ['/ingredient/category'],
-        },
-        {
-          label: 'Unité',
-          icon: 'pi pi-book',
-          routerLink: ['/ingredient/unit'],
-        },
+        { label: 'Achat', icon: 'pi pi-wallet', routerLink: ['/ingredient/purchase'] },
+        { label: 'Inventaire', icon: 'pi pi-clipboard', routerLink: ['/ingredient/inventory'] },
+        { label: 'Liste', icon: 'pi pi-database', routerLink: ['/ingredient/ingredient'] },
+        { label: 'Catégorie', icon: 'pi pi-hashtag', routerLink: ['/ingredient/category'] },
+        { label: 'Unité', icon: 'pi pi-book', routerLink: ['/ingredient/unit'] },
       ],
     },
     {
+      id: 'inventory',
       label: 'Inventaire',
-      items: [
-        {
-          label: 'Articles',
-          icon: 'pi pi-box',
-          routerLink: ['/inventory/item'],
-        },
-      ],
+      shortLabel: 'Stock',
+      icon: 'pi pi-box',
+      prefixes: ['/inventory'],
+      items: [{ label: 'Articles', icon: 'pi pi-box', routerLink: ['/inventory/item'] }],
     },
     {
-      label: 'Parametres',
+      id: 'settings',
+      label: 'Paramètres',
+      shortLabel: 'Param.',
+      icon: 'pi pi-cog',
+      prefixes: ['/identity', '/shop', '/sale/payment'],
       items: [
-        {
-          label: 'Utilisateurs',
-          icon: 'pi pi-user',
-          routerLink: ['/identity/user'],
-        },
-        {
-          label: 'Mon profil',
-          icon: 'pi pi-id-card',
-          routerLink: ['/identity/profile'],
-        },
-        {
-          label: 'Boutique',
-          icon: 'pi pi-shop',
-          routerLink: ['/shop'],
-        },
-        {
-          label: 'Methode de paiement',
-          icon: 'pi pi-credit-card',
-          routerLink: ['/sale/payment'],
-        },
+        { label: 'Utilisateurs', icon: 'pi pi-user', routerLink: ['/identity/user'] },
+        { label: 'Mon profil', icon: 'pi pi-id-card', routerLink: ['/identity/profile'] },
+        { label: 'Boutique', icon: 'pi pi-shop', routerLink: ['/shop'] },
+        { label: 'Méthode de paiement', icon: 'pi pi-credit-card', routerLink: ['/sale/payment'] },
       ],
     },
   ];
+
+  protected readonly selectedSectionId = signal(this.sections[1].id);
+  protected readonly selectedSection = computed(
+    () =>
+      this.sections.find((section) => section.id === this.selectedSectionId()) ?? this.sections[0],
+  );
+
+  protected selectSection(id: string): void {
+    this.selectedSectionId.set(id);
+  }
+
+  protected sectionHasBadge(section: MenuSection): boolean {
+    return section.items.some((item) => this.getBadge(item.id) !== null);
+  }
+
+  private syncSectionWithUrl(url: string): void {
+    const path = url.split(/[?#]/)[0];
+    const match = this.sections.find((section) =>
+      section.prefixes.some((prefix) => path === prefix || path.startsWith(`${prefix}/`)),
+    );
+    if (match) {
+      this.selectedSectionId.set(match.id);
+    }
+  }
 
   protected getBadge(
     id: string | undefined,
@@ -206,6 +193,8 @@ export class AppLayout implements OnInit, OnDestroy {
     this.notificationService.loadRecent();
     this.notificationService.refreshUnreadCount();
 
+    this.syncSectionWithUrl(this.router.url);
+
     // counters change when orders are updated on any page, so refresh on each navigation
     this.menuCounterService.refresh();
     this.router.events
@@ -213,7 +202,10 @@ export class AppLayout implements OnInit, OnDestroy {
         filter((event) => event instanceof NavigationEnd),
         takeUntilDestroyed(this.destroyRef),
       )
-      .subscribe(() => this.menuCounterService.refresh());
+      .subscribe((event) => {
+        this.syncSectionWithUrl((event as NavigationEnd).urlAfterRedirects);
+        this.menuCounterService.refresh();
+      });
     interval(60_000)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(() => this.menuCounterService.refresh());
