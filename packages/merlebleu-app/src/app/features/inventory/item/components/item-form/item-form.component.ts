@@ -28,7 +28,6 @@ export class ItemFormComponent {
     label: '',
     unitPrice: 0,
     type: ItemType.PASTRY,
-    maxRetentionDays: 0,
   };
 
   itemTypes = Object.values(ItemType);
@@ -54,7 +53,7 @@ export class ItemFormComponent {
     this.resetForm();
   }
 
-  getFieldError(field: 'label' | 'unitPrice' | 'type' | 'maxRetentionDays'): string {
+  getFieldError(field: 'label' | 'unitPrice' | 'type'): string {
     return this.validationError?.issues.find((issue) => issue.path[0] === field)?.message ?? '';
   }
 
@@ -68,7 +67,6 @@ export class ItemFormComponent {
       label: '',
       unitPrice: 0,
       type: ItemType.PASTRY,
-      maxRetentionDays: 0,
     };
   }
 }

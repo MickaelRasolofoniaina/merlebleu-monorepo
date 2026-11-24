@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Observable, Subject } from 'rxjs';
@@ -109,24 +109,31 @@ export class NotificationService {
     return totalForRole - readCountForRole;
   }
 
-  async markAsRead(notificationId: string, userId: string): Promise<void> {
-    const existing = await this.notificationReadRepository.findOne({
-      where: {
-        notification: { id: notificationId },
-        user: { id: userId },
-      },
+  async markAsRead(
+    notificationId: string,
+    userId: string,
+    role: UserRole,
+  ): Promise<void> {
+    const notification = await this.notificationRepository.findOneBy({
+      id: notificationId,
     });
 
-    if (existing) {
-      return;
+    if (!notification || !notification.targetRoles.includes(role)) {
+      throw new NotFoundException(
+        `Notification with id ${notificationId} not found`,
+      );
     }
 
-    await this.notificationReadRepository.save(
-      this.notificationReadRepository.create({
+    // The unique (notification, user) constraint makes concurrent calls safe.
+    await this.notificationReadRepository
+      .createQueryBuilder()
+      .insert()
+      .values({
         notification: { id: notificationId } as NotificationEntity,
         user: { id: userId } as UserEntity,
-      }),
-    );
+      })
+      .orIgnore()
+      .execute();
   }
 
   async markAllAsRead(userId: string, role: UserRole): Promise<void> {
@@ -143,14 +150,17 @@ export class NotificationService {
       return;
     }
 
-    await this.notificationReadRepository.save(
-      unread.map((notification) =>
-        this.notificationReadRepository.create({
+    await this.notificationReadRepository
+      .createQueryBuilder()
+      .insert()
+      .values(
+        unread.map((notification) => ({
           notification: { id: notification.id } as NotificationEntity,
           user: { id: userId } as UserEntity,
-        }),
-      ),
-    );
+        })),
+      )
+      .orIgnore()
+      .execute();
   }
 
   private notificationForRoleQuery(role: UserRole) {

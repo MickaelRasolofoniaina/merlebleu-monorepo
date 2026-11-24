@@ -1,0 +1,154 @@
+<div class="flex justify-between items-center mb-4">
+  <h2 class="text-2xl font-bold">Aujourd'hui - Commandes à livrer</h2>
+</div>
+
+<div class="flex flex-wrap gap-3 mb-4">
+    <order-count-card
+    color="blue"
+    icon="pi pi-list"
+    [count]="totalCount()"
+    label="au total"
+  />
+  <order-count-card
+    color="green"
+    icon="pi pi-truck"
+    [count]="readyCount()"
+    label="prête{{ readyCount() > 1 ? 's' : '' }}"
+  />
+  <order-count-card
+    color="red"
+    icon="pi pi-clock"
+    [count]="toPrepareCount()"
+    label="encore à préparer"
+  />
+</div>
+
+<div class="flex justify-start mb-4">
+  <p-selectButton
+    [options]="displayModeOptions"
+    [(ngModel)]="displayMode"
+    (onChange)="onDisplayModeChange()"
+    optionLabel="label"
+    optionValue="value"
+  >
+    <ng-template #item let-item>
+      <i [class]="item.icon" [attr.title]="item.label"></i>
+    </ng-template>
+  </p-selectButton>
+</div>
+
+<div class="flex flex-wrap gap-3 items-center mb-4">
+  <input
+    pInputText
+    [(ngModel)]="filters.customerName"
+    placeholder="Nom du client..."
+    class="w-52"
+  />
+  <p-select
+    [(ngModel)]="filters.shopId"
+    [options]="shops()"
+    optionLabel="address"
+    optionValue="id"
+    placeholder="Toutes boutiques"
+    class="w-52"
+    [showClear]="true"
+  />
+  <p-select
+    [(ngModel)]="filters.orderStatus"
+    [options]="statusOptions"
+    optionLabel="label"
+    optionValue="value"
+    placeholder="Tout statuts"
+    class="w-52"
+    [showClear]="true"
+  />
+  <p-button label="Filtrer" icon="pi pi-search" (onClick)="applyFilters()" [disabled]="isLoading" severity="info" />
+  <p-button
+    label="Réinitialiser"
+    icon="pi pi-refresh"
+    severity="contrast"
+    (onClick)="resetFilters()"
+    [disabled]="isLoading"
+  />
+</div>
+
+@if (displayMode() === OrderDisplayMode.STANDARD) {
+<order-cash-table
+  [orders]="orders()"
+  [loading]="isLoading"
+  [totalRecords]="totalRecords"
+  [first]="first"
+  [pageSize]="rows"
+  [showEditAction]="false"
+  [showDeliverAction]="true"
+  [showCompleteAction]="false"
+  (pageChange)="onPageChange($event)"
+  (viewDetail)="openOrderDetail($event)"
+  (deliver)="openDeliverDialog($event)"
+/>
+} @else {
+<order-agenda-view
+  [orders]="orders()"
+  [loading]="isLoading"
+  [totalRecords]="totalRecords"
+  [first]="first"
+  [pageSize]="rows"
+  [showCompleteAction]="false"
+  [showDeliverAction]="true"
+  (pageChange)="onPageChange($event)"
+  (viewDetail)="openOrderDetail($event)"
+  (deliver)="openDeliverDialog($event)"
+/>
+}
+
+<order-detail-dialog [order]="selectedOrder()" [(visible)]="displayOrderDetailDialog" />
+
+<p-dialog
+  [(visible)]="displayDeliverDialog"
+  [modal]="true"
+  [style]="{ width: '28rem' }"
+  header="Livrer la commande"
+>
+  @if (orderToDeliver(); as order) {
+  <div class="flex flex-col gap-4">
+    <div
+      class="flex items-center justify-between rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 p-3"
+    >
+      <span class="text-slate-500">Reste à payer</span>
+      <span class="font-bold text-slate-900 dark:text-white">{{
+        order.balanceAmount | number: '1.0-2'
+      }} Ar</span>
+    </div>
+    @if (order.balanceAmount > 0) {
+    <div class="flex flex-col gap-2">
+      <label class="font-semibold text-slate-900 dark:text-white">Méthode de paiement du reste</label>
+      <p-select
+        [(ngModel)]="deliverPaymentMethodId"
+        [options]="paymentMethods()"
+        optionLabel="name"
+        optionValue="id"
+        placeholder="Sélectionner une méthode"
+        appendTo="body"
+        class="w-full"
+      />
+    </div>
+    }
+  </div>
+  }
+  <div class="flex justify-end gap-2 mt-6">
+    <p-button
+      label="Annuler"
+      severity="contrast"
+      (onClick)="cancelDeliver()"
+      [disabled]="isDelivering"
+    />
+    <p-button
+      label="Livrer"
+      icon="pi pi-check"
+      severity="success"
+      (onClick)="confirmDeliver()"
+      [loading]="isDelivering"
+      [disabled]="!deliverPaymentMethodId"
+    />
+  </div>
+</p-dialog>

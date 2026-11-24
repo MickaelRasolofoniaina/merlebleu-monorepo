@@ -69,6 +69,7 @@ export const NotificationReadSchema = new EntitySchema<NotificationReadEntity>({
       createDate: true,
     },
   },
+  uniques: [{ columns: ['notification', 'user'] }],
   relations: {
     notification: {
       type: 'many-to-one',

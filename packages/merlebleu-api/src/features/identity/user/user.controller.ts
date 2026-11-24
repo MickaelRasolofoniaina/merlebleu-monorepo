@@ -16,12 +16,15 @@ import {
 } from './user.dto';
 import { CurrentUser } from '@shared/auth/current-user.decorator';
 import type { CurrentUserPayload } from '@shared/auth/current-user.decorator';
+import { Roles } from '@shared/auth/roles';
+import { UserRole } from '@merlebleu/shared';
 
 @Controller('user')
 export class UserController {
   constructor(private userService: UserService) {}
 
   @Post()
+  @Roles(UserRole.ADMIN)
   createUser(
     @Body()
     body: CreateUserDto,
@@ -51,6 +54,7 @@ export class UserController {
   }
 
   @Patch(':id')
+  @Roles(UserRole.ADMIN)
   updateUser(
     @Param('id') id: string,
     @Body()
@@ -60,6 +64,7 @@ export class UserController {
   }
 
   @Delete(':id')
+  @Roles(UserRole.ADMIN)
   deleteUser(@Param('id') id: string) {
     return this.userService.deleteUser(id);
   }

@@ -17,3 +17,18 @@ export interface DashboardAmount {
   total: number;
   ordersCount: number;
 }
+
+export interface DashboardTodaySummary {
+  createdCount: number;
+  toPrepareCount: number;
+  toDeliverCount: number;
+  deliveredCount: number;
+  collectedAmount: number;
+}
+
+export interface DashboardOrderListSummary {
+  balanceToCollect: number;
+  collectedToday: number;
+  toDeliverToday: number;
+  toDeliverThisWeek: number;
+}

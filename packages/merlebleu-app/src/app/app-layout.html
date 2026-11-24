@@ -1,54 +1,142 @@
-<header class="flex justify-between items-center p-4 bg-white dark:bg-slate-800 shadow">
-  <div class="flex items-center">
-    <p-button
-      icon="pi pi-bars"
-      [text]="true"
-      severity="secondary"
-      class="mr-2"
-      (onClick)="toggleSidebar()"
-    />
-    <h1>Le Merlebleu</h1>
-  </div>
-  <div class="flex items-center">
-    <p>{{ name() }}</p>
-    <p-overlay-badge
-      [value]="notificationService.unreadCount()"
-      [badgeDisabled]="notificationService.unreadCount() === 0"
-      severity="danger"
-      class="ml-2"
-    >
-      <p-button
-        icon="pi pi-bell"
-        [text]="true"
-        severity="secondary"
-        (onClick)="notifPopover.toggle($event)"
-      />
-    </p-overlay-badge>
-    <p-popover #notifPopover>
-      <app-notification-panel (notificationOpened)="notifPopover.hide()" />
-    </p-popover>
-    <p-button
-      [icon]="themeService.isDarkMode() ? 'pi pi-sun' : 'pi pi-moon'"
-      [text]="true"
-      severity="secondary"
-      class="ml-2"
-      (onClick)="themeService.toggleTheme()"
-    />
-    <p-button
-      icon="pi pi-sign-out"
-      [text]="true"
-      severity="secondary"
-      (onClick)="logout()"
-    />
-  </div>
-</header>
-<main class="main">
+<div class="flex min-h-screen bg-slate-100 dark:bg-slate-900">
   @if (sidebarOpen()) {
-  <div class="sidebar">
-    <p-menu [model]="items" class="menu" />
+  <div class="sticky top-0 flex h-screen shrink-0 self-start">
+    <nav
+      aria-label="Sections"
+      class="flex w-[68px] flex-col items-center gap-1.5 overflow-y-auto bg-slate-800 py-3 [scrollbar-width:none]"
+    >
+      <div
+        class="mb-2.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px] bg-blue-500 text-base font-semibold text-white"
+      >
+        M
+      </div>
+      @for (section of sections; track section.id) {
+      <button
+        type="button"
+        class="relative flex h-[54px] w-[54px] shrink-0 cursor-pointer flex-col items-center justify-center gap-0.5 rounded-xl border-0 transition-colors"
+        [class]="
+          selectedSectionId() === section.id
+            ? 'bg-slate-600 text-white'
+            : 'bg-transparent text-slate-300 hover:bg-slate-700'
+        "
+        [attr.aria-label]="section.label"
+        [pTooltip]="section.label"
+        tooltipPosition="right"
+        (click)="selectSection(section.id)"
+      >
+        <i [class]="section.icon" class="text-xl"></i>
+        <span class="text-[9px] font-medium">{{ section.shortLabel }}</span>
+        @if (sectionHasBadge(section)) {
+        <span
+          class="absolute right-1.5 top-1 h-2.5 w-2.5 rounded-full border-2 border-slate-800 bg-red-500"
+        ></span>
+        }
+      </button>
+      }
+      <button
+        type="button"
+        class="relative mt-auto flex h-[54px] w-[54px] shrink-0 cursor-pointer items-center justify-center rounded-xl border-0 bg-transparent text-slate-300 transition-colors hover:bg-slate-700"
+        aria-label="Notifications"
+        pTooltip="Notifications"
+        tooltipPosition="right"
+        (click)="notifPopover.toggle($event)"
+      >
+        <i class="pi pi-bell text-xl"></i>
+        @if (notificationService.unreadCount() > 0) {
+        <span
+          class="absolute right-1 top-1 flex h-[18px] min-w-[18px] items-center justify-center rounded-full border-2 border-slate-800 bg-red-500 px-0.5 text-[10px] font-semibold leading-none text-white"
+        >
+          {{ notificationService.unreadCount() }}
+        </span>
+        }
+      </button>
+      <p-popover #notifPopover>
+        <app-notification-panel (notificationOpened)="notifPopover.hide()" />
+      </p-popover>
+      <button
+        type="button"
+        class="flex shrink-0 cursor-pointer rounded-full border-0 bg-transparent p-0"
+        aria-label="Profil"
+        (click)="profilePopover.toggle($event)"
+      >
+        <p-avatar icon="pi pi-user" shape="circle" />
+      </button>
+      <p-popover #profilePopover>
+        <div class="flex flex-col gap-1 min-w-48">
+          <p class="font-semibold px-2 py-1">{{ name() }}</p>
+          <p-button
+            [label]="themeService.isDarkMode() ? 'Mode clair' : 'Mode sombre'"
+            [icon]="themeService.isDarkMode() ? 'pi pi-sun' : 'pi pi-moon'"
+            [text]="true"
+            severity="secondary"
+            class="w-full"
+            styleClass="w-full !justify-start"
+            (onClick)="themeService.toggleTheme()"
+          />
+          <p-button
+            label="Se déconnecter"
+            icon="pi pi-sign-out"
+            [text]="true"
+            severity="secondary"
+            class="w-full"
+            styleClass="w-full !justify-start"
+            (onClick)="profilePopover.hide(); logout()"
+          />
+        </div>
+      </p-popover>
+    </nav>
+    <aside
+      class="flex w-56 flex-col border-r border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-800"
+    >
+      <div
+        class="flex h-14 shrink-0 items-center bg-blue-500 px-4 font-semibold text-white"
+      >
+        {{ selectedSection().label }}
+      </div>
+      <div class="flex-1 overflow-y-auto p-2.5 [scrollbar-width:none]">
+        @for (item of selectedSection().items; track $index) { @if (item.heading) {
+        <div
+          class="px-2.5 pb-1 pt-3 text-[11px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400"
+        >
+          {{ item.label }}
+        </div>
+        } @else {
+        <a
+          class="my-px flex items-center gap-2 rounded-lg px-2.5 py-2 text-sm font-medium text-slate-700 no-underline hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-700"
+          [routerLink]="item.routerLink"
+          routerLinkActive="!bg-blue-50 !text-blue-700 dark:!bg-slate-700 dark:!text-white"
+        >
+          <i [class]="item.icon"></i>
+          <span>{{ item.label }}</span>
+          @if (getBadge(item.id); as badge) {
+          <p-badge class="ml-auto" [value]="badge.value" [severity]="badge.severity" />
+          }
+        </a>
+        } }
+      </div>
+    </aside>
   </div>
   }
-  <div class="content">
-    <router-outlet />
+  <div class="flex min-w-0 flex-1 flex-col">
+    <header
+      class="flex h-14 shrink-0 items-center justify-between bg-slate-800 px-5 shadow"
+    >
+      <div class="flex items-center gap-2">
+        <p-button
+          [icon]="sidebarOpen() ? 'pi pi-angle-double-left' : 'pi pi-angle-double-right'"
+          [text]="true"
+          severity="secondary"
+          styleClass="!text-slate-300 hover:!bg-slate-700"
+          [attr.aria-label]="sidebarOpen() ? 'Masquer le menu' : 'Afficher le menu'"
+          (onClick)="toggleSidebar()"
+        />
+        <h1 class="m-0 text-lg font-semibold text-white">GESTION PATISSERIE MERLEBLEU</h1>
+      </div>
+    </header>
+    <main class="flex-1 p-4">
+      <div class="min-w-0 rounded-xl bg-white px-4 py-3 dark:bg-slate-800">
+        <router-outlet />
+      </div>
+    </main>
   </div>
-</main>
+</div>

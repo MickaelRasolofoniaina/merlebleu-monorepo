@@ -1,0 +1,12 @@
+<div class="flex flex-col gap-6">
+  <div class="flex flex-col gap-2">
+    <nav aria-label="Fil d'Ariane" class="text-sm text-slate-500">
+      <a routerLink="/sale/order/list" class="text-blue-700 hover:underline">Commandes</a>
+      <span aria-hidden="true"> / </span>
+      <span>Nouvelle commande</span>
+    </nav>
+    <h1 class="text-2xl font-bold text-slate-900 dark:text-white">Nouvelle commande</h1>
+  </div>
+
+  <order-form [isLoading]="isLoading()" (orderSubmit)="handleOrderSubmit($event)" />
+</div>

@@ -4,7 +4,10 @@ import { TagModule } from 'primeng/tag';
 import { NotificationDto, NotificationType } from '@merlebleu/shared';
 import { NotificationService } from '../../services/notification.service';
 import { formatNotificationDate } from '../../utils/date';
-import { getNotificationTypeMeta } from '../../utils/notification-type';
+import {
+  getNotificationTypeMeta,
+  NotificationTypeMeta,
+} from '../../utils/notification-type';
 
 @Component({
   selector: 'app-notification-panel',
@@ -16,6 +19,16 @@ export class NotificationPanelComponent {
   private readonly router = inject(Router);
   protected readonly formatNotificationDate = formatNotificationDate;
   protected readonly getNotificationTypeMeta = getNotificationTypeMeta;
+
+  protected readonly accentClasses: Record<
+    NotificationTypeMeta['severity'],
+    string
+  > = {
+    success: 'border-l-green-500',
+    warn: 'border-l-amber-500',
+    danger: 'border-l-red-500',
+    info: 'border-l-sky-500',
+  };
 
   @Output() readonly notificationOpened = new EventEmitter<void>();
 

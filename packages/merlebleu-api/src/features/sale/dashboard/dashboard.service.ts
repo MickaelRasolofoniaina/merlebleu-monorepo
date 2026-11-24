@@ -1,11 +1,13 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, SelectQueryBuilder } from 'typeorm';
+import { Between, In, Not, Repository, SelectQueryBuilder } from 'typeorm';
 import {
   DashboardAmount,
   DashboardCountPoint,
   DashboardDistributionPoint,
+  DashboardOrderListSummary,
   DashboardQueryDto,
+  DashboardTodaySummary,
   DashboardView,
   OrderStatus,
 } from '@merlebleu/shared';
@@ -20,6 +22,8 @@ import {
   fillYearPoints,
   getPeriodRange,
 } from './dashboard.period';
+import { formatDate } from '@shared/date/date.utils';
+
 
 @Injectable()
 export class DashboardService {
@@ -90,6 +94,116 @@ export class DashboardService {
     return {
       total: Number(row?.total ?? 0),
       ordersCount: Number(row?.ordersCount ?? 0),
+    };
+  }
+
+  /**
+   * Summary of the current day. Delivered orders and the collected amount are
+   * based on the delivery date since the delivery time is not stored.
+   */
+  async getTodaySummary(): Promise<DashboardTodaySummary> {
+    const now = new Date();
+    const today = formatDate(now);
+    const tomorrow = formatDate(
+      new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1),
+    );
+
+    const [createdCount, toPrepareCount, toDeliverCount, delivered] =
+      await Promise.all([
+        this.orderRepository.count({
+          where: { orderDate: today, orderStatus: Not(OrderStatus.CANCELLED) },
+        }),
+        // same rule as the "to prepare" page: delivery today or tomorrow,
+        // counted per order item (child) rather than per order (parent)
+        this.orderItemRepository
+          .createQueryBuilder('orderItems')
+          .innerJoin('orderItems.order', 'orders')
+          .where('orders.orderStatus = :todo', { todo: OrderStatus.TODO })
+          .andWhere('orders.deliveryDate BETWEEN :today AND :tomorrow', {
+            today,
+            tomorrow,
+          })
+          .getCount(),
+        this.orderRepository.count({
+          where: {
+            deliveryDate: today,
+            orderStatus: In([OrderStatus.TODO, OrderStatus.TODELIVER]),
+          },
+        }),
+        this.orderRepository
+          .createQueryBuilder('orders')
+          .select('COUNT(*)', 'count')
+          .addSelect('COALESCE(SUM(orders.paidAmount), 0)', 'amount')
+          .where('orders.deliveryDate = :today', { today })
+          .andWhere('orders.orderStatus = :delivered', {
+            delivered: OrderStatus.DELIVERED,
+          })
+          .getRawOne<{ count: string; amount: string }>(),
+      ]);
+
+    return {
+      createdCount,
+      toPrepareCount,
+      toDeliverCount,
+      deliveredCount: Number(delivered?.count ?? 0),
+      collectedAmount: Number(delivered?.amount ?? 0),
+    };
+  }
+
+  /**
+   * Figures shown above the order list. The collected amount follows the same
+   * rule as the today summary. "This week" runs from Monday to Sunday and
+   * includes today; only orders still to deliver are counted.
+   */
+  async getOrderListSummary(): Promise<DashboardOrderListSummary> {
+    const now = new Date();
+    const today = formatDate(now);
+    const daysSinceMonday = (now.getDay() + 6) % 7;
+    const weekStart = formatDate(
+      new Date(now.getFullYear(), now.getMonth(), now.getDate() - daysSinceMonday),
+    );
+    const weekEnd = formatDate(
+      new Date(
+        now.getFullYear(),
+        now.getMonth(),
+        now.getDate() - daysSinceMonday + 6,
+      ),
+    );
+    const closedStatuses = [OrderStatus.DELIVERED, OrderStatus.CANCELLED];
+
+    const [balance, collected, toDeliverToday, toDeliverThisWeek] =
+      await Promise.all([
+        this.orderRepository
+          .createQueryBuilder('orders')
+          .select('COALESCE(SUM(orders.balanceAmount), 0)', 'amount')
+          .where('orders.orderStatus NOT IN (:...closedStatuses)', {
+            closedStatuses,
+          })
+          .getRawOne<{ amount: string }>(),
+        this.orderRepository
+          .createQueryBuilder('orders')
+          .select('COALESCE(SUM(orders.paidAmount), 0)', 'amount')
+          .where('orders.deliveryDate = :today', { today })
+          .andWhere('orders.orderStatus = :delivered', {
+            delivered: OrderStatus.DELIVERED,
+          })
+          .getRawOne<{ amount: string }>(),
+        this.orderRepository.count({
+          where: { deliveryDate: today, orderStatus: Not(In(closedStatuses)) },
+        }),
+        this.orderRepository.count({
+          where: {
+            deliveryDate: Between(weekStart, weekEnd),
+            orderStatus: Not(In(closedStatuses)),
+          },
+        }),
+      ]);
+
+    return {
+      balanceToCollect: Number(balance?.amount ?? 0),
+      collectedToday: Number(collected?.amount ?? 0),
+      toDeliverToday,
+      toDeliverThisWeek,
     };
   }
 

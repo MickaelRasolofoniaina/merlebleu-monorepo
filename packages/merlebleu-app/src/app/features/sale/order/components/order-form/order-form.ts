@@ -26,6 +26,7 @@ import {
   OrderItemDto,
   PaymentMethod,
   createOrderSchema,
+  updateOrderSchema,
   Item,
   ItemType,
   Shape,
@@ -57,6 +58,7 @@ import { ShopService } from '@features/shop/shop-list/shop.service';
 })
 export class OrderForm implements OnInit, OnChanges {
   @Input() orderData?: CreateOrderDto | UpdateOrderDto;
+  @Input() isEdit = false;
   @Input() isLoading = false;
   @Output() orderSubmit = new EventEmitter<CreateOrderDto | UpdateOrderDto>();
   @Output() orderReset = new EventEmitter<void>();
@@ -177,7 +179,8 @@ export class OrderForm implements OnInit, OnChanges {
 
   protected submit(): void {
     this.validationErrors = {};
-    const result = createOrderSchema.safeParse(this.order);
+    const schema = this.isEdit ? updateOrderSchema : createOrderSchema;
+    const result = schema.safeParse(this.order);
     if (!result.success) {
       this.validationErrors = buildZodErrorMap(result.error.issues);
       this.messageService.add({
@@ -210,6 +213,18 @@ export class OrderForm implements OnInit, OnChanges {
     this.order.orderDate = formatDate(value);
   }
 
+  /** Formats the delivery date as "Sam 23 Oct". */
+  protected formatDeliveryDate(): string {
+    const date = this.deliveryDateValue;
+    if (!date) {
+      return '';
+    }
+    const capitalize = (text: string): string => text.charAt(0).toUpperCase() + text.slice(1);
+    const weekday = date.toLocaleDateString('fr-FR', { weekday: 'short' }).replace('.', '');
+    const month = date.toLocaleDateString('fr-FR', { month: 'short' }).replace('.', '');
+    return `${capitalize(weekday)} ${date.getDate()} ${capitalize(month)}`;
+  }
+
   protected onDeliveryDateChange(value: Date | null): void {
     this.deliveryDateValue = value;
     this.order.deliveryDate = formatDate(value);
@@ -223,6 +238,12 @@ export class OrderForm implements OnInit, OnChanges {
   protected onDeliveryEndTimeChange(value: Date | null): void {
     this.deliveryEndTimeValue = value;
     this.order.deliveryEndTime = formatTime(value);
+  }
+
+  protected onFromFacebookChange(isFromFacebook: boolean): void {
+    if (!isFromFacebook) {
+      this.order.customerFacebookName = '';
+    }
   }
 
   protected trackByIndex(index: number): number {

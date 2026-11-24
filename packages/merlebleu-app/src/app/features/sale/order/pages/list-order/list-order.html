@@ -1,8 +1,50 @@
 <div class="flex justify-between items-center mb-4">
   <h2 class="text-2xl font-bold">Toutes les commandes</h2>
+  <p-button label="Nouvelle commande" icon="pi pi-plus" severity="primary" (onClick)="openAddOrder()" />
+</div>
+
+<div class="flex justify-between items-center mb-4">
+  <p-selectButton
+    [options]="displayModeOptions"
+    [(ngModel)]="displayMode"
+    (onChange)="onDisplayModeChange()"
+    optionLabel="label"
+    optionValue="value"
+  >
+    <ng-template #item let-item>
+      <i [class]="item.icon" [attr.title]="item.label"></i>
+    </ng-template>
+  </p-selectButton>
 </div>
 
 <div class="flex flex-wrap gap-3 mb-4">
+  @if (displayMode() === OrderDisplayMode.STANDARD) {
+  <order-count-card
+    color="orange"
+    icon="pi pi-wallet"
+    [valueText]="formatAmount(orderListSummary().balanceToCollect)"
+    label="à encaisser"
+  />
+  <order-count-card
+    color="green"
+    icon="pi pi-money-bill"
+    [valueText]="formatAmount(orderListSummary().collectedToday)"
+    label="encaissé aujourd'hui"
+  />
+  } @else if (displayMode() === CALENDAR_VIEW) {
+  <order-count-card
+    color="green"
+    icon="pi pi-truck"
+    [count]="orderListSummary().toDeliverToday"
+    label="à livrer aujourd'hui"
+  />
+  <order-count-card
+    color="blue"
+    icon="pi pi-calendar"
+    [count]="orderListSummary().toDeliverThisWeek"
+    label="à livrer cette semaine"
+  />
+  } @else {
   <order-count-card
     color="red"
     icon="pi pi-box"
@@ -21,34 +63,10 @@
     [count]="lateCount()"
     label="en retard"
   />
+  }
 </div>
 
-<div class="flex justify-between items-center mb-4">
-  <p-selectButton
-    [options]="displayModeOptions"
-    [(ngModel)]="displayMode"
-    (onChange)="onDisplayModeChange()"
-    optionLabel="label"
-    optionValue="value"
-  />
-  <p-button label="Ajouter" icon="pi pi-plus" severity="primary" (onClick)="openAddOrder()" />
-</div>
-
-@if (displayMode() === OrderDisplayMode.PASTRY) {
-<pastry-order-table
-  [rows]="orderItemRows()"
-  [loading]="isLoading"
-  [totalRecords]="totalRecords"
-  [first]="first"
-  [pageSize]="rows"
-  [showEditAction]="true"
-  (pageChange)="onPageChange($event)"
-  (filter)="onPastryFilter($event)"
-  (resetFilter)="onPastryReset()"
-  (viewDetail)="onPastryViewDetail($event)"
-  (editOrder)="onPastryEdit($event)"
-/>
-} @else if (displayMode() === CALENDAR_VIEW) {
+@if (displayMode() === CALENDAR_VIEW) {
 <order-calendar-view
   [orders]="calendarOrders()"
   [loading]="isCalendarLoading"
@@ -56,121 +74,139 @@
   (eventClick)="openOrderDetail($event)"
 />
 } @else {
-<div class="flex flex-wrap gap-3 items-center mb-4">
+<div class="flex flex-wrap gap-3 items-center mb-3">
   <input
     pInputText
     [(ngModel)]="filters.customerName"
-    placeholder="Nom du client..."
-    class="w-52"
+    (ngModelChange)="onSearchChange()"
+    placeholder="Rechercher un client..."
+    aria-label="Rechercher un client"
+    class="w-full max-w-sm"
   />
-  <p-datepicker
-    [(ngModel)]="filters.orderDate"
-    [showIcon]="true"
-    dateFormat="dd/mm/yy"
-    placeholder="Date de commande"
-    class="w-52"
-  />
-  <p-datepicker
-    [(ngModel)]="filters.deliveryDate"
-    [showIcon]="true"
-    dateFormat="dd/mm/yy"
-    placeholder="Date de livraison"
-    class="w-52"
-  />
-  <p-select
-    [(ngModel)]="filters.shopId"
-    [options]="shops()"
-    optionLabel="address"
-    optionValue="id"
-    placeholder="Toutes les boutiques"
-    class="w-52"
-    [showClear]="true"
-  />
-  <p-select
-    [(ngModel)]="filters.orderStatus"
-    [options]="statusOptions"
-    optionLabel="label"
-    optionValue="value"
-    placeholder="Tous les statuts"
-    class="w-52"
-    [showClear]="true"
-  />
-  <p-button label="Filtrer" icon="pi pi-search" (onClick)="applyFilters()" [disabled]="isLoading" severity="info" />
+  <div class="flex items-center gap-2">
+    <p-checkbox
+      inputId="includeDelivered"
+      [(ngModel)]="includeDelivered"
+      [binary]="true"
+      (onChange)="applyFilters()"
+    />
+    <label for="includeDelivered" class="text-sm cursor-pointer">Inclure les commandes livrées</label>
+  </div>
   <p-button
-    label="Réinitialiser"
-    icon="pi pi-refresh"
-    severity="contrast"
-    (onClick)="resetFilters()"
-    [disabled]="isLoading"
-  />
+    icon="pi pi-filter"
+    label="Filtres"
+    [outlined]="activeFilterCount === 0"
+    severity="info"
+    (onClick)="openFilters(filterPopover, $event)"
+  >
+    @if (activeFilterCount > 0) {
+    <p-badge [value]="activeFilterCount" severity="contrast" />
+    }
+  </p-button>
+  <p-popover #filterPopover>
+    <div class="flex w-80 flex-col gap-4">
+      <h3 class="font-semibold text-slate-900 dark:text-white">Filtres</h3>
+      <div class="flex flex-col gap-3">
+        <div class="flex flex-col gap-1">
+          <label class="text-xs font-semibold text-slate-600 dark:text-white">Date de commande</label>
+          <p-datepicker
+            [(ngModel)]="draft.orderDate"
+            [showIcon]="true"
+            dateFormat="dd/mm/yy"
+            placeholder="jj/mm/aaaa"
+            appendTo="body"
+            [showClear]="true"
+          />
+        </div>
+        <div class="flex flex-col gap-1">
+          <label class="text-xs font-semibold text-slate-600 dark:text-white">Date de livraison</label>
+          <p-datepicker
+            [(ngModel)]="draft.deliveryDate"
+            [showIcon]="true"
+            dateFormat="dd/mm/yy"
+            placeholder="jj/mm/aaaa"
+            appendTo="body"
+            [showClear]="true"
+          />
+        </div>
+      </div>
+      <div class="flex flex-col gap-1">
+        <label class="text-xs font-semibold text-slate-600 dark:text-white">Boutique</label>
+        <p-select
+          [(ngModel)]="draft.shopId"
+          [options]="shops()"
+          optionLabel="address"
+          optionValue="id"
+          placeholder="Toutes les boutiques"
+          appendTo="body"
+          [showClear]="true"
+        />
+      </div>
+      <div class="flex flex-col gap-1">
+        <label class="text-xs font-semibold text-slate-600 dark:text-white">Statut</label>
+        <p-select
+          [(ngModel)]="draft.orderStatus"
+          [options]="statusOptions"
+          optionLabel="label"
+          optionValue="value"
+          placeholder="Tous les statuts"
+          appendTo="body"
+          [showClear]="true"
+        />
+      </div>
+      <div class="flex items-center justify-between">
+        <p-button
+          label="Réinitialiser"
+          severity="secondary"
+          [text]="true"
+          (onClick)="resetFilters(); filterPopover.hide()"
+        />
+        <p-button label="Appliquer" (onClick)="applyDraft(); filterPopover.hide()" outlined severity="info" />
+      </div>
+    </div>
+  </p-popover>
 </div>
 
-<p-table
-  [value]="orders()"
+@if (activeChips.length) {
+<div class="flex flex-wrap items-center gap-2 mb-4">
+  @for (chip of activeChips; track chip.key) {
+  <span class="inline-flex items-center gap-1.5">
+    <p-badge [value]="chip.label" severity="info" size="large" style="height: fit-content" />
+    <button
+      type="button"
+      class="pi pi-times cursor-pointer text-xs text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white"
+      [attr.aria-label]="'Retirer le filtre ' + chip.label"
+      (click)="removeFilter(chip.key)"
+    ></button>
+  </span>
+  }
+  <p-button label="Tout effacer" severity="secondary" [text]="true" size="small" (onClick)="resetFilters()" />
+</div>
+}
+
+@if (displayMode() === OrderDisplayMode.STANDARD) {
+<order-cash-table
+  [orders]="orders()"
   [loading]="isLoading"
-  [tableStyle]="{ 'min-width': '60rem' }"
-  [stripedRows]="true"
-  [paginator]="true"
-  [rows]="rows"
-  [first]="first"
   [totalRecords]="totalRecords"
-  [lazy]="true"
-  (onPage)="onPageChange($event)"
->
-  <ng-template #header>
-    <tr>
-      <th>Client</th>
-      <th>Date</th>
-      <th>Date de livraison</th>
-      <th>Boutique</th>
-      <th class="text-right!">Reste</th>
-      <th class="text-right!">Statut</th>
-      <th class="text-center!">Actions</th>
-    </tr>
-  </ng-template>
-  <ng-template #body let-order>
-    <tr>
-      <td>
-        <span
-          class="cursor-pointer text-[#1b4fb6] dark:text-blue-400 hover:underline"
-          (click)="openOrderDetail(order)"
-          >{{ order.customerName }}</span
-        >
-      </td>
-      <td>{{ order.orderDate | date: 'dd/MM/yyyy' }}</td>
-      <td [class]="isOrderLate(order) ? 'text-red-600 dark:text-red-400 font-semibold' : ''">
-        @if (order.deliveryStartTime === order.deliveryEndTime) {
-        {{ order.deliveryDate | date: 'dd/MM/yyyy' }} à {{ order.deliveryStartTime.slice(0, 5) }}
-        } @else {
-        {{ order.deliveryDate | date: 'dd/MM/yyyy' }} de {{ order.deliveryStartTime.slice(0, 5) }} à
-        {{ order.deliveryEndTime.slice(0, 5) }}
-        }
-      </td>
-      <td>{{ order.shop.address }}</td>
-      <td class="text-right!">{{ order.balanceAmount | number: '1.0-2' }}</td>
-      <td class="text-right!">
-        <p-badge
-          [value]="getStatus(order.orderStatus)"
-          [severity]="getStatusColor(order.orderStatus)"
-          style="height: fit-content"
-        ></p-badge>
-      </td>
-      <td class="text-center!">
-        <p-button
-          icon="pi pi-pencil"
-          severity="warn"
-          (onClick)="openEditOrder(order)"
-          size="small"
-        />
-      </td>
-    </tr>
-  </ng-template>
-  <ng-template #emptymessage>
-    <tr>
-      <td colspan="9" class="text-center-important py-6">Aucune commande à afficher</td>
-    </tr>
-  </ng-template>
-</p-table>
+  [first]="first"
+  [pageSize]="rows"
+  (pageChange)="onPageChange($event)"
+  (viewDetail)="openOrderDetail($event)"
+  (editOrder)="openEditOrder($event)"
+  (deliver)="openDeliverDialog($event)"
+/>
+} @else {
+<order-agenda-view
+  [orders]="orders()"
+  [loading]="isLoading"
+  [totalRecords]="totalRecords"
+  [first]="first"
+  [pageSize]="rows"
+  (pageChange)="onPageChange($event)"
+  (viewDetail)="openOrderDetail($event)"
+/>
+}
 }
 
 <order-detail-dialog [order]="selectedOrder()" [(visible)]="displayOrderDetailDialog" />
@@ -182,3 +218,53 @@
   [(visible)]="displayOrderFormDialog"
   (orderSubmit)="handleOrderSubmit($event)"
 />
+
+<p-dialog
+  [(visible)]="displayDeliverDialog"
+  [modal]="true"
+  [style]="{ width: '28rem' }"
+  header="Livrer la commande"
+>
+  @if (orderToDeliver(); as order) {
+  <div class="flex flex-col gap-4">
+    <div
+      class="flex items-center justify-between rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 p-3"
+    >
+      <span class="text-slate-500">Reste à payer</span>
+      <span class="font-bold text-slate-900 dark:text-white">{{
+        order.balanceAmount | number: '1.0-2'
+      }} Ar</span>
+    </div>
+    @if (order.balanceAmount > 0) {
+    <div class="flex flex-col gap-2">
+      <label class="font-semibold text-slate-900 dark:text-white">Méthode de paiement du reste</label>
+      <p-select
+        [(ngModel)]="deliverPaymentMethodId"
+        [options]="paymentMethods()"
+        optionLabel="name"
+        optionValue="id"
+        placeholder="Sélectionner une méthode"
+        appendTo="body"
+        class="w-full"
+      />
+    </div>
+    }
+  </div>
+  }
+  <div class="flex justify-end gap-2 mt-6">
+    <p-button
+      label="Annuler"
+      severity="contrast"
+      (onClick)="cancelDeliver()"
+      [disabled]="isDelivering"
+    />
+    <p-button
+      label="Livrer"
+      icon="pi pi-check"
+      severity="success"
+      (onClick)="confirmDeliver()"
+      [loading]="isDelivering"
+      [disabled]="!deliverPaymentMethodId"
+    />
+  </div>
+</p-dialog>

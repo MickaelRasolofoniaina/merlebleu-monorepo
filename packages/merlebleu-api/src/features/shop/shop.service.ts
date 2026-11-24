@@ -1,6 +1,10 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { QueryFailedError, Repository } from 'typeorm';
 import { ShopEntity, ShopSchema } from './shop.entity';
 import { CreateShopDto, UpdateShopDto } from './shop.dto';
 
@@ -35,7 +39,20 @@ export class ShopService {
   }
 
   async delete(id: string): Promise<void> {
-    const result = await this.shopRepository.delete(id);
+    let result;
+    try {
+      result = await this.shopRepository.delete(id);
+    } catch (error) {
+      if (
+        error instanceof QueryFailedError &&
+        (error.driverError as { code?: string })?.code === '23503'
+      ) {
+        throw new ConflictException(
+          'Cette boutique est utilisée par des commandes ou des utilisateurs et ne peut pas être supprimée.',
+        );
+      }
+      throw error;
+    }
     if (!result.affected) {
       throw new NotFoundException(`Shop with id ${id} not found`);
     }

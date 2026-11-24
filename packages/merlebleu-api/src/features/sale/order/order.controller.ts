@@ -15,7 +15,7 @@ import {
   UpdateOrderDto,
   UpdateOrderStatusDto,
 } from './order.dto';
-import { OrderStatus, Shape } from '@merlebleu/shared';
+import { OrderStatus } from '@merlebleu/shared';
 import { CurrentUser } from '@shared/auth/current-user.decorator';
 import type { CurrentUserPayload } from '@shared/auth/current-user.decorator';
 
@@ -41,6 +41,7 @@ export class OrderController {
     @Query('deliveryDateTo') deliveryDateTo?: string,
     @Query('customerName') customerName?: string,
     @Query('status') status?: OrderStatus,
+    @Query('excludeDelivered') excludeDelivered?: string,
     @Query('shopId') shopId?: string,
   ) {
     const pageNumber = page ? Number.parseInt(page, 10) : 1;
@@ -52,31 +53,9 @@ export class OrderController {
       deliveryDateTo,
       customerName,
       status,
+      excludeDelivered: excludeDelivered === 'true',
       shopId,
     });
-  }
-
-  @Get('to-deliver')
-  listOrdersToDeliver(
-    @Query('page') page?: string,
-    @Query('limit') limit?: string,
-    @Query('customerName') customerName?: string,
-    @Query('shopId') shopId?: string,
-    @Query('status') status?: OrderStatus,
-    @Query('orderDate') orderDate?: string,
-    @Query('deliveryDate') deliveryDate?: string,
-  ) {
-    const pageNumber = page ? Number.parseInt(page, 10) : 1;
-    const limitNumber = limit ? Number.parseInt(limit, 10) : 20;
-    return this.orderService.listOrdersToDeliver(
-      pageNumber,
-      limitNumber,
-      customerName,
-      shopId,
-      status,
-      orderDate,
-      deliveryDate,
-    );
   }
 
   @Get('to-prepare')
@@ -125,98 +104,75 @@ export class OrderController {
     );
   }
 
-  @Get('items')
-  listOrderItems(
-    @Query('page') page?: string,
-    @Query('limit') limit?: string,
-    @Query('customerName') customerName?: string,
-    @Query('deliveryDate') deliveryDate?: string,
-    @Query('type') type?: string,
-    @Query('shape') shape?: Shape,
-    @Query('text') text?: string,
-    @Query('decoration') decoration?: string,
-    @Query('size') size?: string,
-  ) {
-    const pageNumber = page ? Number.parseInt(page, 10) : 1;
-    const limitNumber = limit ? Number.parseInt(limit, 10) : 20;
-    return this.orderService.listOrderItems(pageNumber, limitNumber, {
-      customerName,
-      deliveryDate,
-      type,
-      shape,
-      text,
-      decoration,
-      size: size ? Number.parseInt(size, 10) : undefined,
-    });
-  }
-
   @Get('items/to-prepare')
-  listOrderItemsToPrepare(
-    @Query('page') page?: string,
-    @Query('limit') limit?: string,
-    @Query('customerName') customerName?: string,
-    @Query('type') type?: string,
-    @Query('shape') shape?: Shape,
-    @Query('text') text?: string,
-    @Query('decoration') decoration?: string,
-    @Query('size') size?: string,
-  ) {
+  listOrderItemsToPrepare(@Query('page') page?: string, @Query('limit') limit?: string) {
     const pageNumber = page ? Number.parseInt(page, 10) : 1;
     const limitNumber = limit ? Number.parseInt(limit, 10) : 20;
-    return this.orderService.listOrderItemsToPrepare(pageNumber, limitNumber, {
-      customerName,
-      type,
-      shape,
-      text,
-      decoration,
-      size: size ? Number.parseInt(size, 10) : undefined,
-    });
+    return this.orderService.listOrderItemsToPrepare(pageNumber, limitNumber);
   }
 
   @Get('items/to-deliver')
-  listOrderItemsToDeliver(
-    @Query('page') page?: string,
-    @Query('limit') limit?: string,
-    @Query('customerName') customerName?: string,
-    @Query('type') type?: string,
-    @Query('shape') shape?: Shape,
-    @Query('text') text?: string,
-    @Query('decoration') decoration?: string,
-    @Query('size') size?: string,
-  ) {
+  listOrderItemsToDeliver(@Query('page') page?: string, @Query('limit') limit?: string) {
     const pageNumber = page ? Number.parseInt(page, 10) : 1;
     const limitNumber = limit ? Number.parseInt(limit, 10) : 20;
-    return this.orderService.listOrderItemsToDeliver(pageNumber, limitNumber, {
-      customerName,
-      type,
-      shape,
-      text,
-      decoration,
-      size: size ? Number.parseInt(size, 10) : undefined,
-    });
+    return this.orderService.listOrderItemsToDeliver(pageNumber, limitNumber);
   }
 
   @Get('items/late')
-  listOrderItemsLate(
+  listOrderItemsLate(@Query('page') page?: string, @Query('limit') limit?: string) {
+    const pageNumber = page ? Number.parseInt(page, 10) : 1;
+    const limitNumber = limit ? Number.parseInt(limit, 10) : 20;
+    return this.orderService.listOrderItemsLate(pageNumber, limitNumber);
+  }
+
+  @Get('today/to-prepare')
+  listOrdersTodayToPrepare(
     @Query('page') page?: string,
     @Query('limit') limit?: string,
     @Query('customerName') customerName?: string,
-    @Query('type') type?: string,
-    @Query('shape') shape?: Shape,
-    @Query('text') text?: string,
-    @Query('decoration') decoration?: string,
-    @Query('size') size?: string,
+    @Query('shopId') shopId?: string,
   ) {
     const pageNumber = page ? Number.parseInt(page, 10) : 1;
     const limitNumber = limit ? Number.parseInt(limit, 10) : 20;
-    return this.orderService.listOrderItemsLate(pageNumber, limitNumber, {
+    return this.orderService.listOrdersTodayToPrepare(
+      pageNumber,
+      limitNumber,
       customerName,
-      type,
-      shape,
-      text,
-      decoration,
-      size: size ? Number.parseInt(size, 10) : undefined,
-    });
+      shopId,
+    );
+  }
+
+  @Get('today/to-deliver')
+  listOrdersTodayToDeliver(
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
+    @Query('customerName') customerName?: string,
+    @Query('shopId') shopId?: string,
+    @Query('status') status?: OrderStatus,
+  ) {
+    const pageNumber = page ? Number.parseInt(page, 10) : 1;
+    const limitNumber = limit ? Number.parseInt(limit, 10) : 20;
+    return this.orderService.listOrdersTodayToDeliver(
+      pageNumber,
+      limitNumber,
+      customerName,
+      shopId,
+      status,
+    );
+  }
+
+  @Get('items/today/to-prepare')
+  listOrderItemsTodayToPrepare(@Query('page') page?: string, @Query('limit') limit?: string) {
+    const pageNumber = page ? Number.parseInt(page, 10) : 1;
+    const limitNumber = limit ? Number.parseInt(limit, 10) : 20;
+    return this.orderService.listOrderItemsTodayToPrepare(pageNumber, limitNumber);
+  }
+
+  @Get('items/today/to-deliver')
+  listOrderItemsTodayToDeliver(@Query('page') page?: string, @Query('limit') limit?: string) {
+    const pageNumber = page ? Number.parseInt(page, 10) : 1;
+    const limitNumber = limit ? Number.parseInt(limit, 10) : 20;
+    return this.orderService.listOrderItemsTodayToDeliver(pageNumber, limitNumber);
   }
 
   @Get(':id')

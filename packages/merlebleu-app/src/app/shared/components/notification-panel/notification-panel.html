@@ -1,53 +1,58 @@
-<div class="w-96">
-  <div class="px-4 py-3 font-bold border-b border-surface-200 dark:border-surface-700">
-    Notifications
+<div class="w-96 rounded-lg bg-white text-slate-900">
+  <div class="flex items-center justify-between px-4 pt-3 pb-1 font-bold">
+    <span>Notifications</span>
+    @if (notificationService.unreadCount() > 0) {
+      <span class="text-xs font-semibold text-blue-600">
+        {{ notificationService.unreadCount() }}
+        {{ notificationService.unreadCount() > 1 ? 'non lues' : 'non lue' }}
+      </span>
+    }
   </div>
 
-  @if (notificationService.recent().length === 0) {
-    <div class="px-4 py-6 text-center text-surface-500">Aucune notification</div>
-  }
+  <div class="flex flex-col gap-2.5 p-3">
+    @if (notificationService.recent().length === 0) {
+      <div class="py-6 text-center text-slate-500">Aucune notification</div>
+    }
 
-  @for (notification of notificationService.recent(); track notification.id) {
-    <div
-      class="flex gap-3 px-4 py-3 border-b border-surface-200 dark:border-surface-700 cursor-pointer"
-      (click)="onNotificationClick(notification)"
-      [style.background-color]="
-        !notification.isRead ? 'var(--p-tag-info-background)' : null
-      "
-    >
-      <p-tag
-        [icon]="getNotificationTypeMeta(notification.type).icon"
-        [severity]="getNotificationTypeMeta(notification.type).severity"
-        [rounded]="true"
-      />
-      <div class="flex-1 min-w-0">
-        <div
-          class="text-sm"
-          [class.font-bold]="!notification.isRead"
-          [style.color]="
-            !notification.isRead ? 'var(--p-tag-info-color)' : null
-          "
-        >
-          {{ getNotificationTypeMeta(notification.type).title }}
+    @for (notification of notificationService.recent(); track notification.id) {
+      @let meta = getNotificationTypeMeta(notification.type);
+      <div
+        class="flex items-start gap-2.5 rounded-lg border border-slate-200 border-l-4 bg-white px-3 py-2.5 cursor-pointer transition-colors hover:bg-slate-50"
+        [class]="accentClasses[meta.severity]"
+        [class.shadow-md]="!notification.isRead"
+        (click)="onNotificationClick(notification)"
+      >
+        <div class="flex-1 min-w-0">
+          <p-tag
+            [value]="meta.title"        
+            [severity]="meta.severity"
+            [rounded]="true"
+            styleClass="mb-1 text-xs"
+          />
+          <div
+            class="text-sm text-slate-600"
+            [class.font-semibold]="!notification.isRead"
+            [class.text-slate-900]="!notification.isRead"
+          >
+            {{ meta.description(notification.customerName, notification.actorName) }}
+          </div>
+          <div class="text-xs text-slate-500 mt-1">
+            {{ formatNotificationDate(notification.createdAt) }}
+          </div>
         </div>
-        <div class="text-sm text-surface-600 dark:text-surface-300">
-          {{
-            getNotificationTypeMeta(notification.type).description(
-              notification.customerName,
-              notification.actorName
-            )
-          }}
-        </div>
-        <div class="text-xs italic text-right text-surface-400 mt-1">
-          {{ formatNotificationDate(notification.createdAt) }}
-        </div>
+        @if (!notification.isRead) {
+          <span
+            class="mt-1 size-2 shrink-0 rounded-full bg-blue-500"
+            aria-label="Non lue"
+          ></span>
+        }
       </div>
-    </div>
-  }
+    }
+  </div>
 
   <a
     routerLink="/notification"
-    class="block text-center py-3 text-sm font-semibold text-primary cursor-pointer"
+    class="block text-center pb-3 text-sm font-semibold text-blue-600 cursor-pointer"
   >
     Voir toutes les notifications →
   </a>

@@ -34,18 +34,16 @@
   <ng-template #header>
     <tr>
       <th>Nom</th>
-      <th>Prix Unitaire</th>
+      <th class="text-right!">Prix Unitaire</th>
       <th>Type</th>
-      <th class="text-right!">Jours de Rétention</th>
       <th style="width: 12rem" class="text-center!">Actions</th>
     </tr>
   </ng-template>
   <ng-template #body let-item>
     <tr>
       <td>{{ capitalizeFirstLetter(item.label) }}</td>
-      <td>{{ formatUnitPrice(item.unitPrice) }}</td>
+      <td class="text-right!">{{ formatUnitPrice(item.unitPrice) }}</td>
       <td>{{ capitalizeFirstLetter(item.type) }}</td>
-      <td class="text-right!">{{ item.maxRetentionDays }}</td>
       <td class="text-center!">
         <p-button
           icon="pi pi-pencil"
@@ -79,7 +77,7 @@
   ></mb-item-form>
   <ng-template pTemplate="footer">
     <div class="flex justify-end gap-2">
-      <p-button label="Annuler" severity="danger" (onClick)="closeEditModal()" />
+      <p-button label="Annuler" severity="contrast" (onClick)="closeEditModal()" />
       <button pButton type="submit" form="edit-item-form">Enregistrer</button>
     </div>
   </ng-template>
@@ -100,7 +98,7 @@
   ></mb-item-form>
   <ng-template pTemplate="footer">
     <div class="flex justify-end gap-2">
-      <p-button label="Annuler" severity="danger" (onClick)="closeAddModal()" />
+      <p-button label="Annuler" severity="contrast" (onClick)="closeAddModal()" />
       <button pButton type="submit" form="add-item-form">Ajouter</button>
     </div>
   </ng-template>
@@ -119,7 +117,7 @@
   </div>
   <ng-template pTemplate="footer">
     <div class="flex justify-end gap-2">
-      <p-button label="Annuler" severity="secondary" (onClick)="closeDeleteModal()" />
+      <p-button label="Annuler" severity="contrast" (onClick)="closeDeleteModal()" />
       <p-button
         label="Supprimer"
         severity="danger"

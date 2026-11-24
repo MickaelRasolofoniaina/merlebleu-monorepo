@@ -56,6 +56,26 @@ const isSameDay = (a: Date, b: Date): boolean =>
   a.getMonth() === b.getMonth() &&
   a.getDate() === b.getDate();
 
+export const formatNotificationDayLabel = (value: string): string => {
+  const date = new Date(value);
+  const now = new Date();
+
+  if (isSameDay(date, now)) {
+    return "Aujourd'hui";
+  }
+
+  if (isSameDay(date, addDays(now, -1))) {
+    return 'Hier';
+  }
+
+  return date.toLocaleDateString('fr-FR', {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+    year: date.getFullYear() === now.getFullYear() ? undefined : 'numeric',
+  });
+};
+
 export const formatNotificationDate = (value: string): string => {
   const date = new Date(value);
   const now = new Date();

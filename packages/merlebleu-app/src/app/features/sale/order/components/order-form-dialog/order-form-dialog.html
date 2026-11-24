@@ -1,12 +1,13 @@
 <p-dialog
   [(visible)]="visible"
   [modal]="true"
-  [style]="{ width: '70rem' }"
+  [style]="{ width: '80rem' }"
   [header]="header"
   [maximizable]="true"
 >
   <order-form
     [orderData]="orderData()"
+    [isEdit]="isEdit()"
     [isLoading]="isLoading()"
     (orderSubmit)="orderSubmit.emit($event)"
   />

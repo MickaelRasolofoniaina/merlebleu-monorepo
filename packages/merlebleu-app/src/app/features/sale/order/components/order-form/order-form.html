@@ -1,55 +1,16 @@
-<form class="flex flex-col gap-6">
-  <p-fieldset
-    legend="Informations générales"
-    styleClass="border border-dashed border-slate-200 rounded-xl"
-  >
-    <div class="flex flex-wrap gap-4">
-      <div class="flex flex-col gap-2 flex-none">
-        <label for="shopId" class="font-semibold text-slate-900 dark:text-white">
-          Boutique
-        </label>
-        <p-select
-          inputId="shopId"
-          name="shopId"
-          [(ngModel)]="order.shopId"
-          [options]="shops"
-          optionLabel="address"
-          optionValue="id"
-          placeholder="Sélectionnez une boutique"
-          appendTo="body"
-        />
-        @if (errorFor('shopId')) {
-        <small class="text-red-500">{{ errorFor('shopId') }}</small>
-        }
-      </div>
-      <div class="flex flex-col gap-2 flex-[3]">
-        <label for="orderDate" class="font-semibold text-slate-900 dark:text-white">
-          Date de commande
-        </label>
-        <p-datepicker
-          inputId="orderDate"
-          name="orderDate"
-          [ngModel]="orderDateValue"
-          (ngModelChange)="onOrderDateChange($event)"
-          [showIcon]="true"
-          dateFormat="dd/mm/yy"
-          class="w-full"
-          [maxDate]="now"
-          appendTo="body"
-        />
-        @if (errorFor('orderDate')) {
-        <small class="text-red-500">{{ errorFor('orderDate') }}</small>
-        }
-      </div>
-    </div>
-  </p-fieldset>
-
-  <p-fieldset legend="Client" styleClass="border border-dashed border-slate-200 rounded-xl">
+<form class="flex flex-col gap-6 lg:flex-row lg:items-start">
+<div
+  class="flex min-w-0 flex-1 flex-col gap-6 rounded-xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-900"
+>
+  <p class="text-sm text-slate-500">
+    Les champs marqués d'un <span class="text-red-500" aria-hidden="true">*</span> sont obligatoires.
+  </p>
+  <p-fieldset legend="1 · Client" styleClass="border border-dashed border-slate-200 rounded-xl">
     <div class="flex flex-col gap-4">
-      <div class="grid gap-4 [grid-template-columns:repeat(auto-fit,minmax(240px,1fr))]">
-        <div class="flex flex-col gap-2">
+      <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <div class="flex min-w-0 flex-col gap-2">
           <label for="customerName" class="font-semibold text-slate-900 dark:text-white">
-            Nom du client
+            Nom complet <span class="text-red-500" aria-hidden="true">*</span>
           </label>
           <input
             id="customerName"
@@ -57,7 +18,7 @@
             type="text"
             pInputText
             [(ngModel)]="order.customerName"
-            placeholder="Nom complet"
+            placeholder="Ex : Hanta Rakoto"
             class="w-full"
           />
           @if (errorFor('customerName')) {
@@ -66,7 +27,7 @@
         </div>
         <div class="flex flex-col gap-2">
           <label for="customerPhoneNumber" class="font-semibold text-slate-900 dark:text-white">
-            Numéro de téléphone
+            Téléphone <span class="text-red-500" aria-hidden="true">*</span>
           </label>
           <input
             id="customerPhoneNumber"
@@ -74,7 +35,7 @@
             type="text"
             pInputText
             [(ngModel)]="order.customerPhoneNumber"
-            placeholder="034xxxxxxx 032xxxxxxx"
+            placeholder="Ex : 0341234567 0321234567"
             class="w-full"
           />
           <small class="text-slate-500"> Un ou plusieurs numeros séparés par un espace. </small>
@@ -83,7 +44,22 @@
           }
         </div>
       </div>
-      <div class="grid gap-4 [grid-template-columns:repeat(auto-fit,minmax(240px,1fr))]">
+      <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <div class="flex flex-col gap-2 items-start">
+          <label for="isFromFacebook" class="font-semibold text-slate-900 dark:text-white">
+            Commande reçue par Facebook
+          </label>
+          <p-toggleSwitch
+            inputId="isFromFacebook"
+            name="isFromFacebook"
+            [(ngModel)]="order.isFromFacebook"
+            (ngModelChange)="onFromFacebookChange($event)"
+          />
+          @if (errorFor('isFromFacebook')) {
+          <small class="text-red-500">{{ errorFor('isFromFacebook') }}</small>
+          }
+        </div>
+        @if (order.isFromFacebook) {
         <div class="flex flex-col gap-2">
           <label for="customerFacebookName" class="font-semibold text-slate-900 dark:text-white">
             Compte Facebook
@@ -94,46 +70,35 @@
             type="text"
             pInputText
             [(ngModel)]="order.customerFacebookName"
-            placeholder="Compte Facebook (optionnel)"
+            placeholder="Ex : Hanta Rakoto"
             class="w-full"
           />
           @if (errorFor('customerFacebookName')) {
           <small class="text-red-500">{{ errorFor('customerFacebookName') }}</small>
           }
         </div>
-        <div class="flex flex-col gap-2 items-start">
-          <label for="isFromFacebook" class="font-semibold text-slate-900 dark:text-white">
-            Commande par Facebook
-          </label>
-          <p-toggleSwitch
-            inputId="isFromFacebook"
-            name="isFromFacebook"
-            [(ngModel)]="order.isFromFacebook"
-          />
-          @if (errorFor('isFromFacebook')) {
-          <small class="text-red-500">{{ errorFor('isFromFacebook') }}</small>
-          }
-        </div>
+        }
       </div>
     </div>
   </p-fieldset>
 
-  <p-fieldset legend="Commandes" styleClass="border border-dashed border-slate-200 rounded-xl">
+  <p-fieldset legend="2 · Articles" styleClass="border border-dashed border-slate-200 rounded-xl">
     <div class="mb-4 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-      <p class="text-slate-500">Ajoutez une ou plusieurs commandes.</p>
+      <p class="text-slate-500">Ajoutez un ou plusieurs articles.</p>
     </div>
     @if (errorFor('orderItems')) {
     <small class="text-red-500">{{ errorFor('orderItems') }}</small>
     }
 
     <div
-      class="border border-slate-200 rounded-xl p-4 mb-4 flex flex-col gap-4"
+      class="@container border border-slate-200 rounded-xl p-4 mb-4 flex flex-col gap-4"
       *ngFor="let item of order.orderItems; let i = index; trackBy: trackByIndex"
     >
       <div class="flex items-center justify-between">
-        <h4 class="text-base font-semibold">Commande numéro {{ i + 1 }}</h4>
+        <h4 class="text-base font-semibold">Article {{ i + 1 }}</h4>
         <p-button
           icon="pi pi-trash"
+          label="Supprimer"
           severity="danger"
           [outlined]="true"
           [disabled]="order.orderItems.length === 1"
@@ -141,10 +106,10 @@
         />
       </div>
       <div class="flex flex-col gap-4">
-        <div class="flex flex-nowrap gap-4">
-          <div class="flex flex-col gap-2 flex-none">
+        <div class="grid grid-cols-2 gap-4 @4xl:grid-cols-4">
+          <div class="flex min-w-0 flex-col gap-2">
             <label for="type-{{ i }}" class="font-semibold text-slate-900 dark:text-white">
-              Type
+              Type <span class="text-red-500" aria-hidden="true">*</span>
             </label>
             <p-select
               inputId="type-{{ i }}"
@@ -156,6 +121,7 @@
               [filter]="true"
               filterPlaceholder="Rechercher un type..."
               placeholder="Sélectionnez un type"
+              class="w-full"
               appendTo="body"
               (ngModelChange)="onArticleSelected(item)"
             />
@@ -163,56 +129,26 @@
             <small class="text-red-500">{{ errorFor('orderItems.' + i + '.type') }}</small>
             }
           </div>
-          <div class="flex flex-col gap-2 flex-none">
+          <div class="flex min-w-0 flex-col gap-2">
             <label for="size-{{ i }}" class="font-semibold text-slate-900 dark:text-white">
-              Taille / Nombre
+              Taille<span class="text-red-500" aria-hidden="true">*</span>
             </label>
             <p-inputNumber
               inputId="size-{{ i }}"
+              placeholder="Ex : 12"
               name="size-{{ i }}"
               [(ngModel)]="item.size"
               [min]="0"
+              class="w-full"
               (ngModelChange)="syncItemAmount(item)"
             />
             @if (errorFor('orderItems.' + i + '.size')) {
             <small class="text-red-500">{{ errorFor('orderItems.' + i + '.size') }}</small>
             }
           </div>
-          <div class="flex flex-col gap-2 flex-none">
-            <label for="unitPrice-{{ i }}" class="font-semibold text-slate-900 dark:text-white">
-              Prix unitaire
-            </label>
-            <p-inputNumber
-              inputId="unitPrice-{{ i }}"
-              name="unitPrice-{{ i }}"
-              [(ngModel)]="item.unitPrice"
-              [min]="0"
-              (ngModelChange)="syncItemAmount(item)"
-            />
-            @if (errorFor('orderItems.' + i + '.unitPrice')) {
-            <small class="text-red-500">{{ errorFor('orderItems.' + i + '.unitPrice') }}</small>
-            }
-          </div>
-          <div class="flex flex-col gap-2 flex-none">
-            <label for="itemTotal-{{ i }}" class="font-semibold text-slate-900 dark:text-white">
-              Montant
-            </label>
-            <p-inputNumber
-              inputId="itemTotal-{{ i }}"
-              name="itemTotal-{{ i }}"
-              [(ngModel)]="item.totalAmount"
-              [min]="0"
-              disabled=""
-            />
-            @if (errorFor('orderItems.' + i + '.totalAmount')) {
-            <small class="text-red-500">{{ errorFor('orderItems.' + i + '.totalAmount') }}</small>
-            }
-          </div>
-        </div>
-        <div class="flex flex-wrap gap-4">
-          <div class="flex flex-col gap-2 flex-1">
+          <div class="flex min-w-0 flex-col gap-2">
             <label for="shape-{{ i }}" class="font-semibold text-slate-900 dark:text-white">
-              Forme
+              Forme <span class="text-red-500" aria-hidden="true">*</span>
             </label>
             <p-select
               inputId="shape-{{ i }}"
@@ -227,27 +163,44 @@
             <small class="text-red-500">{{ errorFor('orderItems.' + i + '.shape') }}</small>
             }
           </div>
-          <div class="flex flex-col gap-2 flex-[3]">
-            <label for="text-{{ i }}" class="font-semibold text-slate-900 dark:text-white">
-              Texte (optionnel)
+          <div class="flex min-w-0 flex-col gap-2">
+            <label for="unitPrice-{{ i }}" class="font-semibold text-slate-900 dark:text-white">
+              Prix unitaire <span class="text-red-500" aria-hidden="true">*</span>
             </label>
-            <input
-              id="text-{{ i }}"
-              name="text-{{ i }}"
-              type="text"
-              pInputText
-              [(ngModel)]="item.text"
-              placeholder="Texte à mettre sur le gâteau (optionnel)"
+            <p-inputNumber
+              inputId="unitPrice-{{ i }}"
+              placeholder="Ex : 85 000"
+              name="unitPrice-{{ i }}"
+              [(ngModel)]="item.unitPrice"
+              [min]="0"
               class="w-full"
+              (ngModelChange)="syncItemAmount(item)"
             />
-            @if (errorFor('orderItems.' + i + '.text')) {
-            <small class="text-red-500">{{ errorFor('orderItems.' + i + '.text') }}</small>
+            @if (errorFor('orderItems.' + i + '.unitPrice')) {
+            <small class="text-red-500">{{ errorFor('orderItems.' + i + '.unitPrice') }}</small>
             }
           </div>
         </div>
         <div class="flex flex-col gap-2">
+          <label for="text-{{ i }}" class="font-semibold text-slate-900 dark:text-white">
+            Texte
+          </label>
+          <input
+            id="text-{{ i }}"
+            name="text-{{ i }}"
+            type="text"
+            pInputText
+            [(ngModel)]="item.text"
+            placeholder="Ex : Joyeux anniversaire Lova"
+            class="w-full"
+          />
+          @if (errorFor('orderItems.' + i + '.text')) {
+          <small class="text-red-500">{{ errorFor('orderItems.' + i + '.text') }}</small>
+          }
+        </div>
+        <div class="flex flex-col gap-2">
           <label for="decoration-{{ i }}" class="font-semibold text-slate-900 dark:text-white">
-            Décoration (optionnel)
+            Décoration
           </label>
           <input
             id="decoration-{{ i }}"
@@ -255,7 +208,7 @@
             type="text"
             pInputText
             [(ngModel)]="item.decoration"
-            placeholder="Décoration souhaitée (optionnel)"
+            placeholder="Ex : Fleurs en pâte d'amande, tons pastel bleu et blanc"
             class="w-full"
           />
           @if (errorFor('orderItems.' + i + '.decoration')) {
@@ -272,7 +225,7 @@
             pTextarea
             [(ngModel)]="item.remarks"
             rows="2"
-            placeholder="Ajouter des détails supplémentaires si nécessaire"
+            placeholder="Ex : Sans noix, moins sucré"
             class="w-full"
           ></textarea>
           @if (errorFor('orderItems.' + i + '.remarks')) {
@@ -281,62 +234,92 @@
         </div>
       </div>
     </div>
-    <div class="flex justify-end">
-      <p-button label="Autre commande" icon="pi pi-plus" (onClick)="addOrderItem()" />
-    </div>
+    <p-button
+      label="Ajouter un autre article"
+      icon="pi pi-plus"
+      styleClass="w-full"
+      class="block w-full"
+      (onClick)="addOrderItem()"
+      severity="contrast"
+    />
   </p-fieldset>
 
-  <p-fieldset legend="Livraison" styleClass="border border-dashed border-slate-200 rounded-xl">
+  <p-fieldset legend="3 · Livraison" styleClass="border border-dashed border-slate-200 rounded-xl">
     <div class="flex flex-col gap-4">
-      <div class="flex flex-nowrap gap-4">
-        <div class="flex flex-col gap-2 flex-none">
+      <div class="flex flex-col gap-2">
+        <label for="shopId" class="font-semibold text-slate-900 dark:text-white">
+          Boutique <span class="text-red-500" aria-hidden="true">*</span>
+        </label>
+        <p-select
+          inputId="shopId"
+          name="shopId"
+          [(ngModel)]="order.shopId"
+          [options]="shops"
+          optionLabel="address"
+          optionValue="id"
+          placeholder="Sélectionnez une boutique"
+          class="w-full"
+          appendTo="body"
+        />
+        @if (errorFor('shopId')) {
+        <small class="text-red-500">{{ errorFor('shopId') }}</small>
+        }
+      </div>
+      <div class="grid gap-4 [grid-template-columns:repeat(auto-fit,minmax(180px,1fr))]">
+        <div class="flex min-w-0 flex-col gap-2">
           <label for="deliveryDate" class="font-semibold text-slate-900 dark:text-white">
-            Date de livraison
+            Date de livraison <span class="text-red-500" aria-hidden="true">*</span>
           </label>
           <p-datepicker
             inputId="deliveryDate"
+            placeholder="Ex : 25/12/2026"
             name="deliveryDate"
             [ngModel]="deliveryDateValue"
             (ngModelChange)="onDeliveryDateChange($event)"
             [showIcon]="true"
             dateFormat="dd/mm/yy"
-            [minDate]="now"
+            [minDate]="isEdit ? null : now"
+            class="w-full"
             appendTo="body"
           />
           @if (errorFor('deliveryDate')) {
           <small class="text-red-500">{{ errorFor('deliveryDate') }}</small>
           }
         </div>
-        <div class="flex flex-col gap-2 flex-none">
+        <div class="flex min-w-0 flex-col gap-2">
           <label for="deliveryStartTime" class="font-semibold text-slate-900 dark:text-white">
-            De
+            De <span class="text-red-500" aria-hidden="true">*</span>
           </label>
           <p-datepicker
             inputId="deliveryStartTime"
+            placeholder="Ex : 14:00"
             name="deliveryStartTime"
             [ngModel]="deliveryStartTimeValue"
             (ngModelChange)="onDeliveryStartTimeChange($event)"
             [showIcon]="true"
             [timeOnly]="true"
             hourFormat="24"
+            class="w-full"
             appendTo="body"
           />
           @if (errorFor('deliveryStartTime')) {
           <small class="text-red-500">{{ errorFor('deliveryStartTime') }}</small>
           }
         </div>
-        <div class="flex flex-col gap-2 flex-none">
+        <div class="flex min-w-0 flex-col gap-2">
           <label for="deliveryEndTime" class="font-semibold text-slate-900 dark:text-white">
-            à
+            A <span class="text-red-500" aria-hidden="true">*</span>
           </label>
           <p-datepicker
             inputId="deliveryEndTime"
+            placeholder="Ex : 16:00"
             name="deliveryEndTime"
             [ngModel]="deliveryEndTimeValue"
             (ngModelChange)="onDeliveryEndTimeChange($event)"
             [showIcon]="true"
             [timeOnly]="true"
             hourFormat="24"
+            class="w-full"
             appendTo="body"
           />
           @if (errorFor('deliveryEndTime')) {
@@ -347,7 +330,7 @@
       <div class="grid gap-4 [grid-template-columns:repeat(auto-fit,minmax(240px,1fr))]">
         <div class="flex flex-col gap-2">
           <label for="deliveryAddress" class="font-semibold text-slate-900 dark:text-white">
-            Adresse de livraison (optionnel)
+            Adresse de livraison
           </label>
           <input
             id="deliveryAddress"
@@ -355,7 +338,7 @@
             type="text"
             pInputText
             [(ngModel)]="order.deliveryAddress"
-            placeholder="Adresse complète (optionnel)"
+            placeholder="Ex : Lot IVG 12 Analakely, Antananarivo"
             class="w-full"
           />
           @if (errorFor('deliveryAddress')) {
@@ -373,7 +356,7 @@
           pTextarea
           [(ngModel)]="order.remarks"
           rows="3"
-          placeholder="Tout autres remarques concernant la commande"
+          placeholder="Ex : Livrer à la réception, appeler avant d'arriver"
           class="w-full"
         ></textarea>
         @if (errorFor('remarks')) {
@@ -383,109 +366,123 @@
     </div>
   </p-fieldset>
 
-  <p-fieldset legend="Paiement" styleClass="border border-dashed border-slate-200 rounded-xl">
-    <div class="flex flex-col gap-4">
-      <div class="flex flex-nowrap gap-4">
-        <div class="flex flex-col gap-2 flex-none">
-          <label for="totalAmount" class="font-semibold text-slate-900 dark:text-white">
-            Montant total
-          </label>
-          <p-inputNumber
-            inputId="totalAmount"
-            name="totalAmount"
-            [(ngModel)]="order.totalAmount"
-            [min]="0"
-            (ngModelChange)="updateBalanceAmount()"
-            disabled=""
-          />
-          @if (errorFor('totalAmount')) {
-          <small class="text-red-500">{{ errorFor('totalAmount') }}</small>
-          }
-        </div>
-        <div class="flex flex-col gap-2 flex-none">
-          <label for="deliveryFee" class="font-semibold text-slate-900 dark:text-white">
-            Frais de livraison / Autres
-          </label>
-          <p-inputNumber
-            inputId="deliveryFee"
-            name="deliveryFee"
-            [(ngModel)]="order.deliveryFee"
-            [min]="0"
-            (ngModelChange)="updateBalanceAmount()"
-          />
-          @if (errorFor('deliveryFee')) {
-          <small class="text-red-500">{{ errorFor('deliveryFee') }}</small>
-          }
-        </div>
-        <div class="flex flex-col gap-2 flex-none">
-          <label for="paidAmount" class="font-semibold text-slate-900 dark:text-white">
-            Avance
-          </label>
-          <p-inputNumber
-            inputId="paidAmount"
-            name="paidAmount"
-            [(ngModel)]="order.paidAmount"
-            [min]="0"
-            [max]="order.totalAmount + order.deliveryFee"
-            (ngModelChange)="updateBalanceAmount()"
-          />
-          @if (errorFor('paidAmount')) {
-          <small class="text-red-500">{{ errorFor('paidAmount') }}</small>
-          }
-        </div>
-        <div class="flex flex-col gap-2 flex-none">
-          <label for="balanceAmount" class="font-semibold text-slate-900 dark:text-white">
-            Reste
-          </label>
-          <p-inputNumber
-            inputId="balanceAmount"
-            name="balanceAmount"
-            [(ngModel)]="order.balanceAmount"
-            [min]="0"
-            disabled=""
-          />
-          @if (errorFor('balanceAmount')) {
-          <small class="text-red-500">{{ errorFor('balanceAmount') }}</small>
-          }
-        </div>
-      </div>
-      <div class="flex flex-nowrap gap-4">
-        <div class="flex flex-col gap-2 flex-none">
-          <label for="paymentMethodId" class="font-semibold text-slate-900 dark:text-white">
-            Methode de paiement
-          </label>
-          <p-select
-            inputId="paymentMethodId"
-            name="paymentMethodId"
-            [(ngModel)]="order.paymentMethodId"
-            [options]="paymentMethods"
-            optionLabel="name"
-            optionValue="id"
-            placeholder="Methode de paiement"
-            appendTo="body"
-          />
-          @if (errorFor('paymentMethodId')) {
-          <small class="text-red-500">{{ errorFor('paymentMethodId') }}</small>
-          }
-        </div>
-      </div>
-    </div>
-  </p-fieldset>
+</div>
 
-  <div class="flex flex-col gap-3 lg:flex-row lg:justify-end lg:items-center">
-    <p-button
-      label="Reinitialiser"
-      icon="pi pi-refresh"
-      severity="warn"
-      [disabled]="isLoading"
-      (onClick)="reset()"
-    />
-    <p-button
-      label="Enregistrer"
-      icon="pi pi-check"
-      [disabled]="isLoading"
-      [loading]="isLoading"
-      (onClick)="submit()"
-    />
-  </div>
+  <aside
+    class="flex w-full flex-col gap-4 rounded-xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-900 lg:sticky lg:top-0 lg:w-96 lg:shrink-0"
+  >
+    <section class="flex flex-col gap-4">
+      <h2 class="text-base font-bold text-slate-900 dark:text-white">4 · Récapitulatif</h2>
+
+      <dl class="grid grid-cols-[1fr_auto] gap-x-3 gap-y-2 text-sm">
+        <ng-container *ngFor="let item of order.orderItems; let i = index; trackBy: trackByIndex">
+          <dt class="text-slate-500">{{ item.type || 'Article ' + (i + 1) }} × {{ item.size }}</dt>
+          <dd class="text-right">{{ item.totalAmount | number }} Ar</dd>
+        </ng-container>
+        <dt class="text-slate-500">Livraison</dt>
+        <dd class="text-right">
+          {{ formatDeliveryDate() }} {{ order.deliveryStartTime }}-{{ order.deliveryEndTime }}
+        </dd>
+        <dt class="text-slate-500">Montant des commandes</dt>
+        <dd class="text-right">{{ order.totalAmount | number }} Ar</dd>
+      </dl>
+
+      <div class="flex flex-col gap-2">
+        <label for="deliveryFee" class="font-semibold text-slate-900 dark:text-white">
+          Frais de livraison / Autres
+        </label>
+        <p-inputNumber
+          inputId="deliveryFee"
+          placeholder="Ex : 5 000"
+          name="deliveryFee"
+          [(ngModel)]="order.deliveryFee"
+          [min]="0"
+          (ngModelChange)="updateBalanceAmount()"
+          class="w-full"
+        />
+        @if (errorFor('deliveryFee')) {
+        <small class="text-red-500">{{ errorFor('deliveryFee') }}</small>
+        }
+      </div>
+
+      <div
+        class="flex items-center justify-between border-t border-slate-200 pt-3 font-bold text-slate-900 dark:text-white"
+      >
+        <span>Total</span>
+        <span class="text-lg">{{ order.totalAmount + order.deliveryFee | number }} Ar</span>
+      </div>
+      @if (errorFor('totalAmount')) {
+      <small class="text-red-500">{{ errorFor('totalAmount') }}</small>
+      }
+
+      <div class="flex flex-col gap-2">
+        <label for="paidAmount" class="font-semibold text-slate-900 dark:text-white">
+          Avance versée
+        </label>
+        <p-inputNumber
+          inputId="paidAmount"
+          placeholder="Ex : 40 000"
+          name="paidAmount"
+          [(ngModel)]="order.paidAmount"
+          [min]="0"
+          [max]="order.totalAmount + order.deliveryFee"
+          (ngModelChange)="updateBalanceAmount()"
+          class="w-full"
+        />
+        @if (errorFor('paidAmount')) {
+        <small class="text-red-500">{{ errorFor('paidAmount') }}</small>
+        }
+      </div>
+
+      <div class="flex flex-col gap-2">
+        <label for="paymentMethodId" class="font-semibold text-slate-900 dark:text-white">
+          Methode de paiement <span class="text-red-500" aria-hidden="true">*</span>
+        </label>
+        <p-select
+          inputId="paymentMethodId"
+          name="paymentMethodId"
+          [(ngModel)]="order.paymentMethodId"
+          [options]="paymentMethods"
+          optionLabel="name"
+          optionValue="id"
+          placeholder="Methode de paiement"
+          class="w-full"
+          appendTo="body"
+        />
+        @if (errorFor('paymentMethodId')) {
+        <small class="text-red-500">{{ errorFor('paymentMethodId') }}</small>
+        }
+      </div>
+
+      <div
+        class="flex items-center justify-between rounded-lg bg-amber-100 px-3 py-2.5 font-semibold text-amber-900"
+      >
+        <span>Reste à payer</span>
+        <span>{{ order.balanceAmount | number }} Ar</span>
+      </div>
+      @if (errorFor('balanceAmount')) {
+      <small class="text-red-500">{{ errorFor('balanceAmount') }}</small>
+      }
+    </section>
+
+    <div class="flex flex-col gap-2">
+      <p-button
+        label="Enregistrer la commande"
+        icon="pi pi-check"
+        styleClass="w-full"
+        [disabled]="isLoading"
+        [loading]="isLoading"
+        (onClick)="submit()"
+      />
+      <p-button
+        label="Annuler"
+        icon="pi pi-refresh"
+        severity="warn"
+        styleClass="w-full"
+        [outlined]="true"
+        [disabled]="isLoading"
+        (onClick)="reset()"
+      />
+    </div>
+  </aside>
 </form>

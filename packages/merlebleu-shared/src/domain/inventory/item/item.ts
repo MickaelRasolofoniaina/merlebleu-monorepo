@@ -9,5 +9,4 @@ export interface Item {
   label: string;
   unitPrice: number;
   type: ItemType;
-  maxRetentionDays: number;
 }

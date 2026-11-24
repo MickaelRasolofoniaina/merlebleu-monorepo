@@ -1,21 +1,28 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, ViewChild, inject, signal } from '@angular/core';
+import { Component, DestroyRef, OnInit, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { finalize } from 'rxjs';
-import { TableModule } from 'primeng/table';
+import { Subject, debounceTime, finalize } from 'rxjs';
+import { Popover, PopoverModule } from 'primeng/popover';
 import {
   CreateOrderDto,
+  DashboardOrderListSummary,
   DEFAULT_PAGE_SIZE,
   Order,
   OrderDisplayMode,
-  OrderItemRowDto,
   OrderStatus,
+  PaymentMethod,
   UpdateOrderDto,
 } from '@merlebleu/shared';
-import { OrderItemRowFilters, OrderService } from '../../order.service';
+import { OrderService } from '../../order.service';
+import { DashboardService } from '@features/dashboard/dashboard.service';
+import { formatUnitPrice } from '@shared/utils/number';
 import { ShopService } from '@features/shop/shop-list/shop.service';
+import { PaymentService } from '@features/sale/payment/payment.service';
+import { DialogModule } from 'primeng/dialog';
 import { Button } from 'primeng/button';
+import { CheckboxModule } from 'primeng/checkbox';
 import { BadgeModule } from 'primeng/badge';
 import { InputTextModule } from 'primeng/inputtext';
 import { DatePickerModule } from 'primeng/datepicker';
@@ -34,7 +41,8 @@ import { Shop } from '@merlebleu/shared';
 import { UserPreferencesService } from '@shared/services/user-preferences.service';
 import { OrderDetailDialog } from '../../components/order-detail-dialog/order-detail-dialog';
 import { OrderFormDialog } from '../../components/order-form-dialog/order-form-dialog';
-import { PastryOrderTable } from '../../components/pastry-order-table/pastry-order-table';
+import { OrderCashTable } from '../../components/order-cash-table/order-cash-table';
+import { OrderAgendaView } from '../../components/order-agenda-view/order-agenda-view';
 import { OrderCalendarView } from '../../components/order-calendar-view/order-calendar-view';
 import { OrderCountCard } from '@shared/components/order-count-card/order-count-card';
 
@@ -46,43 +54,45 @@ type ListOrderDisplayMode = OrderDisplayMode | typeof CALENDAR_VIEW;
   imports: [
     CommonModule,
     FormsModule,
-    TableModule,
+    PopoverModule,
     Button,
+    CheckboxModule,
     BadgeModule,
     InputTextModule,
     DatePickerModule,
     SelectModule,
     SelectButtonModule,
+    DialogModule,
     OrderDetailDialog,
     OrderFormDialog,
-    PastryOrderTable,
+    OrderCashTable,
     OrderCalendarView,
+    OrderAgendaView,
     OrderCountCard,
   ],
   templateUrl: './list-order.html',
   styleUrl: './list-order.scss',
 })
 export class ListOrder implements OnInit {
-  @ViewChild(OrderFormDialog) private orderFormDialog!: OrderFormDialog;
-
   private readonly orderService = inject(OrderService);
   private readonly shopService = inject(ShopService);
+  private readonly paymentService = inject(PaymentService);
+  private readonly dashboardService = inject(DashboardService);
   private readonly userPreferencesService = inject(UserPreferencesService);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
+  private readonly destroyRef = inject(DestroyRef);
 
   protected readonly OrderDisplayMode = OrderDisplayMode;
   protected readonly CALENDAR_VIEW = CALENDAR_VIEW;
   protected displayMode = signal<ListOrderDisplayMode>(OrderDisplayMode.STANDARD);
   protected displayModeOptions = [
-    { label: 'Standard', value: OrderDisplayMode.STANDARD },
-    { label: 'Détaillé', value: OrderDisplayMode.PASTRY },
-    { label: 'Calendrier', value: CALENDAR_VIEW },
+    { label: 'Liste', icon: 'pi pi-list', value: OrderDisplayMode.STANDARD },
+    { label: 'Carte', icon: 'pi pi-table', value: OrderDisplayMode.PASTRY },
+    { label: 'Calendrier', icon: 'pi pi-calendar', value: CALENDAR_VIEW },
   ];
 
   protected orders = signal<Order[]>([]);
-  protected orderItemRows = signal<OrderItemRowDto[]>([]);
-  protected pastryFilters: OrderItemRowFilters = {};
   protected calendarOrders = signal<Order[]>([]);
   protected isCalendarLoading = false;
   private calendarRange = this.getDefaultCalendarRange();
@@ -94,6 +104,12 @@ export class ListOrder implements OnInit {
   protected toPrepareCount = signal(0);
   protected toDeliverCount = signal(0);
   protected lateCount = signal(0);
+  protected orderListSummary = signal<DashboardOrderListSummary>({
+    balanceToCollect: 0,
+    collectedToday: 0,
+    toDeliverToday: 0,
+    toDeliverThisWeek: 0,
+  });
   protected readonly isOrderLate = isOrderLate;
 
   protected filters = {
@@ -103,6 +119,17 @@ export class ListOrder implements OnInit {
     orderStatus: '',
     shopId: getUserShopId(),
   };
+
+  protected includeDelivered = false;
+
+  protected draft = {
+    orderDate: null as Date | null,
+    deliveryDate: null as Date | null,
+    orderStatus: '',
+    shopId: getUserShopId(),
+  };
+
+  private readonly searchChange$ = new Subject<void>();
 
   protected statusOptions = ORDER_STATUSES.map((s) => ({
     label: s.label,
@@ -117,10 +144,23 @@ export class ListOrder implements OnInit {
   protected isFormLoading = false;
   protected displayOrderFormDialog = false;
 
+  protected paymentMethods = signal<PaymentMethod[]>([]);
+  protected orderToDeliver = signal<Order | null>(null);
+  protected displayDeliverDialog = false;
+  protected deliverPaymentMethodId: string | null = null;
+  protected isDelivering = false;
+  protected readonly OrderStatus = OrderStatus;
+
   private hasManualDisplayMode = false;
 
   ngOnInit(): void {
+    this.searchChange$
+      .pipe(debounceTime(400), takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => this.applyFilters());
     this.shopService.getAll().subscribe((shops) => this.shops.set(shops));
+    this.paymentService.getAllPaymentMethods().subscribe((paymentMethods) => {
+      this.paymentMethods.set(paymentMethods);
+    });
     this.loadStatusCounts();
     this.openOrderFromQueryParam();
 
@@ -141,19 +181,21 @@ export class ListOrder implements OnInit {
   }
 
   private openOrderFromQueryParam(): void {
-    const orderId = this.route.snapshot.queryParamMap.get('orderId');
-    if (!orderId) {
-      return;
-    }
+    this.route.queryParamMap.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((params) => {
+      const orderId = params.get('orderId');
+      if (!orderId) {
+        return;
+      }
 
-    this.orderService.getOrderById(orderId).subscribe((order) => {
-      this.openOrderDetail(order);
-    });
+      this.orderService.getOrderById(orderId).subscribe((order) => {
+        this.openOrderDetail(order);
+      });
 
-    void this.router.navigate([], {
-      relativeTo: this.route,
-      queryParams: {},
-      replaceUrl: true,
+      void this.router.navigate([], {
+        relativeTo: this.route,
+        queryParams: {},
+        replaceUrl: true,
+      });
     });
   }
 
@@ -166,11 +208,6 @@ export class ListOrder implements OnInit {
   protected loadOrders(page = 1, limit = this.rows): void {
     if (this.displayMode() === CALENDAR_VIEW) {
       this.loadCalendarOrders();
-      return;
-    }
-
-    if (this.displayMode() === OrderDisplayMode.PASTRY) {
-      this.loadOrderItemRows(page, limit);
       return;
     }
 
@@ -192,6 +229,9 @@ export class ListOrder implements OnInit {
     if (this.filters.shopId) {
       filterParams['shopId'] = this.filters.shopId;
     }
+    if (!this.includeDelivered) {
+      filterParams['excludeDelivered'] = true;
+    }
 
     this.orderService
       .listOrders({ page, limit }, filterParams)
@@ -208,35 +248,25 @@ export class ListOrder implements OnInit {
       });
   }
 
-  private loadOrderItemRows(page: number, limit: number): void {
-    this.isLoading = true;
-
-    this.orderService
-      .listOrderItems({ page, limit }, this.pastryFilters)
-      .pipe(
-        finalize(() => {
-          this.isLoading = false;
-        }),
-      )
-      .subscribe({
-        next: (response) => {
-          this.orderItemRows.set(response.data);
-          this.totalRecords = response.total;
-        },
-      });
+  protected formatAmount(value: number): string {
+    return `${formatUnitPrice(value)} Ar`;
   }
 
   private loadStatusCounts(): void {
+    this.dashboardService
+      .getOrderListSummary()
+      .subscribe((summary) => this.orderListSummary.set(summary));
+
     this.orderService
-      .listOrdersToPrepare({ page: 1, limit: 1 })
+      .listOrderItemsToPrepare({ page: 1, limit: 1 })
       .subscribe((response) => this.toPrepareCount.set(response.total));
 
     this.orderService
-      .listOrdersToDeliver({ page: 1, limit: 1 })
+      .listOrderItemsToDeliver({ page: 1, limit: 1 })
       .subscribe((response) => this.toDeliverCount.set(response.total));
 
     this.orderService
-      .listOrdersLate({ page: 1, limit: 1 })
+      .listOrderItemsLate({ page: 1, limit: 1 })
       .subscribe((response) => this.lateCount.set(response.total));
   }
 
@@ -281,22 +311,59 @@ export class ListOrder implements OnInit {
     this.loadCalendarOrders();
   }
 
-  protected onPastryFilter(filters: OrderItemRowFilters): void {
-    this.pastryFilters = filters;
-    this.first = 0;
-    this.loadOrders(1, this.rows);
-  }
-
-  protected onPastryReset(): void {
-    this.pastryFilters = {};
-    this.first = 0;
-    this.loadOrders(1, this.rows);
-  }
-
   protected onPageChange(event: { first: number; rows: number }): void {
     this.first = event.first;
     this.rows = event.rows;
     this.loadOrders(getPageFromFirstRows(event.first, event.rows), event.rows);
+  }
+
+  protected onSearchChange(): void {
+    this.searchChange$.next();
+  }
+
+  protected get activeFilterCount(): number {
+    return this.activeChips.length;
+  }
+
+  protected get activeChips(): { key: 'orderDate' | 'deliveryDate' | 'shopId' | 'orderStatus'; label: string }[] {
+    const chips: { key: 'orderDate' | 'deliveryDate' | 'shopId' | 'orderStatus'; label: string }[] = [];
+    const { shopId, orderStatus, orderDate, deliveryDate } = this.filters;
+
+    if (shopId) {
+      const shop = this.shops().find((s) => s.id === shopId);
+      chips.push({ key: 'shopId', label: `Boutique : ${shop?.address ?? '...'}` });
+    }
+    if (orderStatus) {
+      chips.push({ key: 'orderStatus', label: `Statut : ${getOrderStatusLabel(orderStatus as OrderStatus)}` });
+    }
+    if (deliveryDate) {
+      chips.push({ key: 'deliveryDate', label: `Livraison : ${deliveryDate.toLocaleDateString('fr-FR')}` });
+    }
+    if (orderDate) {
+      chips.push({ key: 'orderDate', label: `Commande : ${orderDate.toLocaleDateString('fr-FR')}` });
+    }
+
+    return chips;
+  }
+
+  protected openFilters(popover: Popover, event: Event): void {
+    this.draft = {
+      orderDate: this.filters.orderDate,
+      deliveryDate: this.filters.deliveryDate,
+      orderStatus: this.filters.orderStatus,
+      shopId: this.filters.shopId,
+    };
+    popover.toggle(event);
+  }
+
+  protected applyDraft(): void {
+    this.filters = { ...this.filters, ...this.draft };
+    this.applyFilters();
+  }
+
+  protected removeFilter(key: 'orderDate' | 'deliveryDate' | 'shopId' | 'orderStatus'): void {
+    this.filters = { ...this.filters, [key]: key === 'orderStatus' ? '' : null };
+    this.applyFilters();
   }
 
   protected applyFilters(): void {
@@ -331,18 +398,6 @@ export class ListOrder implements OnInit {
     this.displayOrderDetailDialog = true;
   }
 
-  protected onPastryViewDetail(orderId: string): void {
-    this.orderService.getOrderById(orderId).subscribe((order) => {
-      this.openOrderDetail(order);
-    });
-  }
-
-  protected onPastryEdit(orderId: string): void {
-    this.orderService.getOrderById(orderId).subscribe((order) => {
-      this.openEditOrder(order);
-    });
-  }
-
   private truncate(value: string, maxLength: number): string {
     if (value.length <= maxLength) {
       return value;
@@ -352,9 +407,7 @@ export class ListOrder implements OnInit {
   }
 
   protected openAddOrder(): void {
-    this.editingOrderId = null;
-    this.editingOrder = undefined;
-    this.displayOrderFormDialog = true;
+    void this.router.navigate(['/sale/order/add']);
   }
 
   protected openEditOrder(order: Order): void {
@@ -365,6 +418,42 @@ export class ListOrder implements OnInit {
       shopId: order.shop?.id ?? '',
     } as UpdateOrderDto;
     this.displayOrderFormDialog = true;
+  }
+
+  protected openDeliverDialog(order: Order): void {
+    this.orderToDeliver.set(order);
+    this.deliverPaymentMethodId = order.paymentMethod?.id ?? null;
+    this.displayDeliverDialog = true;
+  }
+
+  protected cancelDeliver(): void {
+    this.displayDeliverDialog = false;
+    this.orderToDeliver.set(null);
+    this.deliverPaymentMethodId = null;
+  }
+
+  protected confirmDeliver(): void {
+    const order = this.orderToDeliver();
+    if (!order || !this.deliverPaymentMethodId) {
+      return;
+    }
+
+    this.isDelivering = true;
+
+    this.orderService
+      .deliverOrder(order.id, this.deliverPaymentMethodId)
+      .pipe(
+        finalize(() => {
+          this.isDelivering = false;
+        }),
+      )
+      .subscribe({
+        next: () => {
+          this.cancelDeliver();
+          this.loadOrders(getPageFromFirstRows(this.first, this.rows), this.rows);
+          this.loadStatusCounts();
+        },
+      });
   }
 
   protected handleOrderSubmit(order: CreateOrderDto | UpdateOrderDto): void {
@@ -384,9 +473,6 @@ export class ListOrder implements OnInit {
       .subscribe({
         next: () => {
           this.displayOrderFormDialog = false;
-          if (!isEditing) {
-            this.orderFormDialog.resetForm();
-          }
           this.loadOrders(getPageFromFirstRows(this.first, this.rows), this.rows);
           this.loadStatusCounts();
         },

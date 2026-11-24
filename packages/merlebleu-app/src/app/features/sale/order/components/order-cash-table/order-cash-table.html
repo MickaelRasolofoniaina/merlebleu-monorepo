@@ -1,0 +1,106 @@
+<div class="mb-3 flex flex-wrap items-baseline gap-2 text-sm text-slate-600 dark:text-slate-300">
+  <span>Reste à encaisser sur cette page :</span>
+  <span class="text-xl font-bold tabular-nums text-amber-700 dark:text-amber-400">{{
+    pageBalance() | number: '1.0-2'
+  }} Ar</span>
+</div>
+
+<p-table
+  [value]="orders()"
+  [loading]="loading()"
+  [tableStyle]="{ 'min-width': '60rem' }"
+  [paginator]="true"
+  [rows]="pageSize()"
+  [first]="first()"
+  [totalRecords]="totalRecords()"
+  [lazy]="true"
+  (onPage)="onPage($event)"
+>
+  <ng-template #header>
+    <tr>
+      <th>Client</th>
+      <th class="text-right!">Reste à payer</th>
+      <th>Total / Payé</th>
+      <th>Livraison</th>
+      <th>Statut</th>
+      <th class="text-center!">Actions</th>
+    </tr>
+  </ng-template>
+  <ng-template #body let-order>
+    <tr>
+      <td>
+        <button
+          type="button"
+          class="cursor-pointer font-semibold text-[#1b4fb6] hover:underline dark:text-blue-400"
+          (click)="viewDetail.emit(order)"
+        >
+          {{ order.customerName }}
+        </button>
+        <div class="text-xs text-slate-500 tabular-nums">{{ order.customerPhoneNumber }}</div>
+      </td>
+      <td class="text-right!">
+        @if (order.balanceAmount > 0) {
+        <span class="text-xl font-bold tabular-nums text-amber-700 dark:text-amber-400">{{
+          order.balanceAmount | number: '1.0-2'
+        }} Ar</span>
+        } @else {
+        <span class="font-semibold text-green-700 dark:text-green-400">Soldé</span>
+        }
+      </td>
+      <td class="text-sm text-slate-600 tabular-nums dark:text-slate-300">
+        {{ order.totalAmount | number: '1.0-2' }} Ar
+        <span class="text-slate-400">·</span>
+        payé {{ order.paidAmount | number: '1.0-2' }} Ar
+      </td>
+      <td>
+        <div [class]="isLate(order) ? 'font-semibold text-red-600 dark:text-red-400' : 'font-medium'">
+          {{ getDayLabel(order) }} · {{ getTime(order) }}
+        </div>
+        <div class="text-xs text-slate-500">{{ order.shop.address }}</div>
+      </td>
+      <td>
+        <p-badge
+          [value]="getStatus(order.orderStatus)"
+          [severity]="getStatusColor(order.orderStatus)"
+          style="height: fit-content"
+        />
+      </td>
+      <td class="text-center!">
+        <div class="flex flex-wrap items-center justify-center gap-2">
+          @if (canComplete(order)) {
+          <p-button
+            icon="pi pi-check"
+            severity="success"
+            size="small"
+            ariaLabel="Marquer comme préparée"
+            [loading]="isCompleting(order.id)"
+            (onClick)="complete.emit(order.id)"
+          />
+          }
+          @if (showDeliverAction() && order.orderStatus === OrderStatus.TODELIVER) {
+          <p-button
+            [label]="order.balanceAmount > 0 ? 'Livrer et encaisser' : 'Livrer'"
+            severity="success"
+            size="small"
+            (onClick)="deliver.emit(order)"
+          />
+          }
+          @if (showEditAction()) {
+          <p-button
+            icon="pi pi-pencil"
+            severity="warn"
+            size="small"
+            ariaLabel="Modifier"
+            (onClick)="editOrder.emit(order)"
+          />
+          }
+        </div>
+      </td>
+    </tr>
+  </ng-template>
+  <ng-template #emptymessage>
+    <tr>
+      <td colspan="6" class="py-6 text-center">Aucune commande à afficher</td>
+    </tr>
+  </ng-template>
+</p-table>

@@ -1,0 +1,86 @@
+<div class="flex justify-between items-center mb-4">
+  <h2 class="text-2xl font-bold">Aujourd'hui - Commandes à préparer</h2>
+</div>
+
+<order-count-card
+  class="mb-4"
+  color="red"
+  icon="pi pi-box"
+  [count]="totalRecords"
+  label="à préparer aujourd'hui"
+/>
+
+<div class="flex justify-start mb-4">
+  <p-selectButton
+    [options]="displayModeOptions"
+    [(ngModel)]="displayMode"
+    (onChange)="onDisplayModeChange()"
+    optionLabel="label"
+    optionValue="value"
+  >
+    <ng-template #item let-item>
+      <i [class]="item.icon" [attr.title]="item.label"></i>
+    </ng-template>
+  </p-selectButton>
+</div>
+
+<p-confirm-dialog />
+
+<div class="flex flex-wrap gap-3 items-center mb-4">
+  <input
+    pInputText
+    [(ngModel)]="filters.customerName"
+    placeholder="Nom du client..."
+    class="w-52"
+  />
+  <p-select
+    [(ngModel)]="filters.shopId"
+    [options]="shops()"
+    optionLabel="address"
+    optionValue="id"
+    placeholder="Toutes les boutiques"
+    class="w-52"
+    [showClear]="true"
+  />
+  <p-button label="Filtrer" icon="pi pi-search" (onClick)="applyFilters()" [disabled]="isLoading" severity="info" />
+  <p-button
+    label="Réinitialiser"
+    icon="pi pi-refresh"
+    severity="contrast"
+    (onClick)="resetFilters()"
+    [disabled]="isLoading"
+  />
+</div>
+
+@if (displayMode() === OrderDisplayMode.STANDARD) {
+<order-cash-table
+  [orders]="orders()"
+  [loading]="isLoading"
+  [totalRecords]="totalRecords"
+  [first]="first"
+  [pageSize]="rows"
+  [showEditAction]="false"
+  [showDeliverAction]="false"
+  [showCompleteAction]="true"
+  [completingOrderIds]="completingIds()"
+  (pageChange)="onPageChange($event)"
+  (viewDetail)="openOrderDetail($event)"
+  (complete)="onComplete($event)"
+/>
+} @else {
+<order-agenda-view
+  [orders]="orders()"
+  [loading]="isLoading"
+  [totalRecords]="totalRecords"
+  [first]="first"
+  [pageSize]="rows"
+  [showCompleteAction]="true"
+  [showDeliverAction]="false"
+  [completingOrderIds]="completingIds()"
+  (pageChange)="onPageChange($event)"
+  (viewDetail)="openOrderDetail($event)"
+  (complete)="onComplete($event)"
+/>
+}
+
+<order-detail-dialog [order]="selectedOrder()" [(visible)]="displayOrderDetailDialog" />

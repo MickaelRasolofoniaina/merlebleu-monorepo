@@ -43,18 +43,4 @@
       <small class="text-red-500 mt-1 block">{{ getFieldError('type') }}</small>
     }
   </div>
-  <div>
-    <label for="itemMaxRetentionDays" class="block mb-2">Jours de Rétention</label>
-    <p-inputnumber
-      inputId="itemMaxRetentionDays"
-      [(ngModel)]="item.maxRetentionDays"
-      name="maxRetentionDays"
-      [min]="0"
-      fluid
-      required
-    />
-    @if (getFieldError('maxRetentionDays')) {
-      <small class="text-red-500 mt-1 block">{{ getFieldError('maxRetentionDays') }}</small>
-    }
-  </div>
 </form>

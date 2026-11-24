@@ -10,18 +10,7 @@ import {
   OrderStatus,
   PaginationParams,
   ResultPaged,
-  Shape,
 } from '@merlebleu/shared';
-
-export interface OrderItemRowFilters {
-  customerName?: string;
-  deliveryDate?: string;
-  type?: string;
-  shape?: Shape;
-  text?: string;
-  decoration?: string;
-  size?: number;
-}
 
 @Injectable({
   providedIn: 'root',
@@ -52,40 +41,6 @@ export class OrderService {
           queryString += `&${key}=${encodeURIComponent(String(value))}`;
         }
       });
-    }
-
-    return this.http.get<ResultPaged<Order>>(queryString);
-  }
-
-  listOrdersToDeliver(
-    paginationParams: PaginationParams,
-    customerName?: string,
-    shopId?: string,
-    status?: OrderStatus,
-    orderDate?: string,
-    deliveryDate?: string,
-  ): Observable<ResultPaged<Order>> {
-    const { page = 1, limit = 20 } = paginationParams;
-    let queryString = `${this.apiUrl}/to-deliver?page=${page}&limit=${limit}`;
-
-    if (customerName) {
-      queryString += `&customerName=${encodeURIComponent(customerName)}`;
-    }
-
-    if (shopId) {
-      queryString += `&shopId=${encodeURIComponent(shopId)}`;
-    }
-
-    if (status) {
-      queryString += `&status=${encodeURIComponent(status)}`;
-    }
-
-    if (orderDate) {
-      queryString += `&orderDate=${encodeURIComponent(orderDate)}`;
-    }
-
-    if (deliveryDate) {
-      queryString += `&deliveryDate=${encodeURIComponent(deliveryDate)}`;
     }
 
     return this.http.get<ResultPaged<Order>>(queryString);
@@ -159,76 +114,78 @@ export class OrderService {
     return this.http.get<ResultPaged<Order>>(queryString);
   }
 
-  listOrderItems(
+  listOrdersTodayToPrepare(
     paginationParams: PaginationParams,
-    filters?: OrderItemRowFilters,
-  ): Observable<ResultPaged<OrderItemRowDto>> {
+    customerName?: string,
+    shopId?: string,
+  ): Observable<ResultPaged<Order>> {
     const { page = 1, limit = 20 } = paginationParams;
-    let queryString = `${this.apiUrl}/items?page=${page}&limit=${limit}`;
+    let queryString = `${this.apiUrl}/today/to-prepare?page=${page}&limit=${limit}`;
 
-    if (filters) {
-      Object.entries(filters).forEach(([key, value]) => {
-        if (value !== null && value !== undefined && value !== '') {
-          queryString += `&${key}=${encodeURIComponent(String(value))}`;
-        }
-      });
+    if (customerName) {
+      queryString += `&customerName=${encodeURIComponent(customerName)}`;
     }
 
-    return this.http.get<ResultPaged<OrderItemRowDto>>(queryString);
+    if (shopId) {
+      queryString += `&shopId=${encodeURIComponent(shopId)}`;
+    }
+
+    return this.http.get<ResultPaged<Order>>(queryString);
   }
 
-  listOrderItemsToPrepare(
+  listOrdersTodayToDeliver(
     paginationParams: PaginationParams,
-    filters?: OrderItemRowFilters,
-  ): Observable<ResultPaged<OrderItemRowDto>> {
+    customerName?: string,
+    shopId?: string,
+    status?: OrderStatus,
+  ): Observable<ResultPaged<Order>> {
     const { page = 1, limit = 20 } = paginationParams;
-    let queryString = `${this.apiUrl}/items/to-prepare?page=${page}&limit=${limit}`;
+    let queryString = `${this.apiUrl}/today/to-deliver?page=${page}&limit=${limit}`;
 
-    if (filters) {
-      Object.entries(filters).forEach(([key, value]) => {
-        if (value !== null && value !== undefined && value !== '') {
-          queryString += `&${key}=${encodeURIComponent(String(value))}`;
-        }
-      });
+    if (customerName) {
+      queryString += `&customerName=${encodeURIComponent(customerName)}`;
     }
 
-    return this.http.get<ResultPaged<OrderItemRowDto>>(queryString);
+    if (shopId) {
+      queryString += `&shopId=${encodeURIComponent(shopId)}`;
+    }
+
+    if (status) {
+      queryString += `&status=${encodeURIComponent(status)}`;
+    }
+
+    return this.http.get<ResultPaged<Order>>(queryString);
   }
 
-  listOrderItemsToDeliver(
-    paginationParams: PaginationParams,
-    filters?: OrderItemRowFilters,
-  ): Observable<ResultPaged<OrderItemRowDto>> {
-    const { page = 1, limit = 20 } = paginationParams;
-    let queryString = `${this.apiUrl}/items/to-deliver?page=${page}&limit=${limit}`;
-
-    if (filters) {
-      Object.entries(filters).forEach(([key, value]) => {
-        if (value !== null && value !== undefined && value !== '') {
-          queryString += `&${key}=${encodeURIComponent(String(value))}`;
-        }
-      });
-    }
-
-    return this.http.get<ResultPaged<OrderItemRowDto>>(queryString);
+  // item endpoints are only used to count order lines: the `total` of the paged result
+  listOrderItemsTodayToPrepare(paginationParams: PaginationParams): Observable<ResultPaged<OrderItemRowDto>> {
+    return this.listOrderItemsFrom('items/today/to-prepare', paginationParams);
   }
 
-  listOrderItemsLate(
+  listOrderItemsTodayToDeliver(paginationParams: PaginationParams): Observable<ResultPaged<OrderItemRowDto>> {
+    return this.listOrderItemsFrom('items/today/to-deliver', paginationParams);
+  }
+
+  listOrderItemsToPrepare(paginationParams: PaginationParams): Observable<ResultPaged<OrderItemRowDto>> {
+    return this.listOrderItemsFrom('items/to-prepare', paginationParams);
+  }
+
+  listOrderItemsToDeliver(paginationParams: PaginationParams): Observable<ResultPaged<OrderItemRowDto>> {
+    return this.listOrderItemsFrom('items/to-deliver', paginationParams);
+  }
+
+  listOrderItemsLate(paginationParams: PaginationParams): Observable<ResultPaged<OrderItemRowDto>> {
+    return this.listOrderItemsFrom('items/late', paginationParams);
+  }
+
+  private listOrderItemsFrom(
+    path: string,
     paginationParams: PaginationParams,
-    filters?: OrderItemRowFilters,
   ): Observable<ResultPaged<OrderItemRowDto>> {
     const { page = 1, limit = 20 } = paginationParams;
-    let queryString = `${this.apiUrl}/items/late?page=${page}&limit=${limit}`;
-
-    if (filters) {
-      Object.entries(filters).forEach(([key, value]) => {
-        if (value !== null && value !== undefined && value !== '') {
-          queryString += `&${key}=${encodeURIComponent(String(value))}`;
-        }
-      });
-    }
-
-    return this.http.get<ResultPaged<OrderItemRowDto>>(queryString);
+    return this.http.get<ResultPaged<OrderItemRowDto>>(
+      `${this.apiUrl}/${path}?page=${page}&limit=${limit}`,
+    );
   }
 
   getOrderById(id: string): Observable<Order> {
