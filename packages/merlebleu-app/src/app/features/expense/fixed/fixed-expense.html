@@ -1,7 +1,7 @@
 <div class="flex flex-wrap items-center gap-3 mb-4">
   <h2 class="text-2xl font-bold">Dépenses fixes</h2>
   <mb-month-switcher />
-  @if (rows().length > 0) {
+  @if (allRows().length > 0) {
     <div class="ml-auto flex items-center gap-2">
       <p-button label="Employé" icon="pi pi-plus" (onClick)="openAdd(FixedExpenseType.SALARY)" />
       <p-button label="Charge" icon="pi pi-plus" (onClick)="openAdd(FixedExpenseType.CHARGE)" />
@@ -17,7 +17,7 @@
   }
 </div>
 
-@if (rows().length === 0) {
+@if (allRows().length === 0) {
   <div
     class="flex flex-col items-center gap-3 text-center rounded-2xl border-2 border-dashed border-slate-300 dark:border-slate-600 px-6 py-12"
   >
@@ -58,7 +58,7 @@
       <div class="flex justify-between text-sm text-green-600 dark:text-green-400 font-bold">
         <span>Payé : {{ formatAmount(paidTotal()) }} Ar</span>
         <b class="text-green-600 dark:text-green-400">
-          {{ paidPercent() }} % payé · {{ paidCount() }} lignes sur {{ rows().length }}
+          {{ paidPercent() }} % payé · {{ paidCount() }} lignes sur {{ allRows().length }}
         </b>
       </div>
       <div
@@ -95,6 +95,17 @@
     />
   </div>
 
+  <p-selectbutton
+    class="mb-3 block"
+    [options]="statusOptions"
+    optionLabel="label"
+    optionValue="value"
+    [allowEmpty]="false"
+    [ngModel]="statusFilter()"
+    (ngModelChange)="statusFilter.set($event)"
+    aria-label="Filtrer par statut de paiement"
+  />
+
   <p-table [value]="rows()" rowGroupMode="subheader" groupRowsBy="fixedType">
     <ng-template #header>
       <tr>
@@ -109,10 +120,10 @@
     <ng-template #groupheader let-row>
       <tr>
         <td colspan="3" class="font-bold">
-          {{ row.fixedType === FixedExpenseType.SALARY ? 'Salaires · ' + salaries().length : 'Charges · ' + charges().length }}
+          {{ row.fixedType === FixedExpenseType.SALARY ? 'Salaires · ' + visibleSalaries().length : 'Charges · ' + visibleCharges().length }}
         </td>
         <td class="text-right! font-bold">
-          {{ formatAmount(row.fixedType === FixedExpenseType.SALARY ? salaryTotal() : chargeTotal()) }} Ar
+          {{ formatAmount(row.fixedType === FixedExpenseType.SALARY ? visibleSalaryTotal() : visibleChargeTotal()) }} Ar
         </td>
         <td colspan="2"></td>
       </tr>
@@ -141,6 +152,11 @@
           <p-button icon="pi pi-pencil" size="small" severity="warn" class="mr-2" aria-label="Modifier" (onClick)="openEdit(row)" />
           <p-button icon="pi pi-trash" size="small" severity="danger" aria-label="Supprimer" (onClick)="openDelete(row)" />
         </td>
+      </tr>
+    </ng-template>
+    <ng-template #emptymessage>
+      <tr>
+        <td colspan="6" class="text-center! py-6 text-slate-500">Aucune dépense fixe pour ce filtre.</td>
       </tr>
     </ng-template>
   </p-table>

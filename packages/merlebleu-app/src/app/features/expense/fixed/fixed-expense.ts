@@ -3,6 +3,8 @@ import { ButtonModule } from 'primeng/button';
 import { Dialog } from 'primeng/dialog';
 import { TableModule } from 'primeng/table';
 import { TagModule } from 'primeng/tag';
+import { SelectButtonModule } from 'primeng/selectbutton';
+import { FormsModule } from '@angular/forms';
 import { MenuModule } from 'primeng/menu';
 import { MenuItem, MessageService } from 'primeng/api';
 import { finalize } from 'rxjs';
@@ -13,10 +15,12 @@ import { MonthSwitcherComponent } from '../components/month-switcher/month-switc
 import { ExpenseStoreService } from '../expense-store.service';
 import { FixedExpenseFormComponent } from './components/fixed-expense-form/fixed-expense-form.component';
 
+type PaymentStatusFilter = 'ALL' | 'PAID' | 'UNPAID';
+
 @Component({
   selector: 'mb-fixed-expense',
   templateUrl: './fixed-expense.html',
-  imports: [ButtonModule, MenuModule, Dialog, TableModule, TagModule, StatCard, MonthSwitcherComponent, FixedExpenseFormComponent],
+  imports: [FormsModule, SelectButtonModule, ButtonModule, MenuModule, Dialog, TableModule, TagModule, StatCard, MonthSwitcherComponent, FixedExpenseFormComponent],
 })
 export class FixedExpenseComponent {
   protected readonly store = inject(ExpenseStoreService);
@@ -28,6 +32,22 @@ export class FixedExpenseComponent {
 
   protected readonly salaries = computed(() => this.byType(FixedExpenseType.SALARY));
   protected readonly charges = computed(() => this.byType(FixedExpenseType.CHARGE));
+  protected readonly statusOptions: { label: string; value: PaymentStatusFilter }[] = [
+    { label: 'Tous', value: 'ALL' },
+    { label: 'Payé', value: 'PAID' },
+    { label: 'À payer', value: 'UNPAID' },
+  ];
+  protected readonly statusFilter = signal<PaymentStatusFilter>('ALL');
+
+  private matchesStatus(expense: Expense): boolean {
+    const filter = this.statusFilter();
+    return filter === 'ALL' || (filter === 'PAID') === !!expense.paid;
+  }
+
+  /** Salaries and charges matching the status filter, shown in the table. */
+  protected readonly visibleSalaries = computed(() => this.salaries().filter((e) => this.matchesStatus(e)));
+  protected readonly visibleCharges = computed(() => this.charges().filter((e) => this.matchesStatus(e)));
+
   protected readonly salaryTotal = computed(() => this.sum(this.salaries()));
   protected readonly chargeTotal = computed(() => this.sum(this.charges()));
   protected readonly total = computed(() => this.salaryTotal() + this.chargeTotal());
@@ -36,8 +56,11 @@ export class FixedExpenseComponent {
   );
   protected readonly remainingTotal = computed(() => this.total() - this.paidTotal());
   // salaries first, then charges: the table groups consecutive rows by type
-  protected readonly rows = computed(() => [...this.salaries(), ...this.charges()]);
-  protected readonly paidCount = computed(() => this.rows().filter((e) => e.paid).length);
+  protected readonly allRows = computed(() => [...this.salaries(), ...this.charges()]);
+  protected readonly rows = computed(() => [...this.visibleSalaries(), ...this.visibleCharges()]);
+  protected readonly visibleSalaryTotal = computed(() => this.sum(this.visibleSalaries()));
+  protected readonly visibleChargeTotal = computed(() => this.sum(this.visibleCharges()));
+  protected readonly paidCount = computed(() => this.allRows().filter((e) => e.paid).length);
   protected readonly paidPercent = computed(() =>
     this.total() > 0 ? Math.round((this.paidTotal() / this.total()) * 100) : 0,
   );
