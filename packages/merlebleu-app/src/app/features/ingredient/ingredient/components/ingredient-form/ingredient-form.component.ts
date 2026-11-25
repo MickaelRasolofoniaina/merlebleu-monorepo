@@ -2,13 +2,11 @@ import { Component, Input, Output, EventEmitter, SimpleChanges } from '@angular/
 import { FormsModule } from '@angular/forms';
 import {
   CreateIngredientDto,
-  IngredientCategory,
   IngredientUnit,
   UpdateIngredientDto,
   createIngredientSchema,
   updateIngredientSchema,
 } from '@merlebleu/shared';
-import { InputNumberModule } from 'primeng/inputnumber';
 import { InputTextModule } from 'primeng/inputtext';
 import { SelectModule } from 'primeng/select';
 
@@ -17,12 +15,11 @@ import { SelectModule } from 'primeng/select';
   templateUrl: './ingredient-form.component.html',
   styleUrls: ['./ingredient-form.component.scss'],
   standalone: true,
-  imports: [FormsModule, InputTextModule, InputNumberModule, SelectModule],
+  imports: [FormsModule, InputTextModule, SelectModule],
 })
 export class IngredientFormComponent {
   @Input() itemData?: CreateIngredientDto | UpdateIngredientDto | null;
   @Input() formId = 'ingredient-form';
-  @Input() categories: IngredientCategory[] = [];
   @Input() units: IngredientUnit[] = [];
   @Output() itemSubmit = new EventEmitter<CreateIngredientDto | UpdateIngredientDto>();
 
@@ -61,6 +58,6 @@ export class IngredientFormComponent {
   }
 
   private createEmpty(): CreateIngredientDto {
-    return { label: '', categoryId: '', unitId: '', unitPrice: 0 };
+    return { label: '', unitId: '' };
   }
 }

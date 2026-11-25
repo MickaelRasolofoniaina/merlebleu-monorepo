@@ -10,16 +10,6 @@
     class="w-64"
   />
   <p-select
-    [(ngModel)]="filterCategoryId"
-    [options]="categories()"
-    optionLabel="label"
-    optionValue="id"
-    placeholder="Toutes catégories"
-    [showClear]="true"
-    (onChange)="onCategoryFilter()"
-    class="w-52"
-  />
-  <p-select
     [(ngModel)]="filterUnitId"
     [options]="units()"
     optionLabel="label"
@@ -58,7 +48,6 @@
   <ng-template #header>
     <tr>
       <th>Ingrédient</th>
-      <th>Catégorie</th>
       <th style="width: 14rem">Quantité</th>
       <th>Unité</th>
       <th>Statut</th>
@@ -67,7 +56,6 @@
   <ng-template #body let-ingredient>
     <tr>
       <td>{{ capitalizeFirstLetter(ingredient.label) }}</td>
-      <td>{{ capitalizeFirstLetter(ingredient.category.label) }}</td>
       <td>
         <p-inputNumber
           [(ngModel)]="stockValues[ingredient.id]"

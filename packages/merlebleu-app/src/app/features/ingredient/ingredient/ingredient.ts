@@ -3,11 +3,9 @@ import {
   CreateIngredientDto,
   DEFAULT_PAGE_SIZE,
   Ingredient,
-  IngredientCategory,
   IngredientUnit,
   UpdateIngredientDto,
 } from '@merlebleu/shared';
-import { IngredientCategoryService } from '../category/category.service';
 import { IngredientUnitService } from '../unit/unit.service';
 import { IngredientService } from './ingredient.service';
 import { IngredientFormComponent } from './components/ingredient-form/ingredient-form.component';
@@ -18,7 +16,6 @@ import { Dialog } from 'primeng/dialog';
 import { InputTextModule } from 'primeng/inputtext';
 import { SelectModule } from 'primeng/select';
 import { getPageFromFirstRows } from '@shared/utils/pagination';
-import { formatUnitPrice } from '@shared/utils/number';
 import { capitalizeFirstLetter } from '@shared/utils/text';
 import { finalize } from 'rxjs';
 
@@ -26,7 +23,7 @@ import { finalize } from 'rxjs';
   selector: 'mb-ingredient-list',
   templateUrl: './ingredient.html',
   styleUrls: ['./ingredient.scss'],
-  providers: [IngredientService, IngredientCategoryService, IngredientUnitService],
+  providers: [IngredientService, IngredientUnitService],
   imports: [
     ButtonModule,
     TableModule,
@@ -39,10 +36,8 @@ import { finalize } from 'rxjs';
 })
 export class IngredientListComponent implements OnInit {
   readonly capitalizeFirstLetter = capitalizeFirstLetter;
-  readonly formatUnitPrice = formatUnitPrice;
 
   ingredients = signal<Ingredient[]>([]);
-  categories = signal<IngredientCategory[]>([]);
   units = signal<IngredientUnit[]>([]);
   isLoading = signal(false);
   totalRecords = signal(0);
@@ -51,7 +46,6 @@ export class IngredientListComponent implements OnInit {
   rows = DEFAULT_PAGE_SIZE;
 
   searchLabel = '';
-  filterCategoryId: string | null = null;
   filterUnitId: string | null = null;
 
   showModal = false;
@@ -61,11 +55,9 @@ export class IngredientListComponent implements OnInit {
   editDto: UpdateIngredientDto | null = null;
 
   private ingredientService = inject(IngredientService);
-  private categoryService = inject(IngredientCategoryService);
   private unitService = inject(IngredientUnitService);
 
   ngOnInit() {
-    this.categoryService.getAll().subscribe((data) => this.categories.set(data));
     this.unitService.getAll().subscribe((data) => this.units.set(data));
     this.fetchIngredients();
   }
@@ -73,7 +65,6 @@ export class IngredientListComponent implements OnInit {
   private buildFilters() {
     return {
       labelContains: this.searchLabel || undefined,
-      categoryId: this.filterCategoryId || undefined,
       unitId: this.filterUnitId || undefined,
     };
   }
@@ -102,12 +93,6 @@ export class IngredientListComponent implements OnInit {
     this.fetchIngredients();
   }
 
-  onCategoryFilter() {
-    this.page.set(1);
-    this.first.set(0);
-    this.fetchIngredients();
-  }
-
   onUnitFilter() {
     this.page.set(1);
     this.first.set(0);
@@ -124,9 +109,7 @@ export class IngredientListComponent implements OnInit {
   toDto(ingredient: Ingredient): UpdateIngredientDto {
     return {
       label: ingredient.label,
-      categoryId: ingredient.category.id,
       unitId: ingredient.unit.id,
-      unitPrice: ingredient.unitPrice,
     };
   }
 

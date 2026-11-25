@@ -7,8 +7,6 @@ export * from "./domain/identity/user/user.dto";
 export * from "./domain/identity/user/user";
 export * from "./domain/ingredient/ingredient.dto";
 export * from "./domain/ingredient/ingredient";
-export * from "./domain/ingredient/category/ingredient-category.dto";
-export * from "./domain/ingredient/category/ingredient-category";
 export * from "./domain/ingredient/purchase/ingredient-purchase.dto";
 export * from "./domain/ingredient/purchase/ingredient-purchase";
 export * from "./domain/ingredient/unit/ingredient-unit.dto";

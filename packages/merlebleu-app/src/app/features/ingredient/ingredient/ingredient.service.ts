@@ -10,7 +10,7 @@ export class IngredientService {
   private readonly apiUrl = `${environment.apiBaseUrl}/ingredient`;
 
   getIngredients(
-    filters: { labelContains?: string; categoryId?: string; unitId?: string },
+    filters: { labelContains?: string; unitId?: string },
     page: number,
     pageSize: number,
   ): Observable<{ items: Ingredient[]; total: number }> {
@@ -18,7 +18,6 @@ export class IngredientService {
     params.set('page', String(page));
     params.set('limit', String(pageSize));
     if (filters.labelContains) params.set('labelContains', filters.labelContains);
-    if (filters.categoryId) params.set('categoryId', filters.categoryId);
     if (filters.unitId) params.set('unitId', filters.unitId);
 
     return this.http

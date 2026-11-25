@@ -6,10 +6,6 @@ export const INGREDIENT_ROUTES: Route[] = [
     loadChildren: () => import('./ingredient/ingredient.routes').then((m) => m.default),
   },
   {
-    path: 'category',
-    loadChildren: () => import('./category/category.routes').then((m) => m.default),
-  },
-  {
     path: 'unit',
     loadChildren: () => import('./unit/unit.routes').then((m) => m.default),
   },

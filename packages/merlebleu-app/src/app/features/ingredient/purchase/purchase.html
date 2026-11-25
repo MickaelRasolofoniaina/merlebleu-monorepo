@@ -19,16 +19,6 @@
     (input)="onSearchChange($event.target.value)"
     class="w-64"
   />
-  <p-select
-    [(ngModel)]="filterCategoryId"
-    [options]="categories()"
-    optionLabel="label"
-    optionValue="id"
-    placeholder="Toutes catégories"
-    [showClear]="true"
-    (onChange)="onCategoryFilter()"
-    class="w-52"
-  />
   <p-button label="Ajouter" icon="pi pi-plus" (onClick)="openAddModal()" class="ml-auto" />
 </div>
 
@@ -47,11 +37,8 @@
     <tr>
       <th>Date</th>
       <th>Libellé</th>
-      <th>Catégorie</th>
       <th>Unité</th>
       <th class="text-right!">Quantité</th>
-      <th class="text-right!">Prix unitaire</th>
-      <th class="text-right!">Prix total</th>
       <th style="width: 12rem" class="text-center!">Actions</th>
     </tr>
   </ng-template>
@@ -59,11 +46,8 @@
     <tr>
       <td>{{ purchase.purchaseDate | date: 'dd/MM/yyyy' }}</td>
       <td>{{ capitalizeFirstLetter(purchase.ingredient.label) }}</td>
-      <td>{{ capitalizeFirstLetter(purchase.ingredient.category.label) }}</td>
       <td>{{ capitalizeFirstLetter(purchase.ingredient.unit.label) }}</td>
       <td class="text-right!">{{ purchase.quantity }}</td>
-      <td class="text-right!">{{ formatUnitPrice(purchase.ingredient.unitPrice) }}</td>
-      <td class="text-right!">{{ formatUnitPrice(getTotalPrice(purchase)) }}</td>
       <td class="text-center!">
         <p-button
           icon="pi pi-pencil"

@@ -15,7 +15,7 @@ export class IngredientPurchaseService {
   private readonly apiUrl = `${environment.apiBaseUrl}/ingredient-purchase`;
 
   getPurchases(
-    filters: { purchaseDate?: string; labelContains?: string; categoryId?: string },
+    filters: { purchaseDate?: string; labelContains?: string },
     page: number,
     pageSize: number,
   ): Observable<{ items: IngredientPurchase[]; total: number }> {
@@ -24,7 +24,6 @@ export class IngredientPurchaseService {
     params.set('limit', String(pageSize));
     if (filters.purchaseDate) params.set('purchaseDate', filters.purchaseDate);
     if (filters.labelContains) params.set('labelContains', filters.labelContains);
-    if (filters.categoryId) params.set('categoryId', filters.categoryId);
 
     return this.http
       .get<ResultPaged<IngredientPurchase>>(`${this.apiUrl}?${params.toString()}`)

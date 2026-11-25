@@ -20,13 +20,12 @@ export class IngredientService {
   async findIngredients(
     page = 1,
     limit = 20,
-    filters?: { labelContains?: string; categoryId?: string; unitId?: string },
+    filters?: { labelContains?: string; unitId?: string },
   ): Promise<ResultPaged<IngredientEntity>> {
     const pagination = getPaginationParams({ page, limit });
     const where: FindOptionsWhere<IngredientEntity> = {};
     if (filters?.labelContains)
       where.label = ILike(`%${filters.labelContains}%`);
-    if (filters?.categoryId) where.category = { id: filters.categoryId };
     if (filters?.unitId) where.unit = { id: filters.unitId };
 
     const [data, total] = await this.repo.findAndCount({
@@ -41,8 +40,6 @@ export class IngredientService {
   addIngredient(dto: CreateIngredientDto): Promise<IngredientEntity> {
     const entity = this.repo.create({
       label: dto.label,
-      unitPrice: dto.unitPrice,
-      category: { id: dto.categoryId },
       unit: { id: dto.unitId },
     });
     return this.repo.save(entity);
@@ -54,8 +51,6 @@ export class IngredientService {
   ): Promise<IngredientEntity> {
     await this.repo.update(id, {
       label: dto.label,
-      unitPrice: dto.unitPrice,
-      category: { id: dto.categoryId },
       unit: { id: dto.unitId },
     });
     const updated = await this.repo.findOneBy({ id });

@@ -18,10 +18,10 @@ export class ReportGeneratorService {
 
     autoTable(doc, {
       startY: 35,
-      head: [['Désignation', 'Catégorie', 'Stock restant']],
+      head: [['Désignation', 'Unité', 'Stock restant']],
       body: ingredients.map((i) => [
         capitalizeFirstLetter(i.label),
-        capitalizeFirstLetter(i.category.label),
+        capitalizeFirstLetter(i.unit.label),
         '0',
       ]),
       styles: { font: 'helvetica' },
