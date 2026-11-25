@@ -1,6 +1,6 @@
 ---
 name: create-pr
-description: Use this skill when the user asks to create, open, or submit a pull request (PR) to merge a branch into develop — e.g. "crée une PR", "ouvre une PR vers develop", "create a PR for this branch". Builds a French title and a change list from git history grouped by area (INTERFACE WEB, API) and, when `.claude/` config changed, by Claude configuration type (SKILLS, COMMANDS, AGENTS, SETTINGS, ...), then runs `gh pr create` and immediately merges the PR.
+description: Use this skill when the user asks to create, open, or submit a pull request (PR) to merge a branch into develop — e.g. "crée une PR", "ouvre une PR vers develop", "create a PR for this branch". Builds a French title and a change list from git history grouped by area (INTERFACE WEB, API) and, when `.claude/` config changed, by Claude configuration type (SKILLS, COMMANDS, AGENTS, SETTINGS, ...), then runs `gh pr create`, runs a code review on the new PR, and merges it only after explicit user confirmation.
 ---
 
 Create a GitHub pull request targeting `develop` for a given branch, with a standardized French title and body.
@@ -49,9 +49,10 @@ This skill takes one optional argument: the name of the branch to merge into `de
     )"
     ```
     Omit any section with no entries. Keep INTERFACE WEB and API first (in that order, when present), followed by the `.claude/**` groups (SKILLS, COMMANDS, AGENTS, SETTINGS, CLAUDE) in whatever order they appear with changes.
-13. **Validate (merge) the PR immediately** after creation: `gh pr merge <pr-url> --squash`. Do not pass `--delete-branch`. If the merge is blocked (failing required checks, review required, conflicts), do not use `--admin` or retry in a loop — report the reason and leave the PR open.
-14. **Report the PR URL** printed by `gh pr create`, and whether the merge succeeded.
-15. If `gh pr create` fails because a PR already exists for that branch, surface the error and suggest `gh pr view <branch>` instead of retrying (and do not merge it).
+13. **Review the PR** right after creation by invoking the `code-review:code-review` skill on the new PR (pass the PR URL or number). Do not pass `--comment`: the findings are printed to the console only.
+14. **Report the PR URL** printed by `gh pr create` and the review findings (or "No issues found").
+15. **Ask for confirmation before merging**, using the review outcome as context (e.g. "La revue n'a trouvé aucun problème. Fusionner la PR ?" or "La revue a trouvé N problème(s). Fusionner quand même ?"). Only if the user explicitly confirms, merge with `gh pr merge <pr-url> --squash`. Do not pass `--delete-branch`. If the user declines or does not answer, leave the PR open. If the merge is blocked (failing required checks, review required, conflicts), do not use `--admin` or retry in a loop — report the reason and leave the PR open.
+16. If `gh pr create` fails because a PR already exists for that branch, surface the error and suggest `gh pr view <branch>` instead of retrying (and do not review or merge it).
 
 ## Rules
 
@@ -64,7 +65,7 @@ This skill takes one optional argument: the name of the branch to merge into `de
 - Always print the drafted title/body before calling `gh pr create`.
 - Title and body are written in French.
 - If a PR already exists for the branch, report its URL instead of attempting to create a duplicate.
-- Merge the newly created PR right after creation (squash). Never bypass branch protection (`--admin`) and never delete the source branch.
+- Never merge automatically. Run the code review first, then merge (squash) only after explicit user confirmation. Never bypass branch protection (`--admin`) and never delete the source branch.
 
 ## Prerequisite
 
