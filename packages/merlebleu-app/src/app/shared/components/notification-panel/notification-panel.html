@@ -1,8 +1,8 @@
-<div class="w-96 rounded-lg bg-white text-slate-900">
+<div class="w-96 rounded-lg bg-white text-slate-900 dark:bg-slate-900 dark:text-slate-100">
   <div class="flex items-center justify-between px-4 pt-3 pb-1 font-bold">
     <span>Notifications</span>
     @if (notificationService.unreadCount() > 0) {
-      <span class="text-xs font-semibold text-blue-600">
+      <span class="text-xs font-semibold text-blue-600 dark:text-blue-400">
         {{ notificationService.unreadCount() }}
         {{ notificationService.unreadCount() > 1 ? 'non lues' : 'non lue' }}
       </span>
@@ -11,13 +11,13 @@
 
   <div class="flex flex-col gap-2.5 p-3">
     @if (notificationService.recent().length === 0) {
-      <div class="py-6 text-center text-slate-500">Aucune notification</div>
+      <div class="py-6 text-center text-slate-500 dark:text-slate-400">Aucune notification</div>
     }
 
     @for (notification of notificationService.recent(); track notification.id) {
       @let meta = getNotificationTypeMeta(notification.type);
       <div
-        class="flex items-start gap-2.5 rounded-lg border border-slate-200 border-l-4 bg-white px-3 py-2.5 cursor-pointer transition-colors hover:bg-slate-50"
+        class="flex items-start gap-2.5 rounded-lg border border-slate-200 border-l-4 bg-white px-3 py-2.5 cursor-pointer transition-colors hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700/60"
         [class]="accentClasses[meta.severity]"
         [class.shadow-md]="!notification.isRead"
         (click)="onNotificationClick(notification)"
@@ -30,13 +30,12 @@
             styleClass="mb-1 text-xs"
           />
           <div
-            class="text-sm text-slate-600"
-            [class.font-semibold]="!notification.isRead"
-            [class.text-slate-900]="!notification.isRead"
+            class="text-sm text-slate-600 dark:text-slate-300"
+            [class]="!notification.isRead ? 'font-semibold text-slate-900 dark:text-white' : ''"
           >
             {{ meta.description(notification.customerName, notification.actorName) }}
           </div>
-          <div class="text-xs text-slate-500 mt-1">
+          <div class="text-xs text-slate-500 mt-1 dark:text-slate-400">
             {{ formatNotificationDate(notification.createdAt) }}
           </div>
         </div>
@@ -52,7 +51,7 @@
 
   <a
     routerLink="/notification"
-    class="block text-center pb-3 text-sm font-semibold text-blue-600 cursor-pointer"
+    class="block text-center pb-3 text-sm font-semibold text-blue-600 cursor-pointer dark:text-blue-400"
   >
     Voir toutes les notifications →
   </a>
