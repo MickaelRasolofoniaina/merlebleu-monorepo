@@ -269,8 +269,8 @@ export class ExpenseGridComponent {
   }
 
   protected startEdit(row: GridRow, day: number, initial?: string): void {
-    const base = row.amounts.get(day) ?? row.category.usualAmount;
-    this.draft.set(initial ?? (base ? String(base) : ''));
+    const current = row.amounts.get(day);
+    this.draft.set(initial ?? (current ? String(current) : ''));
     this.editing.set({ categoryId: row.category.id, day });
     this.setActive(row.category.id, day);
     afterNextRender(
