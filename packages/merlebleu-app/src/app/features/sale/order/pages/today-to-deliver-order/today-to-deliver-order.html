@@ -3,19 +3,19 @@
 </div>
 
 <div class="flex flex-wrap gap-3 mb-4">
-    <order-count-card
+    <stat-card
     color="blue"
     icon="pi pi-list"
     [count]="totalCount()"
     label="au total"
   />
-  <order-count-card
+  <stat-card
     color="green"
     icon="pi pi-truck"
     [count]="readyCount()"
     label="prête{{ readyCount() > 1 ? 's' : '' }}"
   />
-  <order-count-card
+  <stat-card
     color="red"
     icon="pi pi-clock"
     [count]="toPrepareCount()"

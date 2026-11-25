@@ -1,0 +1,32 @@
+<form [id]="formId()" (submit)="onSubmit()" class="flex flex-col gap-4">
+  <div class="flex flex-col gap-1">
+    <label for="fixedLabel" class="font-semibold text-slate-900 dark:text-white">
+      {{ type() === 'SALARY' ? 'Nom' : 'Désignation' }}
+    </label>
+    <input id="fixedLabel" type="text" pInputText [(ngModel)]="label" name="label" class="w-full" />
+    @if (submitted && !label.trim()) {
+      <small class="text-red-500">Ce champ est requis</small>
+    }
+  </div>
+
+  <div class="flex flex-col gap-1">
+    <label for="fixedDetail" class="font-semibold text-slate-900 dark:text-white">
+      {{ type() === 'SALARY' ? 'Fonction' : 'Détail (facultatif)' }}
+    </label>
+    <input id="fixedDetail" type="text" pInputText [(ngModel)]="detail" name="detail" class="w-full" />
+  </div>
+
+  <div class="grid grid-cols-2 gap-3">
+    <div class="flex flex-col gap-1">
+      <label for="fixedAmount" class="font-semibold text-slate-900 dark:text-white">Montant (Ar)</label>
+      <p-inputnumber inputId="fixedAmount" [(ngModel)]="amount" name="amount" [min]="0" [maxFractionDigits]="0" locale="fr-FR" fluid />
+      @if (submitted && (!amount || amount <= 0)) {
+        <small class="text-red-500">Le montant doit être positif</small>
+      }
+    </div>
+    <div class="flex flex-col gap-1">
+      <label for="fixedPayment" class="font-semibold text-slate-900 dark:text-white">Paiement</label>
+      <p-select inputId="fixedPayment" [options]="paymentMethods" [(ngModel)]="paymentMethod" name="paymentMethod" fluid appendTo="body" />
+    </div>
+  </div>
+</form>

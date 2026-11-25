@@ -6,25 +6,25 @@
 <section class="mb-6">
   <h3 class="text-xl font-semibold mb-3">Commandes</h3>
   <div class="flex flex-wrap gap-3">
-    <order-count-card
+    <stat-card
       color="blue"
       icon="pi pi-plus-circle"
       [count]="summary().createdCount"
       label="ajoutée(s)"
     />
-    <order-count-card
+    <stat-card
       color="red"
       icon="pi pi-box"
       [count]="summary().toPrepareCount"
       label="à préparer"
     />
-    <order-count-card
+    <stat-card
       color="orange"
       icon="pi pi-truck"
       [count]="summary().toDeliverCount"
       label="à livrer"
     />
-    <order-count-card
+    <stat-card
       color="green"
       icon="pi pi-check-circle"
       [count]="summary().deliveredCount"

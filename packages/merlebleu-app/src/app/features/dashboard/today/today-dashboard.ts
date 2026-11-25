@@ -3,7 +3,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { CardModule } from 'primeng/card';
 import { catchError, of } from 'rxjs';
 import { DashboardTodaySummary } from '@merlebleu/shared';
-import { OrderCountCard } from '@shared/components/order-count-card/order-count-card';
+import { StatCard } from '@shared/components/stat-card/stat-card';
 import { formatUnitPrice } from '@shared/utils/number';
 import { DashboardService } from '../dashboard.service';
 
@@ -17,7 +17,7 @@ const EMPTY_SUMMARY: DashboardTodaySummary = {
 
 @Component({
   selector: 'today-dashboard',
-  imports: [CardModule, OrderCountCard],
+  imports: [CardModule, StatCard],
   templateUrl: './today-dashboard.html',
 })
 export class TodayDashboard {

@@ -219,11 +219,11 @@
             class="mt-auto flex items-center justify-between text-sm text-slate-600 dark:text-slate-300"
           >
             <span>Paiement</span>
-            <span
-              class="rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 font-semibold text-emerald-700 dark:border-emerald-800 dark:bg-emerald-950 dark:text-emerald-400"
-            >
-              {{ formatPaymentMethod() }}
-            </span>
+            @if (order.paymentMethod; as method) {
+            <payment-method-badge [name]="method.name" [color]="method.color" />
+            } @else {
+            <span>-</span>
+            }
           </div>
         </aside>
       </div>

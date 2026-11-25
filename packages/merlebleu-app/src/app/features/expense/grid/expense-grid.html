@@ -1,0 +1,178 @@
+<div class="flex flex-wrap items-center gap-3 mb-4">
+  <h2 class="text-2xl font-bold">Grille des dépenses</h2>
+  <mb-month-switcher />
+  <p-button label="Exporter" icon="pi pi-download" severity="secondary" [outlined]="true" class="ml-auto" (onClick)="exportGrid()" />
+</div>
+
+<div class="flex flex-wrap gap-3 mb-4">
+  <stat-card
+    color="blue"
+    icon="pi pi-wallet"
+    [valueText]="formatAmount(grandTotal()) + ' Ar'"
+    label="au total du mois"
+  />
+  <stat-card
+    color="green"
+    icon="pi pi-shopping-cart"
+    [valueText]="formatAmount(sectionTotals().CURRENT) + ' Ar'"
+    label="de dépenses courantes"
+  />
+  <stat-card
+    color="purple"
+    icon="pi pi-box"
+    [valueText]="formatAmount(sectionTotals().INGREDIENT) + ' Ar'"
+    label="de stocks et achats d'ingrédients"
+  />
+  <stat-card
+    color="orange"
+    icon="pi pi-ellipsis-h"
+    [valueText]="formatAmount(sectionTotals().OTHER) + ' Ar'"
+    label="d'autres dépenses"
+  />
+  <stat-card
+    color="red"
+    icon="pi pi-calendar-clock"
+    [valueText]="formatAmount(fixedTotal()) + ' Ar'"
+    label="de dépenses fixes"
+  />
+</div>
+
+<div class="flex flex-wrap items-center gap-3 mb-3">
+  <p-select
+    [options]="sectionOptions"
+    optionLabel="label"
+    optionValue="value"
+    [ngModel]="sectionFilter()"
+    (ngModelChange)="sectionFilter.set($event)"
+    class="w-56"
+  />
+  <p-select
+    [options]="dayOptions()"
+    optionLabel="label"
+    optionValue="value"
+    [ngModel]="dayFilter()"
+    (ngModelChange)="dayFilter.set($event)"
+    class="w-44"
+    aria-label="Filtrer par jour"
+  />
+  <input
+    type="text"
+    pInputText
+    placeholder="Rechercher une désignation..."
+    [ngModel]="search()"
+    (ngModelChange)="search.set($event)"
+    class="w-64"
+  />
+  <span class="text-sm text-slate-500">Toutes les dépenses sont payées en espèces.</span>
+</div>
+
+<!-- The container scrolls in both directions so the header row can stick to its top edge. -->
+<div class="max-h-[70vh] overflow-auto rounded-xl border border-slate-200 dark:border-slate-700">
+  <table class="w-full border-collapse text-sm tabular-nums">
+    <thead>
+      <tr class="bg-slate-100 dark:bg-slate-800">
+        <th class="sticky left-0 top-0 z-30 bg-slate-100 dark:bg-slate-800 text-left px-3 py-2 min-w-48">Désignation</th>
+        @for (column of dayColumns(); track column.day) {
+          <th
+            class="sticky top-0 z-20 text-right! px-2 py-1.5 min-w-20 leading-tight"
+            [class]="
+              column.isToday || isActiveDay(column.day)
+                ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-100'
+                : column.isWeekend
+                  ? 'bg-slate-100 text-slate-500 dark:bg-slate-800'
+                  : 'bg-slate-100 dark:bg-slate-800'
+            "
+            [attr.aria-current]="column.isToday ? 'date' : null"
+          >
+            <span class="block text-xs font-medium capitalize">{{ column.weekday }}</span>
+            {{ column.day }}
+          </th>
+        }
+        <th class="sticky right-0 top-0 z-30 bg-slate-100 dark:bg-slate-800 text-right! px-3 py-2 min-w-28">Total</th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (group of groups(); track group.section) {
+        <tr class="bg-slate-800 text-white font-semibold">
+          <td class="sticky left-0 bg-slate-800 px-3 py-2">{{ group.label }}</td>
+          <td [attr.colspan]="days().length" class="px-2 py-2"></td>
+          <td class="sticky right-0 bg-slate-800 text-right! px-3 py-2">{{ formatAmount(group.total) }}</td>
+        </tr>
+        @for (row of group.rows; track row.category.id) {
+          <tr class="border-t border-slate-100 dark:border-slate-800">
+            <td
+              class="sticky left-0 px-3 py-1.5"
+              [class]="
+                isActiveRow(row.category.id)
+                  ? 'bg-blue-50 font-semibold text-blue-700 dark:bg-blue-950 dark:text-blue-200'
+                  : 'bg-white dark:bg-slate-900'
+              "
+            >
+              {{ row.category.label }}
+            </td>
+            @for (column of dayColumns(); track column.day) {
+              <td
+                class="p-0"
+                [class]="column.isToday ? 'border-x-2 border-blue-300 dark:border-blue-700' : ''"
+              >
+                @if (isEditing(row.category.id, column.day)) {
+                  <input
+                    data-editing
+                    type="text"
+                    inputmode="numeric"
+                    autocomplete="off"
+                    class="w-full min-h-9 text-right px-2 py-1.5 font-semibold tabular-nums bg-white text-slate-900 dark:bg-slate-950 dark:text-white outline-2 -outline-offset-2 outline-blue-600"
+                    [attr.aria-label]="'Montant ' + row.category.label + ' du jour ' + column.day + ' (Ar)'"
+                    [value]="draft()"
+                    (input)="onDraftInput($event)"
+                    (keydown)="onInputKeydown($event, row, column.day)"
+                    (blur)="commit()"
+                  />
+                } @else {
+                  <button
+                    type="button"
+                    [attr.data-cell]="row.category.id + '|' + column.day"
+                    [class]="cellClass(row.amounts.has(column.day), column)"
+                    [attr.tabindex]="isTabStop(row.category.id, column.day) ? 0 : -1"
+                    [attr.aria-label]="(row.amounts.has(column.day) ? 'Modifier ' : 'Saisir ') + row.category.label + ' du jour ' + column.day"
+                    (focus)="setActive(row.category.id, column.day)"
+                    (click)="startEdit(row, column.day)"
+                    (keydown)="onCellKeydown($event, row, column.day)"
+                  >
+                    @if (row.amounts.has(column.day)) {
+                      {{ formatAmount(row.amounts.get(column.day)!) }}
+                    }
+                  </button>
+                }
+              </td>
+            }
+            <td class="sticky right-0 bg-white dark:bg-slate-900 text-right! px-3 py-1.5 font-bold">{{ formatAmount(row.total) }}</td>
+          </tr>
+        }
+      }
+      <tr class="border-t-2 border-slate-300 dark:border-slate-600 bg-slate-100 dark:bg-slate-800 font-bold">
+        <td class="sticky left-0 bg-slate-100 dark:bg-slate-800 px-3 py-2">Total du jour</td>
+        @for (column of dayColumns(); track column.day) {
+          <td
+            class="text-right! px-2 py-2"
+            [class]="column.isToday ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-100' : ''"
+          >
+            {{ dayTotals().has(column.day) ? formatAmount(dayTotals().get(column.day)!) : '' }}
+          </td>
+        }
+        <td class="sticky right-0 bg-slate-100 dark:bg-slate-800 text-right! px-3 py-2">{{ formatAmount(visibleTotal()) }}</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<div
+  class="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-600 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
+>
+  <span><kbd class="rounded border border-b-2 border-slate-300 bg-white px-1.5 py-0.5 font-semibold text-slate-700 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-200">Entrée</kbd> saisir, valider et descendre</span>
+  <span><kbd class="rounded border border-b-2 border-slate-300 bg-white px-1.5 py-0.5 font-semibold text-slate-700 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-200">Tab</kbd> jour suivant</span>
+  <span><kbd class="rounded border border-b-2 border-slate-300 bg-white px-1.5 py-0.5 font-semibold text-slate-700 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-200">Échap</kbd> annuler</span>
+  <span><kbd class="rounded border border-b-2 border-slate-300 bg-white px-1.5 py-0.5 font-semibold text-slate-700 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-200">Suppr</kbd> vider la case</span>
+  <span><kbd class="rounded border border-b-2 border-slate-300 bg-white px-1.5 py-0.5 font-semibold text-slate-700 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-200">Ctrl</kbd>+<kbd class="rounded border border-b-2 border-slate-300 bg-white px-1.5 py-0.5 font-semibold text-slate-700 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-200">D</kbd> copier la case du dessus</span>
+  <span><kbd class="rounded border border-b-2 border-slate-300 bg-white px-1.5 py-0.5 font-semibold text-slate-700 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-200">↑ ↓ ← →</kbd> naviguer</span>
+</div>

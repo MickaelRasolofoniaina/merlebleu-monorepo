@@ -125,6 +125,19 @@ export class AppLayout implements OnInit, OnDestroy {
       ],
     },
     {
+      id: 'expenses',
+      label: 'Dépenses',
+      shortLabel: 'Dép.',
+      icon: 'pi pi-money-bill',
+      prefixes: ['/expense'],
+      items: [
+        { label: 'Grille du mois', icon: 'pi pi-table', routerLink: ['/expense/grid'] },
+        { label: 'Toutes les dépenses', icon: 'pi pi-list', routerLink: ['/expense/list'] },
+        { label: 'Dépenses fixes', icon: 'pi pi-calendar-clock', routerLink: ['/expense/fixed'] },
+        { label: 'Catégories', icon: 'pi pi-hashtag', routerLink: ['/expense/category'] },
+      ],
+    },
+    {
       id: 'inventory',
       label: 'Inventaire',
       shortLabel: 'Stock',

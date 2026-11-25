@@ -12,7 +12,7 @@ import {
   DashboardView,
 } from '@merlebleu/shared';
 import { OrderService } from '@features/sale/order/order.service';
-import { OrderCountCard } from '@shared/components/order-count-card/order-count-card';
+import { StatCard } from '@shared/components/stat-card/stat-card';
 import { formatUnitPrice } from '@shared/utils/number';
 import { DashboardService } from '../dashboard.service';
 import { DashboardWidget } from './components/dashboard-widget/dashboard-widget';
@@ -36,7 +36,7 @@ const YEARS_SHOWN = 6;
     FormsModule,
     SelectModule,
     TagModule,
-    OrderCountCard,
+    StatCard,
     DashboardWidget,
     OrdersBarChart,
     OrdersPieChart,

@@ -19,6 +19,7 @@ export class PaymentService {
   ): Promise<PaymentMethodEntity> {
     const paymentMethodEntity = this.paymentMethodRepository.create({
       name: paymentMethod.name,
+      color: paymentMethod.color,
     });
     return this.paymentMethodRepository.save(paymentMethodEntity);
   }

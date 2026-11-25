@@ -44,7 +44,7 @@ import { OrderFormDialog } from '../../components/order-form-dialog/order-form-d
 import { OrderCashTable } from '../../components/order-cash-table/order-cash-table';
 import { OrderAgendaView } from '../../components/order-agenda-view/order-agenda-view';
 import { OrderCalendarView } from '../../components/order-calendar-view/order-calendar-view';
-import { OrderCountCard } from '@shared/components/order-count-card/order-count-card';
+import { StatCard } from '@shared/components/stat-card/stat-card';
 
 const CALENDAR_VIEW = 'CALENDAR' as const;
 type ListOrderDisplayMode = OrderDisplayMode | typeof CALENDAR_VIEW;
@@ -68,7 +68,7 @@ type ListOrderDisplayMode = OrderDisplayMode | typeof CALENDAR_VIEW;
     OrderCashTable,
     OrderCalendarView,
     OrderAgendaView,
-    OrderCountCard,
+    StatCard,
   ],
   templateUrl: './list-order.html',
   styleUrl: './list-order.scss',

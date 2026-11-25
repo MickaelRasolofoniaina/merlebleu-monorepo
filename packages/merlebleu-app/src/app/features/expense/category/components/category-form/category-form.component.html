@@ -1,0 +1,44 @@
+<form [id]="formId()" (submit)="onSubmit()" class="flex flex-col gap-4">
+  <div class="flex flex-col gap-1">
+    <label for="categoryLabel" class="font-semibold text-slate-900 dark:text-white">Désignation</label>
+    <input id="categoryLabel" type="text" pInputText [(ngModel)]="label" name="label" class="w-full" />
+    @if (submitted && !label.trim()) {
+      <small class="text-red-500">La désignation est requise</small>
+    }
+  </div>
+
+  <div class="flex flex-col gap-1">
+    <label for="categorySection" class="font-semibold text-slate-900 dark:text-white">Section</label>
+    <p-select
+      inputId="categorySection"
+      [options]="sections"
+      optionLabel="label"
+      optionValue="value"
+      [(ngModel)]="section"
+      name="section"
+      fluid
+      appendTo="body"
+    />
+  </div>
+
+  <div class="flex flex-col gap-1">
+    <label for="categoryIngredient" class="font-semibold text-slate-900 dark:text-white">Ingrédient lié (facultatif)</label>
+    <p-select
+      inputId="categoryIngredient"
+      [options]="ingredients"
+      [(ngModel)]="linkedIngredient"
+      name="linkedIngredient"
+      placeholder="Aucun"
+      [showClear]="true"
+      [filter]="true"
+      fluid
+      appendTo="body"
+    />
+  </div>
+
+  <div class="flex flex-col gap-1">
+    <label for="categoryAmount" class="font-semibold text-slate-900 dark:text-white">Montant habituel (Ar)</label>
+    <p-inputnumber inputId="categoryAmount" [(ngModel)]="usualAmount" name="usualAmount" [min]="0" [maxFractionDigits]="0" locale="fr-FR" fluid />
+    <small class="text-slate-500">Pré-rempli lors de la saisie d'une dépense.</small>
+  </div>
+</form>

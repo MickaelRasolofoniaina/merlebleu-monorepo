@@ -1,0 +1,17 @@
+<div class="flex items-center gap-1">
+  <p-button
+    icon="pi pi-chevron-left"
+    severity="secondary"
+    [outlined]="true"
+    aria-label="Mois précédent"
+    (onClick)="store.changeMonth(-1)"
+  />
+  <span class="min-w-40 text-center font-semibold">{{ store.monthLabel() }}</span>
+  <p-button
+    icon="pi pi-chevron-right"
+    severity="secondary"
+    [outlined]="true"
+    aria-label="Mois suivant"
+    (onClick)="store.changeMonth(1)"
+  />
+</div>

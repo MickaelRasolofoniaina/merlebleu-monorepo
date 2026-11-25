@@ -1,13 +1,13 @@
 <section class="mb-6">
   <h3 class="text-xl font-semibold mb-3">Aujourd'hui</h3>
   <div class="flex flex-wrap gap-3">
-    <order-count-card
+    <stat-card
       color="red"
       icon="pi pi-box"
       [count]="todayToPrepareCount()"
       label="à préparer aujourd'hui"
     />
-    <order-count-card
+    <stat-card
       color="green"
       icon="pi pi-truck"
       [count]="todayToDeliverCount()"
@@ -38,9 +38,9 @@
 </div>
 
 <div class="flex flex-wrap gap-3 mb-4">
-  <order-count-card color="red" icon="pi pi-box" [count]="toPrepareCount()" label="à préparer" />
-  <order-count-card color="green" icon="pi pi-truck" [count]="toDeliverCount()" label="à livrer" />
-  <order-count-card
+  <stat-card color="red" icon="pi pi-box" [count]="toPrepareCount()" label="à préparer" />
+  <stat-card color="green" icon="pi pi-truck" [count]="toDeliverCount()" label="à livrer" />
+  <stat-card
     color="orange"
     icon="pi pi-exclamation-triangle"
     [count]="lateCount()"

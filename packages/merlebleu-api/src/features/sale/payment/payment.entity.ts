@@ -1,9 +1,10 @@
 import { EntitySchema } from 'typeorm';
-import { PaymentMethod } from '@merlebleu/shared';
+import { DEFAULT_PAYMENT_METHOD_COLOR, PaymentMethod } from '@merlebleu/shared';
 
 export class PaymentMethodEntity implements PaymentMethod {
   id: string;
   name: string;
+  color: string;
 }
 
 export const PaymentMethodSchema = new EntitySchema<PaymentMethodEntity>({
@@ -20,6 +21,12 @@ export const PaymentMethodSchema = new EntitySchema<PaymentMethodEntity>({
       type: 'varchar',
       nullable: false,
       length: 100,
+    },
+    color: {
+      type: 'varchar',
+      nullable: false,
+      length: 7,
+      default: DEFAULT_PAYMENT_METHOD_COLOR,
     },
   },
 });

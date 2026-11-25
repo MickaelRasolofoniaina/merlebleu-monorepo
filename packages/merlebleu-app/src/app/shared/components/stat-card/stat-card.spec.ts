@@ -1,11 +1,11 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { OrderCountCard } from './order-count-card';
+import { StatCard } from './stat-card';
 
-describe('OrderCountCard', () => {
-  let fixture: ComponentFixture<OrderCountCard>;
+describe('StatCard', () => {
+  let fixture: ComponentFixture<StatCard>;
 
   const render = (count: number): HTMLElement => {
-    fixture = TestBed.createComponent(OrderCountCard);
+    fixture = TestBed.createComponent(StatCard);
     fixture.componentRef.setInput('color', 'orange');
     fixture.componentRef.setInput('icon', 'pi pi-exclamation-triangle');
     fixture.componentRef.setInput('count', count);
@@ -15,7 +15,7 @@ describe('OrderCountCard', () => {
   };
 
   beforeEach(async () => {
-    await TestBed.configureTestingModule({ imports: [OrderCountCard] }).compileComponents();
+    await TestBed.configureTestingModule({ imports: [StatCard] }).compileComponents();
   });
 
   it('shows the count with a singular label', () => {

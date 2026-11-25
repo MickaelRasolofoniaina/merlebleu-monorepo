@@ -1,9 +1,9 @@
 import { Component, computed, input } from '@angular/core';
 
-export type OrderCountCardColor = 'red' | 'green' | 'orange' | 'blue';
+export type StatCardColor = 'red' | 'green' | 'orange' | 'blue' | 'purple';
 
 // Tailwind only generates classes it can read as whole strings, so each color is spelled out
-const COLOR_CLASSES: Record<OrderCountCardColor, { container: string; text: string }> = {
+const COLOR_CLASSES: Record<StatCardColor, { container: string; text: string }> = {
   red: {
     container: 'bg-red-500/10 dark:bg-red-400/10 border-red-500/30 dark:border-red-400/30',
     text: 'text-red-600 dark:text-red-400',
@@ -16,6 +16,11 @@ const COLOR_CLASSES: Record<OrderCountCardColor, { container: string; text: stri
     container: 'bg-blue-500/10 dark:bg-blue-400/10 border-blue-500/30 dark:border-blue-400/30',
     text: 'text-blue-600 dark:text-blue-400',
   },
+  purple: {
+    container:
+      'bg-purple-500/10 dark:bg-purple-400/10 border-purple-500/30 dark:border-purple-400/30',
+    text: 'text-purple-600 dark:text-purple-400',
+  },
   orange: {
     container:
       'bg-orange-500/10 dark:bg-orange-400/10 border-orange-500/30 dark:border-orange-400/30',
@@ -24,12 +29,12 @@ const COLOR_CLASSES: Record<OrderCountCardColor, { container: string; text: stri
 };
 
 @Component({
-  selector: 'order-count-card',
-  templateUrl: './order-count-card.html',
+  selector: 'stat-card',
+  templateUrl: './stat-card.html',
   host: { class: 'inline-block' },
 })
-export class OrderCountCard {
-  color = input.required<OrderCountCardColor>();
+export class StatCard {
+  color = input.required<StatCardColor>();
   icon = input.required<string>();
   count = input<number>(0);
   label = input.required<string>();

@@ -19,45 +19,45 @@
 
 <div class="flex flex-wrap gap-3 mb-4">
   @if (displayMode() === OrderDisplayMode.STANDARD) {
-  <order-count-card
+  <stat-card
     color="orange"
     icon="pi pi-wallet"
     [valueText]="formatAmount(orderListSummary().balanceToCollect)"
     label="à encaisser"
   />
-  <order-count-card
+  <stat-card
     color="green"
     icon="pi pi-money-bill"
     [valueText]="formatAmount(orderListSummary().collectedToday)"
     label="encaissé aujourd'hui"
   />
   } @else if (displayMode() === CALENDAR_VIEW) {
-  <order-count-card
+  <stat-card
     color="green"
     icon="pi pi-truck"
     [count]="orderListSummary().toDeliverToday"
     label="à livrer aujourd'hui"
   />
-  <order-count-card
+  <stat-card
     color="blue"
     icon="pi pi-calendar"
     [count]="orderListSummary().toDeliverThisWeek"
     label="à livrer cette semaine"
   />
   } @else {
-  <order-count-card
+  <stat-card
     color="red"
     icon="pi pi-box"
     [count]="toPrepareCount()"
     label="à préparer"
   />
-  <order-count-card
+  <stat-card
     color="green"
     icon="pi pi-truck"
     [count]="toDeliverCount()"
     label="à livrer"
   />
-  <order-count-card
+  <stat-card
     color="orange"
     icon="pi pi-exclamation-triangle"
     [count]="lateCount()"
