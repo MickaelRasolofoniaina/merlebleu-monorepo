@@ -1,6 +1,6 @@
 // Static prototype models. They will move to @merlebleu/shared once the pages are validated.
 
-export type ExpenseSection = 'CURRENT' | 'OTHER';
+export type ExpenseSection = 'CURRENT' | 'INGREDIENT' | 'OTHER';
 export type FixedExpenseType = 'SALARY' | 'CHARGE';
 export type ExpensePaymentMethod = 'Espèces' | 'Mvola';
 
@@ -33,8 +33,12 @@ export interface FixedExpense {
 
 export const EXPENSE_SECTIONS: { value: ExpenseSection; label: string; severity: 'success' | 'info' | 'warn' }[] = [
   { value: 'CURRENT', label: 'Courante', severity: 'success' },
+  { value: 'INGREDIENT', label: 'Ingrédients', severity: 'info' },
   { value: 'OTHER', label: 'Autre', severity: 'warn' },
 ];
+
+/** Ingredients are managed separately, so this section is not offered on the categories page. */
+export const CATEGORY_SECTIONS = EXPENSE_SECTIONS.filter((s) => s.value !== 'INGREDIENT');
 
 export const EXPENSE_PAYMENT_METHODS: ExpensePaymentMethod[] = ['Espèces', 'Mvola'];
 
@@ -47,6 +51,7 @@ export const getSectionSeverity = (section: ExpenseSection): 'success' | 'info' 
 // Tailwind only generates classes it can read as whole strings, so each color is spelled out
 const SECTION_DOT_CLASSES: Record<ExpenseSection, string> = {
   CURRENT: 'bg-green-400',
+  INGREDIENT: 'bg-blue-400',
   OTHER: 'bg-amber-400',
 };
 

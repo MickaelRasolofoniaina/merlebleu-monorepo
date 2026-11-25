@@ -63,6 +63,27 @@ export const SEED_CATEGORIES: SeedCategory[] = [
   { label: 'Huile (courante)', section: 'CURRENT', days: { 21: 40000 } },
   { label: 'Voanjo', section: 'CURRENT', days: { 22: 1000 } },
 
+  // Stocks and ingredient purchases
+  { label: 'Crème', section: 'INGREDIENT', days: { 1: 1080000, 23: 648000 } },
+  { label: 'Farine', section: 'INGREDIENT', days: { 1: 153000, 5: 153000 } },
+  { label: 'Sucre', section: 'INGREDIENT', days: { 5: 404000 } },
+  { label: 'Huile', section: 'INGREDIENT', days: { 5: 116000, 23: 120000 } },
+  { label: 'Chocolat', section: 'INGREDIENT', days: { 5: 118000, 23: 120000 } },
+  { label: 'Carton', section: 'INGREDIENT', days: { 8: 135000 } },
+  { label: 'Fond 22', section: 'INGREDIENT', days: { 8: 45000 } },
+  { label: 'Fond 28', section: 'INGREDIENT', days: { 8: 35000 } },
+  { label: 'Pêche 2', section: 'INGREDIENT', days: { 8: 30000 } },
+  { label: 'Parfum vanille', section: 'INGREDIENT', days: { 8: 12500 } },
+  { label: 'Parfum or', section: 'INGREDIENT', days: { 8: 12500 } },
+  { label: 'Colorant', section: 'INGREDIENT', days: { 8: 10000 } },
+  { label: 'Cacao 2', section: 'INGREDIENT', days: { 8: 145000 } },
+  { label: 'Raisins secs', section: 'INGREDIENT', days: { 8: 1000 } },
+  { label: 'Lait en poudre', section: 'INGREDIENT', days: { 8: 79200 } },
+  { label: 'Margarine 10', section: 'INGREDIENT', days: { 8: 165000 } },
+  { label: 'Bougie', section: 'INGREDIENT', days: { 10: 600000 } },
+  { label: 'Sirop', section: 'INGREDIENT', days: { 3: 31400 } },
+  { label: 'Lait Candia', section: 'INGREDIENT', days: { 2: 68400 } },
+
   // Other expenses
   { label: 'Transport ingrédients', section: 'OTHER', days: { 5: 4000 } },
   {

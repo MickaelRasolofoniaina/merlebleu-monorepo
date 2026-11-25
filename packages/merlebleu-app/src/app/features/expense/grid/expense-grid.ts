@@ -149,7 +149,7 @@ export class ExpenseGridComponent {
   });
 
   protected readonly sectionTotals = computed(() => {
-    const totals: Record<ExpenseSection, number> = { CURRENT: 0, OTHER: 0 };
+    const totals: Record<ExpenseSection, number> = { CURRENT: 0, INGREDIENT: 0, OTHER: 0 };
     for (const expense of this.store.monthExpenses()) {
       const category = this.store.getCategory(expense.categoryId);
       if (category) {
@@ -164,7 +164,7 @@ export class ExpenseGridComponent {
   );
   protected readonly variableTotal = computed(() => {
     const t = this.sectionTotals();
-    return t.CURRENT + t.OTHER;
+    return t.CURRENT + t.INGREDIENT + t.OTHER;
   });
   protected readonly grandTotal = computed(() => this.variableTotal() + this.fixedTotal());
 

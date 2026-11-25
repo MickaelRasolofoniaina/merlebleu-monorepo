@@ -2,7 +2,7 @@ import { Component, OnChanges, input, output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { InputTextModule } from 'primeng/inputtext';
 import { SelectModule } from 'primeng/select';
-import { EXPENSE_SECTIONS, ExpenseCategory, ExpenseSection } from '../../../expense.model';
+import { CATEGORY_SECTIONS, ExpenseCategory, ExpenseSection } from '../../../expense.model';
 
 export type CategoryFormValue = Omit<ExpenseCategory, 'id'>;
 
@@ -16,7 +16,7 @@ export class CategoryFormComponent implements OnChanges {
   readonly category = input<ExpenseCategory | null>(null);
   readonly save = output<CategoryFormValue>();
 
-  protected readonly sections = EXPENSE_SECTIONS;
+  protected readonly sections = CATEGORY_SECTIONS;
 
   protected label = '';
   protected section: ExpenseSection = 'CURRENT';

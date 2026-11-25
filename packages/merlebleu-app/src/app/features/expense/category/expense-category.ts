@@ -10,7 +10,7 @@ import { MessageService } from 'primeng/api';
 import { formatUnitPrice } from '@shared/utils/number';
 import { ExpenseStoreService } from '../expense-store.service';
 import {
-  EXPENSE_SECTIONS,
+  CATEGORY_SECTIONS,
   ExpenseCategory,
   ExpenseSection,
   getSectionLabel,
@@ -42,7 +42,7 @@ export class ExpenseCategoryComponent {
   protected readonly formatAmount = formatUnitPrice;
   protected readonly getSectionLabel = getSectionLabel;
   protected readonly getSectionSeverity = getSectionSeverity;
-  protected readonly sectionOptions = EXPENSE_SECTIONS;
+  protected readonly sectionOptions = CATEGORY_SECTIONS;
 
   protected readonly sectionFilter = signal<ExpenseSection | null>(null);
   protected readonly search = signal('');
@@ -59,6 +59,7 @@ export class ExpenseCategoryComponent {
     const search = this.search().trim().toLowerCase();
     return this.store
       .categories()
+      .filter((c) => c.section !== 'INGREDIENT')
       .filter((c) => !this.sectionFilter() || c.section === this.sectionFilter())
       .filter((c) => !search || c.label.toLowerCase().includes(search));
   });
