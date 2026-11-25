@@ -1,4 +1,4 @@
-import { Component, ElementRef, Injector, afterNextRender, computed, inject, signal } from '@angular/core';
+import { Component, ElementRef, Injector, afterNextRender, computed, effect, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
@@ -95,6 +95,14 @@ export class ExpenseGridComponent {
       };
     });
   });
+
+  constructor() {
+    // Bring today's column into view whenever the displayed days change (page load, month or day filter).
+    effect(() => {
+      this.dayColumns();
+      afterNextRender(() => this.scrollToToday(), { injector: this.injector });
+    });
+  }
 
   protected readonly groups = computed<GridGroup[]>(() => {
     const amountsByRow = new Map<string, Map<number, number>>();
@@ -352,6 +360,15 @@ export class ExpenseGridComponent {
     if (!focus()) {
       afterNextRender(() => focus(), { injector: this.injector });
     }
+  }
+
+  /** Centers today's column in the horizontally scrollable grid. Does nothing outside the current month. */
+  private scrollToToday(): void {
+    const container = this.host.nativeElement.querySelector<HTMLElement>('[data-grid-scroll]');
+    const header = container?.querySelector<HTMLElement>('th[aria-current="date"]');
+    if (!container || !header) return;
+    const offset = header.getBoundingClientRect().left - container.getBoundingClientRect().left;
+    container.scrollLeft += offset - (container.clientWidth - header.offsetWidth) / 2;
   }
 
   private rowKeyOf(categoryId?: string, ingredientId?: string): string {
