@@ -1,7 +1,9 @@
 import { Routes } from '@angular/router';
 import { AppLayout } from './app-layout';
 import { Login } from './features/identity/login/login';
+import { UserRole } from '@merlebleu/shared';
 import { authGuard } from './shared/guards/auth.guard';
+import { roleGuard } from './shared/guards/role.guard';
 
 export const routes: Routes = [
   {
@@ -43,6 +45,8 @@ export const routes: Routes = [
       },
       {
         path: 'expense',
+        canActivate: [roleGuard],
+        data: { roles: [UserRole.ADMIN, UserRole.PASTRY_CHEF] },
         loadChildren: () =>
           import('./features/expense/expense.routes').then((m) => m.EXPENSE_ROUTES),
       },
@@ -50,6 +54,10 @@ export const routes: Routes = [
         path: 'shop',
         loadChildren: () =>
           import('./features/shop/shop.routes').then((m) => m.SHOP_ROUTES),
+      },
+      {
+        path: 'forbidden',
+        loadComponent: () => import('./features/forbidden/forbidden').then((m) => m.Forbidden),
       },
       {
         path: 'notification',
