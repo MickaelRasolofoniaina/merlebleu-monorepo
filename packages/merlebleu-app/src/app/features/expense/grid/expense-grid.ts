@@ -36,7 +36,7 @@ interface CellRef {
 }
 
 const CELL_BASE =
-  'w-full min-h-9 text-right px-2 py-1.5 cursor-pointer tabular-nums focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-blue-600';
+  'w-full min-h-9 text-right px-2 py-1.5 cursor-pointer tabular-nums focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-blue-600 hover:ring-2 hover:ring-inset hover:ring-blue-400 dark:hover:ring-blue-400';
 const CELL_FILLED =
   'bg-blue-100 text-blue-900 font-semibold hover:bg-blue-200 dark:bg-blue-900 dark:text-blue-50 dark:hover:bg-blue-800';
 const CELL_EMPTY = 'bg-white hover:bg-slate-100 dark:bg-slate-900 dark:hover:bg-slate-800';
@@ -173,6 +173,25 @@ export class ExpenseGridComponent {
   protected readonly draft = signal('');
   /** Last focused cell: highlights its row and column, and is the grid's single tab stop. */
   protected readonly active = signal<CellRef | null>(null);
+
+  /** Cell under the mouse: highlights its row label and day header, like a crosshair. */
+  protected readonly hovered = signal<CellRef | null>(null);
+
+  protected setHovered(categoryId: string, day: number): void {
+    this.hovered.set({ categoryId, day });
+  }
+
+  protected clearHovered(): void {
+    this.hovered.set(null);
+  }
+
+  protected isHoveredRow(categoryId: string): boolean {
+    return this.hovered()?.categoryId === categoryId;
+  }
+
+  protected isHoveredDay(day: number): boolean {
+    return this.hovered()?.day === day;
+  }
 
   protected isEditing(categoryId: string, day: number): boolean {
     const cell = this.editing();

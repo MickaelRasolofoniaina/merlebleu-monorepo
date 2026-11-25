@@ -68,7 +68,7 @@
 
 <!-- The container scrolls in both directions so the header row can stick to its top edge. -->
 <div class="max-h-[70vh] overflow-auto rounded-xl border border-slate-200 dark:border-slate-700">
-  <table class="w-full border-collapse text-sm tabular-nums">
+  <table class="w-full border-collapse text-sm tabular-nums" (mouseleave)="clearHovered()">
     <thead>
       <tr class="bg-slate-100 dark:bg-slate-800">
         <th class="sticky left-0 top-0 z-30 bg-slate-100 dark:bg-slate-800 text-left px-3 py-2 min-w-48">Désignation</th>
@@ -76,7 +76,7 @@
           <th
             class="sticky top-0 z-20 text-right! px-2 py-1.5 min-w-20 leading-tight"
             [class]="
-              column.isToday || isActiveDay(column.day)
+              column.isToday || isActiveDay(column.day) || isHoveredDay(column.day)
                 ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-100'
                 : column.isWeekend
                   ? 'bg-slate-100 text-slate-500 dark:bg-slate-800'
@@ -103,7 +103,7 @@
             <td
               class="sticky left-0 px-3 py-1.5"
               [class]="
-                isActiveRow(row.category.id)
+                isActiveRow(row.category.id) || isHoveredRow(row.category.id)
                   ? 'bg-blue-50 font-semibold text-blue-700 dark:bg-blue-950 dark:text-blue-200'
                   : 'bg-white dark:bg-slate-900'
               "
@@ -135,6 +135,7 @@
                     [class]="cellClass(row.amounts.has(column.day), column)"
                     [attr.tabindex]="isTabStop(row.category.id, column.day) ? 0 : -1"
                     [attr.aria-label]="(row.amounts.has(column.day) ? 'Modifier ' : 'Saisir ') + row.category.label + ' du jour ' + column.day"
+                    (mouseenter)="setHovered(row.category.id, column.day)"
                     (focus)="setActive(row.category.id, column.day)"
                     (click)="startEdit(row, column.day)"
                     (keydown)="onCellKeydown($event, row, column.day)"
