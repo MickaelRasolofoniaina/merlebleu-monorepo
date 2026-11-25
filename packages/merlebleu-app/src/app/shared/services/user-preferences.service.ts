@@ -22,6 +22,11 @@ export class UserPreferencesService {
     return this.cachedUser$;
   }
 
+  /** Forgets the cached user, to call when the session changes (sign in, logout). */
+  clearCache(): void {
+    this.cachedUser$ = null;
+  }
+
   updateDefaultDisplayMode(mode: OrderDisplayMode): Observable<UserDto> {
     return this.http
       .patch<UserDto>(`${this.apiUrl}/me`, { defaultOrderDisplayMode: mode })
