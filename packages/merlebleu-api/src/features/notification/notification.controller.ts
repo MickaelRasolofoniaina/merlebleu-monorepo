@@ -9,6 +9,7 @@ import {
 } from '@nestjs/common';
 import { Observable } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
+import { parsePositiveInt } from '@shared/pagination/pagination.utils';
 import { NotificationService } from './notification.service';
 import { CurrentUser } from '@shared/auth/current-user.decorator';
 import type { CurrentUserPayload } from '@shared/auth/current-user.decorator';
@@ -34,7 +35,7 @@ export class NotificationController {
     @CurrentUser() currentUser: CurrentUserPayload,
     @Query('limit') limit?: string,
   ) {
-    const limitNumber = limit ? Number.parseInt(limit, 10) : 5;
+    const limitNumber = parsePositiveInt(limit, 5, 50);
     return this.notificationService.findRecent(
       currentUser.sub,
       currentUser.role,
@@ -56,8 +57,8 @@ export class NotificationController {
     @Query('page') page?: string,
     @Query('limit') limit?: string,
   ) {
-    const pageNumber = page ? Number.parseInt(page, 10) : 1;
-    const limitNumber = limit ? Number.parseInt(limit, 10) : 20;
+    const pageNumber = parsePositiveInt(page, 1, 100000);
+    const limitNumber = parsePositiveInt(limit, 20);
     return this.notificationService.findPaginated(
       currentUser.sub,
       currentUser.role,

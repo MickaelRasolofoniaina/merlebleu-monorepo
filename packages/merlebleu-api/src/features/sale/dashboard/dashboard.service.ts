@@ -1,16 +1,29 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Between, In, Not, Repository, SelectQueryBuilder } from 'typeorm';
+import {
+  Between,
+  In,
+  LessThanOrEqual,
+  Not,
+  Repository,
+  SelectQueryBuilder,
+} from 'typeorm';
 import {
   DashboardAmount,
+  DashboardCollectionByMethod,
   DashboardCountPoint,
   DashboardDistributionPoint,
   DashboardOrderListSummary,
+  DashboardProductionLine,
   DashboardQueryDto,
+  DashboardTodayDetails,
   DashboardTodaySummary,
   DashboardView,
+  DEFAULT_PAYMENT_METHOD_COLOR,
+  ExpenseNature,
   OrderStatus,
 } from '@merlebleu/shared';
+import { ExpenseEntity } from '../../expense/expense.entity';
 import {
   OrderEntity,
   OrderItemEntity,
@@ -32,6 +45,8 @@ export class DashboardService {
     private orderRepository: Repository<OrderEntity>,
     @InjectRepository(OrderItemSchema)
     private orderItemRepository: Repository<OrderItemEntity>,
+    @InjectRepository(ExpenseEntity)
+    private expenseRepository: Repository<ExpenseEntity>,
   ) {}
 
   async getOrdersCount(query: DashboardQueryDto): Promise<DashboardCountPoint[]> {
@@ -151,6 +166,139 @@ export class DashboardService {
   }
 
   /**
+   * Detailed figures of the current day: late orders, deliveries timeline,
+   * production, collections by payment method and expenses. Collections follow
+   * the same rule as the today summary (delivered orders, by delivery date).
+   */
+  async getTodayDetails(): Promise<DashboardTodayDetails> {
+    const now = new Date();
+    const today = formatDate(now);
+    const tomorrow = formatDate(
+      new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1),
+    );
+    const pendingStatuses = [
+      OrderStatus.TODO,
+      OrderStatus.INPROGRESS,
+      OrderStatus.TODELIVER,
+    ];
+
+    const [late, todayOrders, collections, expenses, unpaidFixed, tomorrowCount] =
+      await Promise.all([
+        this.orderRepository
+          .createQueryBuilder('orders')
+          .select('COUNT(*)', 'count')
+          .addSelect('COALESCE(SUM(orders.balanceAmount), 0)', 'balance')
+          .where('orders.deliveryDate < :today', { today })
+          .andWhere('orders.orderStatus IN (:...pendingStatuses)', {
+            pendingStatuses,
+          })
+          .getRawOne<{ count: string; balance: string }>(),
+        this.orderRepository.find({
+          where: {
+            deliveryDate: today,
+            orderStatus: Not(OrderStatus.CANCELLED),
+          },
+          relations: { orderItems: true, shop: true },
+          order: { deliveryStartTime: 'ASC' },
+        }),
+        this.orderRepository.find({
+          where: { deliveryDate: today, orderStatus: OrderStatus.DELIVERED },
+          relations: { paymentMethod: true, balancePaymentMethod: true },
+        }),
+        this.expenseRepository.find({ where: { date: today } }),
+        this.expenseRepository.count({
+          where: {
+            nature: ExpenseNature.FIXED,
+            paid: false,
+            date: LessThanOrEqual(today),
+          },
+        }),
+        this.orderRepository.count({
+          where: {
+            deliveryDate: tomorrow,
+            orderStatus: In(pendingStatuses),
+          },
+        }),
+      ]);
+
+    const pendingToday = todayOrders.filter((order) =>
+      pendingStatuses.includes(order.orderStatus as OrderStatus),
+    );
+
+    // same rule as the "to prepare" counter: orders still TODO delivered today or tomorrow
+    const toPrepareOrders = await this.orderRepository.find({
+      where: {
+        deliveryDate: Between(today, tomorrow),
+        orderStatus: OrderStatus.TODO,
+      },
+      relations: { orderItems: true },
+    });
+
+    const productionMap = new Map<string, DashboardProductionLine>();
+    let customizedOrdersCount = 0;
+    for (const order of toPrepareOrders) {
+      if (order.orderItems.some((item) => item.text || item.decoration)) {
+        customizedOrdersCount++;
+      }
+      for (const item of order.orderItems) {
+        const key = `${item.shape}|${item.size}`;
+        const line = productionMap.get(key) ?? {
+          shape: item.shape,
+          size: item.size,
+          count: 0,
+        };
+        line.count++;
+        productionMap.set(key, line);
+      }
+    }
+
+    return {
+      lateCount: Number(late?.count ?? 0),
+      lateBalanceAmount: Number(late?.balance ?? 0),
+      balanceToCollectToday: pendingToday.reduce(
+        (sum, order) => sum + order.balanceAmount,
+        0,
+      ),
+      deliveries: todayOrders.map((order) => ({
+        id: order.id,
+        startTime: order.deliveryStartTime.slice(0, 5),
+        endTime: order.deliveryEndTime.slice(0, 5),
+        customerName: order.customerName,
+        shopAddress: order.shop?.address ?? '',
+        isPickup: !order.deliveryAddress,
+        itemsLabel: order.orderItems
+          .map((item) => `${item.type} ${item.shape} ${item.size} cm`)
+          .join(', '),
+        status: order.orderStatus ?? OrderStatus.TODO,
+        balanceAmount: order.balanceAmount,
+      })),
+      production: [...productionMap.values()].sort(
+        (a, b) => b.count - a.count || a.size - b.size,
+      ),
+      customizedOrdersCount,
+      collectionsByMethod: this.groupCollectionsByMethod(collections),
+      expenses: expenses.map((expense) => ({
+        id: expense.id,
+        label:
+          expense.label ??
+          expense.ingredient?.label ??
+          expense.category?.label ??
+          '',
+        origin: expense.ingredient
+          ? 'INGREDIENT'
+          : expense.category
+            ? 'CATEGORY'
+            : 'FIXED',
+        amount: expense.amount,
+        // variable expenses have no paid flag: they are paid when entered
+        paid: expense.paid !== false,
+      })),
+      unpaidFixedExpensesCount: unpaidFixed,
+      tomorrowDeliveriesCount: tomorrowCount,
+    };
+  }
+
+  /**
    * Figures shown above the order list. The collected amount follows the same
    * rule as the today summary. "This week" runs from Monday to Sunday and
    * includes today; only orders still to deliver are counted.
@@ -205,6 +353,38 @@ export class DashboardService {
       toDeliverToday,
       toDeliverThisWeek,
     };
+  }
+
+  // the deposit is attributed to the order's payment method and the balance
+  // collected at delivery to the method chosen then
+  private groupCollectionsByMethod(
+    orders: OrderEntity[],
+  ): DashboardCollectionByMethod[] {
+    const totals = new Map<string, DashboardCollectionByMethod>();
+    const add = (
+      method: { name: string; color: string } | null | undefined,
+      amount: number,
+    ) => {
+      if (amount <= 0) {
+        return;
+      }
+      const name = method?.name ?? 'Non défini';
+      const row = totals.get(name) ?? {
+        name,
+        color: method?.color ?? DEFAULT_PAYMENT_METHOD_COLOR,
+        amount: 0,
+      };
+      row.amount += amount;
+      totals.set(name, row);
+    };
+
+    for (const order of orders) {
+      const balancePaid = order.balancePaidAmount ?? 0;
+      add(order.paymentMethod, order.paidAmount - balancePaid);
+      add(order.balancePaymentMethod ?? order.paymentMethod, balancePaid);
+    }
+
+    return [...totals.values()].sort((a, b) => b.amount - a.amount);
   }
 
   // an order with several items of the same type or shape is counted once

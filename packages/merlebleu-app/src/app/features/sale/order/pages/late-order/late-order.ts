@@ -32,7 +32,7 @@ import { UserPreferencesService } from '@shared/services/user-preferences.servic
 import { OrderDetailDialog } from '../../components/order-detail-dialog/order-detail-dialog';
 import { OrderCashTable } from '../../components/order-cash-table/order-cash-table';
 import { OrderAgendaView } from '../../components/order-agenda-view/order-agenda-view';
-import { OrderCountCard } from '@shared/components/order-count-card/order-count-card';
+import { StatCard } from '@shared/components/stat-card/stat-card';
 
 const LATE_ORDER_STATUSES = [OrderStatus.TODO, OrderStatus.INPROGRESS, OrderStatus.TODELIVER];
 
@@ -55,7 +55,7 @@ type FilterKey = 'orderDate' | 'deliveryDate' | 'shopId' | 'orderStatus';
     OrderDetailDialog,
     OrderCashTable,
     OrderAgendaView,
-    OrderCountCard,
+    StatCard,
   ],
   templateUrl: './late-order.html',
   styleUrl: './late-order.scss',

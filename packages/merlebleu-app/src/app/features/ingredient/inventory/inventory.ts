@@ -1,6 +1,5 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
-import { Ingredient, IngredientCategory, IngredientUnit } from '@merlebleu/shared';
-import { IngredientCategoryService } from '../category/category.service';
+import { Ingredient, IngredientUnit } from '@merlebleu/shared';
 import { IngredientUnitService } from '../unit/unit.service';
 import { IngredientService } from '../ingredient/ingredient.service';
 import { FormsModule } from '@angular/forms';
@@ -19,7 +18,7 @@ import { finalize } from 'rxjs';
   selector: 'mb-inventory',
   templateUrl: './inventory.html',
   styleUrls: ['./inventory.scss'],
-  providers: [IngredientService, IngredientCategoryService, IngredientUnitService],
+  providers: [IngredientService, IngredientUnitService],
   imports: [
     FormsModule,
     TableModule,
@@ -35,13 +34,11 @@ export class InventoryComponent implements OnInit {
   readonly Number = Number;
 
   ingredients = signal<Ingredient[]>([]);
-  categories = signal<IngredientCategory[]>([]);
   units = signal<IngredientUnit[]>([]);
   isLoading = signal(false);
   savingIds = signal<Set<string>>(new Set());
 
   searchLabel = '';
-  filterCategoryId: string | null = null;
   filterUnitId: string | null = null;
   filterStatus = signal<'out_of_stock' | 'available' | null>(null);
 
@@ -61,13 +58,11 @@ export class InventoryComponent implements OnInit {
   stockValues: Record<string, number> = {};
 
   private ingredientService = inject(IngredientService);
-  private categoryService = inject(IngredientCategoryService);
   private unitService = inject(IngredientUnitService);
   private messageService = inject(MessageService);
   private reportGeneratorService = inject(ReportGeneratorService);
 
   ngOnInit() {
-    this.categoryService.getAll().subscribe((data) => this.categories.set(data));
     this.unitService.getAll().subscribe((data) => this.units.set(data));
     this.fetchIngredients();
   }
@@ -75,7 +70,6 @@ export class InventoryComponent implements OnInit {
   private buildFilters() {
     return {
       labelContains: this.searchLabel || undefined,
-      categoryId: this.filterCategoryId || undefined,
       unitId: this.filterUnitId || undefined,
     };
   }
@@ -99,10 +93,6 @@ export class InventoryComponent implements OnInit {
     const normalized = value.trim();
     this.searchLabel = normalized;
     if (normalized.length > 0 && normalized.length < 3) return;
-    this.fetchIngredients();
-  }
-
-  onCategoryFilter() {
     this.fetchIngredients();
   }
 

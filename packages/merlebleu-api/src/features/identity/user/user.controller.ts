@@ -59,14 +59,18 @@ export class UserController {
     @Param('id') id: string,
     @Body()
     body: UpdateUserDto,
+    @CurrentUser() currentUser: CurrentUserPayload,
   ) {
-    return this.userService.updateUser(id, body);
+    return this.userService.updateUser(id, body, currentUser.sub);
   }
 
   @Delete(':id')
   @Roles(UserRole.ADMIN)
-  deleteUser(@Param('id') id: string) {
-    return this.userService.deleteUser(id);
+  deleteUser(
+    @Param('id') id: string,
+    @CurrentUser() currentUser: CurrentUserPayload,
+  ) {
+    return this.userService.deleteUser(id, currentUser.sub);
   }
 
   @Get()

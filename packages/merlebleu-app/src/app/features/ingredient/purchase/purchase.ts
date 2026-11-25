@@ -4,11 +4,9 @@ import {
   CreateIngredientPurchaseDto,
   DEFAULT_PAGE_SIZE,
   Ingredient,
-  IngredientCategory,
   IngredientPurchase,
   UpdateIngredientPurchaseDto,
 } from '@merlebleu/shared';
-import { IngredientCategoryService } from '../category/category.service';
 import { IngredientService } from '../ingredient/ingredient.service';
 import { IngredientPurchaseService } from './purchase.service';
 import { PurchaseFormComponent } from './components/purchase-form/purchase-form.component';
@@ -20,7 +18,6 @@ import { InputTextModule } from 'primeng/inputtext';
 import { SelectModule } from 'primeng/select';
 import { DatePickerModule } from 'primeng/datepicker';
 import { getPageFromFirstRows } from '@shared/utils/pagination';
-import { formatUnitPrice } from '@shared/utils/number';
 import { capitalizeFirstLetter } from '@shared/utils/text';
 import { formatDate } from '@shared/utils/date';
 import { finalize } from 'rxjs';
@@ -29,7 +26,7 @@ import { finalize } from 'rxjs';
   selector: 'mb-purchase-list',
   templateUrl: './purchase.html',
   styleUrls: ['./purchase.scss'],
-  providers: [IngredientPurchaseService, IngredientCategoryService, IngredientService],
+  providers: [IngredientPurchaseService, IngredientService],
   imports: [
     DatePipe,
     ButtonModule,
@@ -43,11 +40,9 @@ import { finalize } from 'rxjs';
   ],
 })
 export class PurchaseListComponent implements OnInit {
-  readonly formatUnitPrice = formatUnitPrice;
   readonly capitalizeFirstLetter = capitalizeFirstLetter;
 
   purchases = signal<IngredientPurchase[]>([]);
-  categories = signal<IngredientCategory[]>([]);
   ingredients = signal<Ingredient[]>([]);
   isLoading = signal(false);
   totalRecords = signal(0);
@@ -57,7 +52,6 @@ export class PurchaseListComponent implements OnInit {
 
   filterPurchaseDate: Date | null = null;
   filterLabelContains = '';
-  filterCategoryId: string | null = null;
 
   showModal = false;
   showEditModal = false;
@@ -66,11 +60,9 @@ export class PurchaseListComponent implements OnInit {
   editDto: UpdateIngredientPurchaseDto | null = null;
 
   private purchaseService = inject(IngredientPurchaseService);
-  private categoryService = inject(IngredientCategoryService);
   private ingredientService = inject(IngredientService);
 
   ngOnInit() {
-    this.categoryService.getAll().subscribe((data) => this.categories.set(data));
     this.ingredientService
       .getIngredients({}, 1, 1000)
       .subscribe(({ items }) => this.ingredients.set(items));
@@ -81,7 +73,6 @@ export class PurchaseListComponent implements OnInit {
     return {
       purchaseDate: this.filterPurchaseDate ? formatDate(this.filterPurchaseDate) : undefined,
       labelContains: this.filterLabelContains || undefined,
-      categoryId: this.filterCategoryId || undefined,
     };
   }
 
@@ -111,21 +102,11 @@ export class PurchaseListComponent implements OnInit {
     this.fetchPurchases();
   }
 
-  onCategoryFilter() {
-    this.page.set(1);
-    this.first.set(0);
-    this.fetchPurchases();
-  }
-
   onTablePage(event: TablePageEvent) {
     this.page.set(getPageFromFirstRows(event.first, event.rows));
     this.rows = event.rows;
     this.first.set(event.first);
     this.fetchPurchases();
-  }
-
-  getTotalPrice(purchase: IngredientPurchase): number {
-    return Number(purchase.quantity) * purchase.ingredient.unitPrice;
   }
 
   toDto(purchase: IngredientPurchase): UpdateIngredientPurchaseDto {

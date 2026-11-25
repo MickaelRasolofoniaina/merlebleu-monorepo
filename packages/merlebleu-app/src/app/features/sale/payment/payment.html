@@ -14,19 +14,21 @@
   <ng-template #header>
     <tr>
       <th>Nom</th>
+      <th>Couleur</th>
       <th style="width: 10rem" class="text-center!">Actions</th>
     </tr>
   </ng-template>
   <ng-template #body let-payment>
     <tr>
       <td>{{ payment.name }}</td>
+      <td><payment-method-badge [name]="payment.name" [color]="payment.color" /></td>
       <td class="text-center!">
         <p-button
           icon="pi pi-pencil"
           size="small"
           severity="warn"
           class="mr-2"
-          (onClick)="editPaymentMethod(payment.id, payment.name)"
+          (onClick)="editPaymentMethod(payment)"
         />
         <p-button
           icon="pi pi-trash"
@@ -60,6 +62,18 @@
         <small class="text-red-500 mt-1 block">{{ validationError }}</small>
       }
     </div>
+    <div>
+      <label for="paymentMethodColor" class="block mb-2">Couleur</label>
+      <div class="flex items-center gap-3">
+        <input
+          id="paymentMethodColor"
+          type="color"
+          [(ngModel)]="newPaymentMethodColor"
+          class="h-10 w-14 cursor-pointer rounded border border-slate-300 bg-transparent p-1"
+        />
+        <payment-method-badge [name]="newPaymentMethodName || 'Aperçu'" [color]="newPaymentMethodColor" />
+      </div>
+    </div>
   </div>
 
   <ng-template pTemplate="footer">
@@ -90,6 +104,18 @@
       @if (editValidationError) {
         <small class="text-red-500 mt-1 block">{{ editValidationError }}</small>
       }
+    </div>
+    <div>
+      <label for="editPaymentMethodColorInput" class="block mb-2">Couleur</label>
+      <div class="flex items-center gap-3">
+        <input
+          id="editPaymentMethodColorInput"
+          type="color"
+          [(ngModel)]="editPaymentMethodColor"
+          class="h-10 w-14 cursor-pointer rounded border border-slate-300 bg-transparent p-1"
+        />
+        <payment-method-badge [name]="editPaymentMethodName || 'Aperçu'" [color]="editPaymentMethodColor" />
+      </div>
     </div>
   </div>
 

@@ -25,18 +25,15 @@ export class IngredientController {
 
   @Get()
   @ApiQuery({ name: 'labelContains', required: false, type: String })
-  @ApiQuery({ name: 'categoryId', required: false, type: String })
   @ApiQuery({ name: 'unitId', required: false, type: String })
   findIngredients(
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
     @Query('limit', new DefaultValuePipe(20), ParseIntPipe) limit: number,
     @Query('labelContains') labelContains?: string,
-    @Query('categoryId') categoryId?: string,
     @Query('unitId') unitId?: string,
   ) {
     return this.ingredientService.findIngredients(page, limit, {
       labelContains,
-      categoryId,
       unitId,
     });
   }

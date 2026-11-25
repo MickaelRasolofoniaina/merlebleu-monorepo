@@ -18,6 +18,7 @@ import {
 import { OrderStatus } from '@merlebleu/shared';
 import { CurrentUser } from '@shared/auth/current-user.decorator';
 import type { CurrentUserPayload } from '@shared/auth/current-user.decorator';
+import { parsePositiveInt } from '@shared/pagination/pagination.utils';
 
 @Controller('order')
 export class OrderController {
@@ -44,8 +45,8 @@ export class OrderController {
     @Query('excludeDelivered') excludeDelivered?: string,
     @Query('shopId') shopId?: string,
   ) {
-    const pageNumber = page ? Number.parseInt(page, 10) : 1;
-    const limitNumber = limit ? Number.parseInt(limit, 10) : 20;
+    const pageNumber = parsePositiveInt(page, 1, 100000);
+    const limitNumber = parsePositiveInt(limit, 20);
     return this.orderService.listOrders(pageNumber, limitNumber, {
       orderDate,
       deliveryDate,
@@ -68,8 +69,8 @@ export class OrderController {
     @Query('orderDate') orderDate?: string,
     @Query('deliveryDate') deliveryDate?: string,
   ) {
-    const pageNumber = page ? Number.parseInt(page, 10) : 1;
-    const limitNumber = limit ? Number.parseInt(limit, 10) : 20;
+    const pageNumber = parsePositiveInt(page, 1, 100000);
+    const limitNumber = parsePositiveInt(limit, 20);
     return this.orderService.listOrdersToPrepare(
       pageNumber,
       limitNumber,
@@ -91,8 +92,8 @@ export class OrderController {
     @Query('orderDate') orderDate?: string,
     @Query('deliveryDate') deliveryDate?: string,
   ) {
-    const pageNumber = page ? Number.parseInt(page, 10) : 1;
-    const limitNumber = limit ? Number.parseInt(limit, 10) : 20;
+    const pageNumber = parsePositiveInt(page, 1, 100000);
+    const limitNumber = parsePositiveInt(limit, 20);
     return this.orderService.listOrdersLate(
       pageNumber,
       limitNumber,
@@ -106,22 +107,22 @@ export class OrderController {
 
   @Get('items/to-prepare')
   listOrderItemsToPrepare(@Query('page') page?: string, @Query('limit') limit?: string) {
-    const pageNumber = page ? Number.parseInt(page, 10) : 1;
-    const limitNumber = limit ? Number.parseInt(limit, 10) : 20;
+    const pageNumber = parsePositiveInt(page, 1, 100000);
+    const limitNumber = parsePositiveInt(limit, 20);
     return this.orderService.listOrderItemsToPrepare(pageNumber, limitNumber);
   }
 
   @Get('items/to-deliver')
   listOrderItemsToDeliver(@Query('page') page?: string, @Query('limit') limit?: string) {
-    const pageNumber = page ? Number.parseInt(page, 10) : 1;
-    const limitNumber = limit ? Number.parseInt(limit, 10) : 20;
+    const pageNumber = parsePositiveInt(page, 1, 100000);
+    const limitNumber = parsePositiveInt(limit, 20);
     return this.orderService.listOrderItemsToDeliver(pageNumber, limitNumber);
   }
 
   @Get('items/late')
   listOrderItemsLate(@Query('page') page?: string, @Query('limit') limit?: string) {
-    const pageNumber = page ? Number.parseInt(page, 10) : 1;
-    const limitNumber = limit ? Number.parseInt(limit, 10) : 20;
+    const pageNumber = parsePositiveInt(page, 1, 100000);
+    const limitNumber = parsePositiveInt(limit, 20);
     return this.orderService.listOrderItemsLate(pageNumber, limitNumber);
   }
 
@@ -132,8 +133,8 @@ export class OrderController {
     @Query('customerName') customerName?: string,
     @Query('shopId') shopId?: string,
   ) {
-    const pageNumber = page ? Number.parseInt(page, 10) : 1;
-    const limitNumber = limit ? Number.parseInt(limit, 10) : 20;
+    const pageNumber = parsePositiveInt(page, 1, 100000);
+    const limitNumber = parsePositiveInt(limit, 20);
     return this.orderService.listOrdersTodayToPrepare(
       pageNumber,
       limitNumber,
@@ -150,8 +151,8 @@ export class OrderController {
     @Query('shopId') shopId?: string,
     @Query('status') status?: OrderStatus,
   ) {
-    const pageNumber = page ? Number.parseInt(page, 10) : 1;
-    const limitNumber = limit ? Number.parseInt(limit, 10) : 20;
+    const pageNumber = parsePositiveInt(page, 1, 100000);
+    const limitNumber = parsePositiveInt(limit, 20);
     return this.orderService.listOrdersTodayToDeliver(
       pageNumber,
       limitNumber,
@@ -163,15 +164,15 @@ export class OrderController {
 
   @Get('items/today/to-prepare')
   listOrderItemsTodayToPrepare(@Query('page') page?: string, @Query('limit') limit?: string) {
-    const pageNumber = page ? Number.parseInt(page, 10) : 1;
-    const limitNumber = limit ? Number.parseInt(limit, 10) : 20;
+    const pageNumber = parsePositiveInt(page, 1, 100000);
+    const limitNumber = parsePositiveInt(limit, 20);
     return this.orderService.listOrderItemsTodayToPrepare(pageNumber, limitNumber);
   }
 
   @Get('items/today/to-deliver')
   listOrderItemsTodayToDeliver(@Query('page') page?: string, @Query('limit') limit?: string) {
-    const pageNumber = page ? Number.parseInt(page, 10) : 1;
-    const limitNumber = limit ? Number.parseInt(limit, 10) : 20;
+    const pageNumber = parsePositiveInt(page, 1, 100000);
+    const limitNumber = parsePositiveInt(limit, 20);
     return this.orderService.listOrderItemsTodayToDeliver(pageNumber, limitNumber);
   }
 

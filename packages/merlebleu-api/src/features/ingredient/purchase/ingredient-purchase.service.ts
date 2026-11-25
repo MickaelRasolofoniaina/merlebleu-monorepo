@@ -25,11 +25,7 @@ export class IngredientPurchaseService {
   async findPurchases(
     page = 1,
     limit = 20,
-    filters?: {
-      purchaseDate?: string;
-      labelContains?: string;
-      categoryId?: string;
-    },
+    filters?: { purchaseDate?: string; labelContains?: string },
   ): Promise<ResultPaged<IngredientPurchaseEntity>> {
     const pagination = getPaginationParams({ page, limit });
     const where: FindOptionsWhere<IngredientPurchaseEntity> = {};
@@ -37,15 +33,8 @@ export class IngredientPurchaseService {
     if (filters?.purchaseDate) {
       where.purchaseDate = new Date(filters.purchaseDate) as unknown as Date;
     }
-    if (filters?.labelContains && filters?.categoryId) {
-      where.ingredient = {
-        label: ILike(`%${filters.labelContains}%`),
-        category: { id: filters.categoryId },
-      };
-    } else if (filters?.labelContains) {
+    if (filters?.labelContains) {
       where.ingredient = { label: ILike(`%${filters.labelContains}%`) };
-    } else if (filters?.categoryId) {
-      where.ingredient = { category: { id: filters.categoryId } };
     }
 
     const [data, total] = await this.repo.findAndCount({

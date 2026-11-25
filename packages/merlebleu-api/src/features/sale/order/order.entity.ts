@@ -34,6 +34,8 @@ export class OrderEntity implements Order {
   paidAmount: number;
   balanceAmount: number;
   paymentMethod: PaymentMethodEntity;
+  balancePaidAmount: number;
+  balancePaymentMethod?: PaymentMethodEntity | null;
   shop: ShopEntity;
   orderDate: string;
   orderStatus?: OrderStatus;
@@ -146,6 +148,10 @@ export const OrderSchema = new EntitySchema<OrderEntity>({
     balanceAmount: {
       type: 'integer',
     },
+    balancePaidAmount: {
+      type: 'integer',
+      default: 0,
+    },
     orderDate: {
       type: 'date',
     },
@@ -171,6 +177,15 @@ export const OrderSchema = new EntitySchema<OrderEntity>({
       target: () => PaymentMethodEntity,
       joinColumn: {
         name: 'paymentMethodId',
+        referencedColumnName: 'id',
+      },
+    },
+    balancePaymentMethod: {
+      type: 'many-to-one',
+      target: () => PaymentMethodEntity,
+      nullable: true,
+      joinColumn: {
+        name: 'balancePaymentMethodId',
         referencedColumnName: 'id',
       },
     },

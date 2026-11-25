@@ -31,6 +31,11 @@ export class DashboardController {
     return this.dashboardService.getTodaySummary();
   }
 
+  @Get('today-details')
+  getTodayDetails() {
+    return this.dashboardService.getTodayDetails();
+  }
+
   @Get('order-list-summary')
   getOrderListSummary() {
     return this.dashboardService.getOrderListSummary();

@@ -5,15 +5,24 @@ import { DialogModule } from 'primeng/dialog';
 import { InputTextModule } from 'primeng/inputtext';
 import { FormsModule } from '@angular/forms';
 import {
+  DEFAULT_PAYMENT_METHOD_COLOR,
   PaymentMethod,
   createPaymentMethodSchema,
   updatePaymentMethodSchema,
 } from '@merlebleu/shared';
+import { PaymentMethodBadge } from '@shared/components/payment-method-badge/payment-method-badge';
 import { PaymentService } from './payment.service';
 
 @Component({
   selector: 'app-payment',
-  imports: [TableModule, ButtonModule, DialogModule, InputTextModule, FormsModule],
+  imports: [
+    TableModule,
+    ButtonModule,
+    DialogModule,
+    InputTextModule,
+    FormsModule,
+    PaymentMethodBadge,
+  ],
   templateUrl: './payment.html',
   styleUrl: './payment.scss',
 })
@@ -25,7 +34,9 @@ export class Payment implements OnInit {
   displayEditModal = false;
   displayDeleteModal = false;
   newPaymentMethodName = '';
+  newPaymentMethodColor = DEFAULT_PAYMENT_METHOD_COLOR;
   editPaymentMethodName = '';
+  editPaymentMethodColor = DEFAULT_PAYMENT_METHOD_COLOR;
   editPaymentMethodId: string | null = null;
   deletePaymentMethodName = '';
   deletePaymentMethodId: string | null = null;
@@ -53,6 +64,7 @@ export class Payment implements OnInit {
 
   addPaymentMethod(): void {
     this.newPaymentMethodName = '';
+    this.newPaymentMethodColor = DEFAULT_PAYMENT_METHOD_COLOR;
     this.validationError = '';
     this.displayModal = true;
   }
@@ -62,6 +74,7 @@ export class Payment implements OnInit {
 
     const validation = createPaymentMethodSchema.safeParse({
       name: this.newPaymentMethodName,
+      color: this.newPaymentMethodColor,
     });
 
     if (!validation.success) {
@@ -69,7 +82,7 @@ export class Payment implements OnInit {
       return;
     }
 
-    this.paymentService.addPaymentMethod({ name: this.newPaymentMethodName }).subscribe({
+    this.paymentService.addPaymentMethod({ name: this.newPaymentMethodName, color: this.newPaymentMethodColor }).subscribe({
       next: () => {
         this.loadPaymentMethods();
         this.displayModal = false;
@@ -88,9 +101,10 @@ export class Payment implements OnInit {
     this.validationError = '';
   }
 
-  editPaymentMethod(id: string, editPaymentMethodName: string): void {
-    this.editPaymentMethodId = id;
-    this.editPaymentMethodName = editPaymentMethodName;
+  editPaymentMethod(payment: PaymentMethod): void {
+    this.editPaymentMethodId = payment.id ?? null;
+    this.editPaymentMethodName = payment.name;
+    this.editPaymentMethodColor = payment.color ?? DEFAULT_PAYMENT_METHOD_COLOR;
     this.editValidationError = '';
     this.displayEditModal = true;
   }
@@ -100,6 +114,7 @@ export class Payment implements OnInit {
 
     const validation = updatePaymentMethodSchema.safeParse({
       name: this.editPaymentMethodName,
+      color: this.editPaymentMethodColor,
     });
 
     if (!validation.success) {
@@ -113,7 +128,10 @@ export class Payment implements OnInit {
     }
 
     this.paymentService
-      .updatePaymentMethod(this.editPaymentMethodId, { name: this.editPaymentMethodName })
+      .updatePaymentMethod(this.editPaymentMethodId, {
+        name: this.editPaymentMethodName,
+        color: this.editPaymentMethodColor,
+      })
       .subscribe({
         next: () => {
           this.loadPaymentMethods();

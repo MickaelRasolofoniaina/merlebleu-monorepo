@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   Injectable,
+  Logger,
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -33,6 +34,8 @@ const LATE_ORDER_STATUSES = [
 
 @Injectable()
 export class OrderService {
+  private readonly logger = new Logger(OrderService.name);
+
   constructor(
     @InjectRepository(OrderEntity)
     private orderRepository: Repository<OrderEntity>,
@@ -63,7 +66,7 @@ export class OrderService {
 
     const savedOrder = await this.orderRepository.save(orderEntity);
 
-    await this.notificationService.create(NotificationType.ORDER_CREATED, {
+    await this.notify(NotificationType.ORDER_CREATED, {
       orderId: savedOrder.id,
       customerName: savedOrder.customerName,
       actorName,
@@ -382,7 +385,7 @@ export class OrderService {
 
     const savedOrder = await this.orderRepository.save(existingOrder);
 
-    await this.notificationService.create(NotificationType.ORDER_UPDATED, {
+    await this.notify(NotificationType.ORDER_UPDATED, {
       orderId: savedOrder.id,
       customerName: savedOrder.customerName,
       actorName,
@@ -411,7 +414,7 @@ export class OrderService {
     await this.orderRepository.save(existingOrder);
 
     if (status === OrderStatus.TODELIVER) {
-      await this.notificationService.create(NotificationType.ORDER_READY, {
+      await this.notify(NotificationType.ORDER_READY, {
         orderId: existingOrder.id,
         customerName: existingOrder.customerName,
         actorName,
@@ -447,9 +450,17 @@ export class OrderService {
     const paymentMethod =
       await this.paymentService.getPaymentMethod(paymentMethodId);
 
-    existingOrder.paymentMethod = paymentMethod;
-    existingOrder.paidAmount =
-      existingOrder.totalAmount + existingOrder.deliveryFee;
+    const totalDue = existingOrder.totalAmount + existingOrder.deliveryFee;
+    const balanceDue = Math.max(totalDue - existingOrder.paidAmount, 0);
+
+    // the deposit keeps its original payment method; only the remaining
+    // balance is attributed to the method chosen at delivery
+    if (existingOrder.paidAmount <= 0) {
+      existingOrder.paymentMethod = paymentMethod;
+    }
+    existingOrder.balancePaymentMethod = paymentMethod;
+    existingOrder.balancePaidAmount = balanceDue;
+    existingOrder.paidAmount = totalDue;
     existingOrder.balanceAmount = 0;
     existingOrder.orderStatus = OrderStatus.DELIVERED;
 
@@ -467,7 +478,7 @@ export class OrderService {
 
     await this.orderRepository.delete(id);
 
-    await this.notificationService.create(NotificationType.ORDER_DELETED, {
+    await this.notify(NotificationType.ORDER_DELETED, {
       orderId: id,
       customerName: existingOrder.customerName,
       actorName,
@@ -505,6 +516,20 @@ export class OrderService {
       },
       orderItems,
     };
+  }
+
+  // a failed notification must not fail an order change that is already saved
+  private async notify(
+    ...args: Parameters<NotificationService['create']>
+  ): Promise<void> {
+    try {
+      await this.notificationService.create(...args);
+    } catch (error) {
+      this.logger.error(
+        `Failed to create notification ${String(args[0])}`,
+        error instanceof Error ? error.stack : String(error),
+      );
+    }
   }
 
   private sanitizeOrder(order: OrderEntity): OrderEntity {

@@ -5,9 +5,11 @@ import { DialogModule } from 'primeng/dialog';
 import { Order, OrderStatus } from '@merlebleu/shared';
 import { getOrderStatusColor, getOrderStatusLabel } from '@shared/utils/order';
 
+import { PaymentMethodBadge } from '@shared/components/payment-method-badge/payment-method-badge';
+
 @Component({
   selector: 'order-detail-dialog',
-  imports: [CommonModule, BadgeModule, DialogModule],
+  imports: [CommonModule, BadgeModule, DialogModule, PaymentMethodBadge],
   templateUrl: './order-detail-dialog.html',
   styleUrl: './order-detail-dialog.scss',
   providers: [DecimalPipe],
@@ -15,10 +17,6 @@ import { getOrderStatusColor, getOrderStatusLabel } from '@shared/utils/order';
 export class OrderDetailDialog {
   order = input<Order | null>(null);
   visible = model(false);
-
-  protected formatPaymentMethod(): string {
-    return this.order()?.paymentMethod?.name ?? '-';
-  }
 
   protected formatRemarks(value?: string | null): string {
     return value?.trim() ? value : '-';
