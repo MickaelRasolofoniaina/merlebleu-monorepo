@@ -39,6 +39,15 @@ export class ExpenseStoreService {
     this.fixedExpenses().filter((e) => e.month === this.monthKey()),
   );
 
+  readonly previousMonthLabel = computed(() =>
+    new Intl.DateTimeFormat('fr-FR', { month: 'long' }).format(new Date(this.year(), this.month() - 1, 1)),
+  );
+  readonly previousMonthFixedExpenses = computed(() => {
+    const previous = new Date(this.year(), this.month() - 1, 1);
+    const previousKey = toMonthKey(previous.getFullYear(), previous.getMonth());
+    return this.fixedExpenses().filter((e) => e.month === previousKey);
+  });
+
   constructor() {
     this.seed();
   }
@@ -126,9 +135,7 @@ export class ExpenseStoreService {
 
   /** Copies the fixed expenses of the previous month into the current one. Returns the copied count. */
   copyFixedFromPreviousMonth(): number {
-    const previous = new Date(this.year(), this.month() - 1, 1);
-    const previousKey = toMonthKey(previous.getFullYear(), previous.getMonth());
-    const source = this.fixedExpenses().filter((e) => e.month === previousKey);
+    const source = this.previousMonthFixedExpenses();
     const copies = source.map((e) => ({
       ...e,
       id: this.nextId('fixed'),

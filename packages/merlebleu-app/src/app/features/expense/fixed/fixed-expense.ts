@@ -3,7 +3,8 @@ import { ButtonModule } from 'primeng/button';
 import { Dialog } from 'primeng/dialog';
 import { TableModule } from 'primeng/table';
 import { TagModule } from 'primeng/tag';
-import { MessageService } from 'primeng/api';
+import { MenuModule } from 'primeng/menu';
+import { MenuItem, MessageService } from 'primeng/api';
 import { formatUnitPrice } from '@shared/utils/number';
 import { StatCard } from '@shared/components/stat-card/stat-card';
 import { MonthSwitcherComponent } from '../components/month-switcher/month-switcher';
@@ -17,7 +18,7 @@ import {
 @Component({
   selector: 'mb-fixed-expense',
   templateUrl: './fixed-expense.html',
-  imports: [ButtonModule, Dialog, TableModule, TagModule, StatCard, MonthSwitcherComponent, FixedExpenseFormComponent],
+  imports: [ButtonModule, MenuModule, Dialog, TableModule, TagModule, StatCard, MonthSwitcherComponent, FixedExpenseFormComponent],
 })
 export class FixedExpenseComponent {
   protected readonly store = inject(ExpenseStoreService);
@@ -38,6 +39,16 @@ export class FixedExpenseComponent {
     this.sum(this.store.monthFixedExpenses().filter((e) => e.paid)),
   );
   protected readonly remainingTotal = computed(() => this.total() - this.paidTotal());
+  // salaries first, then charges: the table groups consecutive rows by type
+  protected readonly rows = computed(() => [...this.salaries(), ...this.charges()]);
+  protected readonly paidCount = computed(() => this.rows().filter((e) => e.paid).length);
+  protected readonly paidPercent = computed(() =>
+    this.total() > 0 ? Math.round((this.paidTotal() / this.total()) * 100) : 0,
+  );
+
+  protected readonly menuItems: MenuItem[] = [
+    { label: 'Copier depuis le mois précédent', icon: 'pi pi-copy', command: () => this.copyFromPreviousMonth() },
+  ];
 
   protected showFormDialog = false;
   protected showDeleteDialog = false;
