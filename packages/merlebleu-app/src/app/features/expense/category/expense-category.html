@@ -3,7 +3,7 @@
   <p-button label="Ajouter" icon="pi pi-plus" (onClick)="openAdd()" />
 </div>
 <p class="text-sm text-slate-500 mb-4">
-  Ce sont les désignations de la première colonne de l'ancien fichier Excel.
+  Ce sont les désignations de la première colonne de la grille. Les ingrédients viennent de la liste des ingrédients.
 </p>
 
 <div class="flex flex-wrap gap-3 items-center mb-4">
@@ -86,9 +86,9 @@
   @if (selected) {
     <p>
       Supprimer la désignation « {{ selected.label }} » ?
-      @if (usageCount(selected) > 0) {
-        Ses {{ usageCount(selected) }} dépenses du mois seront aussi supprimées.
-      }
+    </p>
+    <p class="mt-2 text-sm text-slate-500">
+      Une désignation utilisée par des dépenses, sur n'importe quel mois, ne peut pas être supprimée.
     </p>
   }
   <ng-template pTemplate="footer">

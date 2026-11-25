@@ -1,61 +1,25 @@
-// Static prototype models. They will move to @merlebleu/shared once the pages are validated.
+import { ExpenseSection } from '@merlebleu/shared';
 
-export type ExpenseSection = 'CURRENT' | 'INGREDIENT' | 'OTHER';
-export type FixedExpenseType = 'SALARY' | 'CHARGE';
-export type ExpensePaymentMethod = 'Espèces' | 'Mvola';
+type SectionSeverity = 'success' | 'info' | 'warn';
 
-export interface ExpenseCategory {
-  id: string;
-  label: string;
-  section: ExpenseSection;
-}
-
-export interface Expense {
-  id: string;
-  date: Date;
-  categoryId: string;
-  amount: number;
-  paymentMethod: ExpensePaymentMethod;
-  note: string;
-}
-
-export interface FixedExpense {
-  id: string;
-  /** Month key, formatted YYYY-MM. */
-  month: string;
-  type: FixedExpenseType;
-  label: string;
-  detail: string;
-  amount: number;
-  paymentMethod: ExpensePaymentMethod;
-  paid: boolean;
-}
-
-export const EXPENSE_SECTIONS: { value: ExpenseSection; label: string; severity: 'success' | 'info' | 'warn' }[] = [
-  { value: 'CURRENT', label: 'Courante', severity: 'success' },
-  { value: 'INGREDIENT', label: 'Ingrédients', severity: 'info' },
-  { value: 'OTHER', label: 'Autre', severity: 'warn' },
+export const EXPENSE_SECTIONS: { value: ExpenseSection; label: string; severity: SectionSeverity }[] = [
+  { value: ExpenseSection.CURRENT, label: 'Courante', severity: 'success' },
+  { value: ExpenseSection.INGREDIENT, label: 'Ingrédients', severity: 'info' },
+  { value: ExpenseSection.OTHER, label: 'Autre', severity: 'warn' },
 ];
 
-/** Ingredients are managed separately, so this section is not offered on the categories page. */
-export const CATEGORY_SECTIONS = EXPENSE_SECTIONS.filter((s) => s.value !== 'INGREDIENT');
-
-export const EXPENSE_PAYMENT_METHODS: ExpensePaymentMethod[] = ['Espèces', 'Mvola'];
+/** Ingredients come from the ingredients table, so this section is not offered on the categories page. */
+export const CATEGORY_SECTIONS = EXPENSE_SECTIONS.filter((s) => s.value !== ExpenseSection.INGREDIENT);
 
 export const getSectionLabel = (section: ExpenseSection): string =>
   EXPENSE_SECTIONS.find((s) => s.value === section)?.label ?? section;
 
-export const getSectionSeverity = (section: ExpenseSection): 'success' | 'info' | 'warn' =>
+export const getSectionSeverity = (section: ExpenseSection): SectionSeverity =>
   EXPENSE_SECTIONS.find((s) => s.value === section)?.severity ?? 'info';
 
-// Tailwind only generates classes it can read as whole strings, so each color is spelled out
-const SECTION_DOT_CLASSES: Record<ExpenseSection, string> = {
-  CURRENT: 'bg-green-400',
-  INGREDIENT: 'bg-blue-400',
-  OTHER: 'bg-amber-400',
-};
+/** Formats a calendar date as YYYY-MM-DD from a 0-based month, without any timezone conversion. */
+export const toIsoDate = (year: number, month: number, day: number): string =>
+  `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
 
-export const getSectionDotClass = (section: ExpenseSection): string => SECTION_DOT_CLASSES[section];
-
-export const toMonthKey= (year: number, month: number): string =>
-  `${year}-${String(month + 1).padStart(2, '0')}`;
+/** Day of the month of a YYYY-MM-DD date. */
+export const dayOfDate = (date: string): number => Number(date.slice(8, 10));

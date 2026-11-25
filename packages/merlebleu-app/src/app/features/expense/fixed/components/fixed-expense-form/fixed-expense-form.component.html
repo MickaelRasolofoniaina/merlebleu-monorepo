@@ -1,32 +1,88 @@
 <form [id]="formId()" (submit)="onSubmit()" class="flex flex-col gap-4">
   <div class="flex flex-col gap-1">
     <label for="fixedLabel" class="font-semibold text-slate-900 dark:text-white">
-      {{ type() === 'SALARY' ? 'Nom' : 'Désignation' }}
+      {{ isSalary() ? 'Nom' : 'Désignation' }}
     </label>
-    <input id="fixedLabel" type="text" pInputText [(ngModel)]="label" name="label" class="w-full" />
-    @if (submitted && !label.trim()) {
-      <small class="text-red-500">Ce champ est requis</small>
+    <input
+      id="fixedLabel"
+      type="text"
+      pInputText
+      [ngModel]="label()"
+      (ngModelChange)="label.set($event)"
+      name="label"
+      class="w-full"
+    />
+    @if (error('label')) {
+      <small class="text-red-500">{{ error('label') }}</small>
     }
   </div>
 
   <div class="flex flex-col gap-1">
     <label for="fixedDetail" class="font-semibold text-slate-900 dark:text-white">
-      {{ type() === 'SALARY' ? 'Fonction' : 'Détail (facultatif)' }}
+      {{ isSalary() ? 'Fonction' : 'Détail (facultatif)' }}
     </label>
-    <input id="fixedDetail" type="text" pInputText [(ngModel)]="detail" name="detail" class="w-full" />
+    <input
+      id="fixedDetail"
+      type="text"
+      pInputText
+      [ngModel]="detail()"
+      (ngModelChange)="detail.set($event)"
+      name="detail"
+      class="w-full"
+    />
   </div>
 
   <div class="grid grid-cols-2 gap-3">
     <div class="flex flex-col gap-1">
       <label for="fixedAmount" class="font-semibold text-slate-900 dark:text-white">Montant (Ar)</label>
-      <p-inputnumber inputId="fixedAmount" [(ngModel)]="amount" name="amount" [min]="0" [maxFractionDigits]="0" locale="fr-FR" fluid />
-      @if (submitted && (!amount || amount <= 0)) {
-        <small class="text-red-500">Le montant doit être positif</small>
+      <p-inputnumber
+        inputId="fixedAmount"
+        [ngModel]="amount()"
+        (ngModelChange)="amount.set($event)"
+        name="amount"
+        [min]="0"
+        [maxFractionDigits]="0"
+        locale="fr-FR"
+        fluid
+      />
+      @if (error('amount')) {
+        <small class="text-red-500">{{ error('amount') }}</small>
       }
     </div>
     <div class="flex flex-col gap-1">
-      <label for="fixedPayment" class="font-semibold text-slate-900 dark:text-white">Paiement</label>
-      <p-select inputId="fixedPayment" [options]="paymentMethods" [(ngModel)]="paymentMethod" name="paymentMethod" fluid appendTo="body" />
+      <label for="fixedDay" class="font-semibold text-slate-900 dark:text-white">Jour du mois</label>
+      <p-inputnumber
+        inputId="fixedDay"
+        [ngModel]="day()"
+        (ngModelChange)="day.set($event)"
+        name="day"
+        [min]="1"
+        [max]="daysInMonth()"
+        [maxFractionDigits]="0"
+        fluid
+      />
+      @if (error('date')) {
+        <small class="text-red-500">{{ error('date') }}</small>
+      }
     </div>
+  </div>
+
+  <div class="flex flex-col gap-1">
+    <label for="fixedPayment" class="font-semibold text-slate-900 dark:text-white">Paiement</label>
+    <p-select
+      inputId="fixedPayment"
+      [options]="paymentMethods()"
+      optionLabel="name"
+      optionValue="id"
+      [ngModel]="paymentMethodId()"
+      (ngModelChange)="paymentMethodId.set($event)"
+      name="paymentMethod"
+      placeholder="Choisir un moyen de paiement"
+      fluid
+      appendTo="body"
+    />
+    @if (error('paymentMethodId')) {
+      <small class="text-red-500">{{ error('paymentMethodId') }}</small>
+    }
   </div>
 </form>

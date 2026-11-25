@@ -1,7 +1,6 @@
 <div class="flex flex-wrap items-center gap-3 mb-4">
   <h2 class="text-2xl font-bold">Grille des dépenses</h2>
   <mb-month-switcher />
-  <p-button label="Exporter" icon="pi pi-download" severity="secondary" [outlined]="true" class="ml-auto" (onClick)="exportGrid()" />
 </div>
 
 <div class="flex flex-wrap gap-3 mb-4">
@@ -28,12 +27,6 @@
     icon="pi pi-ellipsis-h"
     [valueText]="formatAmount(sectionTotals().OTHER) + ' Ar'"
     label="d'autres dépenses"
-  />
-  <stat-card
-    color="red"
-    icon="pi pi-calendar-clock"
-    [valueText]="formatAmount(fixedTotal()) + ' Ar'"
-    label="de dépenses fixes"
   />
 </div>
 
@@ -98,31 +91,31 @@
           <td [attr.colspan]="days().length" class="px-2 py-2"></td>
           <td class="sticky right-0 bg-slate-800 text-right! px-3 py-2">{{ formatAmount(group.total) }}</td>
         </tr>
-        @for (row of group.rows; track row.category.id) {
+        @for (row of group.rows; track row.key) {
           <tr class="border-t border-slate-100 dark:border-slate-800">
             <td
               class="sticky left-0 px-3 py-1.5"
               [class]="
-                isActiveRow(row.category.id) || isHoveredRow(row.category.id)
+                isActiveRow(row.key) || isHoveredRow(row.key)
                   ? 'bg-blue-50 font-semibold text-blue-700 dark:bg-blue-950 dark:text-blue-200'
                   : 'bg-white dark:bg-slate-900'
               "
             >
-              {{ row.category.label }}
+              {{ row.label }}
             </td>
             @for (column of dayColumns(); track column.day) {
               <td
                 class="p-0"
                 [class]="column.isToday ? 'border-x-2 border-blue-300 dark:border-blue-700' : ''"
               >
-                @if (isEditing(row.category.id, column.day)) {
+                @if (isEditing(row.key, column.day)) {
                   <input
                     data-editing
                     type="text"
                     inputmode="numeric"
                     autocomplete="off"
                     class="w-full min-h-9 text-right px-2 py-1.5 font-semibold tabular-nums bg-white text-slate-900 dark:bg-slate-950 dark:text-white outline-2 -outline-offset-2 outline-blue-600"
-                    [attr.aria-label]="'Montant ' + row.category.label + ' du jour ' + column.day + ' (Ar)'"
+                    [attr.aria-label]="'Montant ' + row.label + ' du jour ' + column.day + ' (Ar)'"
                     [value]="draft()"
                     (input)="onDraftInput($event)"
                     (keydown)="onInputKeydown($event, row, column.day)"
@@ -131,12 +124,12 @@
                 } @else {
                   <button
                     type="button"
-                    [attr.data-cell]="row.category.id + '|' + column.day"
+                    [attr.data-cell]="row.key + '|' + column.day"
                     [class]="cellClass(row.amounts.has(column.day), column)"
-                    [attr.tabindex]="isTabStop(row.category.id, column.day) ? 0 : -1"
-                    [attr.aria-label]="(row.amounts.has(column.day) ? 'Modifier ' : 'Saisir ') + row.category.label + ' du jour ' + column.day"
-                    (mouseenter)="setHovered(row.category.id, column.day)"
-                    (focus)="setActive(row.category.id, column.day)"
+                    [attr.tabindex]="isTabStop(row.key, column.day) ? 0 : -1"
+                    [attr.aria-label]="(row.amounts.has(column.day) ? 'Modifier ' : 'Saisir ') + row.label + ' du jour ' + column.day"
+                    (mouseenter)="setHovered(row.key, column.day)"
+                    (focus)="setActive(row.key, column.day)"
                     (click)="startEdit(row, column.day)"
                     (keydown)="onCellKeydown($event, row, column.day)"
                   >

@@ -3,15 +3,18 @@ import { FormsModule } from '@angular/forms';
 import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
 import { SelectModule } from 'primeng/select';
-import { MessageService } from 'primeng/api';
+import { ExpenseSection } from '@merlebleu/shared';
 import { formatUnitPrice } from '@shared/utils/number';
 import { StatCard } from '@shared/components/stat-card/stat-card';
 import { MonthSwitcherComponent } from '../components/month-switcher/month-switcher';
-import { ExpenseStoreService } from '../expense-store.service';
-import { EXPENSE_SECTIONS, ExpenseCategory, ExpenseSection } from '../expense.model';
+import { CellTarget, ExpenseStoreService } from '../expense-store.service';
+import { EXPENSE_SECTIONS, dayOfDate } from '../expense.model';
 
 interface GridRow {
-  category: ExpenseCategory;
+  /** Unique row key: `category:<id>` or `ingredient:<id>`. */
+  key: string;
+  target: CellTarget;
+  label: string;
   amounts: Map<number, number>;
   total: number;
 }
@@ -31,7 +34,7 @@ interface DayColumn {
 }
 
 interface CellRef {
-  categoryId: string;
+  rowKey: string;
   day: number;
 }
 
@@ -49,7 +52,6 @@ const CELL_EMPTY_WEEKEND = 'bg-slate-50 hover:bg-slate-100 dark:bg-slate-800/50 
 })
 export class ExpenseGridComponent {
   protected readonly store = inject(ExpenseStoreService);
-  private readonly messageService = inject(MessageService);
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
   private readonly injector = inject(Injector);
 
@@ -95,12 +97,13 @@ export class ExpenseGridComponent {
   });
 
   protected readonly groups = computed<GridGroup[]>(() => {
-    const amountsByCategory = new Map<string, Map<number, number>>();
-    for (const expense of this.store.monthExpenses()) {
-      const amounts = amountsByCategory.get(expense.categoryId) ?? new Map<number, number>();
-      const day = expense.date.getDate();
+    const amountsByRow = new Map<string, Map<number, number>>();
+    for (const expense of this.store.variableExpenses()) {
+      const key = this.rowKeyOf(expense.category?.id, expense.ingredient?.id);
+      const amounts = amountsByRow.get(key) ?? new Map<number, number>();
+      const day = dayOfDate(expense.date);
       amounts.set(day, (amounts.get(day) ?? 0) + expense.amount);
-      amountsByCategory.set(expense.categoryId, amounts);
+      amountsByRow.set(key, amounts);
     }
 
     const search = this.search().trim().toLowerCase();
@@ -109,17 +112,15 @@ export class ExpenseGridComponent {
 
     return EXPENSE_SECTIONS.filter((s) => !sectionFilter || s.value === sectionFilter)
       .map((section) => {
-        const rows = this.store
-          .categories()
-          .filter((c) => c.section === section.value)
-          .filter((c) => !search || c.label.toLowerCase().includes(search))
-          .map((category) => {
-            const amounts = amountsByCategory.get(category.id) ?? new Map<number, number>();
+        const rows = this.sectionRows(section.value)
+          .filter((row) => !search || row.label.toLowerCase().includes(search))
+          .map((row) => {
+            const amounts = amountsByRow.get(row.key) ?? new Map<number, number>();
             let total = 0;
             amounts.forEach((value, day) => {
               if (visibleDays.has(day)) total += value;
             });
-            return { category, amounts, total };
+            return { ...row, amounts, total };
           });
         return {
           section: section.value,
@@ -149,26 +150,24 @@ export class ExpenseGridComponent {
   });
 
   protected readonly sectionTotals = computed(() => {
-    const totals: Record<ExpenseSection, number> = { CURRENT: 0, INGREDIENT: 0, OTHER: 0 };
-    for (const expense of this.store.monthExpenses()) {
-      const category = this.store.getCategory(expense.categoryId);
-      if (category) {
-        totals[category.section] += expense.amount;
-      }
+    const totals: Record<ExpenseSection, number> = {
+      [ExpenseSection.CURRENT]: 0,
+      [ExpenseSection.INGREDIENT]: 0,
+      [ExpenseSection.OTHER]: 0,
+    };
+    for (const expense of this.store.variableExpenses()) {
+      totals[expense.category?.section ?? ExpenseSection.INGREDIENT] += expense.amount;
     }
     return totals;
   });
 
-  protected readonly fixedTotal = computed(() =>
-    this.store.monthFixedExpenses().reduce((sum, e) => sum + e.amount, 0),
-  );
-  protected readonly variableTotal = computed(() => {
+  /** Fixed expenses are not part of the grid: they have their own page. */
+  protected readonly grandTotal = computed(() => {
     const t = this.sectionTotals();
     return t.CURRENT + t.INGREDIENT + t.OTHER;
   });
-  protected readonly grandTotal = computed(() => this.variableTotal() + this.fixedTotal());
 
-  // In-place cell editing. All expenses entered in the grid are paid in cash.
+  // In-place cell editing.
   protected readonly editing = signal<CellRef | null>(null);
   protected readonly draft = signal('');
   /** Last focused cell: highlights its row and column, and is the grid's single tab stop. */
@@ -177,38 +176,38 @@ export class ExpenseGridComponent {
   /** Cell under the mouse: highlights its row label and day header, like a crosshair. */
   protected readonly hovered = signal<CellRef | null>(null);
 
-  protected setHovered(categoryId: string, day: number): void {
-    this.hovered.set({ categoryId, day });
+  protected setHovered(rowKey: string, day: number): void {
+    this.hovered.set({ rowKey, day });
   }
 
   protected clearHovered(): void {
     this.hovered.set(null);
   }
 
-  protected isHoveredRow(categoryId: string): boolean {
-    return this.hovered()?.categoryId === categoryId;
+  protected isHoveredRow(rowKey: string): boolean {
+    return this.hovered()?.rowKey === rowKey;
   }
 
   protected isHoveredDay(day: number): boolean {
     return this.hovered()?.day === day;
   }
 
-  protected isEditing(categoryId: string, day: number): boolean {
+  protected isEditing(rowKey: string, day: number): boolean {
     const cell = this.editing();
-    return cell?.categoryId === categoryId && cell.day === day;
+    return cell?.rowKey === rowKey && cell.day === day;
   }
 
-  protected isActiveRow(categoryId: string): boolean {
-    return this.active()?.categoryId === categoryId;
+  protected isActiveRow(rowKey: string): boolean {
+    return this.active()?.rowKey === rowKey;
   }
 
   protected isActiveDay(day: number): boolean {
     return this.active()?.day === day;
   }
 
-  protected isTabStop(categoryId: string, day: number): boolean {
+  protected isTabStop(rowKey: string, day: number): boolean {
     const cell = this.active() ?? this.firstCell();
-    return cell?.categoryId === categoryId && cell.day === day;
+    return cell?.rowKey === rowKey && cell.day === day;
   }
 
   protected cellClass(hasValue: boolean, column: DayColumn): string {
@@ -216,12 +215,12 @@ export class ExpenseGridComponent {
     return `${CELL_BASE} ${column.isWeekend ? CELL_EMPTY_WEEKEND : CELL_EMPTY}`;
   }
 
-  protected setActive(categoryId: string, day: number): void {
-    this.active.set({ categoryId, day });
+  protected setActive(rowKey: string, day: number): void {
+    this.active.set({ rowKey, day });
   }
 
   protected onCellKeydown(event: KeyboardEvent, row: GridRow, day: number): void {
-    const categoryId = row.category.id;
+    const rowKey = row.key;
     const hasModifier = event.ctrlKey || event.metaKey || event.altKey;
 
     if (event.key === 'Enter' || event.key === 'F2') {
@@ -229,17 +228,17 @@ export class ExpenseGridComponent {
     } else if (/^\d$/.test(event.key) && !hasModifier) {
       this.startEdit(row, day, event.key);
     } else if (event.key === 'Delete' || event.key === 'Backspace') {
-      this.store.setCell(categoryId, day, 0);
+      this.store.setCell(row.target, day, 0);
     } else if ((event.key === 'd' || event.key === 'D') && event.ctrlKey) {
-      this.copyFromAbove(categoryId, day);
+      this.copyFromAbove(rowKey, day);
     } else if (event.key === 'ArrowUp') {
-      this.move(categoryId, day, -1, 0);
+      this.move(rowKey, day, -1, 0);
     } else if (event.key === 'ArrowDown') {
-      this.move(categoryId, day, 1, 0);
+      this.move(rowKey, day, 1, 0);
     } else if (event.key === 'ArrowLeft') {
-      this.move(categoryId, day, 0, -1);
+      this.move(rowKey, day, 0, -1);
     } else if (event.key === 'ArrowRight') {
-      this.move(categoryId, day, 0, 1);
+      this.move(rowKey, day, 0, 1);
     } else {
       return;
     }
@@ -247,20 +246,20 @@ export class ExpenseGridComponent {
   }
 
   protected onInputKeydown(event: KeyboardEvent, row: GridRow, day: number): void {
-    const categoryId = row.category.id;
+    const rowKey = row.key;
 
     if (event.key === 'Escape') {
       this.editing.set(null);
-      this.focusCell(categoryId, day);
+      this.focusCell(rowKey, day);
     } else if (event.key === 'Enter' || event.key === 'ArrowDown') {
       this.commit();
-      this.move(categoryId, day, event.shiftKey ? -1 : 1, 0);
+      this.move(rowKey, day, event.shiftKey ? -1 : 1, 0);
     } else if (event.key === 'ArrowUp') {
       this.commit();
-      this.move(categoryId, day, -1, 0);
+      this.move(rowKey, day, -1, 0);
     } else if (event.key === 'Tab') {
       this.commit();
-      this.move(categoryId, day, 0, event.shiftKey ? -1 : 1, true);
+      this.move(rowKey, day, 0, event.shiftKey ? -1 : 1, true);
     } else {
       return;
     }
@@ -279,19 +278,17 @@ export class ExpenseGridComponent {
     if (!cell) return;
     this.editing.set(null);
     const amount = Number(this.draft()) || 0;
-    const previous = this.flatRows()
-      .find((row) => row.category.id === cell.categoryId)
-      ?.amounts.get(cell.day);
-    if (amount !== (previous ?? 0)) {
-      this.store.setCell(cell.categoryId, cell.day, amount);
+    const row = this.flatRows().find((r) => r.key === cell.rowKey);
+    if (row && amount !== (row.amounts.get(cell.day) ?? 0)) {
+      this.store.setCell(row.target, cell.day, amount);
     }
   }
 
   protected startEdit(row: GridRow, day: number, initial?: string): void {
     const current = row.amounts.get(day);
     this.draft.set(initial ?? (current ? String(current) : ''));
-    this.editing.set({ categoryId: row.category.id, day });
-    this.setActive(row.category.id, day);
+    this.editing.set({ rowKey: row.key, day });
+    this.setActive(row.key, day);
     afterNextRender(
       () => {
         const input = this.host.nativeElement.querySelector<HTMLInputElement>('input[data-editing]');
@@ -307,25 +304,25 @@ export class ExpenseGridComponent {
     );
   }
 
-  private copyFromAbove(categoryId: string, day: number): void {
+  private copyFromAbove(rowKey: string, day: number): void {
     const rows = this.flatRows();
-    const index = rows.findIndex((row) => row.category.id === categoryId);
+    const index = rows.findIndex((row) => row.key === rowKey);
     const amount = index > 0 ? rows[index - 1].amounts.get(day) : undefined;
     if (amount) {
-      this.store.setCell(categoryId, day, amount);
+      this.store.setCell(rows[index].target, day, amount);
     }
   }
 
   private firstCell(): CellRef | null {
     const row = this.flatRows()[0];
     const day = this.days()[0];
-    return row && day !== undefined ? { categoryId: row.category.id, day } : null;
+    return row && day !== undefined ? { rowKey: row.key, day } : null;
   }
 
-  private move(categoryId: string, day: number, rowDelta: number, dayDelta: number, wrap = false): void {
+  private move(rowKey: string, day: number, rowDelta: number, dayDelta: number, wrap = false): void {
     const rows = this.flatRows();
     const days = this.days();
-    let r = rows.findIndex((row) => row.category.id === categoryId);
+    let r = rows.findIndex((row) => row.key === rowKey);
     let c = days.indexOf(day);
     if (r < 0 || c < 0) return;
 
@@ -340,13 +337,13 @@ export class ExpenseGridComponent {
     }
     r = Math.min(Math.max(r, 0), rows.length - 1);
     c = Math.min(Math.max(c, 0), days.length - 1);
-    this.focusCell(rows[r].category.id, days[c]);
+    this.focusCell(rows[r].key, days[c]);
   }
 
-  private focusCell(categoryId: string, day: number): void {
+  private focusCell(rowKey: string, day: number): void {
     const focus = (): boolean => {
       const button = this.host.nativeElement.querySelector<HTMLButtonElement>(
-        `button[data-cell="${CSS.escape(categoryId)}|${day}"]`,
+        `button[data-cell="${CSS.escape(rowKey)}|${day}"]`,
       );
       button?.focus();
       return !!button;
@@ -357,11 +354,35 @@ export class ExpenseGridComponent {
     }
   }
 
-  protected exportGrid(): void {
-    this.messageService.add({
-      severity: 'info',
-      summary: 'Export Excel',
-      detail: 'Disponible une fois les pages validées.',
-    });
+  private rowKeyOf(categoryId?: string, ingredientId?: string): string {
+    return categoryId ? `category:${categoryId}` : `ingredient:${ingredientId}`;
+  }
+
+  /** Rows of a section: the categories for CURRENT / OTHER, the ingredients for INGREDIENT. */
+  private sectionRows(section: ExpenseSection): Omit<GridRow, 'amounts' | 'total'>[] {
+    if (section === ExpenseSection.INGREDIENT) {
+      return this.sortByLabel(
+        this.store.ingredients().map((ingredient) => ({
+          key: this.rowKeyOf(undefined, ingredient.id),
+          target: { ingredientId: ingredient.id },
+          label: ingredient.label,
+        })),
+      );
+    }
+    return this.sortByLabel(
+      this.store
+        .categories()
+        .filter((category) => category.section === section)
+        .map((category) => ({
+          key: this.rowKeyOf(category.id),
+          target: { categoryId: category.id },
+          label: category.label,
+        })),
+    );
+  }
+
+  /** Ascending order on the designation, ignoring case and accents. */
+  private sortByLabel<T extends { label: string }>(rows: T[]): T[] {
+    return rows.sort((a, b) => a.label.localeCompare(b.label, 'fr', { sensitivity: 'base' }));
   }
 }

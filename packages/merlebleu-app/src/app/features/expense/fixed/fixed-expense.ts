@@ -1,19 +1,17 @@
-import { Component, computed, inject } from '@angular/core';
+import { Component, computed, inject, signal, viewChild } from '@angular/core';
 import { ButtonModule } from 'primeng/button';
 import { Dialog } from 'primeng/dialog';
 import { TableModule } from 'primeng/table';
 import { TagModule } from 'primeng/tag';
 import { MenuModule } from 'primeng/menu';
 import { MenuItem, MessageService } from 'primeng/api';
+import { finalize } from 'rxjs';
+import { CreateFixedExpenseDto, Expense, FixedExpenseType } from '@merlebleu/shared';
 import { formatUnitPrice } from '@shared/utils/number';
 import { StatCard } from '@shared/components/stat-card/stat-card';
 import { MonthSwitcherComponent } from '../components/month-switcher/month-switcher';
 import { ExpenseStoreService } from '../expense-store.service';
-import { FixedExpense, FixedExpenseType } from '../expense.model';
-import {
-  FixedExpenseFormComponent,
-  FixedExpenseFormValue,
-} from './components/fixed-expense-form/fixed-expense-form.component';
+import { FixedExpenseFormComponent } from './components/fixed-expense-form/fixed-expense-form.component';
 
 @Component({
   selector: 'mb-fixed-expense',
@@ -26,17 +24,15 @@ export class FixedExpenseComponent {
 
   protected readonly formatAmount = formatUnitPrice;
 
-  protected readonly salaries = computed(() =>
-    this.store.monthFixedExpenses().filter((e) => e.type === 'SALARY'),
-  );
-  protected readonly charges = computed(() =>
-    this.store.monthFixedExpenses().filter((e) => e.type === 'CHARGE'),
-  );
+  protected readonly FixedExpenseType = FixedExpenseType;
+
+  protected readonly salaries = computed(() => this.byType(FixedExpenseType.SALARY));
+  protected readonly charges = computed(() => this.byType(FixedExpenseType.CHARGE));
   protected readonly salaryTotal = computed(() => this.sum(this.salaries()));
   protected readonly chargeTotal = computed(() => this.sum(this.charges()));
   protected readonly total = computed(() => this.salaryTotal() + this.chargeTotal());
   protected readonly paidTotal = computed(() =>
-    this.sum(this.store.monthFixedExpenses().filter((e) => e.paid)),
+    this.sum(this.store.fixedExpenses().filter((e) => e.paid)),
   );
   protected readonly remainingTotal = computed(() => this.total() - this.paidTotal());
   // salaries first, then charges: the table groups consecutive rows by type
@@ -50,13 +46,25 @@ export class FixedExpenseComponent {
     { label: 'Copier depuis le mois précédent', icon: 'pi pi-copy', command: () => this.copyFromPreviousMonth() },
   ];
 
+  protected readonly isCopying = signal(false);
+
+  private readonly form = viewChild(FixedExpenseFormComponent);
+
   protected showFormDialog = false;
   protected showDeleteDialog = false;
-  protected selected: FixedExpense | null = null;
-  protected formType: FixedExpenseType = 'SALARY';
+  protected selected: Expense | null = null;
+  protected formType: FixedExpenseType = FixedExpenseType.SALARY;
   protected readonly formId = 'fixed-expense-form';
 
-  private sum(list: FixedExpense[]): number {
+  /** Fixed expenses of one type, highest amount first. */
+  private byType(type: FixedExpenseType): Expense[] {
+    return this.store
+      .fixedExpenses()
+      .filter((e) => e.fixedType === type)
+      .sort((a, b) => b.amount - a.amount);
+  }
+
+  private sum(list: Expense[]): number {
     return list.reduce((sum, e) => sum + e.amount, 0);
   }
 
@@ -66,43 +74,59 @@ export class FixedExpenseComponent {
     this.showFormDialog = true;
   }
 
-  protected openEdit(expense: FixedExpense): void {
+  protected openEdit(expense: Expense): void {
     this.selected = expense;
-    this.formType = expense.type;
+    this.formType = expense.fixedType ?? FixedExpenseType.SALARY;
     this.showFormDialog = true;
   }
 
-  protected openDelete(expense: FixedExpense): void {
+  protected openDelete(expense: Expense): void {
     this.selected = expense;
     this.showDeleteDialog = true;
   }
 
-  protected save(value: FixedExpenseFormValue): void {
-    if (this.selected) {
-      this.store.updateFixedExpense(this.selected.id, value);
-      this.messageService.add({ severity: 'success', summary: 'Ligne modifiée' });
-    } else {
-      this.store.addFixedExpense(value);
-      this.messageService.add({ severity: 'success', summary: 'Ligne ajoutée' });
-    }
-    this.showFormDialog = false;
+  protected save(value: CreateFixedExpenseDto): void {
+    const isEdit = this.selected !== null;
+    const request = this.selected
+      ? this.store.updateFixedExpense(this.selected.id, value)
+      : this.store.addFixedExpense(value);
+    request.subscribe({
+      next: () => {
+        this.messageService.add({ severity: 'success', summary: isEdit ? 'Ligne modifiée' : 'Ligne ajoutée' });
+        if (!isEdit) this.form()?.reset();
+        this.showFormDialog = false;
+      },
+    });
+  }
+
+  protected togglePaid(expense: Expense): void {
+    this.store.setFixedExpensePaid(expense, !expense.paid).subscribe();
   }
 
   protected confirmDelete(): void {
-    if (this.selected) {
-      this.store.deleteFixedExpense(this.selected.id);
-      this.messageService.add({ severity: 'success', summary: 'Ligne supprimée' });
-    }
-    this.showDeleteDialog = false;
-    this.selected = null;
+    if (!this.selected) return;
+    this.store.deleteExpense(this.selected.id).subscribe({
+      next: () => {
+        this.messageService.add({ severity: 'success', summary: 'Ligne supprimée' });
+        this.showDeleteDialog = false;
+        this.selected = null;
+      },
+    });
   }
 
   protected copyFromPreviousMonth(): void {
-    const count = this.store.copyFixedFromPreviousMonth();
-    this.messageService.add(
-      count > 0
-        ? { severity: 'success', summary: 'Copie effectuée', detail: `${count} lignes copiées, à payer.` }
-        : { severity: 'warn', summary: 'Rien à copier', detail: 'Aucune dépense fixe le mois précédent.' },
-    );
+    if (this.isCopying()) return;
+    this.isCopying.set(true);
+    this.store
+      .copyFixedFromPreviousMonth()
+      .pipe(finalize(() => this.isCopying.set(false)))
+      .subscribe({
+        next: (copies) =>
+          this.messageService.add(
+            copies.length > 0
+              ? { severity: 'success', summary: 'Copie effectuée', detail: `${copies.length} lignes copiées, à payer.` }
+              : { severity: 'warn', summary: 'Rien à copier', detail: 'Aucune nouvelle dépense fixe à copier du mois précédent.' },
+          ),
+      });
   }
 }

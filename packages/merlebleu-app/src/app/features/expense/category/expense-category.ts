@@ -1,4 +1,4 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, inject, signal, viewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ButtonModule } from 'primeng/button';
 import { Dialog } from 'primeng/dialog';
@@ -7,19 +7,11 @@ import { SelectModule } from 'primeng/select';
 import { TableModule } from 'primeng/table';
 import { TagModule } from 'primeng/tag';
 import { MessageService } from 'primeng/api';
+import { CreateExpenseCategoryDto, ExpenseCategory, ExpenseSection } from '@merlebleu/shared';
 import { formatUnitPrice } from '@shared/utils/number';
 import { ExpenseStoreService } from '../expense-store.service';
-import {
-  CATEGORY_SECTIONS,
-  ExpenseCategory,
-  ExpenseSection,
-  getSectionLabel,
-  getSectionSeverity,
-} from '../expense.model';
-import {
-  CategoryFormComponent,
-  CategoryFormValue,
-} from './components/category-form/category-form.component';
+import { CATEGORY_SECTIONS, getSectionLabel, getSectionSeverity } from '../expense.model';
+import { CategoryFormComponent } from './components/category-form/category-form.component';
 
 @Component({
   selector: 'mb-expense-category',
@@ -49,8 +41,9 @@ export class ExpenseCategoryComponent {
 
   protected readonly usageByCategory = computed(() => {
     const usage = new Map<string, number>();
-    for (const expense of this.store.monthExpenses()) {
-      usage.set(expense.categoryId, (usage.get(expense.categoryId) ?? 0) + 1);
+    for (const expense of this.store.variableExpenses()) {
+      const categoryId = expense.category?.id;
+      if (categoryId) usage.set(categoryId, (usage.get(categoryId) ?? 0) + 1);
     }
     return usage;
   });
@@ -59,10 +52,12 @@ export class ExpenseCategoryComponent {
     const search = this.search().trim().toLowerCase();
     return this.store
       .categories()
-      .filter((c) => c.section !== 'INGREDIENT')
       .filter((c) => !this.sectionFilter() || c.section === this.sectionFilter())
-      .filter((c) => !search || c.label.toLowerCase().includes(search));
+      .filter((c) => !search || c.label.toLowerCase().includes(search))
+      .sort((a, b) => a.label.localeCompare(b.label, 'fr', { sensitivity: 'base' }));
   });
+
+  private readonly form = viewChild(CategoryFormComponent);
 
   protected showFormDialog = false;
   protected showDeleteDialog = false;
@@ -88,23 +83,31 @@ export class ExpenseCategoryComponent {
     this.showDeleteDialog = true;
   }
 
-  protected save(value: CategoryFormValue): void {
-    if (this.selected) {
-      this.store.updateCategory(this.selected.id, value);
-      this.messageService.add({ severity: 'success', summary: 'Désignation modifiée' });
-    } else {
-      this.store.addCategory(value);
-      this.messageService.add({ severity: 'success', summary: 'Désignation ajoutée' });
-    }
-    this.showFormDialog = false;
+  protected save(value: CreateExpenseCategoryDto): void {
+    const isEdit = this.selected !== null;
+    const request = this.selected
+      ? this.store.updateCategory(this.selected.id, value)
+      : this.store.addCategory(value);
+    request.subscribe({
+      next: () => {
+        this.messageService.add({
+          severity: 'success',
+          summary: isEdit ? 'Désignation modifiée' : 'Désignation ajoutée',
+        });
+        if (!isEdit) this.form()?.reset();
+        this.showFormDialog = false;
+      },
+    });
   }
 
   protected confirmDelete(): void {
-    if (this.selected) {
-      this.store.deleteCategory(this.selected.id);
-      this.messageService.add({ severity: 'success', summary: 'Désignation supprimée' });
-    }
-    this.showDeleteDialog = false;
-    this.selected = null;
+    if (!this.selected) return;
+    this.store.deleteCategory(this.selected.id).subscribe({
+      next: () => {
+        this.messageService.add({ severity: 'success', summary: 'Désignation supprimée' });
+        this.showDeleteDialog = false;
+        this.selected = null;
+      },
+    });
   }
 }
