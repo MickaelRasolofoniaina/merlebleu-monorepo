@@ -3,8 +3,7 @@
   <p-button label="Ajouter" icon="pi pi-plus" (onClick)="openAdd()" />
 </div>
 <p class="text-sm text-slate-500 mb-4">
-  Ce sont les désignations de la première colonne de l'ancien fichier Excel. Une désignation peut être liée à un
-  ingrédient pour alimenter son stock.
+  Ce sont les désignations de la première colonne de l'ancien fichier Excel.
 </p>
 
 <div class="flex flex-wrap gap-3 items-center mb-4">
@@ -39,8 +38,6 @@
     <tr>
       <th>Désignation</th>
       <th>Section</th>
-      <th>Ingrédient lié</th>
-      <th class="text-right!">Montant habituel</th>
       <th class="text-right!">Utilisée ce mois</th>
       <th style="width: 10rem" class="text-center!">Actions</th>
     </tr>
@@ -51,8 +48,6 @@
       <td>
         <p-tag [value]="getSectionLabel(category.section)" [severity]="getSectionSeverity(category.section)" />
       </td>
-      <td>{{ category.linkedIngredient ?? '-' }}</td>
-      <td class="text-right!">{{ category.usualAmount > 0 ? formatAmount(category.usualAmount) + ' Ar' : '-' }}</td>
       <td class="text-right!">{{ usageCount(category) }} fois</td>
       <td class="text-center!">
         <p-button icon="pi pi-pencil" size="small" severity="warn" class="mr-2" (onClick)="openEdit(category)" />
@@ -62,7 +57,7 @@
   </ng-template>
   <ng-template #emptymessage>
     <tr>
-      <td colspan="6" class="text-center! py-6 text-slate-500">Aucune désignation.</td>
+      <td colspan="4" class="text-center! py-6 text-slate-500">Aucune désignation.</td>
     </tr>
   </ng-template>
 </p-table>

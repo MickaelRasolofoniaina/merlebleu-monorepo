@@ -5,7 +5,6 @@ type DayAmounts = Record<number, number>;
 export interface SeedCategory {
   label: string;
   section: ExpenseSection;
-  linkedIngredient?: string;
   /** Amount per day of October 2026, taken from the Excel sheet DEPENSES. */
   days: DayAmounts;
 }
@@ -35,7 +34,6 @@ export const SEED_CATEGORIES: SeedCategory[] = [
   {
     label: 'Œufs',
     section: 'CURRENT',
-    linkedIngredient: 'Œuf',
     days: { 1: 171800, 5: 240000, 7: 172400, 12: 200000, 15: 160000, 19: 170900, 22: 160000, 28: 171200 },
   },
   { label: 'Fromage', section: 'CURRENT', days: { 1: 8000, 8: 8000, 16: 8000, 17: 4000, 20: 8000, 28: 8000 } },
@@ -60,31 +58,10 @@ export const SEED_CATEGORIES: SeedCategory[] = [
   { label: 'Ketchup', section: 'CURRENT', days: { 7: 4200, 17: 4200, 22: 4000, 26: 3000 } },
   { label: 'Tomate', section: 'CURRENT', days: { 8: 1800, 16: 1800, 19: 1500, 21: 1800, 24: 1500, 27: 1700 } },
   { label: 'Totokena', section: 'CURRENT', days: { 13: 11000, 17: 5500, 21: 11000, 24: 1800 } },
-  { label: 'Beurre', section: 'CURRENT', linkedIngredient: 'Beurre', days: { 13: 7800, 19: 7800, 21: 7800, 28: 7800 } },
+  { label: 'Beurre', section: 'CURRENT', days: { 13: 7800, 19: 7800, 21: 7800, 28: 7800 } },
   { label: 'Oignon', section: 'CURRENT', days: { 16: 1500, 19: 1500, 21: 1500 } },
   { label: 'Huile (courante)', section: 'CURRENT', days: { 21: 40000 } },
   { label: 'Voanjo', section: 'CURRENT', days: { 22: 1000 } },
-
-  // Stocks and ingredient purchases
-  { label: 'Crème', section: 'INGREDIENT', linkedIngredient: 'Crème', days: { 1: 1080000, 23: 648000 } },
-  { label: 'Farine', section: 'INGREDIENT', linkedIngredient: 'Farine', days: { 1: 153000, 5: 153000 } },
-  { label: 'Sucre', section: 'INGREDIENT', linkedIngredient: 'Sucre', days: { 5: 404000 } },
-  { label: 'Huile', section: 'INGREDIENT', linkedIngredient: 'Huile', days: { 5: 116000, 23: 120000 } },
-  { label: 'Chocolat', section: 'INGREDIENT', linkedIngredient: 'Chocolat', days: { 5: 118000, 23: 120000 } },
-  { label: 'Carton', section: 'INGREDIENT', days: { 8: 135000 } },
-  { label: 'Fond 22', section: 'INGREDIENT', days: { 8: 45000 } },
-  { label: 'Fond 28', section: 'INGREDIENT', days: { 8: 35000 } },
-  { label: 'Pêche 2', section: 'INGREDIENT', days: { 8: 30000 } },
-  { label: 'Parfum vanille', section: 'INGREDIENT', days: { 8: 12500 } },
-  { label: 'Parfum or', section: 'INGREDIENT', days: { 8: 12500 } },
-  { label: 'Colorant', section: 'INGREDIENT', days: { 8: 10000 } },
-  { label: 'Cacao 2', section: 'INGREDIENT', linkedIngredient: 'Cacao', days: { 8: 145000 } },
-  { label: 'Raisins secs', section: 'INGREDIENT', days: { 8: 1000 } },
-  { label: 'Lait en poudre', section: 'INGREDIENT', linkedIngredient: 'Lait en poudre', days: { 8: 79200 } },
-  { label: 'Margarine 10', section: 'INGREDIENT', linkedIngredient: 'Margarine', days: { 8: 165000 } },
-  { label: 'Bougie', section: 'INGREDIENT', days: { 10: 600000 } },
-  { label: 'Sirop', section: 'INGREDIENT', days: { 3: 31400 } },
-  { label: 'Lait Candia', section: 'INGREDIENT', days: { 2: 68400 } },
 
   // Other expenses
   { label: 'Transport ingrédients', section: 'OTHER', days: { 5: 4000 } },

@@ -1,6 +1,6 @@
 // Static prototype models. They will move to @merlebleu/shared once the pages are validated.
 
-export type ExpenseSection = 'CURRENT' | 'INGREDIENT' | 'OTHER';
+export type ExpenseSection = 'CURRENT' | 'OTHER';
 export type FixedExpenseType = 'SALARY' | 'CHARGE';
 export type ExpensePaymentMethod = 'Espèces' | 'Mvola';
 
@@ -8,8 +8,6 @@ export interface ExpenseCategory {
   id: string;
   label: string;
   section: ExpenseSection;
-  linkedIngredient: string | null;
-  usualAmount: number;
 }
 
 export interface Expense {
@@ -35,24 +33,10 @@ export interface FixedExpense {
 
 export const EXPENSE_SECTIONS: { value: ExpenseSection; label: string; severity: 'success' | 'info' | 'warn' }[] = [
   { value: 'CURRENT', label: 'Courante', severity: 'success' },
-  { value: 'INGREDIENT', label: 'Ingrédients', severity: 'info' },
   { value: 'OTHER', label: 'Autre', severity: 'warn' },
 ];
 
 export const EXPENSE_PAYMENT_METHODS: ExpensePaymentMethod[] = ['Espèces', 'Mvola'];
-
-export const LINKABLE_INGREDIENTS = [
-  'Crème',
-  'Farine',
-  'Sucre',
-  'Huile',
-  'Chocolat',
-  'Cacao',
-  'Margarine',
-  'Lait en poudre',
-  'Œuf',
-  'Beurre',
-];
 
 export const getSectionLabel = (section: ExpenseSection): string =>
   EXPENSE_SECTIONS.find((s) => s.value === section)?.label ?? section;
@@ -63,7 +47,6 @@ export const getSectionSeverity = (section: ExpenseSection): 'success' | 'info' 
 // Tailwind only generates classes it can read as whole strings, so each color is spelled out
 const SECTION_DOT_CLASSES: Record<ExpenseSection, string> = {
   CURRENT: 'bg-green-400',
-  INGREDIENT: 'bg-blue-400',
   OTHER: 'bg-amber-400',
 };
 

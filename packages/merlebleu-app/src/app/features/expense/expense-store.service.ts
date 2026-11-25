@@ -156,10 +156,6 @@ export class ExpenseStoreService {
         id: this.nextId('category'),
         label: seed.label,
         section: seed.section,
-        linkedIngredient: seed.linkedIngredient ?? null,
-        usualAmount: days.length
-          ? Math.round(days.reduce((sum, d) => sum + d.amount, 0) / days.length / 100) * 100
-          : 0,
       };
       categories.push(category);
       for (const { day, amount } of days) {
