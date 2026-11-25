@@ -3,6 +3,28 @@
   <p class="text-sm text-slate-500 dark:text-slate-400 first-letter:uppercase">{{ today }}</p>
 </div>
 
+@if (details().lateCount > 0) {
+<div
+  class="mb-6 flex flex-wrap items-center gap-3 rounded-lg border border-red-500/40 bg-red-500/10 px-4 py-3"
+>
+  <i class="pi pi-exclamation-triangle text-red-600 dark:text-red-400"></i>
+  <span class="font-semibold text-red-700 dark:text-red-400">
+    {{ details().lateCount }} commande{{ details().lateCount > 1 ? 's' : '' }} en retard
+  </span>
+  @if (details().lateBalanceAmount > 0) {
+  <span class="text-sm text-red-700 dark:text-red-300">
+    dont {{ formatAmount(details().lateBalanceAmount) }} Ar restant à encaisser
+  </span>
+  }
+  <a
+    routerLink="/sale/order/late"
+    class="ml-auto text-sm font-semibold text-red-700 hover:underline dark:text-red-400"
+  >
+    Voir les commandes en retard →
+  </a>
+</div>
+}
+
 <section class="mb-6">
   <h3 class="text-xl font-semibold mb-3">Commandes</h3>
   <div class="flex flex-wrap gap-3">
@@ -33,14 +55,185 @@
   </div>
 </section>
 
-<section>
+<section class="mb-6">
   <h3 class="text-xl font-semibold mb-3">Finance</h3>
-  <p-card class="max-w-md block">
-    <div class="flex flex-col items-center justify-center gap-2 py-4">
-      <span class="text-slate-500 dark:text-slate-400">Recette encaissée</span>
-      <span class="text-5xl font-bold text-slate-900 dark:text-white">
-        {{ formatAmount(summary().collectedAmount) }} Ar
-      </span>
+  <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+    <p-card styleClass="border border-slate-300 shadow-md dark:border-slate-600">
+      <div class="flex flex-col gap-1">
+        <span class="text-slate-500 dark:text-slate-400">Recette encaissée</span>
+        <span class="text-3xl font-bold text-slate-900 dark:text-white">
+          {{ formatAmount(summary().collectedAmount) }} Ar
+        </span>
+      </div>
+    </p-card>
+    <p-card styleClass="border border-slate-300 shadow-md dark:border-slate-600">
+      <div class="flex flex-col gap-1">
+        <span class="text-slate-500 dark:text-slate-400">Reste à encaisser (livraisons du jour)</span>
+        <span class="text-3xl font-bold text-orange-600 dark:text-orange-400">
+          {{ formatAmount(details().balanceToCollectToday) }} Ar
+        </span>
+      </div>
+    </p-card>
+    <p-card styleClass="border border-slate-300 shadow-md dark:border-slate-600">
+      <div class="flex flex-col gap-1">
+        <span class="text-slate-500 dark:text-slate-400">Dépenses du jour</span>
+        <span class="text-3xl font-bold text-slate-900 dark:text-white">
+          {{ formatAmount(expensesTotal()) }} Ar
+        </span>
+        @if (expensesUnpaidTotal() > 0) {
+        <span class="text-sm text-slate-500 dark:text-slate-400">
+          dont {{ formatAmount(expensesUnpaidTotal()) }} Ar non payés
+        </span>
+        }
+      </div>
+    </p-card>
+    <p-card styleClass="border border-slate-300 shadow-md dark:border-slate-600">
+      <div class="flex flex-col gap-1">
+        <span class="text-slate-500 dark:text-slate-400">Solde du jour (recette − dépenses payées)</span>
+        <span
+          class="text-3xl font-bold"
+          [class]="
+            dayBalance() < 0
+              ? 'text-red-600 dark:text-red-400'
+              : 'text-green-600 dark:text-green-400'
+          "
+        >
+          {{ formatSignedAmount(dayBalance()) }} Ar
+        </span>
+      </div>
+    </p-card>
+  </div>
+</section>
+
+<div class="mb-6 grid grid-cols-1 gap-4 xl:grid-cols-5">
+  <p-card header="Livraisons du jour" class="xl:col-span-3" styleClass="border border-slate-300 shadow-md dark:border-slate-600">
+    @if (details().deliveries.length === 0) {
+    <p class="text-slate-500 dark:text-slate-400">Aucune livraison prévue aujourd'hui.</p>
+    } @else {
+    <div class="flex flex-col divide-y divide-slate-200 dark:divide-slate-700">
+      @for (delivery of details().deliveries; track delivery.id) {
+      <div class="flex flex-wrap items-center gap-x-4 gap-y-1 py-2">
+        <span class="w-28 shrink-0 font-semibold">
+          {{ delivery.startTime }}–{{ delivery.endTime }}
+        </span>
+        <div class="min-w-0 flex-1">
+          <div class="font-semibold">{{ delivery.customerName }}</div>
+          <div class="truncate text-sm text-slate-500 dark:text-slate-400">
+            {{ delivery.itemsLabel }} · {{ delivery.isPickup ? 'Retrait' : 'Livraison' }}
+            @if (delivery.shopAddress) { · {{ delivery.shopAddress }} }
+          </div>
+        </div>
+        <p-tag
+          [value]="statusLabel(delivery.status)"
+          [severity]="statusSeverity(delivery.status)"
+        />
+        <span class="w-32 text-right font-semibold">
+          @if (delivery.balanceAmount > 0) { {{ formatAmount(delivery.balanceAmount) }} Ar dus }
+          @else { Soldé }
+        </span>
+      </div>
+      }
+    </div>
+    }
+  </p-card>
+
+  <p-card header="À produire" class="xl:col-span-2" styleClass="border border-slate-300 shadow-md dark:border-slate-600">
+    <p class="mb-2 text-sm text-slate-500 dark:text-slate-400">
+      Gâteaux à préparer (livraison aujourd'hui ou demain), par forme et taille
+    </p>
+    @if (details().production.length === 0) {
+    <p class="text-slate-500 dark:text-slate-400">Rien à préparer.</p>
+    } @else {
+    <div class="flex flex-col divide-y divide-slate-200 dark:divide-slate-700">
+      @for (line of details().production; track line.shape + line.size) {
+      <div class="flex justify-between py-2">
+        <span>{{ line.shape }} · {{ line.size }} cm</span>
+        <strong>{{ line.count }}</strong>
+      </div>
+      }
+      <div class="flex justify-between py-2 font-semibold">
+        <span>Total</span>
+        <span>{{ productionTotal() }}</span>
+      </div>
+    </div>
+    @if (details().customizedOrdersCount > 0) {
+    <div class="mt-3 rounded-lg bg-slate-100 px-3 py-2 text-sm dark:bg-slate-800">
+      {{ details().customizedOrdersCount }} commande(s) avec texte ou décoration personnalisée
+    </div>
+    } }
+  </p-card>
+</div>
+
+<div class="grid grid-cols-1 gap-4 lg:grid-cols-2 xl:grid-cols-3">
+  <p-card header="Encaissements par mode" styleClass="border border-slate-300 shadow-md dark:border-slate-600">
+    @if (details().collectionsByMethod.length === 0) {
+    <p class="text-slate-500 dark:text-slate-400">Aucun encaissement pour le moment.</p>
+    } @else {
+    <div class="flex flex-col gap-3">
+      @for (row of details().collectionsByMethod; track row.name) {
+      <div>
+        <div class="mb-1 flex justify-between text-sm">
+          <span>{{ row.name }}</span>
+          <strong>{{ formatAmount(row.amount) }} Ar</strong>
+        </div>
+        <div class="h-2.5 rounded-md bg-slate-200 dark:bg-slate-700">
+          <div
+            class="h-2.5 rounded-md"
+            [style.width.%]="percentOf(row.amount, collectionsTotal())"
+            [style.background-color]="row.color"
+          ></div>
+        </div>
+      </div>
+      }
+    </div>
+    }
+  </p-card>
+
+  <p-card header="Dépenses du jour" styleClass="border border-slate-300 shadow-md dark:border-slate-600">
+    @if (details().expenses.length === 0) {
+    <p class="text-slate-500 dark:text-slate-400">Aucune dépense enregistrée aujourd'hui.</p>
+    } @else {
+    <div class="flex flex-col divide-y divide-slate-200 dark:divide-slate-700">
+      @for (expense of details().expenses; track expense.id) {
+      <div class="flex items-center justify-between gap-2 py-2">
+        <span class="min-w-0 truncate">
+          {{ expense.label }}
+          <span class="text-sm text-slate-500 dark:text-slate-400">({{ originLabel(expense.origin) }})</span>
+        </span>
+        <span class="flex shrink-0 items-center gap-2">
+          <strong>{{ formatAmount(expense.amount) }} Ar</strong>
+          <p-tag
+            [value]="expense.paid ? 'Payé' : 'À payer'"
+            [severity]="expense.paid ? 'success' : 'danger'"
+          />
+        </span>
+      </div>
+      }
+    </div>
+    }
+    <a
+      routerLink="/expense/grid"
+      class="mt-3 inline-block text-sm font-semibold text-blue-600 hover:underline dark:text-blue-400"
+    >
+      Ouvrir la grille des dépenses →
+    </a>
+  </p-card>
+
+  <p-card header="Alertes" styleClass="border border-slate-300 shadow-md dark:border-slate-600">
+    <div class="flex flex-col gap-2">
+      @if (details().unpaidFixedExpensesCount > 0) {
+      <div
+        class="rounded-lg border border-red-500/40 bg-red-500/10 px-3 py-2 text-sm text-red-700 dark:text-red-300"
+      >
+        <strong>Charges fixes non payées :</strong> {{ details().unpaidFixedExpensesCount }}
+      </div>
+      }
+      <div
+        class="rounded-lg border border-blue-500/40 bg-blue-500/10 px-3 py-2 text-sm text-blue-700 dark:text-blue-300"
+      >
+        <strong>Demain :</strong> {{ details().tomorrowDeliveriesCount }} livraison(s) déjà
+        planifiée(s)
+      </div>
     </div>
   </p-card>
-</section>
+</div>
