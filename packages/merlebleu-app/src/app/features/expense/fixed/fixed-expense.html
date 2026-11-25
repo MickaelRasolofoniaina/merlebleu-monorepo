@@ -11,24 +11,25 @@
   />
 </div>
 
-<div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4">
-  <div class="rounded-xl border border-slate-200 dark:border-slate-700 p-4">
-    <div class="text-sm text-slate-500">Salaires</div>
-    <div class="text-2xl font-bold tabular-nums">{{ formatAmount(salaryTotal()) }} Ar</div>
-    <div class="text-xs text-slate-500">{{ salaries().length }} personnes</div>
-  </div>
-  <div class="rounded-xl border border-slate-200 dark:border-slate-700 p-4">
-    <div class="text-sm text-slate-500">Charges</div>
-    <div class="text-2xl font-bold tabular-nums">{{ formatAmount(chargeTotal()) }} Ar</div>
-    <div class="text-xs text-slate-500">{{ charges().length }} lignes</div>
-  </div>
-  <div class="rounded-xl border border-slate-200 dark:border-slate-700 p-4">
-    <div class="text-sm text-slate-500">Total fixe du mois</div>
-    <div class="text-2xl font-bold tabular-nums">{{ formatAmount(total()) }} Ar</div>
-    <div class="text-xs text-slate-500">
-      Payé : {{ formatAmount(paidTotal()) }} · Reste : {{ formatAmount(remainingTotal()) }}
-    </div>
-  </div>
+<div class="flex flex-wrap gap-3 mb-4">
+  <stat-card
+    color="blue"
+    icon="pi pi-users"
+    [valueText]="formatAmount(salaryTotal()) + ' Ar'"
+    [label]="'de salaires (' + salaries().length + ' personnes)'"
+  />
+  <stat-card
+    color="orange"
+    icon="pi pi-receipt"
+    [valueText]="formatAmount(chargeTotal()) + ' Ar'"
+    [label]="'de charges (' + charges().length + ' lignes)'"
+  />
+  <stat-card
+    color="red"
+    icon="pi pi-calendar-clock"
+    [valueText]="formatAmount(total()) + ' Ar'"
+    [label]="'de fixe du mois · payé : ' + formatAmount(paidTotal()) + ' · reste : ' + formatAmount(remainingTotal())"
+  />
 </div>
 
 <div class="grid grid-cols-1 xl:grid-cols-2 gap-4 items-start">

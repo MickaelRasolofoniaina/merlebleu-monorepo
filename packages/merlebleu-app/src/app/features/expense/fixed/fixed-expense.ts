@@ -5,6 +5,7 @@ import { TableModule } from 'primeng/table';
 import { TagModule } from 'primeng/tag';
 import { MessageService } from 'primeng/api';
 import { formatUnitPrice } from '@shared/utils/number';
+import { StatCard } from '@shared/components/stat-card/stat-card';
 import { MonthSwitcherComponent } from '../components/month-switcher/month-switcher';
 import { ExpenseStoreService } from '../expense-store.service';
 import { FixedExpense, FixedExpenseType } from '../expense.model';
@@ -16,7 +17,7 @@ import {
 @Component({
   selector: 'mb-fixed-expense',
   templateUrl: './fixed-expense.html',
-  imports: [ButtonModule, Dialog, TableModule, TagModule, MonthSwitcherComponent, FixedExpenseFormComponent],
+  imports: [ButtonModule, Dialog, TableModule, TagModule, StatCard, MonthSwitcherComponent, FixedExpenseFormComponent],
 })
 export class FixedExpenseComponent {
   protected readonly store = inject(ExpenseStoreService);
