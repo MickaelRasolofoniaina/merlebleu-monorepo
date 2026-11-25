@@ -34,3 +34,19 @@ export const getPaginationParams = (
     skip: (page - 1) * cappedLimit,
   };
 };
+
+/**
+ * Parses a query string value into a positive integer. A missing, non numeric
+ * or non positive value gives the fallback, and the result never exceeds `max`.
+ */
+export const parsePositiveInt = (
+  value: string | undefined,
+  fallback: number,
+  max = 100,
+): number => {
+  const parsed = Number.parseInt(value ?? '', 10);
+  if (!Number.isFinite(parsed) || parsed <= 0) {
+    return fallback;
+  }
+  return Math.min(parsed, max);
+};

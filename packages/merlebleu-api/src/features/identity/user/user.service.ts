@@ -1,5 +1,9 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
-import { Repository } from 'typeorm';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
+import { Not, Repository } from 'typeorm';
 import { UserEntity, UserSchema } from './user.entity';
 import { ShopEntity } from '../../shop/shop.entity';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -9,6 +13,7 @@ import {
   UpdateUserDto,
   UpdateUserPreferencesDto,
   UserDto,
+  UserRole,
 } from '@merlebleu/shared';
 
 @Injectable()
@@ -71,7 +76,7 @@ export class UserService {
     }
   }
 
-  async updateUser(id: string, updates: UpdateUserDto) {
+  async updateUser(id: string, updates: UpdateUserDto, actingUserId?: string) {
     const user = await this.userRepository.findOne({
       where: { id },
       relations: { shop: true },
@@ -79,6 +84,19 @@ export class UserService {
 
     if (!user) {
       throw new NotFoundException(`User with id ${id} not found`);
+    }
+
+    if (
+      user.role === UserRole.ADMIN &&
+      updates.role !== undefined &&
+      updates.role !== UserRole.ADMIN
+    ) {
+      if (id === actingUserId) {
+        throw new BadRequestException(
+          'Vous ne pouvez pas retirer votre propre rôle administrateur.',
+        );
+      }
+      await this.assertAnotherAdminExists(id);
     }
 
     const { shopId, ...userUpdates } = updates;
@@ -99,8 +117,30 @@ export class UserService {
     return this.userRepository.findOne({ where: { id }, relations: { shop: true } });
   }
 
-  deleteUser(id: string) {
+  async deleteUser(id: string, actingUserId?: string) {
+    if (id === actingUserId) {
+      throw new BadRequestException(
+        'Vous ne pouvez pas supprimer votre propre compte.',
+      );
+    }
+
+    const user = await this.userRepository.findOne({ where: { id } });
+    if (user?.role === UserRole.ADMIN) {
+      await this.assertAnotherAdminExists(id);
+    }
+
     return this.userRepository.delete({ id });
+  }
+
+  private async assertAnotherAdminExists(excludedId: string): Promise<void> {
+    const otherAdmins = await this.userRepository.count({
+      where: { role: UserRole.ADMIN, id: Not(excludedId) },
+    });
+    if (otherAdmins === 0) {
+      throw new BadRequestException(
+        'Il doit rester au moins un administrateur.',
+      );
+    }
   }
 
   public async hashPassword(password: string): Promise<string> {

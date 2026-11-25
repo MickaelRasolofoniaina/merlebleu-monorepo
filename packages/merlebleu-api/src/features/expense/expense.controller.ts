@@ -1,3 +1,5 @@
+import { Roles } from '@shared/auth/roles';
+import { UserRole } from '@merlebleu/shared';
 import {
   Body,
   Controller,
@@ -19,6 +21,7 @@ import {
   UpdateFixedExpenseDto,
 } from './expense.dto';
 
+@Roles(UserRole.ADMIN, UserRole.PASTRY_CHEF)
 @Controller('expense')
 export class ExpenseController {
   constructor(private readonly expenseService: ExpenseService) {}

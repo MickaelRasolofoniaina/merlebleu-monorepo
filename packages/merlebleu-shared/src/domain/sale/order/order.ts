@@ -51,7 +51,12 @@ export interface Order {
   deliveryFee: number;
   paidAmount: number;
   balanceAmount: number;
+  /** Method used for the deposit paid when the order was taken. */
   paymentMethod: PaymentMethod;
+  /** Amount collected at delivery to settle the balance (included in `paidAmount`). */
+  balancePaidAmount?: number;
+  /** Method used to settle the balance at delivery. */
+  balancePaymentMethod?: PaymentMethod | null;
   shop: Shop;
   orderStatus?: OrderStatus;
 }

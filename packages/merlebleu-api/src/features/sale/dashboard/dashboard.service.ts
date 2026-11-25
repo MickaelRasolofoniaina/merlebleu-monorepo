@@ -10,6 +10,7 @@ import {
 } from 'typeorm';
 import {
   DashboardAmount,
+  DashboardCollectionByMethod,
   DashboardCountPoint,
   DashboardDistributionPoint,
   DashboardOrderListSummary,
@@ -200,20 +201,10 @@ export class DashboardService {
           relations: { orderItems: true, shop: true },
           order: { deliveryStartTime: 'ASC' },
         }),
-        this.orderRepository
-          .createQueryBuilder('orders')
-          .leftJoin('orders.paymentMethod', 'paymentMethod')
-          .select('paymentMethod.name', 'name')
-          .addSelect('paymentMethod.color', 'color')
-          .addSelect('COALESCE(SUM(orders.paidAmount), 0)', 'amount')
-          .where('orders.deliveryDate = :today', { today })
-          .andWhere('orders.orderStatus = :delivered', {
-            delivered: OrderStatus.DELIVERED,
-          })
-          .groupBy('paymentMethod.name')
-          .addGroupBy('paymentMethod.color')
-          .orderBy('amount', 'DESC')
-          .getRawMany<{ name: string | null; color: string | null; amount: string }>(),
+        this.orderRepository.find({
+          where: { deliveryDate: today, orderStatus: OrderStatus.DELIVERED },
+          relations: { paymentMethod: true, balancePaymentMethod: true },
+        }),
         this.expenseRepository.find({ where: { date: today } }),
         this.expenseRepository.count({
           where: {
@@ -285,11 +276,7 @@ export class DashboardService {
         (a, b) => b.count - a.count || a.size - b.size,
       ),
       customizedOrdersCount,
-      collectionsByMethod: collections.map((row) => ({
-        name: row.name ?? 'Non défini',
-        color: row.color ?? DEFAULT_PAYMENT_METHOD_COLOR,
-        amount: Number(row.amount),
-      })),
+      collectionsByMethod: this.groupCollectionsByMethod(collections),
       expenses: expenses.map((expense) => ({
         id: expense.id,
         label:
@@ -366,6 +353,38 @@ export class DashboardService {
       toDeliverToday,
       toDeliverThisWeek,
     };
+  }
+
+  // the deposit is attributed to the order's payment method and the balance
+  // collected at delivery to the method chosen then
+  private groupCollectionsByMethod(
+    orders: OrderEntity[],
+  ): DashboardCollectionByMethod[] {
+    const totals = new Map<string, DashboardCollectionByMethod>();
+    const add = (
+      method: { name: string; color: string } | null | undefined,
+      amount: number,
+    ) => {
+      if (amount <= 0) {
+        return;
+      }
+      const name = method?.name ?? 'Non défini';
+      const row = totals.get(name) ?? {
+        name,
+        color: method?.color ?? DEFAULT_PAYMENT_METHOD_COLOR,
+        amount: 0,
+      };
+      row.amount += amount;
+      totals.set(name, row);
+    };
+
+    for (const order of orders) {
+      const balancePaid = order.balancePaidAmount ?? 0;
+      add(order.paymentMethod, order.paidAmount - balancePaid);
+      add(order.balancePaymentMethod ?? order.paymentMethod, balancePaid);
+    }
+
+    return [...totals.values()].sort((a, b) => b.amount - a.amount);
   }
 
   // an order with several items of the same type or shape is counted once
