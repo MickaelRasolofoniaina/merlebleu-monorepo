@@ -7,6 +7,10 @@ export const EXPENSE_ROUTES: Route[] = [
     loadComponent: () => import('./grid/expense-grid').then((m) => m.ExpenseGridComponent),
   },
   {
+    path: 'list',
+    loadComponent: () => import('./list/expense-list').then((m) => m.ExpenseListComponent),
+  },
+  {
     path: 'fixed',
     loadComponent: () => import('./fixed/fixed-expense').then((m) => m.FixedExpenseComponent),
   },

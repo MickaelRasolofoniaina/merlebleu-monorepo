@@ -1,0 +1,80 @@
+<div class="flex flex-wrap items-center gap-3 mb-4">
+  <h2 class="text-2xl font-bold">Liste des dépenses</h2>
+  <mb-month-switcher />
+</div>
+
+<div class="flex flex-wrap gap-3 mb-4">
+  <stat-card color="blue" icon="pi pi-wallet" [valueText]="formatAmount(total()) + ' Ar'" label="au total (filtres appliqués)" />
+  <stat-card color="green" icon="pi pi-list" [valueText]="rows().length.toString()" label="dépenses effectuées" />
+  <stat-card color="purple" icon="pi pi-chart-bar" [valueText]="formatAmount(average()) + ' Ar'" label="par dépense en moyenne" />
+  <stat-card color="orange" icon="pi pi-arrow-up" [valueText]="formatAmount(highest()) + ' Ar'" label="pour la plus grosse dépense" />
+</div>
+
+<div class="flex flex-wrap items-center justify-between gap-3 mb-3">
+  <p-selectbutton
+    [options]="sectionOptions"
+    optionLabel="label"
+    optionValue="value"
+    [allowEmpty]="false"
+    [ngModel]="sectionFilter()"
+    (ngModelChange)="sectionFilter.set($event)"
+    aria-label="Filtrer par section"
+  />
+  <div class="flex flex-wrap items-center gap-3">
+    <input
+      type="text"
+      pInputText
+      placeholder="Rechercher..."
+      aria-label="Rechercher une dépense"
+      class="w-64"
+      [ngModel]="search()"
+      (ngModelChange)="search.set($event)"
+    />
+  </div>
+</div>
+
+<p-table [value]="rows()" [loading]="store.isLoading()" rowGroupMode="subheader" groupRowsBy="date" dataKey="id">
+  <ng-template #header>
+    <tr>
+      <th>Désignation</th>
+      <th>Section</th>
+      <th>Statut</th>
+      <th class="text-right!">Montant</th>
+    </tr>
+  </ng-template>
+  <ng-template #groupheader let-row>
+    <tr>
+      <td colspan="3" class="font-bold bg-slate-800! text-white!">
+        {{ dayOf(row.date).title }}
+        <span class="ml-2 font-normal text-slate-300">
+          {{ dayOf(row.date).count }} {{ dayOf(row.date).count > 1 ? 'dépenses' : 'dépense' }}
+        </span>
+      </td>
+      <td class="text-right! font-bold tabular-nums bg-slate-800! text-white!">{{ formatAmount(dayOf(row.date).total) }} Ar</td>
+    </tr>
+  </ng-template>
+  <ng-template #body let-row>
+    <tr>
+      <td>
+        {{ row.label }}
+        @if (row.detail) {
+          <span class="block text-sm text-slate-500">{{ row.detail }}</span>
+        }
+      </td>
+      <td><p-tag [value]="row.sectionLabel" [severity]="row.sectionSeverity" /></td>
+      <td>
+        @if (row.paid === null) {
+          <span class="text-slate-500">—</span>
+        } @else {
+          <p-tag [value]="row.paid ? 'Payé' : 'À payer'" [severity]="row.paid ? 'success' : 'warn'" />
+        }
+      </td>
+      <td class="text-right! tabular-nums font-semibold">{{ formatAmount(row.amount) }} Ar</td>
+    </tr>
+  </ng-template>
+  <ng-template #emptymessage>
+    <tr>
+      <td colspan="4" class="text-center! py-6 text-slate-500">Aucune dépense pour ces filtres en {{ store.monthLabel().toLowerCase() }}.</td>
+    </tr>
+  </ng-template>
+</p-table>
