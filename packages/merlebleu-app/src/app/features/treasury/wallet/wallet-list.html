@@ -3,6 +3,7 @@
   @if (isAdmin()) {
     <div class="flex flex-wrap gap-2">
       <p-button label="Nouveau virement" icon="pi pi-arrow-right-arrow-left" severity="secondary" [outlined]="true" (onClick)="openTransfer(null)" />
+      <p-button label="Clôturer la caisse" icon="pi pi-lock" severity="danger" (onClick)="openClosing(false)" />
       <p-button label="Nouveau portefeuille" icon="pi pi-plus" (onClick)="openCreate()" />
     </div>
   }
@@ -22,6 +23,24 @@
     </div>
   </p-message>
 } @else if (summary(); as data) {
+  @if (isAdmin() && closingDue()) {
+    <div class="mb-3 flex flex-wrap items-start gap-3 rounded-lg border border-amber-300 bg-amber-50 p-3 text-amber-900 dark:border-amber-500/40 dark:bg-amber-950 dark:text-amber-100" role="status">
+      <i class="pi pi-clock mt-1"></i>
+      <div class="flex-1">
+        <p class="font-semibold first-letter:uppercase">{{ reminderMonth }} n'est pas clôturé</p>
+        <p class="text-xs">
+          @if (data.lastClosingDate; as last) {
+            Dernière clôture : {{ formatDay(last) }}.
+          } @else {
+            La caisse n'a jamais été clôturée.
+          }
+          Clôturer fige les soldes et accélère l'affichage de la trésorerie.
+        </p>
+      </div>
+      <p-button label="Clôturer {{ reminderMonth.split(' ')[0] }}" size="small" severity="danger" [outlined]="true" (onClick)="openClosing(true)" />
+    </div>
+  }
+
   @for (wallet of negativeWallets(); track wallet.id) {
     <div class="mb-3 flex flex-wrap items-start gap-3 rounded-lg border border-red-300 bg-red-50 p-3 text-red-900 dark:border-red-500/40 dark:bg-red-950 dark:text-red-100">
       <i class="pi pi-exclamation-triangle mt-1"></i>
@@ -59,7 +78,14 @@
         {{ formatAmount(data.totalBalance) }} <span class="text-lg font-semibold text-slate-300">Ar</span>
       </p>
     </div>
-    <p class="text-xs text-slate-300">{{ activeWallets().length }} portefeuille(s) actif(s)</p>
+    <div class="text-right text-xs text-slate-300">
+      <p>{{ activeWallets().length }} portefeuille(s) actif(s)</p>
+      @if (data.lastClosingDate; as last) {
+        <a class="mt-1 inline-flex items-center gap-1.5 rounded-full bg-white/15 px-2.5 py-0.5 text-white hover:bg-white/25" routerLink="/treasury/closings">
+          <i class="pi pi-lock text-[0.65rem]"></i> Calculé depuis la clôture du {{ formatDay(last) }}
+        </a>
+      }
+    </div>
   </div>
 
   @if (activeWallets().length === 0) {
@@ -98,6 +124,10 @@
             <dd class="text-right font-medium tabular-nums text-green-700 dark:text-green-400">+ {{ formatAmount(wallet.monthIncome) }}</dd>
             <dt class="text-slate-500">Sorties du mois</dt>
             <dd class="text-right font-medium tabular-nums text-red-700 dark:text-red-400">− {{ formatAmount(wallet.monthOutflow) }}</dd>
+            @if (data.lastClosingDate && wallet.frozenAmount !== null) {
+              <dt class="text-slate-500">Figé au {{ formatDay(data.lastClosingDate) }}</dt>
+              <dd class="text-right tabular-nums">{{ formatAmount(wallet.frozenAmount) }} Ar</dd>
+            } @else {
             <dt class="text-slate-500">Solde initial</dt>
             <dd class="text-right tabular-nums">
               @if (wallet.openingDate) {
@@ -106,6 +136,7 @@
                 <span class="text-slate-400">non défini</span>
               }
             </dd>
+            }
           </dl>
           <p class="text-xs" [class]="wallet.lastCashCount ? 'text-slate-500' : 'text-amber-700 dark:text-amber-400'">
             @if (wallet.lastCashCount; as count) {
@@ -152,3 +183,4 @@
 <mb-wallet-form-dialog [(visible)]="showWalletDialog" [wallet]="selected" (saved)="load()" />
 <mb-transfer-dialog [(visible)]="showTransferDialog" [wallets]="activeWallets()" [sourceId]="selected?.id ?? null" (saved)="load()" />
 <mb-cash-count-dialog [(visible)]="showCashCountDialog" [wallet]="selected" (saved)="load()" />
+<mb-closing-dialog [(visible)]="showClosingDialog" [initialDate]="closingDate" [lastClosingDate]="summary()?.lastClosingDate ?? null" (saved)="load()" />

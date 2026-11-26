@@ -1,5 +1,7 @@
 import {
+  closingPreviewQuerySchema,
   createCashCountSchema,
+  createClosingSchema,
   createRefundSchema,
   createTransferSchema,
   exportMovementsQuerySchema,
@@ -8,6 +10,12 @@ import {
   updateWalletSchema,
 } from '@merlebleu/shared';
 import { createZodDto } from 'nestjs-zod';
+
+export class ClosingPreviewQueryDto extends createZodDto(
+  closingPreviewQuerySchema,
+) {}
+
+export class CreateClosingDto extends createZodDto(createClosingSchema) {}
 
 export class UpdateWalletDto extends createZodDto(updateWalletSchema) {}
 

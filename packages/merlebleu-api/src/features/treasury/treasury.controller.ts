@@ -1,8 +1,11 @@
 import { Roles } from '@shared/auth/roles';
+import { CurrentUser } from '@shared/auth/current-user.decorator';
+import type { CurrentUserPayload } from '@shared/auth/current-user.decorator';
 import { UserRole } from '@merlebleu/shared';
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Header,
   HttpCode,
@@ -14,7 +17,9 @@ import {
 } from '@nestjs/common';
 import { TreasuryService } from './treasury.service';
 import {
+  ClosingPreviewQueryDto,
   CreateCashCountDto,
+  CreateClosingDto,
   CreateRefundDto,
   CreateTransferDto,
   ExportMovementsQueryDto,
@@ -77,6 +82,34 @@ export class TreasuryController {
   @Get('cash-counts')
   listCashCounts(@Query('walletId', ParseUUIDPipe) walletId: string) {
     return this.treasuryService.listCashCounts(walletId);
+  }
+
+  @Get('closings')
+  listClosings() {
+    return this.treasuryService.listClosings();
+  }
+
+  @Roles(UserRole.ADMIN)
+  @Get('closings/preview')
+  previewClosing(@Query() query: ClosingPreviewQueryDto) {
+    return this.treasuryService.previewClosing(query.date);
+  }
+
+  @Roles(UserRole.ADMIN)
+  @Post('closings')
+  createClosing(
+    @Body() dto: CreateClosingDto,
+    @CurrentUser() currentUser: CurrentUserPayload,
+  ) {
+    return this.treasuryService.createClosing(dto, currentUser.name);
+  }
+
+  // only the latest closing can be reopened
+  @Roles(UserRole.ADMIN)
+  @Delete('closings/last')
+  @HttpCode(204)
+  reopenLastClosing() {
+    return this.treasuryService.reopenLastClosing();
   }
 
   @Roles(UserRole.ADMIN)

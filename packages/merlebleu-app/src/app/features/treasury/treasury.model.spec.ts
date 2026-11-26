@@ -5,6 +5,10 @@ import {
   formatSigned,
   getMovementTypeLabel,
   getMovementTypeSeverity,
+  isClosingDue,
+  lastDayOfPreviousMonth,
+  parseDay,
+  previousMonthLabel,
 } from './treasury.model';
 
 describe('treasury model', () => {
@@ -38,5 +42,40 @@ describe('treasury model', () => {
     for (const type of Object.values(MovementType)) {
       expect(values).toContain(type);
     }
+  });
+
+  describe('cash closing', () => {
+    const now = new Date(2026, 10, 26); // 26 November 2026
+
+    it('finds the last day of the previous month, also across a year', () => {
+      expect(lastDayOfPreviousMonth(now)).toBe('2026-10-31');
+      expect(lastDayOfPreviousMonth(new Date(2027, 0, 5))).toBe('2026-12-31');
+      expect(lastDayOfPreviousMonth(new Date(2028, 2, 10))).toBe('2028-02-29');
+    });
+
+    it('names the previous month in French', () => {
+      expect(previousMonthLabel(now)).toBe('octobre 2026');
+    });
+
+    it('asks for a closing when the previous month is not closed', () => {
+      expect(isClosingDue(null, now)).toBeTrue();
+      expect(isClosingDue('2026-09-30', now)).toBeTrue();
+      expect(isClosingDue('2026-10-30', now)).toBeTrue();
+    });
+
+    it('does not ask once the previous month is closed', () => {
+      expect(isClosingDue('2026-10-31', now)).toBeFalse();
+      expect(isClosingDue('2026-11-15', now)).toBeFalse();
+    });
+
+    it('reads a day as a local date', () => {
+      const day = parseDay('2026-09-30');
+
+      expect([day.getFullYear(), day.getMonth(), day.getDate()]).toEqual([2026, 8, 30]);
+    });
+
+    it('labels the counting adjustment', () => {
+      expect(getMovementTypeLabel(MovementType.ADJUSTMENT)).toBe('Ajustement');
+    });
   });
 });

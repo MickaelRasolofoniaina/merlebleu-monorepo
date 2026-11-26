@@ -9,6 +9,8 @@ export enum MovementType {
   REFUND = "REFUND",
   TRANSFER_IN = "TRANSFER_IN",
   TRANSFER_OUT = "TRANSFER_OUT",
+  /** Gap found when counting the cash at a closing. */
+  ADJUSTMENT = "ADJUSTMENT",
 }
 
 /** Movement types that bring money in from a customer. */
@@ -51,4 +53,6 @@ export interface MovementPage {
   page: number;
   limit: number;
   totals: MovementTotals;
+  /** YYYY-MM-DD, last closed day: older movements are locked and have no running balance. */
+  lockedUntil: string | null;
 }

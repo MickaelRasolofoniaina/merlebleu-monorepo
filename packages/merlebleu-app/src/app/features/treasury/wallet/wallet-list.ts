@@ -8,9 +8,10 @@ import { finalize, EMPTY, catchError } from 'rxjs';
 import { Wallet, WalletSummary } from '@merlebleu/shared';
 import { CurrentUserService } from '@shared/services/current-user.service';
 import { formatUnitPrice } from '@shared/utils/number';
-import { formatDay } from '../treasury.model';
+import { formatDay, isClosingDue, lastDayOfPreviousMonth, previousMonthLabel } from '../treasury.model';
 import { TreasuryApiService } from '../treasury-api.service';
 import { CashCountDialogComponent } from './components/cash-count-dialog/cash-count-dialog';
+import { ClosingDialogComponent } from './components/closing-dialog/closing-dialog';
 import { TransferDialogComponent } from './components/transfer-dialog/transfer-dialog';
 import { WalletFormDialogComponent } from './components/wallet-form-dialog/wallet-form-dialog';
 
@@ -24,6 +25,7 @@ import { WalletFormDialogComponent } from './components/wallet-form-dialog/walle
     SkeletonModule,
     TagModule,
     CashCountDialogComponent,
+    ClosingDialogComponent,
     TransferDialogComponent,
     WalletFormDialogComponent,
   ],
@@ -43,9 +45,19 @@ export class WalletListComponent {
   protected readonly archivedWallets = computed(() => this.summary()?.wallets.filter((w) => w.archived) ?? []);
   protected readonly negativeWallets = computed(() => this.activeWallets().filter((w) => w.balance < 0));
 
+  /** The previous month still has to be closed: only worth a reminder once there are wallets to close. */
+  protected readonly closingDue = computed(() => {
+    const data = this.summary();
+    return data !== null && this.activeWallets().length > 0 && isClosingDue(data.lastClosingDate, new Date());
+  });
+  protected readonly reminderMonth = previousMonthLabel(new Date());
+
   protected showWalletDialog = false;
   protected showTransferDialog = false;
   protected showCashCountDialog = false;
+  protected showClosingDialog = false;
+  /** Closing date proposed by the dialog, today when null. */
+  protected closingDate: string | null = null;
   protected selected: Wallet | null = null;
 
   constructor() {
@@ -78,6 +90,12 @@ export class WalletListComponent {
   protected openEdit(wallet: Wallet): void {
     this.selected = wallet;
     this.showWalletDialog = true;
+  }
+
+  /** From the reminder, the previous month is proposed; from the header, today. */
+  protected openClosing(forPreviousMonth: boolean): void {
+    this.closingDate = forPreviousMonth ? lastDayOfPreviousMonth(new Date()) : null;
+    this.showClosingDialog = true;
   }
 
   protected openTransfer(wallet: Wallet | null): void {

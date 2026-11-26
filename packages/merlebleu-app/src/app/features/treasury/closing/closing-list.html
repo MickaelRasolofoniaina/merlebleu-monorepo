@@ -1,0 +1,156 @@
+<div class="mb-3 flex flex-wrap items-center justify-between gap-3">
+  <h2 class="text-2xl font-bold">Clôtures de caisse</h2>
+  @if (isAdmin()) {
+    <p-button label="Clôturer la caisse" icon="pi pi-lock" severity="danger" (onClick)="showClosingDialog = true" />
+  }
+</div>
+
+@if (loading() && !closings()) {
+  <p-skeleton height="12rem" borderRadius="0.75rem" />
+} @else if (failed() && !closings()) {
+  <p-message severity="error">
+    <div class="flex items-center gap-3">
+      <span>Impossible de charger les clôtures.</span>
+      <p-button label="Réessayer" size="small" severity="secondary" (onClick)="load()" />
+    </div>
+  </p-message>
+} @else if (closings(); as data) {
+  @if (data.length === 0) {
+    <div class="flex flex-col items-center gap-2 rounded-xl border border-dashed border-slate-300 py-12 text-center dark:border-slate-600">
+      <i class="pi pi-lock text-3xl text-slate-400"></i>
+      <p class="font-semibold">Aucune clôture pour le moment</p>
+      <p class="max-w-md text-slate-500">
+        Clôture la caisse en fin de mois pour figer les soldes. Les mois clôturés ne peuvent plus être modifiés.
+      </p>
+      @if (isAdmin()) {
+        <p-button label="Faire la première clôture" icon="pi pi-lock" severity="danger" (onClick)="showClosingDialog = true" />
+      }
+    </div>
+  } @else {
+    <div class="overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-700">
+      <table class="w-full text-sm">
+        <thead class="bg-slate-50 text-left text-xs uppercase tracking-wide text-slate-500 dark:bg-slate-800 dark:text-slate-300">
+          <tr>
+            <th class="p-3">Date de clôture</th>
+            <th class="p-3 text-right">Total figé</th>
+            <th class="p-3 text-right">Écart de comptage</th>
+            <th class="p-3">Clôturée le</th>
+            <th class="p-3">Statut</th>
+            <th class="p-3"></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (closing of data; track closing.id) {
+            <tr class="border-t border-slate-100 dark:border-slate-700" [class]="closing.reopenable ? '' : 'text-slate-500 dark:text-slate-400'">
+              <td class="p-3">
+                <button
+                  type="button"
+                  class="flex items-center gap-2 font-semibold"
+                  [attr.aria-expanded]="expanded().has(closing.id)"
+                  [attr.aria-label]="'Détail de la clôture du ' + formatDay(closing.date)"
+                  (click)="toggle(closing)"
+                >
+                  <i class="pi text-xs" [class]="expanded().has(closing.id) ? 'pi-chevron-down' : 'pi-chevron-right'"></i>
+                  {{ formatDay(closing.date) }}
+                </button>
+              </td>
+              <td class="p-3 text-right tabular-nums">{{ formatAmount(closing.totalFrozen) }} Ar</td>
+              <td
+                class="p-3 text-right tabular-nums"
+                [class]="closing.totalGap < 0 ? 'font-semibold text-red-700 dark:text-red-400' : closing.totalGap > 0 ? 'font-semibold text-green-700 dark:text-green-400' : ''"
+              >
+                {{ closing.totalGap > 0 ? '+ ' : '' }}{{ formatAmount(closing.totalGap) }} Ar
+              </td>
+              <td class="p-3">{{ closing.createdAt | date: 'dd/MM/yyyy' }} par {{ closing.createdBy }}</td>
+              <td class="p-3">
+                @if (closing.reopenable) {
+                  <p-tag value="Dernière clôture" severity="success" />
+                } @else {
+                  <p-tag value="Verrouillée" icon="pi pi-lock" severity="secondary" />
+                }
+              </td>
+              <td class="p-3 text-right">
+                @if (closing.reopenable && isAdmin()) {
+                  <p-button label="Rouvrir" icon="pi pi-undo" size="small" severity="secondary" [outlined]="true" (onClick)="confirmingReopen.set(true)" />
+                }
+              </td>
+            </tr>
+            @if (expanded().has(closing.id)) {
+              <tr class="bg-slate-50 dark:bg-slate-800">
+                <td colspan="6" class="px-3 py-2 sm:pl-10">
+                  <div class="overflow-x-auto">
+                    <table class="w-full text-sm">
+                      <thead class="text-left text-xs uppercase tracking-wide text-slate-500 dark:text-slate-300">
+                        <tr>
+                          <th class="py-1">Portefeuille</th>
+                          <th class="py-1 text-right">Calculé</th>
+                          <th class="py-1 text-right">Compté</th>
+                          <th class="py-1 text-right">Écart</th>
+                          <th class="py-1 text-right">Solde figé</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        @for (line of closing.lines; track line.walletId) {
+                          <tr class="border-t border-slate-200 dark:border-slate-700">
+                            <td class="py-1">
+                              <span class="flex items-center gap-2">
+                                <span class="inline-block h-2.5 w-2.5 rounded-full" [style.background]="line.walletColor"></span>{{ line.walletName }}
+                              </span>
+                            </td>
+                            <td class="py-1 text-right tabular-nums">{{ formatAmount(line.calculatedAmount) }}</td>
+                            <td class="py-1 text-right tabular-nums">
+                              @if (line.countedAmount === null) {
+                                <span class="text-slate-400">non compté</span>
+                              } @else {
+                                {{ formatAmount(line.countedAmount) }}
+                              }
+                            </td>
+                            <td
+                              class="py-1 text-right tabular-nums"
+                              [class]="line.gap < 0 ? 'font-semibold text-red-700 dark:text-red-400' : line.gap > 0 ? 'font-semibold text-green-700 dark:text-green-400' : ''"
+                            >
+                              {{ line.countedAmount === null ? '—' : (line.gap > 0 ? '+ ' : '') + formatAmount(line.gap) }}
+                            </td>
+                            <td class="py-1 text-right font-semibold tabular-nums">{{ formatAmount(line.frozenAmount) }}</td>
+                          </tr>
+                        }
+                      </tbody>
+                    </table>
+                  </div>
+                </td>
+              </tr>
+            }
+          }
+        </tbody>
+      </table>
+    </div>
+    <p class="mt-2 text-xs text-slate-500">Seule la dernière clôture peut être rouverte.</p>
+  }
+}
+
+<p-dialog [(visible)]="confirmingReopen" [modal]="true" [style]="{ width: '30rem', maxWidth: '95vw' }" header="Rouvrir la dernière clôture ?">
+  @if (lastClosing(); as last) {
+    <div class="flex flex-col gap-3">
+      <p>
+        Les mouvements jusqu'au {{ formatDay(last.date) }} redeviennent modifiables.
+        @if (last.totalGap !== 0) {
+          L'ajustement de {{ formatAmount(last.totalGap) }} Ar est supprimé, et
+        } @else {
+          Les
+        }
+        soldes sont recalculés depuis la clôture précédente.
+      </p>
+      <p class="rounded-md bg-slate-50 p-2 text-xs text-slate-600 dark:bg-slate-700 dark:text-slate-200">
+        Les clôtures plus anciennes restent verrouillées.
+      </p>
+    </div>
+  }
+  <ng-template #footer>
+    <div class="flex justify-end gap-2">
+      <p-button label="Annuler" severity="contrast" (onClick)="confirmingReopen.set(false)" />
+      <p-button label="Rouvrir la clôture" icon="pi pi-undo" severity="danger" [loading]="reopening()" (onClick)="reopen()" />
+    </div>
+  </ng-template>
+</p-dialog>
+
+<mb-closing-dialog [(visible)]="showClosingDialog" [lastClosingDate]="lastClosing()?.date ?? null" (saved)="load()" />

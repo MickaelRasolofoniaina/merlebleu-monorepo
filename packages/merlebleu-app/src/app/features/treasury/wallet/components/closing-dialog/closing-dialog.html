@@ -1,0 +1,175 @@
+<p-dialog [(visible)]="visible" [modal]="true" [style]="{ width: '44rem', maxWidth: '95vw' }" header="Clôturer la caisse">
+  <div class="flex flex-col gap-4">
+    <p class="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-300">
+      <span [class]="step() === 'count' ? 'font-semibold text-slate-900 dark:text-white' : ''">1 Comptage</span>
+      <i class="pi pi-angle-right text-[0.6rem]"></i>
+      <span [class]="step() === 'confirm' ? 'font-semibold text-slate-900 dark:text-white' : ''">2 Confirmation</span>
+    </p>
+
+    @if (step() === 'count') {
+      <div class="flex flex-wrap items-end gap-4">
+        <div class="flex flex-col gap-1">
+          <label for="closingDate" class="font-semibold text-slate-900 dark:text-white">Date de clôture</label>
+          <p-datepicker
+            inputId="closingDate"
+            name="date"
+            [ngModel]="date()"
+            (ngModelChange)="date.set($event)"
+            [minDate]="minDate()"
+            [maxDate]="today"
+            [showOnFocus]="false"
+            dateFormat="dd/mm/yy"
+            [showIcon]="true"
+            appendTo="body"
+          />
+        </div>
+        <p class="min-w-56 flex-1 text-xs text-slate-500 dark:text-slate-300">
+          @if (lastClosingDate(); as last) {
+            Dernière clôture : {{ formatDay(last) }}.
+          } @else {
+            Aucune clôture pour le moment.
+          }
+          Les soldes sont calculés à la date choisie, pas à aujourd'hui.
+        </p>
+      </div>
+
+      @if (loadingPreview()) {
+        <p-skeleton height="12rem" borderRadius="0.75rem" />
+      } @else if (previewFailed() || !preview()) {
+        <p-message severity="error">Impossible de calculer les soldes pour cette date. Choisis une autre date.</p-message>
+      } @else {
+        @if (preview(); as data) {
+          <div class="flex flex-col gap-2" aria-label="Contrôles avant clôture">
+            @if (data.undefinedExpenseCount > 0) {
+              <div class="flex items-start gap-2 rounded-lg border border-amber-300 bg-amber-50 p-2 text-sm text-amber-900 dark:border-amber-500/40 dark:bg-amber-950 dark:text-amber-100">
+                <i class="pi pi-exclamation-triangle mt-1"></i>
+                <div>
+                  <p class="font-semibold">
+                    {{ data.undefinedExpenseCount }} dépense(s) sans portefeuille (− {{ formatAmount(data.undefinedExpenseAmount) }} Ar)
+                  </p>
+                  <p class="text-xs">Elles ne sont retirées d'aucun solde et seront verrouillées avec la période.</p>
+                </div>
+              </div>
+            }
+            @for (row of negativeRows(); track row.walletId) {
+              <div class="flex items-start gap-2 rounded-lg border border-red-300 bg-red-50 p-2 text-sm text-red-900 dark:border-red-500/40 dark:bg-red-950 dark:text-red-100">
+                <i class="pi pi-exclamation-triangle mt-1"></i>
+                <p>
+                  <span class="font-semibold">{{ row.walletName }} est à {{ formatAmount(row.calculatedAmount) }} Ar.</span>
+                  Une dépense a peut-être le mauvais portefeuille : vérifie avant de figer ce solde.
+                </p>
+              </div>
+            }
+            @if (data.undefinedExpenseCount === 0 && negativeRows().length === 0) {
+              <p class="flex items-center gap-2 rounded-lg border border-slate-200 p-2 text-sm text-slate-500 dark:border-slate-700 dark:text-slate-300">
+                <i class="pi pi-check"></i> Aucune anomalie détectée au {{ dateLabel() }}
+              </p>
+            }
+          </div>
+
+          <div class="overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-700">
+            <table class="w-full text-sm">
+              <thead class="bg-slate-50 text-left text-xs uppercase tracking-wide text-slate-500 dark:bg-slate-800 dark:text-slate-300">
+                <tr>
+                  <th class="p-2">Portefeuille</th>
+                  <th class="p-2 text-right">Solde calculé</th>
+                  <th class="p-2 text-right">Solde compté (Ar)</th>
+                  <th class="p-2 text-right">Écart</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (row of rows(); track row.walletId) {
+                  <tr class="border-t border-slate-100 dark:border-slate-700">
+                    <td class="p-2">
+                      <span class="flex items-center gap-2">
+                        <span class="inline-block h-2.5 w-2.5 rounded-full" [style.background]="row.walletColor"></span>{{ row.walletName }}
+                      </span>
+                    </td>
+                    <td class="p-2 text-right tabular-nums">{{ formatAmount(row.calculatedAmount) }}</td>
+                    <td class="p-2 text-right">
+                      <p-inputnumber
+                        [inputId]="'counted-' + row.walletId"
+                        [ariaLabel]="'Solde compté ' + row.walletName"
+                        [ngModel]="row.counted"
+                        (ngModelChange)="setCounted(row.walletId, $event)"
+                        [maxFractionDigits]="0"
+                        locale="fr-FR"
+                        placeholder="= calculé"
+                        inputStyleClass="w-36 text-right"
+                      />
+                    </td>
+                    <td
+                      class="p-2 text-right font-semibold tabular-nums"
+                      [class]="row.gap === null || row.gap === 0 ? 'text-slate-400' : row.gap < 0 ? 'text-red-700 dark:text-red-400' : 'text-green-700 dark:text-green-400'"
+                    >
+                      {{ row.gap === null ? '—' : row.gap > 0 ? '+ ' + formatAmount(row.gap) : formatAmount(row.gap) }}
+                    </td>
+                  </tr>
+                } @empty {
+                  <tr>
+                    <td colspan="4" class="p-4 text-center text-slate-500">Aucun portefeuille actif à clôturer.</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+          <p class="rounded-md bg-slate-50 p-2 text-xs text-slate-600 dark:bg-slate-700 dark:text-slate-200">
+            Laisse « Solde compté » vide pour figer le solde calculé. Un écart devient un mouvement « Ajustement » daté du {{ dateLabel() }}.
+          </p>
+        }
+      }
+    } @else {
+      <div class="overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-700">
+        <table class="w-full text-sm">
+          <thead class="bg-slate-50 text-left text-xs uppercase tracking-wide text-slate-500 dark:bg-slate-800 dark:text-slate-300">
+            <tr>
+              <th class="p-2">Portefeuille</th>
+              <th class="p-2 text-right">Solde figé</th>
+              <th class="p-2 text-right">Ajustement</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (row of rows(); track row.walletId) {
+              <tr class="border-t border-slate-100 dark:border-slate-700">
+                <td class="p-2">{{ row.walletName }}</td>
+                <td class="p-2 text-right font-semibold tabular-nums">{{ formatAmount(row.frozen) }}</td>
+                <td
+                  class="p-2 text-right tabular-nums"
+                  [class]="row.gap ? (row.gap < 0 ? 'font-semibold text-red-700 dark:text-red-400' : 'font-semibold text-green-700 dark:text-green-400') : 'text-slate-400'"
+                >
+                  {{ row.gap ? (row.gap > 0 ? '+ ' : '') + formatAmount(row.gap) : '—' }}
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+      <div class="flex items-baseline justify-between rounded-lg bg-slate-50 px-3 py-2 font-bold dark:bg-slate-700">
+        <span>Total figé</span>
+        <span class="tabular-nums">{{ formatAmount(totalFrozen()) }} Ar</span>
+      </div>
+      <div class="flex items-start gap-2 rounded-lg border border-amber-300 bg-amber-50 p-3 text-amber-900 dark:border-amber-500/40 dark:bg-amber-950 dark:text-amber-100">
+        <i class="pi pi-lock mt-1"></i>
+        <div>
+          <p class="font-semibold">Les mouvements jusqu'au {{ dateLabel() }} seront verrouillés.</p>
+          <p class="text-xs">
+            Plus aucune dépense, commande, virement ou remboursement ne pourra être créé ou modifié avec une date jusqu'au {{ dateLabel() }}. Tu pourras
+            rouvrir cette clôture tant qu'aucune autre n'est faite.
+          </p>
+        </div>
+      </div>
+    }
+  </div>
+
+  <ng-template #footer>
+    <div class="flex w-full flex-wrap justify-between gap-2">
+      @if (step() === 'count') {
+        <p-button label="Annuler" severity="contrast" (onClick)="visible.set(false)" />
+        <p-button label="Continuer" icon="pi pi-arrow-right" iconPos="right" [disabled]="!preview() || loadingPreview()" (onClick)="next()" />
+      } @else {
+        <p-button label="Retour" icon="pi pi-arrow-left" severity="secondary" [outlined]="true" (onClick)="back()" />
+        <p-button label="Confirmer la clôture" icon="pi pi-lock" severity="danger" [loading]="saving()" (onClick)="confirm()" />
+      }
+    </div>
+  </ng-template>
+</p-dialog>

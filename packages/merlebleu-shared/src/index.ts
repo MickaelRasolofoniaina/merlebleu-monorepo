@@ -29,6 +29,8 @@ export * from "./domain/shared/base";
 export * from "./domain/shared/pagination";
 export * from "./domain/shop/shop.dto";
 export * from "./domain/shop/shop";
+export * from "./domain/treasury/closing.dto";
+export * from "./domain/treasury/closing";
 export * from "./domain/treasury/movement.dto";
 export * from "./domain/treasury/movement";
 export * from "./domain/treasury/receipt.dto";

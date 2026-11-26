@@ -20,6 +20,8 @@ export interface Wallet extends PaymentMethod {
   /** Outflows of the current month (expenses and refunds). */
   monthOutflow: number;
   lastCashCount: WalletCashCount | null;
+  /** Balance frozen by the latest closing, null when there is none for this wallet. */
+  frozenAmount: number | null;
 }
 
 export interface WalletSummary {
@@ -28,6 +30,8 @@ export interface WalletSummary {
   totalBalance: number;
   /** Sum of the movements that have no wallet (expenses without a payment method). */
   undefinedBalance: number;
+  /** YYYY-MM-DD, date of the latest cash closing, null when the cash was never closed. */
+  lastClosingDate: string | null;
 }
 
 export interface CashCount {

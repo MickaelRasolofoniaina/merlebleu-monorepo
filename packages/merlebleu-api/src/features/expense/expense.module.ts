@@ -8,6 +8,7 @@ import { ExpenseCategoryService } from './category/expense-category.service';
 import { ExpenseController } from './expense.controller';
 import { ExpenseSchema } from './expense.entity';
 import { ExpenseService } from './expense.service';
+import { PeriodLockModule } from '../treasury/period-lock/period-lock.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { ExpenseService } from './expense.service';
       IngredientSchema,
       PaymentMethodSchema,
     ]),
+    PeriodLockModule,
   ],
   controllers: [ExpenseController, ExpenseCategoryController],
   providers: [ExpenseService, ExpenseCategoryService],

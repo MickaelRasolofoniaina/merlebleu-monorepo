@@ -11,6 +11,10 @@ export const TREASURY_ROUTES: Route[] = [
     loadComponent: () => import('./receipt/receipt').then((m) => m.ReceiptComponent),
   },
   {
+    path: 'closings',
+    loadComponent: () => import('./closing/closing-list').then((m) => m.ClosingListComponent),
+  },
+  {
     path: 'movements',
     loadComponent: () => import('./movement/movement').then((m) => m.MovementComponent),
   },
