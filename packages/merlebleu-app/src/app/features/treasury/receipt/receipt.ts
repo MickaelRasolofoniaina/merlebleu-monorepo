@@ -7,7 +7,7 @@ import { SelectButtonModule } from 'primeng/selectbutton';
 import { SkeletonModule } from 'primeng/skeleton';
 import { TableModule } from 'primeng/table';
 import { FormsModule } from '@angular/forms';
-import { finalize } from 'rxjs';
+import { finalize, EMPTY, catchError } from 'rxjs';
 import { ReceiptPeriod, ReceiptSummary, WalletSummary } from '@merlebleu/shared';
 import { StatCard } from '@shared/components/stat-card/stat-card';
 import { ThemeService } from '@shared/services/theme.service';
@@ -148,11 +148,16 @@ export class ReceiptComponent {
     this.failed.set(false);
     this.api
       .getReceipts({ period, date: formatDate(anchor) })
-      .pipe(finalize(() => this.loading.set(false)))
+      .pipe(
+        // the error itself is shown by httpErrorInterceptor, the page only needs to show its error state
+        catchError(() => {
+          this.failed.set(true);
+          return EMPTY;
+        }),
+        finalize(() => this.loading.set(false)),
+      )
       .subscribe({
         next: (summary) => this.summary.set(summary),
-        // the error itself is shown by httpErrorInterceptor
-        error: () => this.failed.set(true),
       });
   }
 }

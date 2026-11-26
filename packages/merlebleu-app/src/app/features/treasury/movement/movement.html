@@ -5,7 +5,7 @@
 
 <div class="mb-3 grid grid-cols-[repeat(auto-fit,minmax(180px,1fr))] gap-3 rounded-xl border border-slate-200 p-3 dark:border-slate-700">
   <div class="flex flex-col gap-1">
-    <label for="movementWallet" class="text-xs font-medium text-slate-500">Portefeuille</label>
+    <label for="movementWallet" class="text-xs font-medium text-slate-500 dark:text-white">Portefeuille</label>
     <p-select
       inputId="movementWallet"
       [options]="walletOptions()"
@@ -18,7 +18,7 @@
     />
   </div>
   <div class="flex flex-col gap-1">
-    <label for="movementType" class="text-xs font-medium text-slate-500">Type</label>
+    <label for="movementType" class="text-xs font-medium text-slate-500 dark:text-white">Type</label>
     <p-select
       inputId="movementType"
       [options]="typeOptions"
@@ -31,7 +31,7 @@
     />
   </div>
   <div class="flex flex-col gap-1">
-    <label for="movementRange" class="text-xs font-medium text-slate-500">Période</label>
+    <label for="movementRange" class="text-xs font-medium text-slate-500 dark:text-white">Période</label>
     <p-datepicker
       inputId="movementRange"
       selectionMode="range"
@@ -47,7 +47,7 @@
     />
   </div>
   <div class="flex flex-col gap-1">
-    <label for="movementSearch" class="text-xs font-medium text-slate-500">Recherche</label>
+    <label for="movementSearch" class="text-xs font-medium text-slate-500 dark:text-white">Recherche</label>
     <input
       id="movementSearch"
       type="text"

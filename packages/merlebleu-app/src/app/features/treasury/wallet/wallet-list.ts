@@ -4,7 +4,7 @@ import { ButtonModule } from 'primeng/button';
 import { MessageModule } from 'primeng/message';
 import { SkeletonModule } from 'primeng/skeleton';
 import { TagModule } from 'primeng/tag';
-import { finalize } from 'rxjs';
+import { finalize, EMPTY, catchError } from 'rxjs';
 import { Wallet, WalletSummary } from '@merlebleu/shared';
 import { CurrentUserService } from '@shared/services/current-user.service';
 import { formatUnitPrice } from '@shared/utils/number';
@@ -57,11 +57,16 @@ export class WalletListComponent {
     this.failed.set(false);
     this.api
       .getWallets()
-      .pipe(finalize(() => this.loading.set(false)))
+      .pipe(
+        // the error itself is shown by httpErrorInterceptor, the page only needs to show its error state
+        catchError(() => {
+          this.failed.set(true);
+          return EMPTY;
+        }),
+        finalize(() => this.loading.set(false)),
+      )
       .subscribe({
         next: (summary) => this.summary.set(summary),
-        // the error itself is shown by httpErrorInterceptor
-        error: () => this.failed.set(true),
       });
   }
 

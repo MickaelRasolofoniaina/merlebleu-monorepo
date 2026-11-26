@@ -8,7 +8,7 @@ import { MessageModule } from 'primeng/message';
 import { SelectModule } from 'primeng/select';
 import { TableModule, TableLazyLoadEvent } from 'primeng/table';
 import { TagModule } from 'primeng/tag';
-import { Subject, debounceTime, finalize } from 'rxjs';
+import { Subject, debounceTime, finalize, EMPTY, catchError } from 'rxjs';
 import { MovementPage, MovementType, Wallet } from '@merlebleu/shared';
 import { formatDate } from '@shared/utils/date';
 import { formatUnitPrice } from '@shared/utils/number';
@@ -134,11 +134,16 @@ export class MovementComponent {
     this.failed.set(false);
     this.api
       .listMovements({ ...this.query(), page: Math.floor(this.first() / PAGE_SIZE) + 1, limit: PAGE_SIZE })
-      .pipe(finalize(() => this.loading.set(false)))
+      .pipe(
+        // the error itself is shown by httpErrorInterceptor, the page only needs to show its error state
+        catchError(() => {
+          this.failed.set(true);
+          return EMPTY;
+        }),
+        finalize(() => this.loading.set(false)),
+      )
       .subscribe({
         next: (page) => this.page.set(page),
-        // the error itself is shown by httpErrorInterceptor
-        error: () => this.failed.set(true),
       });
   }
 }
