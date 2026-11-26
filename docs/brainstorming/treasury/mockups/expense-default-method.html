@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="fr"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Maquette Trésorerie · Dépenses : méthode par défaut</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"/>
+<style>body{font-family:Inter,system-ui,sans-serif;margin:0}</style></head>
+<body>
+<div class="relative flex min-h-[900px] bg-slate-100 text-sm text-slate-800" data-shell>
+  <div class="flex shrink-0">
+    <nav class="flex w-[68px] flex-col items-center gap-1.5 bg-slate-800 py-3">
+      <div class="mb-2.5 flex h-9 w-9 items-center justify-center rounded-[10px] bg-blue-500 text-base font-semibold text-white">M</div>
+      <div class="flex h-[54px] w-[54px] shrink-0 flex-col items-center justify-center gap-0.5 rounded-xl text-slate-300"><svg class="h-5 w-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="20" r="1"/><circle cx="18" cy="20" r="1"/><path d="M2 3h3l2.7 11.4a2 2 0 0 0 2 1.6h7.7a2 2 0 0 0 2-1.5L21 7H6"/></svg><span class="text-[9px] font-medium">Cmd</span></div><div class="flex h-[54px] w-[54px] shrink-0 flex-col items-center justify-center gap-0.5 rounded-xl text-slate-300"><svg class="h-5 w-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3v18h18"/><path d="M7 15v3M12 9v9M17 12v6"/></svg><span class="text-[9px] font-medium">Dash</span></div><div class="flex h-[54px] w-[54px] shrink-0 flex-col items-center justify-center gap-0.5 rounded-xl text-slate-300"><svg class="h-5 w-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="8" cy="8" r="5"/><path d="M16.5 9.5A5 5 0 1 1 9.5 16.5"/></svg><span class="text-[9px] font-medium">Dép.</span></div><div class="flex h-[54px] w-[54px] shrink-0 flex-col items-center justify-center gap-0.5 rounded-xl text-slate-300"><svg class="h-5 w-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 8l-9-5-9 5 9 5 9-5z"/><path d="M3 8v8l9 5 9-5V8"/></svg><span class="text-[9px] font-medium">Stock</span></div><div class="flex h-[54px] w-[54px] shrink-0 flex-col items-center justify-center gap-0.5 rounded-xl bg-slate-600 text-white"><svg class="h-5 w-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7a2 2 0 0 1 2-2h13v4"/><path d="M3 7v11a2 2 0 0 0 2 2h15V9H5a2 2 0 0 1-2-2z"/><circle cx="16.5" cy="14.5" r="1"/></svg><span class="text-[9px] font-medium">Tréso</span></div>
+      <div class="mt-auto flex h-[54px] w-[54px] items-center justify-center text-slate-300"><svg class="h-5 w-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg></div>
+      <div class="flex h-9 w-9 items-center justify-center rounded-full bg-slate-600 text-slate-200"><svg class="h-5 w-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg></div>
+    </nav>
+    <aside class="flex w-56 flex-col border-r border-slate-200 bg-white">
+      <div class="flex h-14 items-center bg-blue-500 px-4 font-semibold text-white">Trésorerie</div>
+      <div class="p-2.5"><div class="my-px flex items-center gap-2 rounded-lg px-2.5 py-2 text-sm font-medium text-slate-700"><svg class="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7a2 2 0 0 1 2-2h13v4"/><path d="M3 7v11a2 2 0 0 0 2 2h15V9H5a2 2 0 0 1-2-2z"/><circle cx="16.5" cy="14.5" r="1"/></svg><span>Portefeuilles</span></div><div class="my-px flex items-center gap-2 rounded-lg px-2.5 py-2 text-sm font-medium text-slate-700"><svg class="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3v18h18"/><path d="M7 15v3M12 9v9M17 12v6"/></svg><span>Recettes</span></div><div class="my-px flex items-center gap-2 rounded-lg px-2.5 py-2 text-sm font-medium bg-blue-50 text-blue-700"><svg class="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg><span>Mouvements</span></div></div>
+    </aside>
+  </div>
+  <div class="flex min-w-0 flex-1 flex-col">
+    <header class="flex h-14 shrink-0 items-center justify-between bg-slate-800 px-5 shadow">
+      <h1 class="m-0 text-lg font-semibold text-white">GESTION PATISSERIE MERLEBLEU</h1>
+      <span class="rounded-full bg-slate-700 px-3 py-1 text-xs font-medium text-slate-200" data-role-badge>Connecté : Admin</span>
+    </header>
+    <main class="flex-1 p-4"><div class="min-w-0 rounded-xl bg-white px-4 py-3">
+<div data-screen="expense-default-method">
+  <h2 class="mb-1 text-2xl font-bold">Méthode de paiement des dépenses</h2>
+  <p class="mb-4 text-slate-500">Trois écrans existants modifiés, présentés ensemble.</p>
+  <div class="grid gap-4 xl:grid-cols-2"><div class="flex flex-col gap-4"><section class="flex flex-col gap-3 rounded-xl border border-slate-200 p-4"><div><h3 class="font-semibold">Catégorie de dépense</h3><p class="text-xs text-slate-500">Page Dépenses › Catégories (formulaire existant, un champ ajouté)</p></div><label class="flex flex-col gap-1 text-xs font-medium text-slate-600">Libellé<input type="text" value="Emballages" class="rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-800 "/></label>
+<label class="flex flex-col gap-1 text-xs font-medium text-slate-600">Méthode de paiement par défaut<select class="rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-800 "><option>Espèces</option><option>MVola</option><option>Orange Money</option><option>Banque BNI</option><option>Aucune (à choisir à chaque saisie)</option></select><span class="font-normal text-slate-500">Utilisée pour les cellules de la grille, modifiable cellule par cellule.</span></label>
+<div class="flex justify-end gap-2"><button type="button" class="inline-flex items-center gap-1.5 rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 ">Annuler</button><button type="button" class="inline-flex items-center gap-1.5 rounded-md bg-blue-500 px-3 py-2 text-sm font-medium text-white hover:bg-blue-600">Enregistrer</button></div></section><section class="flex flex-col gap-3 rounded-xl border border-slate-200 p-4"><div><h3 class="font-semibold">Ingrédient</h3><p class="text-xs text-slate-500">Page Stock › Ingrédients (formulaire existant, un champ ajouté)</p></div><label class="flex flex-col gap-1 text-xs font-medium text-slate-600">Nom<input type="text" value="Farine T55" class="rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-800 "/></label>
+<label class="flex flex-col gap-1 text-xs font-medium text-slate-600">Méthode de paiement par défaut<select class="rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-800 "><option>Espèces</option><option>MVola</option><option>Orange Money</option><option>Banque BNI</option><option>Aucune (à choisir à chaque saisie)</option></select><span class="font-normal text-slate-500">Utilisée pour les achats saisis dans la grille.</span></label>
+<div class="flex justify-end gap-2"><button type="button" class="inline-flex items-center gap-1.5 rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 ">Annuler</button><button type="button" class="inline-flex items-center gap-1.5 rounded-md bg-blue-500 px-3 py-2 text-sm font-medium text-white hover:bg-blue-600">Enregistrer</button></div></section></div><section class="flex flex-col gap-3 rounded-xl border border-slate-200 p-4"><div><h3 class="font-semibold">Grille des dépenses</h3><p class="text-xs text-slate-500">Page Dépenses › Grille : chaque cellule affiche son portefeuille et permet de le changer</p></div><div class="overflow-hidden rounded-lg border border-slate-200 text-sm">
+      <div class="flex items-center justify-between bg-slate-50 px-3 py-2 text-xs font-semibold uppercase tracking-wider text-slate-500"><span class="w-40">Désignation</span><span>Jour</span><span class="w-24 text-right">Montant</span><span class="w-36 text-right">Payé avec</span></div>
+      <div class="flex items-center justify-between border-t border-slate-100 px-3 py-2"><span class="w-40 font-medium">Farine T55</span><span class="tabular-nums text-slate-500">26/11</span><span class="w-24 text-right font-semibold tabular-nums">45 000</span><span class="flex w-36 items-center justify-end gap-1.5 text-xs text-slate-600"><span class="inline-block h-2.5 w-2.5 rounded-full" style="background:#16a34a"></span>Espèces</span></div>
+      <div class="flex items-center justify-between border-t border-slate-100 px-3 py-2"><span class="w-40 font-medium">Œufs</span><span class="tabular-nums text-slate-500">23/11</span><span class="w-24 text-right font-semibold tabular-nums">32 000</span><span class="flex w-36 items-center justify-end gap-1.5 text-xs text-slate-600"><span class="inline-block h-2.5 w-2.5 rounded-full" style="background:#16a34a"></span>Espèces</span></div>
+      <div class="flex items-center justify-between border-t border-slate-100 px-3 py-2"><span class="w-40 font-medium">Emballages</span><span class="tabular-nums text-slate-500">22/11</span><span class="w-24 text-right font-semibold tabular-nums">18 500</span><span class="flex w-36 items-center justify-end gap-1.5 text-xs text-slate-600"><span class="inline-block h-2.5 w-2.5 rounded-full" style="background:#f59e0b"></span>MVola</span></div>
+      <div class="flex items-center justify-between border-t border-slate-100 px-3 py-2"><span class="w-40 font-medium">Gaz</span><span class="tabular-nums text-slate-500">20/11</span><span class="w-24 text-right font-semibold tabular-nums">12 000</span><span class="flex w-36 items-center justify-end gap-1.5 text-xs text-amber-700"><svg class="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.3 3.9L1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4M12 17h.01"/></svg>À définir</span></div>
+    </div>
+    <div class="relative mt-1 w-72 self-end rounded-xl border border-slate-200 bg-white p-3 shadow-lg">
+      <p class="mb-2 text-xs font-semibold text-slate-700">Cellule · Gaz · 20/11</p>
+      <label class="flex flex-col gap-1 text-xs font-medium text-slate-600">Montant (Ar)<input type="text" value="12 000" class="rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-800 text-right tabular-nums"/></label>
+      <div class="mt-2"><label class="flex flex-col gap-1 text-xs font-medium text-slate-600">Payé avec<select class="rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-800 "><option>Choisir un portefeuille...</option><option>Espèces</option><option>MVola</option><option>Orange Money</option><option>Banque BNI</option></select><span class="font-normal text-slate-500">Aucune méthode par défaut pour « Gaz ».</span></label></div>
+      <div class="mt-3 flex justify-end gap-2"><button type="button" class="inline-flex items-center gap-1.5 rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 !px-2 !py-1">Annuler</button><button type="button" class="inline-flex items-center gap-1.5 rounded-md bg-blue-500 px-3 py-2 text-sm font-medium text-white hover:bg-blue-600">Valider</button></div>
+    </div>
+    <p class="flex items-start gap-2 rounded-md bg-amber-50 p-2 text-xs text-amber-900"><svg class="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.3 3.9L1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4M12 17h.01"/></svg>Une dépense sans portefeuille est rangée dans « Non défini » et signalée dans les mouvements jusqu'à correction.</p></section></div>
+</div></div></main>
+  </div>
+</div>
+<script>function statesInit(root) {
+  root.querySelectorAll('[data-states]').forEach((bar) => {
+    bar.querySelectorAll('[data-state]').forEach((b) =>
+      b.addEventListener('click', () => {
+        bar.querySelectorAll('[data-state]').forEach((x) => {
+          const on = x === b;
+          x.className = 'rounded-full border px-3 py-1 text-xs font-medium ' + (on ? 'border-blue-500 bg-blue-50 text-blue-700' : 'border-slate-300 bg-white text-slate-600');
+        });
+        root.querySelectorAll('[data-state-panel]').forEach((p) => (p.hidden = p.dataset.statePanel !== b.dataset.state));
+      }),
+    );
+  });
+}
+function receiptsInit(root) {
+  const fmt = (n) => n.toLocaleString('fr-FR').replace(/[\u202f\u00a0]/g, ' ');
+  const D = {
+    day: {
+      label: 'Jeudi 26 novembre 2026', chartTitle: 'Entrées du jour par commande',
+      kpi: [330000, 30000, 118000, 182000],
+      rows: [['Espèces', '#16a34a', 230000, 0, 118000], ['MVola', '#f59e0b', 60000, 30000, 0], ['Orange Money', '#ea580c', 40000, 0, 0], ['Banque BNI', '#2563eb', 0, 0, 0]],
+      bars: [['#1047 Andry', 145], ['#1049 Hery', 85], ['#1052 Rakoto', 60], ['#1053 Naly', 40], ['Remb. #1038', -30]], unit: 'k',
+    },
+    month: {
+      label: 'Novembre 2026', chartTitle: 'Recettes nettes par jour (en milliers d\'Ar)',
+      kpi: [7680000, 30000, 2615000, 5035000],
+      rows: [['Espèces', '#16a34a', 3120000, 0, 1480000], ['MVola', '#f59e0b', 1450000, 30000, 390000], ['Orange Money', '#ea580c', 310000, 0, 355000], ['Banque BNI', '#2563eb', 2800000, 0, 390000]],
+      bars: [240, 310, 0, 280, 350, 420, 190, 260, 330, 290, 380, 0, 310, 270, 340, 410, 230, 300, 360, 0, 320, 290, 450, 380, 330, 300].map((v, i) => [String(i + 1), v]), unit: 'k',
+    },
+    year: {
+      label: 'Année 2026', chartTitle: 'Recettes nettes par mois (en millions d\'Ar)',
+      kpi: [70900000, 330000, 27500000, 43070000],
+      rows: [['Espèces', '#16a34a', 31400000, 120000, 14200000], ['MVola', '#f59e0b', 14900000, 210000, 3900000], ['Orange Money', '#ea580c', 3600000, 0, 3100000], ['Banque BNI', '#2563eb', 21000000, 0, 6300000]],
+      bars: [['Jan', 5.5], ['Fév', 5.2], ['Mar', 6.0], ['Avr', 6.3], ['Mai', 6.7], ['Jun', 6.1], ['Jul', 6.5], ['Aoû', 6.4], ['Sep', 6.9], ['Oct', 7.3], ['Nov', 7.65], ['Déc', 0]], unit: 'M',
+    },
+  };
+  const chart = (bars, unit) => {
+    const w = 700, h = 190, padL = 36, padB = 24, padT = 8;
+    const vals = bars.map((b) => b[1]);
+    const max = Math.max(...vals, 1), min = Math.min(...vals, 0);
+    const span = max - min || 1;
+    const y = (v) => padT + (h - padT - padB) * (1 - (v - min) / span);
+    const bw = (w - padL) / bars.length;
+    const ticks = [min, min + span / 2, max];
+    let s = `<svg viewBox="0 0 ${w} ${h}" class="h-full w-full" role="img" aria-label="Graphique des recettes">`;
+    ticks.forEach((t) => {
+      s += `<line x1="${padL}" x2="${w}" y1="${y(t)}" y2="${y(t)}" stroke="#e2e8f0"/><text x="${padL - 6}" y="${y(t) + 3}" text-anchor="end" font-size="9" fill="#64748b">${Math.round(t * 10) / 10}${unit === 'M' ? '' : ''}</text>`;
+    });
+    bars.forEach((b, i) => {
+      const v = b[1];
+      const x = padL + i * bw + bw * 0.18;
+      const y0 = y(0), y1 = y(v);
+      s += `<rect x="${x}" y="${Math.min(y0, y1)}" width="${bw * 0.64}" height="${Math.max(Math.abs(y0 - y1), v === 0 ? 0 : 1)}" rx="2" fill="${v < 0 ? '#ef4444' : '#3b82f6'}"/>`;
+      if (bars.length <= 12 || i % 2 === 0) s += `<text x="${x + bw * 0.32}" y="${h - 8}" text-anchor="middle" font-size="9" fill="#64748b">${b[0]}</text>`;
+    });
+    return s + '</svg>';
+  };
+  const render = (p) => {
+    const d = D[p];
+    root.querySelectorAll('[data-period]').forEach((b) => {
+      const on = b.dataset.period === p;
+      b.className = b.className.replace(/ ?(bg-blue-500 text-white|bg-white text-slate-700)/g, '') + (on ? ' bg-blue-500 text-white' : ' bg-white text-slate-700');
+    });
+    root.querySelector('[data-period-label]').textContent = d.label;
+    root.querySelector('[data-chart-title]').textContent = d.chartTitle;
+    const k = [['Entrées', d.kpi[0], 'text-green-700', '+'], ['Remboursements', d.kpi[1], 'text-orange-700', '−'], ['Sorties (dépenses)', d.kpi[2], 'text-red-700', '−'], ['Net de la période', d.kpi[3], 'text-slate-900', '']];
+    root.querySelector('[data-kpis]').innerHTML = k
+      .map(([l, v, c, sg]) => `<div class="rounded-xl border border-slate-200 p-3"><p class="text-xs text-slate-500">${l}</p><p class="mt-1 text-2xl font-bold tabular-nums ${c}">${sg} ${fmt(v)} <span class="text-sm font-semibold text-slate-500">Ar</span></p></div>`)
+      .join('');
+    root.querySelector('[data-chart]').innerHTML = chart(d.bars, d.unit);
+    let tIn = 0, tRef = 0, tOut = 0;
+    root.querySelector('[data-rows]').innerHTML = d.rows
+      .map(([n, c, i, r, o]) => {
+        tIn += i; tRef += r; tOut += o;
+        const net = i - r - o;
+        const z = (v) => (v ? fmt(v) : '<span class="text-slate-400">—</span>');
+        return `<tr class="border-t border-slate-100"><td class="px-3 py-2"><span class="flex items-center gap-2"><span class="inline-block h-2.5 w-2.5 rounded-full" style="background:${c}"></span>${n}</span></td><td class="px-3 py-2 text-right tabular-nums">${z(i)}</td><td class="px-3 py-2 text-right tabular-nums">${z(r)}</td><td class="px-3 py-2 text-right tabular-nums">${z(o)}</td><td class="px-3 py-2 text-right font-semibold tabular-nums ${net < 0 ? 'text-red-700' : ''}">${net ? fmt(net) : '<span class="text-slate-400">—</span>'}</td></tr>`;
+      })
+      .join('');
+    root.querySelector('[data-foot]').innerHTML = `<tr><td class="px-3 py-2 font-bold">Total</td><td class="px-3 py-2 text-right font-bold tabular-nums">${fmt(tIn)}</td><td class="px-3 py-2 text-right font-bold tabular-nums">${fmt(tRef)}</td><td class="px-3 py-2 text-right font-bold tabular-nums">${fmt(tOut)}</td><td class="px-3 py-2 text-right font-bold tabular-nums">${fmt(tIn - tRef - tOut)}</td></tr>`;
+  };
+  root.querySelectorAll('[data-period]').forEach((b) => b.addEventListener('click', () => render(b.dataset.period)));
+  render('month');
+}
+function movementsInit(root) {
+  root.querySelectorAll('[data-role]').forEach((b) =>
+    b.addEventListener('click', () => {
+      const cashier = b.dataset.role === 'Caissier';
+      root.querySelectorAll('[data-role]').forEach((x) => {
+        const on = x === b;
+        x.className = 'px-3 py-2 font-medium ' + (on ? 'bg-blue-500 text-white' : 'bg-white text-slate-700');
+      });
+      root.querySelector('[data-role-note]').classList.toggle('hidden', !cashier);
+      root.querySelector('[data-role-note]').classList.toggle('flex', cashier);
+      root.querySelectorAll('[data-kind="expense"] [data-label]').forEach((l) => {
+        l.textContent = cashier ? 'Détail réservé' : l.dataset.full;
+        l.classList.toggle('italic', cashier);
+        l.classList.toggle('text-slate-400', cashier);
+      });
+    }),
+  );
+}
+</script></body></html>
