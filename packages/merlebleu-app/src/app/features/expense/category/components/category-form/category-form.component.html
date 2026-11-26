@@ -29,4 +29,22 @@
       appendTo="body"
     />
   </div>
+
+  <div class="flex flex-col gap-1">
+    <label for="categoryPayment" class="font-semibold text-slate-900 dark:text-white">Méthode de paiement par défaut</label>
+    <p-select
+      inputId="categoryPayment"
+      [options]="paymentMethods()"
+      optionLabel="name"
+      optionValue="id"
+      [ngModel]="defaultPaymentMethodId()"
+      (ngModelChange)="defaultPaymentMethodId.set($event)"
+      name="defaultPaymentMethod"
+      placeholder="Aucune (à choisir à chaque saisie)"
+      [showClear]="true"
+      fluid
+      appendTo="body"
+    />
+    <small class="text-slate-500">Utilisée pour les cases de la grille, modifiable à chaque saisie.</small>
+  </div>
 </form>

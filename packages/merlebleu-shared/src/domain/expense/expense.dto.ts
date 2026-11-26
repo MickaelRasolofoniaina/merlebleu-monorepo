@@ -29,6 +29,8 @@ export const setExpenseCellSchema = z
       .number("Le montant est requis")
       .int("Le montant doit être un nombre entier")
       .min(0, "Le montant doit être supérieur ou égal à 0"),
+    /** Overrides the default wallet of the category or ingredient. */
+    paymentMethodId: z.uuid().optional(),
   })
   .refine((value) => Boolean(value.categoryId) !== Boolean(value.ingredientId), {
     message: "Indiquez soit une catégorie, soit un ingrédient",

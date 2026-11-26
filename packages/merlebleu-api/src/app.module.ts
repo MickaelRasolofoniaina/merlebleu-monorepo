@@ -10,6 +10,7 @@ import { IngredientModule } from './features/ingredient/ingredient.module';
 import { ShopModule } from './features/shop/shop.module';
 import { NotificationModule } from './features/notification/notification.module';
 import { ExpenseModule } from './features/expense/expense.module';
+import { TreasuryModule } from './features/treasury/treasury.module';
 
 @Module({
   imports: [
@@ -37,6 +38,7 @@ import { ExpenseModule } from './features/expense/expense.module';
     ShopModule,
     NotificationModule,
     ExpenseModule,
+    TreasuryModule,
   ],
   controllers: [AppController],
   providers: [AppService],

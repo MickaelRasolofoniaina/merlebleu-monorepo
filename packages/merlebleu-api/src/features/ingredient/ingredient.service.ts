@@ -41,6 +41,9 @@ export class IngredientService {
     const entity = this.repo.create({
       label: dto.label,
       unit: { id: dto.unitId },
+      defaultPaymentMethod: dto.defaultPaymentMethodId
+        ? { id: dto.defaultPaymentMethodId }
+        : null,
     });
     return this.repo.save(entity);
   }
@@ -52,6 +55,11 @@ export class IngredientService {
     await this.repo.update(id, {
       label: dto.label,
       unit: { id: dto.unitId },
+      ...(dto.defaultPaymentMethodId !== undefined && {
+        defaultPaymentMethod: dto.defaultPaymentMethodId
+          ? { id: dto.defaultPaymentMethodId }
+          : null,
+      }),
     });
     const updated = await this.repo.findOneBy({ id });
     if (!updated)

@@ -87,8 +87,9 @@ export class ExpenseStoreService {
   /**
    * Sets the total of one cell of the grid for a day of the selected month. An amount of 0 clears the cell.
    * The grid updates immediately; the month is reloaded if the server refuses the change.
+   * `paymentMethodId` overrides the default wallet of the category or ingredient.
    */
-  setCell(target: CellTarget, day: number, amount: number): void {
+  setCell(target: CellTarget, day: number, amount: number, paymentMethodId?: string): void {
     const date = toIsoDate(this.year(), this.month(), day);
     const isSameCell = (e: Expense) =>
       e.nature === ExpenseNature.VARIABLE &&
@@ -102,7 +103,7 @@ export class ExpenseStoreService {
     }
 
     this.api
-      .setCell({ date, amount, ...target })
+      .setCell({ date, amount, ...target, ...(paymentMethodId ? { paymentMethodId } : {}) })
       .pipe(
         catchError(() => {
           this.reloadMonth();

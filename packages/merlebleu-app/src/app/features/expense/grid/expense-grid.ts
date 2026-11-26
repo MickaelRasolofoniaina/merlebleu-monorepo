@@ -3,7 +3,7 @@ import { FormsModule } from '@angular/forms';
 import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
 import { SelectModule } from 'primeng/select';
-import { ExpenseSection } from '@merlebleu/shared';
+import { ExpenseSection, PaymentMethod } from '@merlebleu/shared';
 import { formatUnitPrice } from '@shared/utils/number';
 import { StatCard } from '@shared/components/stat-card/stat-card';
 import { MonthSwitcherComponent } from '../components/month-switcher/month-switcher';
@@ -15,6 +15,8 @@ interface GridRow {
   key: string;
   target: CellTarget;
   label: string;
+  /** Wallet used by default for this row, null when none is defined. */
+  defaultWallet: PaymentMethod | null;
   amounts: Map<number, number>;
   total: number;
 }
@@ -62,6 +64,13 @@ export class ExpenseGridComponent {
   protected readonly search = signal('');
 
   protected readonly dayFilter = signal<number | null>(null);
+
+  /** Wallet used for the next entries. Null keeps the default wallet of each row. */
+  protected readonly payWith = signal<string | null>(null);
+  protected readonly payWithOptions = computed(() => [
+    { id: null as string | null, name: 'Portefeuille par défaut de la ligne' },
+    ...this.store.paymentMethods(),
+  ]);
 
   private readonly monthDays = computed(() =>
     Array.from({ length: this.store.daysInMonth() }, (_, i) => i + 1),
@@ -288,7 +297,7 @@ export class ExpenseGridComponent {
     const amount = Number(this.draft()) || 0;
     const row = this.flatRows().find((r) => r.key === cell.rowKey);
     if (row && amount !== (row.amounts.get(cell.day) ?? 0)) {
-      this.store.setCell(row.target, cell.day, amount);
+      this.store.setCell(row.target, cell.day, amount, this.payWith() ?? undefined);
     }
   }
 
@@ -317,7 +326,7 @@ export class ExpenseGridComponent {
     const index = rows.findIndex((row) => row.key === rowKey);
     const amount = index > 0 ? rows[index - 1].amounts.get(day) : undefined;
     if (amount) {
-      this.store.setCell(rows[index].target, day, amount);
+      this.store.setCell(rows[index].target, day, amount, this.payWith() ?? undefined);
     }
   }
 
@@ -383,6 +392,7 @@ export class ExpenseGridComponent {
           key: this.rowKeyOf(undefined, ingredient.id),
           target: { ingredientId: ingredient.id },
           label: ingredient.label,
+          defaultWallet: ingredient.defaultPaymentMethod ?? null,
         })),
       );
     }
@@ -394,6 +404,7 @@ export class ExpenseGridComponent {
           key: this.rowKeyOf(category.id),
           target: { categoryId: category.id },
           label: category.label,
+          defaultWallet: category.defaultPaymentMethod ?? null,
         })),
     );
   }

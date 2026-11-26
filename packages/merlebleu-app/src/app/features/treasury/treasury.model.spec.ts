@@ -1,0 +1,42 @@
+import { MovementType } from '@merlebleu/shared';
+import {
+  MOVEMENT_TYPE_OPTIONS,
+  formatDay,
+  formatSigned,
+  getMovementTypeLabel,
+  getMovementTypeSeverity,
+} from './treasury.model';
+
+describe('treasury model', () => {
+  it('formats an ISO day as dd/mm/yyyy', () => {
+    expect(formatDay('2026-11-26')).toBe('26/11/2026');
+  });
+
+  it('signs an amount with a plus or a real minus sign', () => {
+    const format = (value: number) => String(value);
+
+    expect(formatSigned(500, format)).toBe('+ 500');
+    expect(formatSigned(-500, format)).toBe('− 500');
+  });
+
+  it('labels both transfer directions the same way', () => {
+    expect(getMovementTypeLabel(MovementType.TRANSFER_IN)).toBe('Virement');
+    expect(getMovementTypeLabel(MovementType.TRANSFER_OUT)).toBe('Virement');
+  });
+
+  it('colors incomes in green and outflows in red', () => {
+    expect(getMovementTypeSeverity(MovementType.DEPOSIT)).toBe('success');
+    expect(getMovementTypeSeverity(MovementType.BALANCE)).toBe('success');
+    expect(getMovementTypeSeverity(MovementType.EXPENSE)).toBe('danger');
+    expect(getMovementTypeSeverity(MovementType.REFUND)).toBe('warn');
+  });
+
+  it('offers every movement type in the filter, plus "all types"', () => {
+    const values = MOVEMENT_TYPE_OPTIONS.map((option) => option.value);
+
+    expect(values[0]).toBeNull();
+    for (const type of Object.values(MovementType)) {
+      expect(values).toContain(type);
+    }
+  });
+});

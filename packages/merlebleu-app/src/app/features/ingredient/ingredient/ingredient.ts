@@ -110,6 +110,7 @@ export class IngredientListComponent implements OnInit {
     return {
       label: ingredient.label,
       unitId: ingredient.unit.id,
+      defaultPaymentMethodId: ingredient.defaultPaymentMethod?.id ?? null,
     };
   }
 

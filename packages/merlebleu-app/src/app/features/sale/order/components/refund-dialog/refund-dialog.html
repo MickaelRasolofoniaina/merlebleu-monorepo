@@ -1,0 +1,84 @@
+<p-dialog [(visible)]="visible" [modal]="true" [style]="{ width: '30rem', maxWidth: '95vw' }" header="Rembourser l'acompte">
+  @if (order(); as order) {
+    <form id="refund-form" (submit)="$event.preventDefault(); save()" class="flex flex-col gap-4">
+      <div class="rounded-lg bg-slate-50 p-3 text-xs dark:bg-slate-700">
+        <p class="font-semibold text-slate-700 dark:text-slate-100">{{ order.customerName }}</p>
+        <p class="text-slate-600 dark:text-slate-200">
+          Acompte reçu : {{ formatAmount(deposit()) }} Ar@if (order.paymentMethod) { en {{ order.paymentMethod.name }} }
+        </p>
+      </div>
+
+      <div class="grid grid-cols-2 gap-3">
+        <div class="flex flex-col gap-1">
+          <label for="refundAmount" class="font-semibold text-slate-900 dark:text-white">Montant (Ar)</label>
+          <p-inputnumber
+            inputId="refundAmount"
+            name="amount"
+            [ngModel]="amount()"
+            (ngModelChange)="amount.set($event)"
+            [min]="0"
+            [max]="deposit()"
+            [maxFractionDigits]="0"
+            locale="fr-FR"
+            fluid
+          />
+          <small class="text-slate-500">Maximum : {{ formatAmount(deposit()) }} Ar</small>
+          @if (error('amount')) {
+            <small class="text-red-500">{{ error('amount') }}</small>
+          }
+        </div>
+        <div class="flex flex-col gap-1">
+          <label for="refundDate" class="font-semibold text-slate-900 dark:text-white">Date</label>
+          <p-datepicker
+            inputId="refundDate"
+            name="date"
+            [ngModel]="date()"
+            (ngModelChange)="date.set($event)"
+            dateFormat="dd/mm/yy"
+            [showIcon]="true"
+            fluid
+            appendTo="body"
+          />
+        </div>
+      </div>
+
+      <div class="flex flex-col gap-1">
+        <label for="refundWallet" class="font-semibold text-slate-900 dark:text-white">Rembourser depuis</label>
+        <p-select
+          inputId="refundWallet"
+          name="wallet"
+          [options]="wallets()"
+          optionLabel="name"
+          optionValue="id"
+          [ngModel]="walletId()"
+          (ngModelChange)="walletId.set($event)"
+          placeholder="Choisir un portefeuille"
+          fluid
+          appendTo="body"
+        />
+        @if (error('walletId')) {
+          <small class="text-red-500">{{ error('walletId') }}</small>
+        }
+      </div>
+
+      <div class="flex flex-col gap-1">
+        <label for="refundReason" class="font-semibold text-slate-900 dark:text-white">Motif (facultatif)</label>
+        <input id="refundReason" name="reason" type="text" pInputText [ngModel]="reason()" (ngModelChange)="reason.set($event)" class="w-full" />
+      </div>
+
+      @if (preview(); as p) {
+        <div class="rounded-lg bg-slate-50 p-3 text-xs dark:bg-slate-700">
+          <div class="flex justify-between"><span>{{ p.name }} avant</span><span class="tabular-nums">{{ formatAmount(p.before) }} Ar</span></div>
+          <div class="flex justify-between font-semibold"><span>{{ p.name }} après</span><span class="tabular-nums">{{ formatAmount(p.after) }} Ar</span></div>
+        </div>
+      }
+    </form>
+  }
+
+  <ng-template #footer>
+    <div class="flex justify-end gap-2">
+      <p-button label="Annuler" severity="contrast" (onClick)="visible.set(false)" />
+      <p-button label="Confirmer le remboursement" icon="pi pi-undo" (onClick)="save()" [loading]="saving()" />
+    </div>
+  </ng-template>
+</p-dialog>

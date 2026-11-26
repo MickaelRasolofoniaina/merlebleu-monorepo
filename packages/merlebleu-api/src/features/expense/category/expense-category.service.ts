@@ -29,7 +29,15 @@ export class ExpenseCategoryService {
 
   async add(dto: CreateExpenseCategoryDto): Promise<ExpenseCategoryEntity> {
     await this.assertLabelIsFree(dto.label, dto.section);
-    return this.categoryRepository.save(this.categoryRepository.create(dto));
+    const { defaultPaymentMethodId, ...data } = dto;
+    return this.categoryRepository.save(
+      this.categoryRepository.create({
+        ...data,
+        defaultPaymentMethod: defaultPaymentMethodId
+          ? { id: defaultPaymentMethodId }
+          : null,
+      }),
+    );
   }
 
   async update(
@@ -41,7 +49,15 @@ export class ExpenseCategoryService {
       throw new NotFoundException(`Expense category with id ${id} not found`);
     }
     await this.assertLabelIsFree(dto.label, dto.section, id);
-    Object.assign(category, dto);
+    const { defaultPaymentMethodId, ...data } = dto;
+    Object.assign(category, data);
+    if (defaultPaymentMethodId !== undefined) {
+      category.defaultPaymentMethod = defaultPaymentMethodId
+        ? ({
+            id: defaultPaymentMethodId,
+          } as ExpenseCategoryEntity['defaultPaymentMethod'])
+        : null;
+    }
     return this.categoryRepository.save(category);
   }
 

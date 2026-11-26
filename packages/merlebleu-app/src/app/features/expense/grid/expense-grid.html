@@ -56,7 +56,16 @@
     (ngModelChange)="search.set($event)"
     class="w-64"
   />
-  <span class="text-sm text-slate-500">Toutes les dépenses sont payées en espèces.</span>
+  <p-select
+    [options]="payWithOptions()"
+    optionLabel="name"
+    optionValue="id"
+    [ngModel]="payWith()"
+    (ngModelChange)="payWith.set($event)"
+    class="w-72"
+    aria-label="Portefeuille utilisé pour la saisie"
+  />
+  <span class="text-sm text-slate-500">Payé avec ce portefeuille pour les prochaines saisies.</span>
 </div>
 
 <!-- The container scrolls in both directions so the header row can stick to its top edge. -->
@@ -102,6 +111,11 @@
               "
             >
               {{ row.label }}
+              @if (row.defaultWallet; as wallet) {
+                <span class="ml-1 inline-block h-2 w-2 rounded-full align-middle" [style.background]="wallet.color" [attr.title]="'Payé par défaut avec ' + wallet.name"></span>
+              } @else {
+                <i class="pi pi-exclamation-triangle ml-1 text-xs text-amber-500" title="Aucun portefeuille par défaut"></i>
+              }
             </td>
             @for (column of dayColumns(); track column.day) {
               <td

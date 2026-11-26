@@ -7,6 +7,7 @@ export const createExpenseCategorySchema = z.object({
     [ExpenseSection.CURRENT, ExpenseSection.OTHER],
     "La section doit être valide",
   ),
+  defaultPaymentMethodId: z.uuid().nullable().optional(),
 });
 
 export const updateExpenseCategorySchema = createExpenseCategorySchema;

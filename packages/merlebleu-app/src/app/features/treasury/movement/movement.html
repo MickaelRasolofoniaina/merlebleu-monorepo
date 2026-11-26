@@ -1,0 +1,142 @@
+<div class="mb-3 flex flex-wrap items-center justify-between gap-3">
+  <h2 class="text-2xl font-bold">Mouvements</h2>
+  <p-button label="Exporter en CSV" icon="pi pi-download" severity="secondary" [outlined]="true" [loading]="exporting()" (onClick)="exportCsv()" />
+</div>
+
+<div class="mb-3 grid grid-cols-[repeat(auto-fit,minmax(180px,1fr))] gap-3 rounded-xl border border-slate-200 p-3 dark:border-slate-700">
+  <div class="flex flex-col gap-1">
+    <label for="movementWallet" class="text-xs font-medium text-slate-500 dark:text-white">Portefeuille</label>
+    <p-select
+      inputId="movementWallet"
+      [options]="walletOptions()"
+      optionLabel="label"
+      optionValue="value"
+      [ngModel]="walletId()"
+      (ngModelChange)="walletId.set($event); applyFilters()"
+      fluid
+      appendTo="body"
+    />
+  </div>
+  <div class="flex flex-col gap-1">
+    <label for="movementType" class="text-xs font-medium text-slate-500 dark:text-white">Type</label>
+    <p-select
+      inputId="movementType"
+      [options]="typeOptions"
+      optionLabel="label"
+      optionValue="value"
+      [ngModel]="type()"
+      (ngModelChange)="type.set($event); applyFilters()"
+      fluid
+      appendTo="body"
+    />
+  </div>
+  <div class="flex flex-col gap-1">
+    <label for="movementRange" class="text-xs font-medium text-slate-500 dark:text-white">Période</label>
+    <p-datepicker
+      inputId="movementRange"
+      selectionMode="range"
+      [ngModel]="range()"
+      (ngModelChange)="range.set($event)"
+      (onSelect)="range()?.[1] && applyFilters()"
+      (onClear)="applyFilters()"
+      dateFormat="dd/mm/yy"
+      [showIcon]="true"
+      [showClear]="true"
+      fluid
+      appendTo="body"
+    />
+  </div>
+  <div class="flex flex-col gap-1">
+    <label for="movementSearch" class="text-xs font-medium text-slate-500 dark:text-white">Recherche</label>
+    <input
+      id="movementSearch"
+      type="text"
+      pInputText
+      placeholder="Client, libellé..."
+      [ngModel]="search()"
+      (ngModelChange)="onSearch($event)"
+      class="w-full"
+    />
+  </div>
+</div>
+
+@if (failed() && !page()) {
+  <p-message severity="error">
+    <div class="flex items-center gap-3">
+      <span>Impossible de charger les mouvements.</span>
+      <p-button label="Réessayer" size="small" severity="secondary" (onClick)="reload()" />
+    </div>
+  </p-message>
+} @else {
+  @if (page(); as data) {
+    <div class="mb-2 flex flex-wrap gap-4 text-sm">
+      <span>Entrées : <b class="tabular-nums text-green-700 dark:text-green-400">+ {{ formatAmount(data.totals.income) }} Ar</b></span>
+      <span>Sorties : <b class="tabular-nums text-red-700 dark:text-red-400">− {{ formatAmount(data.totals.outflow) }} Ar</b></span>
+    </div>
+  }
+
+  <p-table
+    [value]="page()?.data ?? []"
+    [lazy]="true"
+    [paginator]="true"
+    [rows]="pageSize"
+    [first]="first()"
+    [totalRecords]="page()?.total ?? 0"
+    [loading]="loading()"
+    (onLazyLoad)="onLazyLoad($event)"
+    [tableStyle]="{ 'min-width': '52rem' }"
+    dataKey="id"
+  >
+    <ng-template #header>
+      <tr>
+        <th>Date</th>
+        <th>Type</th>
+        <th>Libellé</th>
+        <th>Portefeuille</th>
+        <th class="text-right!">Montant</th>
+        @if (showRunningBalance()) {
+          <th class="text-right!">Solde après</th>
+        }
+      </tr>
+    </ng-template>
+    <ng-template #body let-row>
+      <tr>
+        <td class="tabular-nums">{{ formatDay(row.date) }}</td>
+        <td><p-tag [value]="getTypeLabel(row.type)" [severity]="getTypeSeverity(row.type)" /></td>
+        <td>{{ row.label }}</td>
+        <td>
+          @if (row.wallet; as wallet) {
+            <span class="flex items-center gap-2">
+              <span class="inline-block h-2.5 w-2.5 rounded-full" [style.background]="wallet.color"></span>{{ wallet.name }}
+            </span>
+          } @else {
+            <p-tag value="Non défini" severity="warn" />
+          }
+        </td>
+        <td
+          class="text-right! font-semibold tabular-nums"
+          [class]="row.amount < 0 ? 'text-red-700 dark:text-red-400' : 'text-green-700 dark:text-green-400'"
+        >
+          {{ formatSigned(row.amount, formatAmount) }} Ar
+        </td>
+        @if (showRunningBalance()) {
+          <td class="text-right! tabular-nums text-slate-600 dark:text-slate-300">
+            {{ row.runningBalance === null ? '' : formatAmount(row.runningBalance) + ' Ar' }}
+          </td>
+        }
+      </tr>
+    </ng-template>
+    <ng-template #emptymessage>
+      <tr>
+        <td [attr.colspan]="showRunningBalance() ? 6 : 5" class="text-center! py-8">
+          <p class="font-semibold">Aucun mouvement pour ces filtres</p>
+          <p class="mb-3 text-slate-500">Élargis la période ou change de portefeuille.</p>
+          <p-button label="Réinitialiser les filtres" severity="secondary" size="small" (onClick)="resetFilters()" />
+        </td>
+      </tr>
+    </ng-template>
+  </p-table>
+  @if (showRunningBalance()) {
+    <p class="mt-1 text-xs text-slate-500">Le « solde après » couvre tout l'historique du portefeuille, pas seulement les lignes filtrées.</p>
+  }
+}

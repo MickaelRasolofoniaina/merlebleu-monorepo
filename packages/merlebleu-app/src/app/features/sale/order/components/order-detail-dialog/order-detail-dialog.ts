@@ -1,15 +1,17 @@
 import { CommonModule, DecimalPipe } from '@angular/common';
-import { Component, input, model } from '@angular/core';
+import { Component, computed, inject, input, model } from '@angular/core';
 import { BadgeModule } from 'primeng/badge';
 import { DialogModule } from 'primeng/dialog';
 import { Order, OrderStatus } from '@merlebleu/shared';
 import { getOrderStatusColor, getOrderStatusLabel } from '@shared/utils/order';
 
 import { PaymentMethodBadge } from '@shared/components/payment-method-badge/payment-method-badge';
+import { CurrentUserService } from '@shared/services/current-user.service';
+import { RefundDialogComponent } from '../refund-dialog/refund-dialog';
 
 @Component({
   selector: 'order-detail-dialog',
-  imports: [CommonModule, BadgeModule, DialogModule, PaymentMethodBadge],
+  imports: [CommonModule, BadgeModule, DialogModule, PaymentMethodBadge, RefundDialogComponent],
   templateUrl: './order-detail-dialog.html',
   styleUrl: './order-detail-dialog.scss',
   providers: [DecimalPipe],
@@ -17,6 +19,19 @@ import { PaymentMethodBadge } from '@shared/components/payment-method-badge/paym
 export class OrderDetailDialog {
   order = input<Order | null>(null);
   visible = model(false);
+
+  private readonly currentUser = inject(CurrentUserService);
+  protected showRefund = false;
+
+  /** Only an admin can refund, and only the deposit of a cancelled order. */
+  protected readonly canRefund = computed(() => {
+    const order = this.order();
+    return (
+      this.currentUser.isAdmin() &&
+      order?.orderStatus === OrderStatus.CANCELLED &&
+      order.paidAmount - (order.balancePaidAmount ?? 0) > 0
+    );
+  });
 
   protected formatRemarks(value?: string | null): string {
     return value?.trim() ? value : '-';

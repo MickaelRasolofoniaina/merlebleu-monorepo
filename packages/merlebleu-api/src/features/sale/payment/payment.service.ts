@@ -1,6 +1,10 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { DeleteResult, QueryFailedError, Repository } from 'typeorm';
 import { PaymentMethodEntity } from './payment.entity';
 import {
   CreatePaymentMethodDto,
@@ -25,7 +29,11 @@ export class PaymentService {
   }
 
   async getAllPaymentMethods(): Promise<PaymentMethodEntity[]> {
-    return this.paymentMethodRepository.find({ order: { name: 'ASC' } });
+    // archived wallets stay out of the pickers, their history remains in the treasury
+    return this.paymentMethodRepository.find({
+      where: { archived: false },
+      order: { name: 'ASC' },
+    });
   }
 
   async updatePaymentMethod(
@@ -46,7 +54,21 @@ export class PaymentService {
   }
 
   async deletePaymentMethod(id: string): Promise<void> {
-    const deleteResult = await this.paymentMethodRepository.delete(id);
+    let deleteResult: DeleteResult;
+    try {
+      deleteResult = await this.paymentMethodRepository.delete(id);
+    } catch (error) {
+      // 23503 = foreign key violation: the wallet is used by orders, expenses or transfers
+      if (
+        error instanceof QueryFailedError &&
+        (error.driverError as { code?: string })?.code === '23503'
+      ) {
+        throw new ConflictException(
+          'Ce portefeuille a des mouvements : archivez-le au lieu de le supprimer.',
+        );
+      }
+      throw error;
+    }
 
     if (!deleteResult.affected) {
       throw new NotFoundException(`Payment method with id ${id} not found`);
