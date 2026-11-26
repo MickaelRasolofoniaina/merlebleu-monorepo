@@ -1,0 +1,422 @@
+<title>Clôture de caisse Merlebleu</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+  /* Layout: app shell (sidebar + content) as in app-layout; screens switch via the mock toolbar.
+     Tokens mirror the app: slate neutrals, Aura emerald primary, dark panel for the total balance. */
+  :root {
+    --page: #cbd5e1; --surface: #ffffff; --surface-2: #f8fafc; --line: #e2e8f0; --line-strong: #cbd5e1;
+    --text: #0f172a; --muted: #64748b; --primary: #10b981; --primary-ink: #ffffff; --link: #2563eb;
+    --hero: #1e293b; --hero-ink: #ffffff; --hero-muted: #cbd5e1;
+    --ok-bg: #f0fdf4; --ok-ink: #15803d; --warn-bg: #fffbeb; --warn-line: #fcd34d; --warn-ink: #78350f;
+    --bad-bg: #fef2f2; --bad-line: #fca5a5; --bad-ink: #991b1b; --bad: #b91c1c; --good: #15803d;
+    --overlay: rgba(15, 23, 42, .55); --focus: #2563eb;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      color-scheme: dark;
+      --page: #020617; --surface: #0f172a; --surface-2: #1e293b; --line: #334155; --line-strong: #475569;
+      --text: #f1f5f9; --muted: #94a3b8; --primary: #34d399; --primary-ink: #022c22; --link: #60a5fa;
+      --hero: #1e3a8a; --hero-ink: #ffffff; --hero-muted: #bfdbfe;
+      --ok-bg: #052e1699; --ok-ink: #86efac; --warn-bg: #451a0366; --warn-line: #92400e; --warn-ink: #fde68a;
+      --bad-bg: #450a0a88; --bad-line: #7f1d1d; --bad-ink: #fecaca; --bad: #f87171; --good: #4ade80;
+      --overlay: rgba(2, 6, 23, .7);
+    }
+  }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --page: #020617; --surface: #0f172a; --surface-2: #1e293b; --line: #334155; --line-strong: #475569;
+    --text: #f1f5f9; --muted: #94a3b8; --primary: #34d399; --primary-ink: #022c22; --link: #60a5fa;
+    --hero: #1e3a8a; --hero-ink: #ffffff; --hero-muted: #bfdbfe;
+    --ok-bg: #052e1699; --ok-ink: #86efac; --warn-bg: #451a0366; --warn-line: #92400e; --warn-ink: #fde68a;
+    --bad-bg: #450a0a88; --bad-line: #7f1d1d; --bad-ink: #fecaca; --bad: #f87171; --good: #4ade80;
+    --overlay: rgba(2, 6, 23, .7);
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--page); color: var(--text); font: 14px/1.45 Inter, system-ui, -apple-system, "Segoe UI", sans-serif; }
+  button { font: inherit; color: inherit; cursor: pointer; }
+  :focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+  .tnum { font-variant-numeric: tabular-nums; }
+
+  /* Mock toolbar (not part of the app) */
+  .mock-bar { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 30; display: flex; flex-wrap: wrap; gap: 6px; align-items: center;
+    padding: 8px max(16px, env(safe-area-inset-left, 0px)) 8px max(16px, env(safe-area-inset-right, 0px)); background: #0f172a; color: #e2e8f0; font-size: 12px; }
+  .mock-bar b { margin-right: 6px; letter-spacing: .04em; text-transform: uppercase; font-size: 11px; color: #94a3b8; }
+  .mock-bar button { border: 1px solid #334155; background: #1e293b; color: #e2e8f0; border-radius: 6px; padding: 4px 10px; }
+  .mock-bar button[aria-current="true"] { background: #10b981; border-color: #10b981; color: #022c22; font-weight: 600; }
+
+  .shell { display: flex; min-height: calc(100vh - 44px); }
+  .side { width: 220px; flex: none; background: var(--surface); border-right: 1px solid var(--line); padding: 16px 12px; display: flex; flex-direction: column; gap: 4px; }
+  .brand { font-weight: 700; font-size: 16px; padding: 0 8px 12px; }
+  .side .sec { color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: .06em; padding: 10px 8px 4px; }
+  .side a { display: flex; gap: 8px; align-items: center; padding: 7px 8px; border-radius: 8px; color: var(--text); text-decoration: none; }
+  .side a[aria-current="page"] { background: var(--surface-2); font-weight: 600; box-shadow: inset 3px 0 0 var(--primary); }
+  .side a .new { margin-left: auto; font-size: 10px; font-weight: 700; background: var(--primary); color: var(--primary-ink); border-radius: 99px; padding: 1px 7px; }
+  .main { flex: 1; min-width: 0; padding: 20px max(16px, env(safe-area-inset-right, 0px)) 40px 20px; }
+  @media (max-width: 760px) {
+    .shell { flex-direction: column; }
+    .side { width: auto; flex-direction: row; flex-wrap: wrap; border-right: 0; border-bottom: 1px solid var(--line); padding-left: max(16px, env(safe-area-inset-left, 0px)); }
+    .side .brand, .side .sec { display: none; }
+    .main { padding-left: max(16px, env(safe-area-inset-left, 0px)); }
+  }
+
+  .head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
+  h2 { margin: 0; font-size: 24px; font-weight: 700; font-family: inherit; }
+  .btns { display: flex; flex-wrap: wrap; gap: 8px; }
+  .btn { display: inline-flex; align-items: center; gap: 8px; border-radius: 8px; padding: 8px 14px; font-weight: 600; border: 1px solid transparent; background: var(--primary); color: var(--primary-ink); }
+  .btn.outlined { background: transparent; color: var(--text); border-color: var(--line-strong); }
+  .btn.contrast { background: var(--text); color: var(--surface); }
+  .btn.danger { background: var(--bad); color: #fff; }
+  .btn.text { background: transparent; color: var(--link); padding: 4px 8px; }
+  .btn.sm { padding: 5px 10px; font-size: 12px; }
+
+  .alert { display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-start; border: 1px solid; border-radius: 8px; padding: 12px; margin-bottom: 12px; }
+  .alert.warn { background: var(--warn-bg); border-color: var(--warn-line); color: var(--warn-ink); }
+  .alert.bad { background: var(--bad-bg); border-color: var(--bad-line); color: var(--bad-ink); }
+  .alert.info { background: var(--surface-2); border-color: var(--line-strong); }
+  .alert .grow { flex: 1; min-width: 200px; } .alert p { margin: 0; } .alert .t { font-weight: 600; } .alert .s { font-size: 12px; margin-top: 2px; }
+  .alert a { font-size: 12px; font-weight: 600; color: inherit; text-decoration: underline; white-space: nowrap; background: none; border: 0; padding: 0; }
+
+  .hero { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 12px; border-radius: 12px; padding: 16px; background: var(--hero); color: var(--hero-ink); margin-bottom: 16px; }
+  .hero .k { font-size: 11px; text-transform: uppercase; letter-spacing: .08em; color: var(--hero-muted); margin: 0; }
+  .hero .v { font-size: 36px; font-weight: 700; margin: 0; } .hero .v small { font-size: 18px; color: var(--hero-muted); font-weight: 600; }
+  .hero .r { font-size: 12px; color: var(--hero-muted); text-align: right; } .hero .r p { margin: 0; }
+  .hero .lock { display: inline-flex; gap: 6px; align-items: center; background: rgba(255,255,255,.14); border-radius: 99px; padding: 3px 10px; margin-top: 4px; }
+
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; }
+  .card { display: flex; flex-direction: column; gap: 12px; border: 2px solid var(--line); border-radius: 12px; padding: 16px; background: var(--surface); }
+  .card .nm { display: flex; align-items: center; gap: 8px; font-weight: 600; }
+  .dot { width: 10px; height: 10px; border-radius: 99px; display: inline-block; }
+  .card .bal { font-size: 30px; font-weight: 700; } .card .bal small { font-size: 16px; color: var(--muted); font-weight: 600; }
+  dl { margin: 0; display: grid; grid-template-columns: 1fr auto; gap: 4px 12px; font-size: 12px; }
+  dt { color: var(--muted); } dd { margin: 0; text-align: right; }
+  .in { color: var(--good); font-weight: 500; } .out { color: var(--bad); font-weight: 500; }
+  .card .foot { margin-top: auto; border-top: 1px solid var(--line); padding-top: 8px; display: flex; align-items: center; gap: 4px; font-size: 12px; }
+  .card .foot a { margin-right: auto; color: var(--link); font-weight: 500; text-decoration: none; }
+  .frozen { font-size: 12px; color: var(--muted); display: flex; gap: 6px; align-items: center; }
+
+  .panel { border: 1px solid var(--line); border-radius: 12px; background: var(--surface); overflow: hidden; }
+  .tw { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; }
+  th { text-align: left; font-size: 11px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); padding: 10px 12px; background: var(--surface-2); white-space: nowrap; }
+  td { padding: 10px 12px; border-top: 1px solid var(--line); vertical-align: middle; }
+  th.n, td.n { text-align: right; }
+  tr.locked td { color: var(--muted); }
+  tr.sub td { background: var(--surface-2); padding-left: 32px; font-size: 13px; }
+  .tag { display: inline-flex; align-items: center; gap: 4px; border-radius: 6px; padding: 2px 8px; font-size: 11px; font-weight: 700; }
+  .tag.ok { background: var(--ok-bg); color: var(--ok-ink); } .tag.warn { background: var(--warn-bg); color: var(--warn-ink); } .tag.mute { background: var(--surface-2); color: var(--muted); border: 1px solid var(--line); }
+
+  /* Dialog */
+  .overlay { position: fixed; inset: 0; z-index: 40; background: var(--overlay); display: flex; align-items: flex-start; justify-content: center; padding: 6vh 12px 12px; overflow-y: auto; }
+  .overlay[hidden] { display: none; }
+  .dlg { width: 44rem; max-width: 100%; background: var(--surface); border-radius: 12px; border: 1px solid var(--line); box-shadow: 0 20px 50px rgba(0,0,0,.35); }
+  .dlg.small { width: 30rem; }
+  .dlg header { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px 8px; }
+  .dlg header h3 { margin: 0; font-size: 18px; }
+  .dlg .body { padding: 8px 20px 16px; display: flex; flex-direction: column; gap: 14px; }
+  .dlg footer { display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; padding: 12px 20px 16px; }
+  .steps { display: flex; gap: 8px; font-size: 12px; color: var(--muted); align-items: center; }
+  .steps b { color: var(--text); }
+  label.l { display: block; font-weight: 600; margin-bottom: 4px; }
+  .field { border: 1px solid var(--line-strong); background: var(--surface); color: var(--text); border-radius: 8px; padding: 8px 10px; width: 100%; font: inherit; }
+  .field.num { text-align: right; max-width: 11rem; }
+  .field-row { display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-end; }
+  .hint { font-size: 12px; color: var(--muted); margin: 0; }
+  .note { border-radius: 8px; background: var(--surface-2); padding: 8px 10px; font-size: 12px; color: var(--muted); margin: 0; }
+  .checks { display: flex; flex-direction: column; gap: 6px; }
+  .check { display: flex; gap: 8px; align-items: flex-start; border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; font-size: 13px; }
+  .check.warn { background: var(--warn-bg); border-color: var(--warn-line); color: var(--warn-ink); }
+  .check.ok { color: var(--muted); }
+  .sum { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; font-weight: 700; padding: 10px 12px; background: var(--surface-2); border-radius: 8px; }
+  .gap-pos { color: var(--good); font-weight: 600; } .gap-neg { color: var(--bad); font-weight: 600; }
+
+  .toast { position: fixed; right: max(16px, env(safe-area-inset-right, 0px)); bottom: calc(16px + env(safe-area-inset-bottom, 0px)); z-index: 50; max-width: 24rem; background: var(--surface); border: 1px solid var(--bad-line); border-left: 4px solid var(--bad); border-radius: 8px; padding: 12px 14px; box-shadow: 0 10px 30px rgba(0,0,0,.25); }
+  .toast[hidden] { display: none; }
+  .toast p { margin: 0; } .toast .t { font-weight: 700; }
+  .screen[hidden] { display: none; }
+  .legend { font-size: 12px; color: var(--muted); margin: 12px 0 0; }
+</style>
+
+<nav class="mock-bar" aria-label="Écrans de la maquette">
+  <b>Maquette</b>
+  <button data-go="wallets" aria-current="true">1 · Portefeuilles</button>
+  <button data-go="close1">2 · Clôture, étape 1</button>
+  <button data-go="close2">3 · Clôture, étape 2</button>
+  <button data-go="history">4 · Historique des clôtures</button>
+  <button data-go="reopen">5 · Rouvrir</button>
+  <button data-go="movements">6 · Mouvements verrouillés</button>
+</nav>
+
+<div class="shell">
+  <aside class="side" aria-label="Menu">
+    <div class="brand">Merlebleu</div>
+    <div class="sec">Trésorerie</div>
+    <a href="#" data-go="wallets" id="nav-wallets">▣ Portefeuilles</a>
+    <a href="#">▤ Recettes</a>
+    <a href="#" data-go="movements" id="nav-movements">☰ Mouvements</a>
+    <a href="#" data-go="history" id="nav-history">🔒 Clôtures <span class="new">Nouveau</span></a>
+    <div class="sec">Autres</div>
+    <a href="#">Commandes</a><a href="#">Dépenses</a><a href="#">Ingrédients</a>
+  </aside>
+
+  <main class="main">
+    <!-- 1. Wallets -->
+    <section class="screen" id="s-wallets">
+      <div class="head">
+        <h2>Portefeuilles</h2>
+        <div class="btns">
+          <button class="btn outlined">⇄ Nouveau virement</button>
+          <button class="btn contrast" data-go="close1">🔒 Clôturer la caisse</button>
+          <button class="btn">+ Nouveau portefeuille</button>
+        </div>
+      </div>
+
+      <div class="alert warn" role="status">
+        <span aria-hidden="true">⏰</span>
+        <div class="grow">
+          <p class="t">Octobre 2026 n'est pas clôturé</p>
+          <p class="s">Dernière clôture : 30/09/2026. Clôturer fige les soldes et accélère l'affichage de la trésorerie.</p>
+        </div>
+        <button class="btn sm outlined" data-go="close1">Clôturer octobre</button>
+      </div>
+
+      <div class="hero">
+        <div>
+          <p class="k">Solde total disponible</p>
+          <p class="v tnum">5 675 500 <small>Ar</small></p>
+        </div>
+        <div class="r">
+          <p>4 portefeuille(s) actif(s)</p>
+          <p class="lock">🔒 Calculé depuis la clôture du 30/09/2026</p>
+        </div>
+      </div>
+
+      <div class="grid">
+        <article class="card" style="border-color:#10b981">
+          <div class="nm"><span class="dot" style="background:#10b981"></span>Espèces</div>
+          <div class="bal tnum">1 245 000 <small>Ar</small></div>
+          <dl>
+            <dt>Entrées du mois</dt><dd class="in tnum">+ 612 000</dd>
+            <dt>Sorties du mois</dt><dd class="out tnum">− 187 500</dd>
+            <dt>Figé au 30/09/2026</dt><dd class="tnum">820 500 Ar</dd>
+          </dl>
+          <p class="frozen">✓ Pointé le 30/09 · écart 0 Ar</p>
+          <div class="foot"><a href="#" data-go="movements">Mouvements</a><button class="btn text sm">⇄</button><button class="btn text sm">✎</button></div>
+        </article>
+        <article class="card" style="border-color:#8b5cf6">
+          <div class="nm"><span class="dot" style="background:#8b5cf6"></span>MVola</div>
+          <div class="bal tnum">868 500 <small>Ar</small></div>
+          <dl>
+            <dt>Entrées du mois</dt><dd class="in tnum">+ 340 000</dd>
+            <dt>Sorties du mois</dt><dd class="out tnum">− 96 000</dd>
+            <dt>Figé au 30/09/2026</dt><dd class="tnum">624 500 Ar</dd>
+          </dl>
+          <p class="frozen">✓ Pointé le 30/09 · écart 0 Ar</p>
+          <div class="foot"><a href="#" data-go="movements">Mouvements</a><button class="btn text sm">⇄</button><button class="btn text sm">✎</button></div>
+        </article>
+        <article class="card" style="border-color:#3b82f6">
+          <div class="nm"><span class="dot" style="background:#3b82f6"></span>Banque BNI</div>
+          <div class="bal tnum">3 410 000 <small>Ar</small></div>
+          <dl>
+            <dt>Entrées du mois</dt><dd class="in tnum">+ 1 150 000</dd>
+            <dt>Sorties du mois</dt><dd class="out tnum">− 740 000</dd>
+            <dt>Figé au 30/09/2026</dt><dd class="tnum">3 000 000 Ar</dd>
+          </dl>
+          <p class="frozen">Figé sans comptage</p>
+          <div class="foot"><a href="#" data-go="movements">Mouvements</a><button class="btn text sm">⇄</button><button class="btn text sm">✎</button></div>
+        </article>
+        <article class="card" style="border-color:#f97316">
+          <div class="nm"><span class="dot" style="background:#f97316"></span>Orange Money</div>
+          <div class="bal tnum">152 000 <small>Ar</small></div>
+          <dl>
+            <dt>Entrées du mois</dt><dd class="in tnum">+ 90 000</dd>
+            <dt>Sorties du mois</dt><dd class="out tnum">− 38 000</dd>
+            <dt>Figé au 30/09/2026</dt><dd class="tnum">100 000 Ar</dd>
+          </dl>
+          <p class="frozen">Figé sans comptage</p>
+          <div class="foot"><a href="#" data-go="movements">Mouvements</a><button class="btn text sm">⇄</button><button class="btn text sm">✎</button></div>
+        </article>
+      </div>
+      <p class="legend">Nouveautés : bouton « Clôturer la caisse », rappel de clôture, mention « Calculé depuis… » sous le total, ligne « Figé au… » qui remplace « Solde initial » une fois une clôture faite.</p>
+    </section>
+
+    <!-- 4. History -->
+    <section class="screen" id="s-history" hidden>
+      <div class="head">
+        <h2>Clôtures de caisse</h2>
+        <div class="btns"><button class="btn contrast" data-go="close1">🔒 Clôturer la caisse</button></div>
+      </div>
+      <div class="panel">
+        <div class="tw">
+          <table>
+            <thead><tr><th>Date de clôture</th><th class="n">Total figé</th><th class="n">Écart de comptage</th><th>Clôturée le</th><th>Statut</th><th></th></tr></thead>
+            <tbody>
+              <tr>
+                <td><b>30/09/2026</b></td><td class="n tnum">4 545 000 Ar</td><td class="n tnum gap-neg">− 3 000 Ar</td><td>02/10/2026 par Hery</td>
+                <td><span class="tag ok">Dernière clôture</span></td>
+                <td class="n"><button class="btn sm outlined" data-go="reopen">↺ Rouvrir</button></td>
+              </tr>
+              <tr class="sub"><td colspan="6">
+                <div class="tw"><table>
+                  <thead><tr><th>Portefeuille</th><th class="n">Calculé</th><th class="n">Compté</th><th class="n">Écart</th><th class="n">Solde figé</th></tr></thead>
+                  <tbody>
+                    <tr><td>Espèces</td><td class="n tnum">823 500</td><td class="n tnum">820 500</td><td class="n tnum gap-neg">− 3 000</td><td class="n tnum"><b>820 500</b></td></tr>
+                    <tr><td>MVola</td><td class="n tnum">624 500</td><td class="n tnum">624 500</td><td class="n tnum">0</td><td class="n tnum"><b>624 500</b></td></tr>
+                    <tr><td>Banque BNI</td><td class="n tnum">3 000 000</td><td class="n tnum" style="color:var(--muted)">non compté</td><td class="n tnum">—</td><td class="n tnum"><b>3 000 000</b></td></tr>
+                    <tr><td>Orange Money</td><td class="n tnum">100 000</td><td class="n tnum" style="color:var(--muted)">non compté</td><td class="n tnum">—</td><td class="n tnum"><b>100 000</b></td></tr>
+                  </tbody>
+                </table></div>
+              </td></tr>
+              <tr class="locked">
+                <td><b>31/08/2026</b></td><td class="n tnum">3 870 000 Ar</td><td class="n tnum">0 Ar</td><td>01/09/2026 par Hery</td>
+                <td><span class="tag mute">🔒 Verrouillée</span></td><td class="n"></td>
+              </tr>
+              <tr class="locked">
+                <td><b>31/07/2026</b></td><td class="n tnum">3 215 500 Ar</td><td class="n tnum">+ 1 500 Ar</td><td>03/08/2026 par Hery</td>
+                <td><span class="tag mute">🔒 Verrouillée</span></td><td class="n"></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <p class="legend">Seule la dernière clôture est réouvrable. Vide : « Aucune clôture pour le moment. Clôture la caisse en fin de mois pour figer les soldes. » avec un bouton « Faire la première clôture ».</p>
+    </section>
+
+    <!-- 6. Movements -->
+    <section class="screen" id="s-movements" hidden>
+      <div class="head"><h2>Mouvements</h2><div class="btns"><button class="btn outlined">⬇ Exporter CSV</button></div></div>
+      <div class="alert info" role="status">
+        <span aria-hidden="true">🔒</span>
+        <div class="grow"><p class="t">Période clôturée jusqu'au 30/09/2026</p><p class="s">Ces mouvements ne peuvent plus être modifiés. Le solde cumulé est affiché à partir du 01/10/2026 (portefeuille « Espèces »).</p></div>
+        <button class="btn sm outlined" id="try-edit">Essayer de saisir une dépense du 15/09</button>
+      </div>
+      <div class="panel"><div class="tw">
+        <table>
+          <thead><tr><th>Date</th><th>Type</th><th>Libellé</th><th class="n">Montant</th><th class="n">Solde cumulé</th></tr></thead>
+          <tbody>
+            <tr><td>24/11/2026</td><td><span class="tag ok">Solde</span></td><td>Rakoto Hanta</td><td class="n tnum in">+ 85 000</td><td class="n tnum">1 245 000</td></tr>
+            <tr><td>20/11/2026</td><td><span class="tag warn">Dépense</span></td><td>Farine de blé (25 kg)</td><td class="n tnum out">− 62 500</td><td class="n tnum">1 160 000</td></tr>
+            <tr><td>03/11/2026</td><td><span class="tag ok">Acompte</span></td><td>Andry Ravelo</td><td class="n tnum in">+ 40 000</td><td class="n tnum">1 222 500</td></tr>
+            <tr><td>01/10/2026</td><td><span class="tag mute">Ouverture</span></td><td>Solde figé au 30/09/2026</td><td class="n tnum">+ 820 500</td><td class="n tnum">820 500</td></tr>
+            <tr class="locked"><td>🔒 30/09/2026</td><td><span class="tag mute">Ajustement</span></td><td>Écart de comptage (clôture)</td><td class="n tnum">− 3 000</td><td class="n tnum">—</td></tr>
+            <tr class="locked"><td>🔒 28/09/2026</td><td><span class="tag warn">Dépense</span></td><td>Beurre (10 kg)</td><td class="n tnum">− 48 000</td><td class="n tnum">—</td></tr>
+            <tr class="locked"><td>🔒 26/09/2026</td><td><span class="tag ok">Solde</span></td><td>Soa Rabe</td><td class="n tnum">+ 120 000</td><td class="n tnum">—</td></tr>
+          </tbody>
+        </table>
+      </div></div>
+      <p class="legend">Les lignes verrouillées sont grisées, avec un cadenas et sans solde cumulé. Le CSV les inclut toujours.</p>
+    </section>
+  </main>
+</div>
+
+<!-- 2. Close, step 1 -->
+<div class="overlay" id="d-close1" hidden>
+  <div class="dlg" role="dialog" aria-modal="true" aria-labelledby="t1">
+    <header><h3 id="t1">Clôturer la caisse</h3><div class="steps"><b>1 Comptage</b> › 2 Confirmation</div></header>
+    <div class="body">
+      <div class="field-row">
+        <div>
+          <label class="l" for="closeDate">Date de clôture</label>
+          <input class="field" id="closeDate" value="31/10/2026" style="max-width:11rem">
+        </div>
+        <p class="hint" style="flex:1;min-width:14rem">Dernière clôture : 30/09/2026. Les soldes sont calculés à la date choisie, pas à aujourd'hui.</p>
+      </div>
+
+      <div class="checks" aria-label="Contrôles avant clôture">
+        <div class="check warn"><span aria-hidden="true">⚠</span><div><b>3 dépenses sans portefeuille (− 45 000 Ar)</b><br><span style="font-size:12px">Elles ne sont retirées d'aucun solde et seront verrouillées avec la période. <a href="#" style="color:inherit;font-weight:600">Voir les dépenses</a></span></div></div>
+        <div class="check ok"><span aria-hidden="true">✓</span><div>Aucun solde négatif au 31/10/2026</div></div>
+      </div>
+
+      <div class="panel"><div class="tw">
+        <table>
+          <thead><tr><th>Portefeuille</th><th class="n">Solde calculé</th><th class="n">Solde compté (Ar)</th><th class="n">Écart</th></tr></thead>
+          <tbody>
+            <tr><td><span class="dot" style="background:#10b981"></span> Espèces</td><td class="n tnum">1 058 500</td><td class="n"><input class="field num tnum" aria-label="Solde compté Espèces" value="1 053 500"></td><td class="n tnum gap-neg" id="gap-cash">− 5 000</td></tr>
+            <tr><td><span class="dot" style="background:#8b5cf6"></span> MVola</td><td class="n tnum">812 000</td><td class="n"><input class="field num tnum" aria-label="Solde compté MVola" placeholder="= calculé"></td><td class="n tnum" style="color:var(--muted)">—</td></tr>
+            <tr><td><span class="dot" style="background:#3b82f6"></span> Banque BNI</td><td class="n tnum">3 267 000</td><td class="n"><input class="field num tnum" aria-label="Solde compté Banque BNI" placeholder="= calculé"></td><td class="n tnum" style="color:var(--muted)">—</td></tr>
+            <tr><td><span class="dot" style="background:#f97316"></span> Orange Money</td><td class="n tnum">145 500</td><td class="n"><input class="field num tnum" aria-label="Solde compté Orange Money" placeholder="= calculé"></td><td class="n tnum" style="color:var(--muted)">—</td></tr>
+          </tbody>
+        </table>
+      </div></div>
+      <p class="note">Laisse « Solde compté » vide pour figer le solde calculé. Un écart devient un mouvement « Ajustement » daté du 31/10/2026.</p>
+    </div>
+    <footer>
+      <button class="btn contrast" data-go="wallets">Annuler</button>
+      <button class="btn" data-go="close2">Continuer →</button>
+    </footer>
+  </div>
+</div>
+
+<!-- 3. Close, step 2 -->
+<div class="overlay" id="d-close2" hidden>
+  <div class="dlg" role="dialog" aria-modal="true" aria-labelledby="t2">
+    <header><h3 id="t2">Confirmer la clôture du 31/10/2026</h3><div class="steps">1 Comptage › <b>2 Confirmation</b></div></header>
+    <div class="body">
+      <div class="panel"><div class="tw">
+        <table>
+          <thead><tr><th>Portefeuille</th><th class="n">Solde figé</th><th class="n">Ajustement</th></tr></thead>
+          <tbody>
+            <tr><td>Espèces</td><td class="n tnum"><b>1 053 500</b></td><td class="n tnum gap-neg">− 5 000</td></tr>
+            <tr><td>MVola</td><td class="n tnum"><b>812 000</b></td><td class="n tnum" style="color:var(--muted)">—</td></tr>
+            <tr><td>Banque BNI</td><td class="n tnum"><b>3 267 000</b></td><td class="n tnum" style="color:var(--muted)">—</td></tr>
+            <tr><td>Orange Money</td><td class="n tnum"><b>145 500</b></td><td class="n tnum" style="color:var(--muted)">—</td></tr>
+          </tbody>
+        </table>
+      </div></div>
+      <div class="sum"><span>Total figé</span><span class="tnum">5 278 000 Ar</span></div>
+      <div class="alert warn" style="margin:0">
+        <span aria-hidden="true">🔒</span>
+        <div class="grow"><p class="t">Les mouvements jusqu'au 31/10/2026 seront verrouillés.</p><p class="s">Plus aucune dépense, commande, virement ou remboursement ne pourra être créé ou modifié avec une date jusqu'au 31/10/2026. Tu pourras rouvrir cette clôture tant qu'aucune autre n'est faite.</p></div>
+      </div>
+    </div>
+    <footer>
+      <button class="btn outlined" data-go="close1">← Retour</button>
+      <button class="btn" data-go="history">🔒 Confirmer la clôture</button>
+    </footer>
+  </div>
+</div>
+
+<!-- 5. Reopen -->
+<div class="overlay" id="d-reopen" hidden>
+  <div class="dlg small" role="alertdialog" aria-modal="true" aria-labelledby="t3">
+    <header><h3 id="t3">Rouvrir la clôture du 30/09/2026 ?</h3></header>
+    <div class="body">
+      <p style="margin:0">Les mouvements jusqu'au 30/09/2026 redeviennent modifiables. L'ajustement de − 3 000 Ar sur « Espèces » est supprimé, et les soldes sont recalculés depuis la clôture du 31/08/2026.</p>
+      <p class="note">Cette action est enregistrée. Les clôtures plus anciennes restent verrouillées.</p>
+    </div>
+    <footer>
+      <button class="btn contrast" data-go="history">Annuler</button>
+      <button class="btn danger" data-go="history">↺ Rouvrir la clôture</button>
+    </footer>
+  </div>
+</div>
+
+<div class="toast" id="toast" role="alert" hidden>
+  <p class="t">Période clôturée</p>
+  <p>Cette date est avant la clôture du 30/09/2026. Choisis une date à partir du 01/10/2026 ou demande de rouvrir la clôture.</p>
+</div>
+
+<script>
+  var screens = { wallets: 's-wallets', close1: 's-wallets', close2: 's-wallets', history: 's-history', reopen: 's-history', movements: 's-movements' };
+  var dialogs = { close1: 'd-close1', close2: 'd-close2', reopen: 'd-reopen' };
+  var navIds = { wallets: 'nav-wallets', history: 'nav-history', movements: 'nav-movements' };
+  function show(key) {
+    ['s-wallets', 's-history', 's-movements'].forEach(function (id) { document.getElementById(id).hidden = id !== screens[key]; });
+    ['d-close1', 'd-close2', 'd-reopen'].forEach(function (id) { document.getElementById(id).hidden = id !== dialogs[key]; });
+    document.getElementById('toast').hidden = true;
+    document.querySelectorAll('.mock-bar button').forEach(function (b) { b.setAttribute('aria-current', String(b.dataset.go === key)); });
+    var base = screens[key] === 's-wallets' ? 'wallets' : screens[key] === 's-history' ? 'history' : 'movements';
+    Object.keys(navIds).forEach(function (k) {
+      var el = document.getElementById(navIds[k]);
+      if (k === base) el.setAttribute('aria-current', 'page'); else el.removeAttribute('aria-current');
+    });
+    window.scrollTo(0, 0);
+  }
+  document.addEventListener('click', function (e) {
+    var t = e.target.closest('[data-go]');
+    if (t) { e.preventDefault(); show(t.dataset.go); return; }
+    if (e.target.closest('#try-edit')) { document.getElementById('toast').hidden = false; }
+    var a = e.target.closest('a[href="#"]'); if (a) e.preventDefault();
+  });
+  var initial = (location.hash || '').slice(1);
+  show(screens[initial] ? initial : 'wallets');
+</script>
