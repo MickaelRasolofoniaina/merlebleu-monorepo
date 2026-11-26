@@ -32,4 +32,20 @@
       <small class="text-red-500 mt-1 block">{{ getFieldError('unitId') }}</small>
     }
   </div>
+  <div>
+    <label for="ingredientPayment" class="block mb-2">Méthode de paiement par défaut</label>
+    <p-select
+      inputId="ingredientPayment"
+      [(ngModel)]="item.defaultPaymentMethodId"
+      name="defaultPaymentMethodId"
+      [options]="paymentMethods()"
+      optionLabel="name"
+      optionValue="id"
+      placeholder="Aucune (à choisir à chaque saisie)"
+      [showClear]="true"
+      fluid
+      appendTo="body"
+    />
+    <small class="text-slate-500 mt-1 block">Utilisée pour les achats saisis dans la grille des dépenses.</small>
+  </div>
 </form>

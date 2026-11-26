@@ -1,14 +1,16 @@
-import { Component, Input, Output, EventEmitter, SimpleChanges } from '@angular/core';
+import { Component, Input, Output, EventEmitter, SimpleChanges, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import {
   CreateIngredientDto,
   IngredientUnit,
+  PaymentMethod,
   UpdateIngredientDto,
   createIngredientSchema,
   updateIngredientSchema,
 } from '@merlebleu/shared';
 import { InputTextModule } from 'primeng/inputtext';
 import { SelectModule } from 'primeng/select';
+import { PaymentService } from '../../../../sale/payment/payment.service';
 
 @Component({
   selector: 'mb-ingredient-form',
@@ -22,6 +24,13 @@ export class IngredientFormComponent {
   @Input() formId = 'ingredient-form';
   @Input() units: IngredientUnit[] = [];
   @Output() itemSubmit = new EventEmitter<CreateIngredientDto | UpdateIngredientDto>();
+
+  private readonly paymentService = inject(PaymentService);
+  protected readonly paymentMethods = signal<PaymentMethod[]>([]);
+
+  constructor() {
+    this.paymentService.getAllPaymentMethods().subscribe({ next: (methods) => this.paymentMethods.set(methods) });
+  }
 
   validationError: ReturnType<typeof createIngredientSchema.safeParse>['error'] | null = null;
 
@@ -58,6 +67,6 @@ export class IngredientFormComponent {
   }
 
   private createEmpty(): CreateIngredientDto {
-    return { label: '', unitId: '' };
+    return { label: '', unitId: '', defaultPaymentMethodId: null };
   }
 }

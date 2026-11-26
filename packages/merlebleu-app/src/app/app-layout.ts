@@ -111,16 +111,15 @@ export class AppLayout implements OnInit, OnDestroy {
       ],
     },
     {
-      id: 'ingredients',
-      label: 'Ingrédients',
-      shortLabel: 'Ingr.',
-      icon: 'pi pi-database',
-      prefixes: ['/ingredient'],
+      id: 'treasury',
+      label: 'Trésorerie',
+      shortLabel: 'Tréso.',
+      icon: 'pi pi-wallet',
+      prefixes: ['/treasury'],
       items: [
-        { label: 'Achat', icon: 'pi pi-wallet', routerLink: ['/ingredient/purchase'] },
-        { label: 'Inventaire', icon: 'pi pi-clipboard', routerLink: ['/ingredient/inventory'] },
-        { label: 'Liste', icon: 'pi pi-database', routerLink: ['/ingredient/ingredient'] },
-        { label: 'Unité', icon: 'pi pi-book', routerLink: ['/ingredient/unit'] },
+        { label: 'Portefeuilles', icon: 'pi pi-wallet', routerLink: ['/treasury/wallets'] },
+        { label: 'Recettes', icon: 'pi pi-chart-bar', routerLink: ['/treasury/receipts'] },
+        { label: 'Mouvements', icon: 'pi pi-list', routerLink: ['/treasury/movements'] },
       ],
     },
     {
@@ -137,6 +136,19 @@ export class AppLayout implements OnInit, OnDestroy {
       ],
     },
     {
+      id: 'ingredients',
+      label: 'Ingrédients',
+      shortLabel: 'Ingr.',
+      icon: 'pi pi-database',
+      prefixes: ['/ingredient'],
+      items: [
+        { label: 'Achat', icon: 'pi pi-wallet', routerLink: ['/ingredient/purchase'] },
+        { label: 'Inventaire', icon: 'pi pi-clipboard', routerLink: ['/ingredient/inventory'] },
+        { label: 'Liste', icon: 'pi pi-database', routerLink: ['/ingredient/ingredient'] },
+        { label: 'Unité', icon: 'pi pi-book', routerLink: ['/ingredient/unit'] },
+      ],
+    },
+    {
       id: 'inventory',
       label: 'Inventaire',
       shortLabel: 'Stock',
@@ -149,12 +161,11 @@ export class AppLayout implements OnInit, OnDestroy {
       label: 'Paramètres',
       shortLabel: 'Param.',
       icon: 'pi pi-cog',
-      prefixes: ['/identity', '/shop', '/sale/payment'],
+      prefixes: ['/identity', '/shop'],
       items: [
         { label: 'Utilisateurs', icon: 'pi pi-user', routerLink: ['/identity/user'] },
         { label: 'Mon profil', icon: 'pi pi-id-card', routerLink: ['/identity/profile'] },
         { label: 'Boutique', icon: 'pi pi-shop', routerLink: ['/shop'] },
-        { label: 'Méthode de paiement', icon: 'pi pi-credit-card', routerLink: ['/sale/payment'] },
       ],
     },
   ];

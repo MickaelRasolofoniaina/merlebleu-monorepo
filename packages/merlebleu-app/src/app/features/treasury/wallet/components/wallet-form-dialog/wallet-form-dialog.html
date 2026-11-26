@@ -1,0 +1,84 @@
+<p-dialog
+  [(visible)]="visible"
+  [modal]="true"
+  [style]="{ width: '30rem', maxWidth: '95vw' }"
+  [header]="wallet() ? 'Modifier le portefeuille' : 'Nouveau portefeuille'"
+>
+  <form id="wallet-form" (submit)="$event.preventDefault(); save()" class="flex flex-col gap-4">
+    <div class="flex flex-col gap-1">
+      <label for="walletName" class="font-semibold text-slate-900 dark:text-white">Nom du portefeuille</label>
+      <input id="walletName" name="name" type="text" pInputText [ngModel]="name()" (ngModelChange)="name.set($event)" class="w-full" />
+      @if (error('name')) {
+        <small class="text-red-500">{{ error('name') }}</small>
+      }
+    </div>
+
+    <div class="grid grid-cols-2 gap-3">
+      <div class="flex flex-col gap-1">
+        <label for="walletOpeningBalance" class="font-semibold text-slate-900 dark:text-white">Solde initial (Ar)</label>
+        <p-inputnumber
+          inputId="walletOpeningBalance"
+          name="openingBalance"
+          [ngModel]="openingBalance()"
+          (ngModelChange)="openingBalance.set($event)"
+          [maxFractionDigits]="0"
+          locale="fr-FR"
+          fluid
+        />
+        @if (error('openingBalance')) {
+          <small class="text-red-500">{{ error('openingBalance') }}</small>
+        }
+      </div>
+      <div class="flex flex-col gap-1">
+        <label for="walletOpeningDate" class="font-semibold text-slate-900 dark:text-white">Valable à partir du</label>
+        <p-datepicker
+          inputId="walletOpeningDate"
+          name="openingDate"
+          [ngModel]="openingDate()"
+          (ngModelChange)="openingDate.set($event)"
+          dateFormat="dd/mm/yy"
+          [showIcon]="true"
+          [showClear]="true"
+          fluid
+          appendTo="body"
+        />
+        @if (error('openingDate')) {
+          <small class="text-red-500">{{ error('openingDate') }}</small>
+        }
+      </div>
+    </div>
+    <p class="-mt-2 rounded-md bg-blue-50 p-2 text-xs text-blue-900 dark:bg-slate-700 dark:text-slate-100">
+      Seuls les mouvements à partir de cette date comptent dans le solde. Les commandes et dépenses plus anciennes sont ignorées.
+      Sans date, tous les mouvements comptent.
+    </p>
+
+    <div class="flex flex-col gap-1">
+      <label for="walletColor" class="font-semibold text-slate-900 dark:text-white">Couleur</label>
+      <input
+        id="walletColor"
+        name="color"
+        type="color"
+        [ngModel]="color()"
+        (ngModelChange)="color.set($event)"
+        class="h-9 w-16 cursor-pointer rounded border border-slate-300"
+      />
+    </div>
+
+    @if (wallet()) {
+      <div class="flex items-center justify-between rounded-lg border border-slate-200 p-3 dark:border-slate-700">
+        <div>
+          <label for="walletArchived" class="font-semibold text-slate-900 dark:text-white">Archiver ce portefeuille</label>
+          <p class="text-xs text-slate-500">Il disparaît des listes de choix. L'historique reste consultable.</p>
+        </div>
+        <p-toggleswitch inputId="walletArchived" name="archived" [ngModel]="archived()" (ngModelChange)="archived.set($event)" />
+      </div>
+    }
+  </form>
+
+  <ng-template #footer>
+    <div class="flex justify-end gap-2">
+      <p-button label="Annuler" severity="contrast" (onClick)="visible.set(false)" />
+      <p-button [label]="wallet() ? 'Enregistrer' : 'Créer'" (onClick)="save()" [loading]="saving()" />
+    </div>
+  </ng-template>
+</p-dialog>

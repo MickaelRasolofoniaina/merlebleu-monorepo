@@ -63,6 +63,9 @@ export class ExpenseService {
     const existing = await this.expenseRepository.findOne({
       where: { nature: ExpenseNature.VARIABLE, date: dto.date, ...target },
     });
+    const chosenMethod = dto.paymentMethodId
+      ? await this.getPaymentMethod(dto.paymentMethodId)
+      : null;
 
     if (dto.amount === 0) {
       if (existing) {
@@ -73,20 +76,24 @@ export class ExpenseService {
 
     if (existing) {
       existing.amount = dto.amount;
+      if (chosenMethod) {
+        existing.paymentMethod = chosenMethod;
+      }
       return this.expenseRepository.save(existing);
     }
 
-    if (dto.categoryId) {
-      await this.getCategory(dto.categoryId);
-    } else if (dto.ingredientId) {
-      await this.getIngredient(dto.ingredientId);
-    }
+    // the wallet is the one chosen on the cell, else the default of the category or ingredient
+    const owner = dto.categoryId
+      ? await this.getCategory(dto.categoryId)
+      : await this.getIngredient(dto.ingredientId as string);
+    const paymentMethod = chosenMethod ?? owner.defaultPaymentMethod ?? null;
 
     return this.expenseRepository.save(
       this.expenseRepository.create({
         nature: ExpenseNature.VARIABLE,
         date: dto.date,
         amount: dto.amount,
+        paymentMethod,
         ...target,
       }),
     );

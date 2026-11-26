@@ -57,6 +57,8 @@ export interface Order {
   balancePaidAmount?: number;
   /** Method used to settle the balance at delivery. */
   balancePaymentMethod?: PaymentMethod | null;
+  /** YYYY-MM-DD, day the balance was collected. Falls back to `deliveryDate` when missing. */
+  balancePaidDate?: string | null;
   shop: Shop;
   orderStatus?: OrderStatus;
 }

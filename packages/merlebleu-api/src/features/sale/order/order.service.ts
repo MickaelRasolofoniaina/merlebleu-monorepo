@@ -197,7 +197,8 @@ export class OrderService {
       deliveryDateTo: today,
       customerName,
       shopId,
-      status: status && LATE_ORDER_STATUSES.includes(status) ? status : undefined,
+      status:
+        status && LATE_ORDER_STATUSES.includes(status) ? status : undefined,
       statuses: LATE_ORDER_STATUSES,
       orderDate,
       deliveryDate,
@@ -230,7 +231,10 @@ export class OrderService {
   ): Promise<ResultPaged<OrderEntity>> {
     return this.listOrders(page, limit, {
       deliveryDate: this.getToday(),
-      status: status && TODAY_TO_DELIVER_STATUSES.includes(status) ? status : undefined,
+      status:
+        status && TODAY_TO_DELIVER_STATUSES.includes(status)
+          ? status
+          : undefined,
       statuses: TODAY_TO_DELIVER_STATUSES,
       customerName,
       shopId,
@@ -460,6 +464,7 @@ export class OrderService {
     }
     existingOrder.balancePaymentMethod = paymentMethod;
     existingOrder.balancePaidAmount = balanceDue;
+    existingOrder.balancePaidDate = formatDate(new Date());
     existingOrder.paidAmount = totalDue;
     existingOrder.balanceAmount = 0;
     existingOrder.orderStatus = OrderStatus.DELIVERED;

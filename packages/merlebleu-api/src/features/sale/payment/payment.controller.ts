@@ -7,6 +7,8 @@ import {
   Post,
   Put,
 } from '@nestjs/common';
+import { Roles } from '@shared/auth/roles';
+import { UserRole } from '@merlebleu/shared';
 import { PaymentService } from './payment.service';
 import { CreatePaymentMethodDto, UpdatePaymentMethodDto } from './payment.dto';
 
@@ -14,6 +16,7 @@ import { CreatePaymentMethodDto, UpdatePaymentMethodDto } from './payment.dto';
 export class PaymentController {
   constructor(private paymentService: PaymentService) {}
 
+  @Roles(UserRole.ADMIN)
   @Post()
   addPaymentMethod(@Body() body: CreatePaymentMethodDto) {
     return this.paymentService.addPaymentMethod(body);
@@ -24,6 +27,7 @@ export class PaymentController {
     return this.paymentService.getAllPaymentMethods();
   }
 
+  @Roles(UserRole.ADMIN)
   @Put(':id')
   updatePaymentMethod(
     @Param('id') id: string,
@@ -32,6 +36,7 @@ export class PaymentController {
     return this.paymentService.updatePaymentMethod(id, body);
   }
 
+  @Roles(UserRole.ADMIN)
   @Delete(':id')
   deletePaymentMethod(@Param('id') id: string) {
     return this.paymentService.deletePaymentMethod(id);

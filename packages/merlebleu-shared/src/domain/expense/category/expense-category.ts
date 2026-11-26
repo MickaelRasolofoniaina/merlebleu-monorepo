@@ -1,3 +1,5 @@
+import { PaymentMethod } from "../../sale/payment/payment";
+
 export enum ExpenseSection {
   CURRENT = "CURRENT",
   INGREDIENT = "INGREDIENT",
@@ -9,4 +11,6 @@ export interface ExpenseCategory {
   label: string;
   /** Categories only belong to CURRENT or OTHER: the INGREDIENT section is fed by the ingredients table. */
   section: ExpenseSection.CURRENT | ExpenseSection.OTHER;
+  /** Wallet used by default when a grid cell of this category is filled. */
+  defaultPaymentMethod?: PaymentMethod | null;
 }

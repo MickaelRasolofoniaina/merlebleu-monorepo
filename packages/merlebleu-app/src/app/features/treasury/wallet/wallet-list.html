@@ -1,0 +1,154 @@
+<div class="mb-3 flex flex-wrap items-center justify-between gap-3">
+  <h2 class="text-2xl font-bold">Portefeuilles</h2>
+  @if (isAdmin()) {
+    <div class="flex flex-wrap gap-2">
+      <p-button label="Nouveau virement" icon="pi pi-arrow-right-arrow-left" severity="secondary" [outlined]="true" (onClick)="openTransfer(null)" />
+      <p-button label="Nouveau portefeuille" icon="pi pi-plus" (onClick)="openCreate()" />
+    </div>
+  }
+</div>
+
+@if (loading() && !summary()) {
+  <div class="grid grid-cols-[repeat(auto-fill,minmax(260px,1fr))] gap-3">
+    @for (placeholder of [1, 2, 3, 4]; track placeholder) {
+      <p-skeleton height="11rem" borderRadius="0.75rem" />
+    }
+  </div>
+} @else if (failed() && !summary()) {
+  <p-message severity="error">
+    <div class="flex items-center gap-3">
+      <span>Impossible de charger les portefeuilles.</span>
+      <p-button label="Réessayer" size="small" severity="secondary" (onClick)="load()" />
+    </div>
+  </p-message>
+} @else if (summary(); as data) {
+  @for (wallet of negativeWallets(); track wallet.id) {
+    <div class="mb-3 flex flex-wrap items-start gap-3 rounded-lg border border-red-300 bg-red-50 p-3 text-red-900 dark:border-red-500/40 dark:bg-red-950 dark:text-red-100">
+      <i class="pi pi-exclamation-triangle mt-1"></i>
+      <div class="flex-1">
+        <p class="font-semibold">{{ wallet.name }} est à {{ formatAmount(wallet.balance) }} Ar</p>
+        <p class="text-xs">
+          Une dépense a peut-être été saisie avec le mauvais portefeuille, ou un virement manque. Ouvre les mouvements pour vérifier.
+        </p>
+      </div>
+      <a class="whitespace-nowrap text-xs font-semibold underline" routerLink="/treasury/movements" [queryParams]="{ walletId: wallet.id }">
+        Voir les mouvements
+      </a>
+    </div>
+  }
+
+  @if (data.undefinedBalance !== 0) {
+    <div class="mb-3 flex flex-wrap items-start gap-3 rounded-lg border border-amber-300 bg-amber-50 p-3 text-amber-900 dark:border-amber-500/40 dark:bg-amber-950 dark:text-amber-100">
+      <i class="pi pi-info-circle mt-1"></i>
+      <div class="flex-1">
+        <p class="font-semibold">Dépenses sans portefeuille : {{ formatAmount(data.undefinedBalance) }} Ar</p>
+        <p class="text-xs">
+          Ces dépenses n'ont pas de méthode de paiement et ne sont retirées d'aucun solde. Définis une méthode par défaut sur la catégorie ou l'ingrédient.
+        </p>
+      </div>
+      <a class="whitespace-nowrap text-xs font-semibold underline" routerLink="/treasury/movements" [queryParams]="{ walletId: 'none' }">
+        Voir les dépenses
+      </a>
+    </div>
+  }
+
+  <div class="mb-4 flex flex-wrap items-end justify-between gap-3 rounded-xl bg-slate-800 p-4 text-white dark:bg-blue-900">
+    <div>
+      <p class="text-xs uppercase tracking-wider text-slate-300">Solde total disponible</p>
+      <p class="text-4xl font-bold tabular-nums">
+        {{ formatAmount(data.totalBalance) }} <span class="text-lg font-semibold text-slate-300">Ar</span>
+      </p>
+    </div>
+    <p class="text-xs text-slate-300">{{ activeWallets().length }} portefeuille(s) actif(s)</p>
+  </div>
+
+  @if (activeWallets().length === 0) {
+    <div class="flex flex-col items-center gap-2 rounded-xl border border-dashed border-slate-300 py-12 text-center dark:border-slate-600">
+      <i class="pi pi-wallet text-3xl text-slate-400"></i>
+      <p class="font-semibold">Aucun portefeuille pour le moment</p>
+      <p class="max-w-md text-slate-500">
+        Crée un portefeuille par moyen de paiement (espèces, MVola, banque...) pour suivre où se trouve l'argent.
+      </p>
+      @if (isAdmin()) {
+        <p-button label="Créer le premier portefeuille" icon="pi pi-plus" (onClick)="openCreate()" />
+      }
+    </div>
+  } @else {
+    <div class="grid grid-cols-[repeat(auto-fill,minmax(260px,1fr))] gap-3">
+      @for (wallet of activeWallets(); track wallet.id) {
+        <article
+          class="flex flex-col gap-3 rounded-xl border-2 p-4"
+          [class]="wallet.balance < 0 ? 'border-red-300 bg-red-50/40 dark:border-red-500/40 dark:bg-red-950/30' : 'border-slate-200 dark:border-slate-700'"
+          [style.border-color]="wallet.balance < 0 ? null : wallet.color"
+        >
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2 font-semibold">
+              <span class="inline-block h-2.5 w-2.5 rounded-full" [style.background]="wallet.color"></span>
+              {{ wallet.name }}
+            </div>
+            @if (wallet.balance < 0) {
+              <p-tag value="Solde négatif" severity="danger" />
+            }
+          </div>
+          <div class="text-3xl font-bold tabular-nums" [class]="wallet.balance < 0 ? 'text-red-700 dark:text-red-400' : ''">
+            {{ formatAmount(wallet.balance) }} <span class="text-base font-semibold text-slate-500">Ar</span>
+          </div>
+          <dl class="grid grid-cols-2 gap-x-3 gap-y-1 text-xs">
+            <dt class="text-slate-500">Entrées du mois</dt>
+            <dd class="text-right font-medium tabular-nums text-green-700 dark:text-green-400">+ {{ formatAmount(wallet.monthIncome) }}</dd>
+            <dt class="text-slate-500">Sorties du mois</dt>
+            <dd class="text-right font-medium tabular-nums text-red-700 dark:text-red-400">− {{ formatAmount(wallet.monthOutflow) }}</dd>
+            <dt class="text-slate-500">Solde initial</dt>
+            <dd class="text-right tabular-nums">
+              @if (wallet.openingDate) {
+                {{ formatAmount(wallet.openingBalance) }} au {{ formatDay(wallet.openingDate) }}
+              } @else {
+                <span class="text-slate-400">non défini</span>
+              }
+            </dd>
+          </dl>
+          <p class="text-xs" [class]="wallet.lastCashCount ? 'text-slate-500' : 'text-amber-700 dark:text-amber-400'">
+            @if (wallet.lastCashCount; as count) {
+              Pointé le {{ formatDay(count.date) }} · écart {{ formatAmount(count.gap) }} Ar
+            } @else {
+              Jamais pointé
+            }
+          </p>
+          <div class="mt-auto flex flex-wrap items-center gap-1 border-t border-slate-100 pt-2 dark:border-slate-700">
+            <a class="mr-auto text-xs font-medium text-blue-600 hover:underline dark:text-blue-400" routerLink="/treasury/movements" [queryParams]="{ walletId: wallet.id }">
+              Mouvements
+            </a>
+            @if (isAdmin()) {
+              <p-button icon="pi pi-arrow-right-arrow-left" size="small" [text]="true" severity="secondary" aria-label="Virement" (onClick)="openTransfer(wallet)" />
+              <p-button icon="pi pi-check-square" size="small" [text]="true" severity="secondary" aria-label="Pointer" (onClick)="openCashCount(wallet)" />
+              <p-button icon="pi pi-pencil" size="small" [text]="true" severity="secondary" aria-label="Modifier" (onClick)="openEdit(wallet)" />
+            }
+          </div>
+        </article>
+      }
+    </div>
+  }
+
+  @if (archivedWallets().length) {
+    <details class="mt-4 rounded-lg border border-slate-200 p-3 text-sm dark:border-slate-700">
+      <summary class="cursor-pointer font-medium">Portefeuilles archivés ({{ archivedWallets().length }})</summary>
+      <div class="mt-2 flex flex-col gap-2">
+        @for (wallet of archivedWallets(); track wallet.id) {
+          <div class="flex items-center justify-between rounded-md bg-slate-50 p-2 dark:bg-slate-700">
+            <span class="flex items-center gap-2 text-slate-600 dark:text-slate-200">
+              <span class="inline-block h-2.5 w-2.5 rounded-full" [style.background]="wallet.color"></span>
+              {{ wallet.name }} · solde final {{ formatAmount(wallet.balance) }} Ar
+            </span>
+            @if (isAdmin()) {
+              <p-button label="Restaurer" icon="pi pi-undo" size="small" [text]="true" severity="secondary" (onClick)="restore(wallet)" />
+            }
+          </div>
+        }
+      </div>
+    </details>
+  }
+}
+
+<mb-wallet-form-dialog [(visible)]="showWalletDialog" [wallet]="selected" (saved)="load()" />
+<mb-transfer-dialog [(visible)]="showTransferDialog" [wallets]="activeWallets()" [sourceId]="selected?.id ?? null" (saved)="load()" />
+<mb-cash-count-dialog [(visible)]="showCashCountDialog" [wallet]="selected" (saved)="load()" />

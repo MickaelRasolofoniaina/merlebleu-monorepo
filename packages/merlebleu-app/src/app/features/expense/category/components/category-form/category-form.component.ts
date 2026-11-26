@@ -1,4 +1,4 @@
-import { Component, computed, effect, input, output, signal } from '@angular/core';
+import { Component, computed, effect, inject, input, output, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { InputTextModule } from 'primeng/inputtext';
 import { SelectModule } from 'primeng/select';
@@ -6,8 +6,10 @@ import {
   CreateExpenseCategoryDto,
   ExpenseCategory,
   ExpenseSection,
+  PaymentMethod,
   createExpenseCategorySchema,
 } from '@merlebleu/shared';
+import { PaymentService } from '../../../../sale/payment/payment.service';
 import { CATEGORY_SECTIONS } from '../../../expense.model';
 
 @Component({
@@ -20,14 +22,22 @@ export class CategoryFormComponent {
   readonly category = input<ExpenseCategory | null>(null);
   readonly save = output<CreateExpenseCategoryDto>();
 
+  private readonly paymentService = inject(PaymentService);
+
   protected readonly sections = CATEGORY_SECTIONS;
+  protected readonly paymentMethods = signal<PaymentMethod[]>([]);
+  protected readonly defaultPaymentMethodId = signal<string | null>(null);
 
   protected readonly label = signal('');
   protected readonly section = signal<ExpenseCategory['section']>(ExpenseSection.CURRENT);
   protected readonly submitted = signal(false);
 
   private readonly result = computed(() =>
-    createExpenseCategorySchema.safeParse({ label: this.label(), section: this.section() }),
+    createExpenseCategorySchema.safeParse({
+      label: this.label(),
+      section: this.section(),
+      defaultPaymentMethodId: this.defaultPaymentMethodId(),
+    }),
   );
 
   protected readonly labelError = computed(() => {
@@ -36,9 +46,11 @@ export class CategoryFormComponent {
   });
 
   constructor() {
+    this.paymentService.getAllPaymentMethods().subscribe({ next: (methods) => this.paymentMethods.set(methods) });
     effect(() => {
       const category = this.category();
       this.submitted.set(false);
+      this.defaultPaymentMethodId.set(category?.defaultPaymentMethod?.id ?? null);
       this.label.set(category?.label ?? '');
       this.section.set(category?.section ?? ExpenseSection.CURRENT);
     });
@@ -48,6 +60,7 @@ export class CategoryFormComponent {
   reset(): void {
     this.submitted.set(false);
     this.label.set('');
+    this.defaultPaymentMethodId.set(null);
   }
 
   protected onSubmit(): void {

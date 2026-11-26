@@ -36,6 +36,7 @@ export class OrderEntity implements Order {
   paymentMethod: PaymentMethodEntity;
   balancePaidAmount: number;
   balancePaymentMethod?: PaymentMethodEntity | null;
+  balancePaidDate?: string | null;
   shop: ShopEntity;
   orderDate: string;
   orderStatus?: OrderStatus;
@@ -151,6 +152,10 @@ export const OrderSchema = new EntitySchema<OrderEntity>({
     balancePaidAmount: {
       type: 'integer',
       default: 0,
+    },
+    balancePaidDate: {
+      type: 'date',
+      nullable: true,
     },
     orderDate: {
       type: 'date',

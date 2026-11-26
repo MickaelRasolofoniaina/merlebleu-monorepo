@@ -1,0 +1,104 @@
+<p-dialog [(visible)]="visible" [modal]="true" [style]="{ width: '30rem', maxWidth: '95vw' }" header="Nouveau virement">
+  <form id="transfer-form" (submit)="$event.preventDefault(); save()" class="flex flex-col gap-4">
+    <div class="grid grid-cols-2 gap-3">
+      <div class="flex flex-col gap-1">
+        <label for="transferFrom" class="font-semibold text-slate-900 dark:text-white">Depuis</label>
+        <p-select
+          inputId="transferFrom"
+          name="from"
+          [options]="wallets()"
+          optionLabel="name"
+          optionValue="id"
+          [ngModel]="fromId()"
+          (ngModelChange)="fromId.set($event)"
+          placeholder="Portefeuille"
+          fluid
+          appendTo="body"
+        />
+        @if (error('fromWalletId')) {
+          <small class="text-red-500">{{ error('fromWalletId') }}</small>
+        }
+      </div>
+      <div class="flex flex-col gap-1">
+        <label for="transferTo" class="font-semibold text-slate-900 dark:text-white">Vers</label>
+        <p-select
+          inputId="transferTo"
+          name="to"
+          [options]="wallets()"
+          optionLabel="name"
+          optionValue="id"
+          [ngModel]="toId()"
+          (ngModelChange)="toId.set($event)"
+          placeholder="Portefeuille"
+          fluid
+          appendTo="body"
+        />
+        @if (error('toWalletId')) {
+          <small class="text-red-500">{{ error('toWalletId') }}</small>
+        }
+      </div>
+    </div>
+
+    <div class="grid grid-cols-2 gap-3">
+      <div class="flex flex-col gap-1">
+        <label for="transferAmount" class="font-semibold text-slate-900 dark:text-white">Montant (Ar)</label>
+        <p-inputnumber
+          inputId="transferAmount"
+          name="amount"
+          [ngModel]="amount()"
+          (ngModelChange)="amount.set($event)"
+          [min]="0"
+          [maxFractionDigits]="0"
+          locale="fr-FR"
+          fluid
+        />
+        @if (error('amount')) {
+          <small class="text-red-500">{{ error('amount') }}</small>
+        }
+      </div>
+      <div class="flex flex-col gap-1">
+        <label for="transferDate" class="font-semibold text-slate-900 dark:text-white">Date</label>
+        <p-datepicker
+          inputId="transferDate"
+          name="date"
+          [ngModel]="date()"
+          (ngModelChange)="date.set($event)"
+          dateFormat="dd/mm/yy"
+          [showIcon]="true"
+          fluid
+          appendTo="body"
+        />
+        @if (error('date')) {
+          <small class="text-red-500">{{ error('date') }}</small>
+        }
+      </div>
+    </div>
+
+    <div class="flex flex-col gap-1">
+      <label for="transferNote" class="font-semibold text-slate-900 dark:text-white">Note (facultatif)</label>
+      <input id="transferNote" name="note" type="text" pInputText [ngModel]="note()" (ngModelChange)="note.set($event)" class="w-full" />
+    </div>
+
+    @if (preview(); as rows) {
+      <div class="rounded-lg bg-slate-50 p-3 text-xs dark:bg-slate-700">
+        <p class="mb-1 font-semibold text-slate-700 dark:text-slate-100">Après ce virement</p>
+        @for (row of rows; track row.name) {
+          <div class="flex justify-between text-slate-700 dark:text-slate-100">
+            <span>{{ row.name }}</span>
+            <span class="tabular-nums">{{ formatAmount(row.before) }} → <b>{{ formatAmount(row.after) }} Ar</b></span>
+          </div>
+        }
+      </div>
+    }
+    <p class="text-xs text-slate-500">
+      Un virement n'est ni une recette ni une dépense : il déplace l'argent d'un portefeuille à l'autre.
+    </p>
+  </form>
+
+  <ng-template #footer>
+    <div class="flex justify-end gap-2">
+      <p-button label="Annuler" severity="contrast" (onClick)="visible.set(false)" />
+      <p-button label="Enregistrer le virement" icon="pi pi-arrow-right-arrow-left" (onClick)="save()" [loading]="saving()" />
+    </div>
+  </ng-template>
+</p-dialog>

@@ -3,6 +3,7 @@ import { z } from "zod";
 export const createIngredientSchema = z.object({
   label: z.string().min(1, "Veuillez remplir le libellé de l'ingrédient"),
   unitId: z.uuid("L'unité est requise"),
+  defaultPaymentMethodId: z.uuid().nullable().optional(),
 });
 
 export const updateIngredientSchema = createIngredientSchema;

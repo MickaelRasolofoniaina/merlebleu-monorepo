@@ -5,6 +5,9 @@ export class PaymentMethodEntity implements PaymentMethod {
   id: string;
   name: string;
   color: string;
+  openingBalance: number;
+  openingDate: string | null;
+  archived: boolean;
 }
 
 export const PaymentMethodSchema = new EntitySchema<PaymentMethodEntity>({
@@ -27,6 +30,18 @@ export const PaymentMethodSchema = new EntitySchema<PaymentMethodEntity>({
       nullable: false,
       length: 7,
       default: DEFAULT_PAYMENT_METHOD_COLOR,
+    },
+    openingBalance: {
+      type: 'integer',
+      default: 0,
+    },
+    openingDate: {
+      type: 'date',
+      nullable: true,
+    },
+    archived: {
+      type: 'boolean',
+      default: false,
     },
   },
 });

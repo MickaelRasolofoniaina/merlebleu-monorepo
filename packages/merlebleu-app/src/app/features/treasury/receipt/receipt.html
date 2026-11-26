@@ -1,0 +1,124 @@
+<div class="mb-3 flex flex-wrap items-center justify-between gap-3">
+  <h2 class="text-2xl font-bold">Recettes</h2>
+  <div class="flex flex-wrap items-center gap-3">
+    <p-selectbutton
+      [options]="periodOptions"
+      optionLabel="label"
+      optionValue="value"
+      [allowEmpty]="false"
+      [ngModel]="period()"
+      (ngModelChange)="setPeriod($event)"
+      aria-label="Période"
+    />
+    <div class="flex items-center gap-1">
+      <p-button icon="pi pi-chevron-left" [text]="true" severity="secondary" aria-label="Période précédente" (onClick)="shift(-1)" />
+      <span class="min-w-48 text-center font-semibold">{{ periodLabel() }}</span>
+      <p-button icon="pi pi-chevron-right" [text]="true" severity="secondary" aria-label="Période suivante" (onClick)="shift(1)" />
+      @if (!isCurrentPeriod()) {
+        <p-button label="Aujourd'hui" size="small" severity="secondary" [outlined]="true" (onClick)="goToCurrent()" />
+      }
+    </div>
+  </div>
+</div>
+
+@if (failed() && !summary()) {
+  <p-message severity="error">
+    <div class="flex items-center gap-3">
+      <span>Impossible de charger les recettes.</span>
+      <p-button label="Réessayer" size="small" severity="secondary" (onClick)="reload()" />
+    </div>
+  </p-message>
+} @else if (loading() && !summary()) {
+  <div class="grid grid-cols-[repeat(auto-fit,minmax(170px,1fr))] gap-3">
+    @for (placeholder of [1, 2, 3, 4]; track placeholder) {
+      <p-skeleton height="5rem" borderRadius="0.75rem" />
+    }
+  </div>
+} @else if (summary(); as data) {
+  <div class="mb-4 flex flex-wrap gap-3" [class.opacity-60]="loading()">
+    <stat-card class="[&>div]:border-2 [&>div]:shadow-md dark:[&>div]:shadow-none" color="green" icon="pi pi-arrow-down-left" [valueText]="'+ ' + formatAmount(data.income) + ' Ar'" label="entrées" />
+    <stat-card class="[&>div]:border-2 [&>div]:shadow-md dark:[&>div]:shadow-none" color="orange" icon="pi pi-undo" [valueText]="'− ' + formatAmount(data.refunds) + ' Ar'" label="remboursements" />
+    <stat-card class="[&>div]:border-2 [&>div]:shadow-md dark:[&>div]:shadow-none" color="red" icon="pi pi-arrow-up-right" [valueText]="'− ' + formatAmount(data.outflow) + ' Ar'" label="sorties (dépenses)" />
+    <stat-card class="[&>div]:border-2 [&>div]:shadow-md dark:[&>div]:shadow-none" color="blue" icon="pi pi-wallet" [valueText]="formatAmount(data.net) + ' Ar'" label="net de la période" />
+  </div>
+
+  <div class="grid gap-4 xl:grid-cols-[1fr_300px]">
+    <div class="flex min-w-0 flex-col gap-4">
+      <section class="rounded-xl border border-slate-300 p-4 shadow-md dark:border-slate-700 dark:shadow-none">
+        <h3 class="mb-2 text-sm font-semibold">{{ chartTitle() }}</h3>
+        @if (data.points.length === 0) {
+          <p class="py-8 text-center text-slate-500">Aucune entrée sur cette période.</p>
+        } @else {
+          <p-chart type="bar" [data]="chartData()" [options]="chartOptions()" height="14rem" />
+        }
+      </section>
+
+      <p-table [value]="data.wallets" [tableStyle]="{ 'min-width': '36rem' }" dataKey="name">
+        <ng-template #header>
+          <tr>
+            <th>Portefeuille</th>
+            <th class="text-right!">Entrées</th>
+            <th class="text-right!">Remboursements</th>
+            <th class="text-right!">Sorties</th>
+            <th class="text-right!">Net</th>
+          </tr>
+        </ng-template>
+        <ng-template #body let-row>
+          <tr>
+            <td>
+              <span class="flex items-center gap-2">
+                <span class="inline-block h-2.5 w-2.5 rounded-full" [style.background]="row.color"></span>{{ row.name }}
+              </span>
+            </td>
+            <td class="text-right! tabular-nums">{{ row.income ? formatAmount(row.income) : '—' }}</td>
+            <td class="text-right! tabular-nums">{{ row.refunds ? formatAmount(row.refunds) : '—' }}</td>
+            <td class="text-right! tabular-nums">{{ row.outflow ? formatAmount(row.outflow) : '—' }}</td>
+            <td class="text-right! font-semibold tabular-nums" [class]="row.net < 0 ? 'text-red-600 dark:text-red-400' : ''">
+              {{ row.net ? formatAmount(row.net) : '—' }}
+            </td>
+          </tr>
+        </ng-template>
+        <ng-template #footer>
+          <tr class="font-bold">
+            <td>Total</td>
+            <td class="text-right! tabular-nums">{{ formatAmount(data.income) }}</td>
+            <td class="text-right! tabular-nums">{{ formatAmount(data.refunds) }}</td>
+            <td class="text-right! tabular-nums">{{ formatAmount(data.outflow) }}</td>
+            <td class="text-right! tabular-nums">{{ formatAmount(data.net) }}</td>
+          </tr>
+        </ng-template>
+        <ng-template #emptymessage>
+          <tr>
+            <td colspan="5" class="text-center! py-6 text-slate-500">Aucun mouvement sur cette période.</td>
+          </tr>
+        </ng-template>
+      </p-table>
+    </div>
+
+    <aside class="h-fit rounded-xl border border-slate-300 p-4 shadow-md dark:border-slate-700 dark:shadow-none">
+      <h3 class="mb-1 text-sm font-semibold">Soldes disponibles</h3>
+      <p class="mb-3 text-xs text-slate-500">À l'instant, tous portefeuilles actifs</p>
+      <ul class="flex flex-col gap-2">
+        @for (wallet of activeBalances(); track wallet.id) {
+          <li class="flex items-center justify-between">
+            <span class="flex items-center gap-2">
+              <span class="inline-block h-2.5 w-2.5 rounded-full" [style.background]="wallet.color"></span>{{ wallet.name }}
+            </span>
+            <span class="font-semibold tabular-nums" [class]="wallet.balance < 0 ? 'text-red-600 dark:text-red-400' : ''">
+              {{ formatAmount(wallet.balance) }} Ar
+            </span>
+          </li>
+        }
+      </ul>
+      <div class="mt-3 flex items-center justify-between border-t border-slate-200 pt-3 font-bold dark:border-slate-700">
+        <span>Total</span>
+        <span class="tabular-nums">{{ formatAmount(balances()?.totalBalance ?? 0) }} Ar</span>
+      </div>
+    </aside>
+  </div>
+
+  <p class="mt-3 text-xs text-slate-500">
+    Recettes = acomptes (à la date de commande) + soldes (à la date réelle de livraison), moins les remboursements.
+    Les dépenses fixes non payées ne sont pas comptées.
+  </p>
+}
