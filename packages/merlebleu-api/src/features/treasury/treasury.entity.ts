@@ -111,3 +111,74 @@ export const CashCountSchema = new EntitySchema<CashCountEntity>({
     },
   },
 });
+
+export class CashClosingEntity {
+  id: string;
+  /** Last day covered by the closing, YYYY-MM-DD. */
+  date: string;
+  createdBy: string;
+  createdAt: Date;
+  lines: CashClosingLineEntity[];
+}
+
+export class CashClosingLineEntity {
+  id: string;
+  closing: CashClosingEntity;
+  wallet: PaymentMethodEntity;
+  calculatedAmount: number;
+  countedAmount: number | null;
+  frozenAmount: number;
+}
+
+export const CashClosingSchema = new EntitySchema<CashClosingEntity>({
+  name: 'CashClosingEntity',
+  tableName: 'cash_closings',
+  target: CashClosingEntity,
+  columns: {
+    id: { type: 'uuid', primary: true, generated: 'uuid' },
+    date: { type: 'date', unique: true },
+    createdBy: { type: 'varchar', length: 100 },
+    createdAt: { type: 'timestamp', createDate: true },
+  },
+  relations: {
+    lines: {
+      type: 'one-to-many',
+      target: () => CashClosingLineEntity,
+      inverseSide: 'closing',
+      cascade: ['insert'],
+    },
+  },
+});
+
+export const CashClosingLineSchema = new EntitySchema<CashClosingLineEntity>({
+  name: 'CashClosingLineEntity',
+  tableName: 'cash_closing_lines',
+  target: CashClosingLineEntity,
+  columns: {
+    id: { type: 'uuid', primary: true, generated: 'uuid' },
+    calculatedAmount: { type: 'integer' },
+    countedAmount: { type: 'integer', nullable: true },
+    frozenAmount: { type: 'integer' },
+  },
+  relations: {
+    closing: {
+      type: 'many-to-one',
+      target: () => CashClosingEntity,
+      joinColumn: { name: 'closingId', referencedColumnName: 'id' },
+      onDelete: 'CASCADE',
+      inverseSide: 'lines',
+    },
+    wallet: {
+      type: 'many-to-one',
+      target: () => PaymentMethodEntity,
+      joinColumn: { name: 'walletId', referencedColumnName: 'id' },
+      onDelete: 'RESTRICT',
+    },
+  },
+  uniques: [
+    {
+      name: 'UQ_cash_closing_lines_closing_wallet',
+      columns: ['closing', 'wallet'],
+    },
+  ],
+});

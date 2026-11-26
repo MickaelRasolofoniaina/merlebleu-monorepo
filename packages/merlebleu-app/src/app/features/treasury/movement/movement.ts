@@ -74,6 +74,12 @@ export class MovementComponent {
     });
   }
 
+  /** Movements up to the latest closing are locked and have no running balance. */
+  protected isLocked(date: string): boolean {
+    const lockedUntil = this.page()?.lockedUntil;
+    return !!lockedUntil && date <= lockedUntil;
+  }
+
   protected onSearch(value: string): void {
     this.search$.next(value);
   }

@@ -2,8 +2,11 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import {
+  CashClosing,
   CashCount,
+  ClosingPreview,
   CreateCashCountDto,
+  CreateClosingDto,
   CreateRefundDto,
   CreateTransferDto,
   ExportMovementsQueryDto,
@@ -58,6 +61,23 @@ export class TreasuryApiService {
 
   createRefund(dto: CreateRefundDto): Observable<void> {
     return this.http.post<void>(`${this.url}/refunds`, dto);
+  }
+
+  listClosings(): Observable<CashClosing[]> {
+    return this.http.get<CashClosing[]>(`${this.url}/closings`);
+  }
+
+  previewClosing(date: string): Observable<ClosingPreview> {
+    return this.http.get<ClosingPreview>(`${this.url}/closings/preview`, { params: toParams({ date }) });
+  }
+
+  createClosing(dto: CreateClosingDto): Observable<CashClosing> {
+    return this.http.post<CashClosing>(`${this.url}/closings`, dto);
+  }
+
+  /** Only the latest closing can be reopened. */
+  reopenLastClosing(): Observable<void> {
+    return this.http.delete<void>(`${this.url}/closings/last`);
   }
 
   listCashCounts(walletId: string): Observable<CashCount[]> {

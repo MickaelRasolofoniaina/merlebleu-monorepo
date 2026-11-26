@@ -1,4 +1,5 @@
 import { describe, it, expect, beforeEach, jest } from '@jest/globals';
+import { BadRequestException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { ExpenseNature, FixedExpenseType } from '@merlebleu/shared';
@@ -7,6 +8,7 @@ import { PaymentMethodEntity } from '../sale/payment/payment.entity';
 import { ExpenseCategoryEntity } from './category/expense-category.entity';
 import { ExpenseEntity } from './expense.entity';
 import { ExpenseService } from './expense.service';
+import { PeriodLockService } from '../treasury/period-lock/period-lock.service';
 
 /* eslint-disable @typescript-eslint/no-unsafe-return */
 // Loosely typed mocks: the repositories are replaced by plain objects
@@ -41,10 +43,12 @@ describe('ExpenseService', () => {
   let service: ExpenseService;
   let expenseRepository: RepositoryMock;
   let categoryRepository: RepositoryMock;
+  let periodLock: { assertOpen: ReturnType<typeof mockFn> };
 
   beforeEach(async () => {
     expenseRepository = createRepositoryMock();
     categoryRepository = createRepositoryMock();
+    periodLock = { assertOpen: mockFn().mockResolvedValue(undefined) };
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -63,8 +67,12 @@ describe('ExpenseService', () => {
         },
         {
           provide: getRepositoryToken(PaymentMethodEntity),
-          useValue: createRepositoryMock(),
+          useValue: {
+            ...createRepositoryMock(),
+            findOneBy: mockFn().mockResolvedValue({ id: 'wallet-1' }),
+          },
         },
+        { provide: PeriodLockService, useValue: periodLock },
       ],
     }).compile();
 
@@ -107,6 +115,59 @@ describe('ExpenseService', () => {
 
       expect(result).toBeNull();
       expect(expenseRepository.delete).toHaveBeenCalledWith('expense-1');
+    });
+  });
+
+  describe('closed periods', () => {
+    const closed = new BadRequestException('période clôturée');
+
+    it('refuses a cell dated in a closed period without touching the data', async () => {
+      periodLock.assertOpen.mockRejectedValue(closed);
+
+      await expect(
+        service.setCell({ date: '2026-09-15', categoryId: 'c', amount: 100 }),
+      ).rejects.toBe(closed);
+      expect(expenseRepository.save).not.toHaveBeenCalled();
+    });
+
+    it('refuses to mark a fixed expense of a closed period as paid', async () => {
+      expenseRepository.findOneBy.mockResolvedValue(
+        fixedExpense({ date: '2026-09-30', paid: false }),
+      );
+      periodLock.assertOpen.mockRejectedValue(closed);
+
+      await expect(service.setPaid('id', true)).rejects.toBe(closed);
+      expect(periodLock.assertOpen).toHaveBeenCalledWith('2026-09-30');
+      expect(expenseRepository.save).not.toHaveBeenCalled();
+    });
+
+    it('lets an unpaid fixed expense be edited, it is not in the ledger', async () => {
+      expenseRepository.findOneBy.mockResolvedValue(
+        fixedExpense({ date: '2026-09-30', paid: false }),
+      );
+      periodLock.assertOpen.mockRejectedValue(closed);
+
+      await service.updateFixed('id', {
+        date: '2026-09-30',
+        fixedType: FixedExpenseType.CHARGE,
+        label: 'Jirama',
+        amount: 2000,
+        paymentMethodId: 'wallet-1',
+        paid: false,
+      });
+
+      expect(periodLock.assertOpen).not.toHaveBeenCalled();
+      expect(expenseRepository.save).toHaveBeenCalled();
+    });
+
+    it('refuses to delete a paid expense of a closed period', async () => {
+      expenseRepository.findOneBy.mockResolvedValue(
+        fixedExpense({ date: '2026-09-30', paid: true }),
+      );
+      periodLock.assertOpen.mockRejectedValue(closed);
+
+      await expect(service.delete('id')).rejects.toBe(closed);
+      expect(expenseRepository.delete).not.toHaveBeenCalled();
     });
   });
 

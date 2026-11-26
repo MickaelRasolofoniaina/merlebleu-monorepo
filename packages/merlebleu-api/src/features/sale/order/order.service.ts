@@ -21,6 +21,7 @@ import { formatDate } from '@shared/date/date.utils';
 import { PaymentService } from '../payment/payment.service';
 import { ShopService } from '../../shop/shop.service';
 import { NotificationService } from '../../notification/notification.service';
+import { PeriodLockService } from '../../treasury/period-lock/period-lock.service';
 
 const PASTRY_NOTIFICATION_ROLES = [UserRole.PASTRY_CHEF, UserRole.ADMIN];
 const CASHIER_NOTIFICATION_ROLES = [UserRole.CASHIER, UserRole.ADMIN];
@@ -44,12 +45,15 @@ export class OrderService {
     private paymentService: PaymentService,
     private shopService: ShopService,
     private notificationService: NotificationService,
+    private periodLock: PeriodLockService,
   ) {}
 
   async addOrder(
     order: CreateOrderDto,
     actorName: string,
   ): Promise<OrderEntity> {
+    await this.periodLock.assertOpen(order.orderDate);
+
     const paymentMethod = await this.paymentService.getPaymentMethod(
       order.paymentMethodId,
     );
@@ -379,6 +383,12 @@ export class OrderService {
 
     const { orderData, orderItems } = this.splitOrderInput(order);
 
+    const before = {
+      date: existingOrder.orderDate,
+      deposit: this.getDeposit(existingOrder),
+      walletId: existingOrder.paymentMethod?.id,
+    };
+
     Object.assign(existingOrder, {
       ...orderData,
       paymentMethod,
@@ -386,6 +396,15 @@ export class OrderService {
     });
 
     existingOrder.orderItems = this.buildOrderItems(orderItems, existingOrder);
+
+    // only the deposit is dated by the order date: editing anything else stays possible
+    const depositChanged =
+      before.date.slice(0, 10) !== existingOrder.orderDate.slice(0, 10) ||
+      before.deposit !== this.getDeposit(existingOrder) ||
+      before.walletId !== paymentMethod.id;
+    if (depositChanged) {
+      await this.periodLock.assertOpen(before.date, existingOrder.orderDate);
+    }
 
     const savedOrder = await this.orderRepository.save(existingOrder);
 
@@ -451,6 +470,9 @@ export class OrderService {
       );
     }
 
+    // the balance is collected, so dated, today
+    await this.periodLock.assertOpen(formatDate(new Date()));
+
     const paymentMethod =
       await this.paymentService.getPaymentMethod(paymentMethodId);
 
@@ -481,6 +503,14 @@ export class OrderService {
       throw new NotFoundException(`Order with id ${id} not found`);
     }
 
+    // deleting an order removes its deposit and balance from the ledger
+    await this.periodLock.assertOpen(
+      this.getDeposit(existingOrder) > 0 ? existingOrder.orderDate : null,
+      existingOrder.balancePaidAmount > 0
+        ? (existingOrder.balancePaidDate ?? existingOrder.deliveryDate)
+        : null,
+    );
+
     await this.orderRepository.delete(id);
 
     await this.notify(NotificationType.ORDER_DELETED, {
@@ -489,6 +519,11 @@ export class OrderService {
       actorName,
       targetRoles: PASTRY_NOTIFICATION_ROLES,
     });
+  }
+
+  /** What the customer paid when the order was taken. */
+  private getDeposit(order: OrderEntity): number {
+    return (order.paidAmount ?? 0) - (order.balancePaidAmount ?? 0);
   }
 
   private buildOrderItems(

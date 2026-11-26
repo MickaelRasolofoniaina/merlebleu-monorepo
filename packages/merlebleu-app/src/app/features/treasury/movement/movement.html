@@ -60,6 +60,18 @@
   </div>
 </div>
 
+@if (page()?.lockedUntil; as lockedUntil) {
+  <div class="mb-3 flex items-start gap-2 rounded-lg border border-slate-300 bg-slate-50 p-3 text-sm dark:border-slate-600 dark:bg-slate-800" role="status">
+    <i class="pi pi-lock mt-1"></i>
+    <div>
+      <p class="font-semibold">Période clôturée jusqu'au {{ formatDay(lockedUntil) }}</p>
+      <p class="text-xs text-slate-500 dark:text-slate-300">
+        Ces mouvements ne peuvent plus être modifiés. Le solde après est affiché à partir du lendemain de la clôture.
+      </p>
+    </div>
+  </div>
+}
+
 @if (failed() && !page()) {
   <p-message severity="error">
     <div class="flex items-center gap-3">
@@ -100,8 +112,13 @@
       </tr>
     </ng-template>
     <ng-template #body let-row>
-      <tr>
-        <td class="tabular-nums">{{ formatDay(row.date) }}</td>
+      <tr [class]="isLocked(row.date) ? 'text-slate-500 dark:text-slate-400' : ''">
+        <td class="tabular-nums">
+          @if (isLocked(row.date)) {
+            <i class="pi pi-lock mr-1 text-xs" aria-label="Période clôturée"></i>
+          }
+          {{ formatDay(row.date) }}
+        </td>
         <td><p-tag [value]="getTypeLabel(row.type)" [severity]="getTypeSeverity(row.type)" /></td>
         <td>{{ row.label }}</td>
         <td>
@@ -137,6 +154,12 @@
     </ng-template>
   </p-table>
   @if (showRunningBalance()) {
-    <p class="mt-1 text-xs text-slate-500">Le « solde après » couvre tout l'historique du portefeuille, pas seulement les lignes filtrées.</p>
+    <p class="mt-1 text-xs text-slate-500">
+      @if (page()?.lockedUntil; as lockedUntil) {
+        Le « solde après » part de la clôture du {{ formatDay(lockedUntil) }} : avant cette date, seuls les mouvements sont listés.
+      } @else {
+        Le « solde après » couvre tout l'historique du portefeuille, pas seulement les lignes filtrées.
+      }
+    </p>
   }
 }

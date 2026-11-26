@@ -8,6 +8,7 @@ import { PaymentService } from '../payment/payment.service';
 import { ShopSchema } from '../../shop/shop.entity';
 import { ShopService } from '../../shop/shop.service';
 import { NotificationModule } from '../../notification/notification.module';
+import { PeriodLockModule } from '../../treasury/period-lock/period-lock.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { NotificationModule } from '../../notification/notification.module';
       ShopSchema,
     ]),
     NotificationModule,
+    PeriodLockModule,
   ],
   controllers: [OrderController],
   providers: [OrderService, PaymentService, ShopService],

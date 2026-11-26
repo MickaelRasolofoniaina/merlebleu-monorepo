@@ -120,6 +120,7 @@ export class AppLayout implements OnInit, OnDestroy {
         { label: 'Portefeuilles', icon: 'pi pi-wallet', routerLink: ['/treasury/wallets'] },
         { label: 'Recettes', icon: 'pi pi-chart-bar', routerLink: ['/treasury/receipts'] },
         { label: 'Mouvements', icon: 'pi pi-list', routerLink: ['/treasury/movements'] },
+        { label: 'Clôtures', icon: 'pi pi-lock', routerLink: ['/treasury/closings'] },
       ],
     },
     {

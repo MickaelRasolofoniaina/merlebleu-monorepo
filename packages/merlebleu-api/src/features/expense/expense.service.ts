@@ -8,6 +8,7 @@ import { Between, Repository } from 'typeorm';
 import { ExpenseNature } from '@merlebleu/shared';
 import { IngredientEntity } from '../ingredient/ingredient.entity';
 import { PaymentMethodEntity } from '../sale/payment/payment.entity';
+import { PeriodLockService } from '../treasury/period-lock/period-lock.service';
 import { ExpenseCategoryEntity } from './category/expense-category.entity';
 import { ExpenseEntity } from './expense.entity';
 import {
@@ -41,6 +42,7 @@ export class ExpenseService {
     private readonly ingredientRepository: Repository<IngredientEntity>,
     @InjectRepository(PaymentMethodEntity)
     private readonly paymentMethodRepository: Repository<PaymentMethodEntity>,
+    private readonly periodLock: PeriodLockService,
   ) {}
 
   findByMonth(query: ListExpensesQueryDto): Promise<ExpenseEntity[]> {
@@ -56,6 +58,8 @@ export class ExpenseService {
 
   /** Sets the total of one grid cell. An amount of 0 clears the cell and returns null. */
   async setCell(dto: SetExpenseCellDto): Promise<ExpenseEntity | null> {
+    await this.periodLock.assertOpen(dto.date);
+
     const target = dto.categoryId
       ? { category: { id: dto.categoryId } }
       : { ingredient: { id: dto.ingredientId } };
@@ -100,6 +104,9 @@ export class ExpenseService {
   }
 
   async addFixed(dto: CreateFixedExpenseDto): Promise<ExpenseEntity> {
+    if (dto.paid) {
+      await this.periodLock.assertOpen(dto.date);
+    }
     const paymentMethod = await this.getPaymentMethod(dto.paymentMethodId);
     return this.expenseRepository.save(
       this.expenseRepository.create({
@@ -120,6 +127,10 @@ export class ExpenseService {
     dto: UpdateFixedExpenseDto,
   ): Promise<ExpenseEntity> {
     const expense = await this.getFixed(id);
+    // an unpaid fixed expense is not in the ledger, so it stays editable in a closed period
+    if (expense.paid || dto.paid) {
+      await this.periodLock.assertOpen(expense.date, dto.date);
+    }
     expense.paymentMethod = await this.getPaymentMethod(dto.paymentMethodId);
     expense.date = dto.date;
     expense.amount = dto.amount;
@@ -132,11 +143,19 @@ export class ExpenseService {
 
   async setPaid(id: string, paid: boolean): Promise<ExpenseEntity> {
     const expense = await this.getFixed(id);
+    await this.periodLock.assertOpen(expense.date);
     expense.paid = paid;
     return this.expenseRepository.save(expense);
   }
 
   async delete(id: string): Promise<void> {
+    const existing = await this.expenseRepository.findOneBy({ id });
+    if (
+      existing &&
+      (existing.nature === ExpenseNature.VARIABLE || existing.paid)
+    ) {
+      await this.periodLock.assertOpen(existing.date);
+    }
     const result = await this.expenseRepository.delete(id);
     if (!result.affected) {
       throw new NotFoundException(`Expense with id ${id} not found`);
