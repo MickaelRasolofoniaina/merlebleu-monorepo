@@ -95,10 +95,10 @@
     </thead>
     <tbody>
       @for (group of groups(); track group.section) {
-        <tr class="bg-slate-800 text-white font-semibold">
-          <td class="sticky left-0 bg-slate-800 px-3 py-2">{{ group.label }}</td>
+        <tr class="bg-slate-800 text-white font-semibold dark:bg-teal-900">
+          <td class="sticky left-0 bg-slate-800 dark:bg-teal-900 px-3 py-2">{{ group.label }}</td>
           <td [attr.colspan]="days().length" class="px-2 py-2"></td>
-          <td class="sticky right-0 bg-slate-800 text-right! px-3 py-2">{{ formatAmount(group.total) }}</td>
+          <td class="sticky right-0 bg-slate-800 dark:bg-teal-900 text-right! px-3 py-2">{{ formatAmount(group.total) }}</td>
         </tr>
         @for (row of group.rows; track row.key) {
           <tr class="border-t border-slate-100 dark:border-slate-800">
