@@ -115,38 +115,76 @@ function buildPoints(
   range: DayRange,
   rows: ReceiptMovementRow[],
 ): ReceiptPoint[] {
-  const receipts = rows.filter(
-    (row) =>
-      INCOME_MOVEMENT_TYPES.includes(row.type) ||
-      row.type === MovementType.REFUND,
-  );
-
   if (period === ReceiptPeriod.DAY) {
-    return receipts.map((row) => ({
-      label: row.label,
-      amount: row.amount,
-    }));
+    // one point per receipt: expenses are not receipts, so they are left out
+    return rows.filter(isReceipt).map((row) => {
+      const { income, refunds } = splitAmount(row);
+      return {
+        label: row.label,
+        date: row.date,
+        income,
+        refunds,
+        outflow: 0,
+        amount: row.amount,
+        net: row.amount,
+      };
+    });
   }
 
-  if (period === ReceiptPeriod.MONTH) {
-    const year = Number(range.from.slice(0, 4));
-    const month = Number(range.from.slice(5, 7));
-    const totals = new Array<number>(daysInMonth(year, month)).fill(0);
-    for (const row of receipts) {
-      totals[Number(row.date.slice(8, 10)) - 1] += row.amount;
-    }
-    return totals.map((amount, index) => ({
-      label: String(index + 1),
-      amount,
-    }));
-  }
-
-  const totals = new Array<number>(12).fill(0);
-  for (const row of receipts) {
-    totals[Number(row.date.slice(5, 7)) - 1] += row.amount;
-  }
-  return totals.map((amount, index) => ({
-    label: MONTH_LABELS[index],
-    amount,
+  const year = range.from.slice(0, 4);
+  const bucketCount =
+    period === ReceiptPeriod.MONTH
+      ? daysInMonth(Number(year), Number(range.from.slice(5, 7)))
+      : 12;
+  const buckets = Array.from({ length: bucketCount }, () => ({
+    income: 0,
+    refunds: 0,
+    outflow: 0,
   }));
+
+  for (const row of rows) {
+    const index =
+      period === ReceiptPeriod.MONTH
+        ? Number(row.date.slice(8, 10)) - 1
+        : Number(row.date.slice(5, 7)) - 1;
+    if (isReceipt(row)) {
+      const { income, refunds } = splitAmount(row);
+      buckets[index].income += income;
+      buckets[index].refunds += refunds;
+    } else if (isExpense(row)) {
+      buckets[index].outflow -= row.amount;
+    }
+  }
+
+  return buckets.map(({ income, refunds, outflow }, index) => ({
+    label:
+      period === ReceiptPeriod.MONTH ? String(index + 1) : MONTH_LABELS[index],
+    date:
+      period === ReceiptPeriod.MONTH
+        ? `${range.from.slice(0, 7)}-${String(index + 1).padStart(2, '0')}`
+        : `${year}-${String(index + 1).padStart(2, '0')}-01`,
+    income,
+    refunds,
+    outflow,
+    amount: income - refunds,
+    net: income - refunds - outflow,
+  }));
+}
+
+const isReceipt = (row: ReceiptMovementRow): boolean =>
+  INCOME_MOVEMENT_TYPES.includes(row.type) || row.type === MovementType.REFUND;
+
+const isExpense = (row: ReceiptMovementRow): boolean =>
+  row.type === MovementType.EXPENSE || row.type === MovementType.FIXED_EXPENSE;
+
+/** Splits a receipt movement into income and refunds (a positive amount). */
+function splitAmount(row: ReceiptMovementRow): {
+  income: number;
+  refunds: number;
+} {
+  const isRefund = row.type === MovementType.REFUND;
+  return {
+    income: isRefund ? 0 : row.amount,
+    refunds: isRefund ? -row.amount : 0,
+  };
 }

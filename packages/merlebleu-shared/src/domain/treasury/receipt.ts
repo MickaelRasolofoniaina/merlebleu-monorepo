@@ -16,8 +16,18 @@ export interface ReceiptWalletRow {
 
 export interface ReceiptPoint {
   label: string;
-  /** Net receipts of the point (income minus refunds). */
+  /** Date of the point, YYYY-MM-DD. First day of the month for a yearly point. */
+  date: string;
+  /** Deposits and balances collected. */
+  income: number;
+  /** Refunds, as a positive amount. */
+  refunds: number;
+  /** Expenses paid, as a positive amount. Always 0 for a point of a day (one point per receipt). */
+  outflow: number;
+  /** Net receipts of the point (income minus refunds), shown by the chart. */
   amount: number;
+  /** Full net of the point (income minus refunds minus expenses). */
+  net: number;
 }
 
 export interface ReceiptSummary {

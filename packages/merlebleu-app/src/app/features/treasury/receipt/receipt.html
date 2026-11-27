@@ -45,11 +45,67 @@
   <div class="grid gap-4 xl:grid-cols-[1fr_300px]">
     <div class="flex min-w-0 flex-col gap-4">
       <section class="rounded-xl border border-slate-300 p-4 shadow-md dark:border-slate-700 dark:shadow-none">
-        <h3 class="mb-2 text-sm font-semibold">{{ chartTitle() }}</h3>
+        <div class="mb-2 flex flex-wrap items-center justify-between gap-2">
+          <h3 class="text-sm font-semibold">{{ chartTitle() }}</h3>
+          @if (hasTable()) {
+            <p-selectbutton
+              [options]="viewOptions"
+              optionLabel="label"
+              optionValue="value"
+              size="small"
+              [allowEmpty]="false"
+              [ngModel]="view()"
+              (ngModelChange)="setView($event)"
+              aria-label="Affichage"
+            />
+          }
+        </div>
         @if (data.points.length === 0) {
           <p class="py-8 text-center text-slate-500">Aucune entrée sur cette période.</p>
-        } @else {
+        } @else if (activeView() === 'chart') {
           <p-chart type="bar" [data]="chartData()" [options]="chartOptions()" height="14rem" />
+        } @else {
+          <div [class.opacity-60]="loading()">
+            <p-table [value]="rows()" [tableStyle]="{ 'min-width': '38rem' }">
+              <ng-template #header>
+                <tr>
+                  <th>{{ firstColumnLabel() }}</th>
+                  <th class="text-right!">Entrées</th>
+                  <th class="text-right!">Remboursements</th>
+                  <th class="text-right!">Dépenses</th>
+                  <th class="text-right!">Recette</th>
+                </tr>
+              </ng-template>
+              <ng-template #body let-row>
+                <tr [class]="row.isToday ? '[&>td]:bg-sky-50 dark:[&>td]:bg-sky-950' : row.isEmpty ? 'text-slate-400 dark:text-slate-600' : ''" [attr.aria-current]="row.isToday ? 'date' : null">
+                  <td>
+                    {{ row.label }}
+                    @if (row.isToday) {
+                      <span class="ml-1 rounded bg-sky-600 px-1.5 py-0.5 text-[10px] font-semibold text-white uppercase">Aujourd'hui</span>
+                    }
+                  </td>
+                  <td class="text-right! tabular-nums">{{ row.income ? formatAmount(row.income) + ' Ar' : '—' }}</td>
+                  <td class="text-right! tabular-nums">{{ row.refunds ? formatAmount(row.refunds) + ' Ar' : '—' }}</td>
+                  <td class="text-right! tabular-nums">{{ row.outflow ? formatAmount(row.outflow) + ' Ar' : '—' }}</td>
+                  <td class="text-right! font-semibold tabular-nums" [class]="row.net < 0 ? 'text-red-600 dark:text-red-400' : ''">
+                    {{ row.net ? formatAmount(row.net) + ' Ar' : '—' }}
+                  </td>
+                </tr>
+              </ng-template>
+              <ng-template #footer>
+                <tr class="font-bold">
+                  <td>Total</td>
+                  <td class="text-right! tabular-nums">{{ formatAmount(data.income) }} Ar</td>
+                  <td class="text-right! tabular-nums">{{ formatAmount(data.refunds) }} Ar</td>
+                  <td class="text-right! tabular-nums">{{ formatAmount(data.outflow) }} Ar</td>
+                  <td class="text-right! tabular-nums">{{ formatAmount(data.net) }} Ar</td>
+                </tr>
+              </ng-template>
+            </p-table>
+            <p class="mt-2 text-xs text-slate-500">
+              Recette = entrées − remboursements − dépenses. Le total est celui de la carte « net de la période ».
+            </p>
+          </div>
         }
       </section>
 
@@ -70,21 +126,21 @@
                 <span class="inline-block h-2.5 w-2.5 rounded-full" [style.background]="row.color"></span>{{ row.name }}
               </span>
             </td>
-            <td class="text-right! tabular-nums">{{ row.income ? formatAmount(row.income) : '—' }}</td>
-            <td class="text-right! tabular-nums">{{ row.refunds ? formatAmount(row.refunds) : '—' }}</td>
-            <td class="text-right! tabular-nums">{{ row.outflow ? formatAmount(row.outflow) : '—' }}</td>
+            <td class="text-right! tabular-nums">{{ row.income ? formatAmount(row.income) + ' Ar' : '—' }}</td>
+            <td class="text-right! tabular-nums">{{ row.refunds ? formatAmount(row.refunds) + ' Ar' : '—' }}</td>
+            <td class="text-right! tabular-nums">{{ row.outflow ? formatAmount(row.outflow) + ' Ar' : '—' }}</td>
             <td class="text-right! font-semibold tabular-nums" [class]="row.net < 0 ? 'text-red-600 dark:text-red-400' : ''">
-              {{ row.net ? formatAmount(row.net) : '—' }}
+              {{ row.net ? formatAmount(row.net) + ' Ar' : '—' }}
             </td>
           </tr>
         </ng-template>
         <ng-template #footer>
           <tr class="font-bold">
             <td>Total</td>
-            <td class="text-right! tabular-nums">{{ formatAmount(data.income) }}</td>
-            <td class="text-right! tabular-nums">{{ formatAmount(data.refunds) }}</td>
-            <td class="text-right! tabular-nums">{{ formatAmount(data.outflow) }}</td>
-            <td class="text-right! tabular-nums">{{ formatAmount(data.net) }}</td>
+            <td class="text-right! tabular-nums">{{ formatAmount(data.income) }} Ar</td>
+            <td class="text-right! tabular-nums">{{ formatAmount(data.refunds) }} Ar</td>
+            <td class="text-right! tabular-nums">{{ formatAmount(data.outflow) }} Ar</td>
+            <td class="text-right! tabular-nums">{{ formatAmount(data.net) }} Ar</td>
           </tr>
         </ng-template>
         <ng-template #emptymessage>

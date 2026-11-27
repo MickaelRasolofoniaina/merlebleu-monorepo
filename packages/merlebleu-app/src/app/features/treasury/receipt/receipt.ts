@@ -28,6 +28,23 @@ const CHART_TITLES: Record<ReceiptPeriod, string> = {
   [ReceiptPeriod.YEAR]: 'Recettes nettes par mois',
 };
 
+type ReceiptView = 'chart' | 'table';
+
+const VIEW_OPTIONS: { label: string; value: ReceiptView }[] = [
+  { label: 'Graphique', value: 'chart' },
+  { label: 'Tableau', value: 'table' },
+];
+
+interface ReceiptRow {
+  label: string;
+  income: number;
+  refunds: number;
+  outflow: number;
+  net: number;
+  isEmpty: boolean;
+  isToday: boolean;
+}
+
 @Component({
   selector: 'mb-receipt',
   templateUrl: './receipt.html',
@@ -39,6 +56,7 @@ export class ReceiptComponent {
 
   protected readonly formatAmount = formatUnitPrice;
   protected readonly periodOptions = PERIOD_OPTIONS;
+  protected readonly viewOptions = VIEW_OPTIONS;
 
   protected readonly period = signal<ReceiptPeriod>(ReceiptPeriod.MONTH);
   protected readonly anchor = signal(new Date());
@@ -59,6 +77,26 @@ export class ReceiptComponent {
       case ReceiptPeriod.YEAR:
         return `Année ${date.getFullYear()}`;
     }
+  });
+
+  // the table lists days (month) or months (year); a day already lists one entry per order in the chart
+  protected readonly view = signal<ReceiptView>('chart');
+  protected readonly hasTable = computed(() => this.period() !== ReceiptPeriod.DAY);
+  protected readonly activeView = computed<ReceiptView>(() => (this.hasTable() ? this.view() : 'chart'));
+  protected readonly firstColumnLabel = computed(() => (this.period() === ReceiptPeriod.YEAR ? 'Mois' : 'Jour'));
+
+  protected readonly rows: Signal<ReceiptRow[]> = computed(() => {
+    const isMonth = this.period() === ReceiptPeriod.MONTH;
+    const today = formatDate(new Date());
+    return (this.summary()?.points ?? []).map((point) => ({
+      label: isMonth ? formatDayLabel(point.date) : point.label,
+      income: point.income,
+      refunds: point.refunds,
+      outflow: point.outflow,
+      net: point.net,
+      isEmpty: point.income === 0 && point.refunds === 0 && point.outflow === 0,
+      isToday: isMonth && point.date === today,
+    }));
   });
 
   protected readonly chartTitle = computed(() => CHART_TITLES[this.period()]);
@@ -117,6 +155,10 @@ export class ReceiptComponent {
     if (period) this.period.set(period);
   }
 
+  protected setView(view: ReceiptView | null): void {
+    if (view) this.view.set(view);
+  }
+
   protected shift(direction: -1 | 1): void {
     const date = new Date(this.anchor());
     switch (this.period()) {
@@ -163,3 +205,11 @@ export class ReceiptComponent {
 }
 
 const capitalize = (text: string): string => text.charAt(0).toUpperCase() + text.slice(1);
+
+// YYYY-MM-DD is parsed as a local date: `new Date('2026-11-03')` would be UTC and could shift the day
+const formatDayLabel = (isoDate: string): string => {
+  const [year, month, day] = isoDate.split('-').map(Number);
+  return capitalize(
+    new Date(year, month - 1, day).toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric', month: 'short' }),
+  );
+};

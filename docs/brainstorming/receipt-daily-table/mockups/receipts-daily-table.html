@@ -1,0 +1,217 @@
+<title>Recettes Tableau Journalier</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<script src="https://cdn.tailwindcss.com/3.4.17"></script>
+<script>
+  tailwind.config = { darkMode: 'class' };
+  // Follow the viewer theme: explicit data-theme wins, otherwise the OS setting
+  (function () {
+    var root = document.documentElement;
+    function apply() {
+      var t = root.getAttribute('data-theme');
+      var dark = t ? t === 'dark' : window.matchMedia('(prefers-color-scheme: dark)').matches;
+      root.classList.toggle('dark', dark);
+    }
+    apply();
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', apply);
+    new MutationObserver(apply).observe(root, { attributes: true, attributeFilter: ['data-theme'] });
+  })();
+</script>
+<style>
+  :root { --bg: #ffffff; --fg: #0f172a; }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --bg: #0b1220; --fg: #e2e8f0; color-scheme: dark; } }
+  :root[data-theme="dark"] { --bg: #0b1220; --fg: #e2e8f0; color-scheme: dark; }
+  body { background: var(--bg); color: var(--fg); font-family: Inter, system-ui, sans-serif; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 16px; }
+  .num { font-variant-numeric: tabular-nums; }
+  .tbl th, .tbl td { padding: 0.6rem 0.9rem; border-bottom: 1px solid rgb(226 232 240); text-align: left; }
+  .dark .tbl th, .dark .tbl td { border-bottom-color: rgb(51 65 85); }
+  .tbl thead th { font-weight: 600; background: rgb(248 250 252); }
+  .dark .tbl thead th { background: rgb(15 23 42); }
+  .tbl .r { text-align: right; }
+  .tbl tfoot td { font-weight: 700; background: rgb(248 250 252); }
+  .dark .tbl tfoot td { background: rgb(15 23 42); }
+</style>
+
+<div class="mx-auto max-w-6xl">
+  <div class="mb-1 rounded-md border border-dashed border-amber-400 bg-amber-50 px-3 py-2 text-xs text-amber-900 dark:bg-amber-950 dark:text-amber-200">
+    Maquette : seuls les onglets Graphique / Tableau (encadrés en bleu) sont nouveaux. Cliquez sur « Tableau » pour voir le nouvel affichage. Le reste de la page est inchangé.
+  </div>
+
+  <div class="mb-3 mt-3 flex flex-wrap items-center justify-between gap-3">
+    <h2 class="text-2xl font-bold">Recettes</h2>
+    <div class="flex flex-wrap items-center gap-3">
+      <div class="inline-flex overflow-hidden rounded-lg border border-slate-300 dark:border-slate-600" role="group" aria-label="Période">
+        <button class="px-4 py-2 text-sm font-medium text-slate-600 dark:text-slate-300" disabled>Jour</button>
+        <button id="btn-month" class="bg-slate-900 px-4 py-2 text-sm font-medium text-white dark:bg-white dark:text-slate-900" aria-pressed="true">Mois</button>
+        <button id="btn-year" class="px-4 py-2 text-sm font-medium text-slate-600 dark:text-slate-300" aria-pressed="false">Année</button>
+      </div>
+      <div class="flex items-center gap-1">
+        <span class="px-2 text-slate-500" aria-hidden="true">‹</span>
+        <span id="period-label" class="min-w-48 text-center font-semibold">Novembre 2026</span>
+        <span class="px-2 text-slate-500" aria-hidden="true">›</span>
+      </div>
+    </div>
+  </div>
+
+  <div id="cards" class="mb-4 flex flex-wrap gap-3"></div>
+
+  <div class="grid gap-4 xl:grid-cols-[1fr_300px]">
+    <div class="flex min-w-0 flex-col gap-4">
+      <!-- existing chart (unchanged) -->
+      <section class="min-w-0 rounded-xl border border-slate-300 p-4 shadow-md dark:border-slate-700 dark:shadow-none">
+        <div class="mb-3 flex flex-wrap items-center justify-between gap-2">
+          <h3 id="chart-title" class="text-sm font-semibold">Recettes nettes par jour</h3>
+          <!-- NEW: tabs -->
+          <div class="inline-flex overflow-hidden rounded-lg border border-slate-300 ring-2 ring-sky-500 ring-offset-2 ring-offset-white dark:border-slate-600 dark:ring-offset-slate-950" role="tablist" aria-label="Affichage">
+            <button id="tab-chart" role="tab" aria-selected="true" aria-controls="panel-chart" class="px-3 py-1.5 text-sm font-medium">▥ Graphique</button>
+            <button id="tab-table" role="tab" aria-selected="false" aria-controls="panel-table" class="px-3 py-1.5 text-sm font-medium">☰ Tableau</button>
+          </div>
+        </div>
+
+        <div id="panel-chart" role="tabpanel" aria-labelledby="tab-chart">
+          <div id="chart" class="flex h-40 items-end gap-1" aria-hidden="true"></div>
+          <p class="mt-2 text-xs text-slate-500">Graphique existant, inchangé.</p>
+        </div>
+
+        <div id="panel-table" role="tabpanel" aria-labelledby="tab-table" hidden>
+        <div class="overflow-x-auto rounded-lg border border-slate-300 dark:border-slate-700">
+          <table class="tbl w-full text-sm" style="min-width: 34rem">
+            <thead>
+              <tr>
+                <th id="col-first">Jour</th>
+                <th class="r">Entrées</th>
+                <th class="r">Remboursements</th>
+                <th class="r">Recette nette</th>
+              </tr>
+            </thead>
+            <tbody id="rows"></tbody>
+            <tfoot>
+              <tr>
+                <td>Total recettes nettes</td>
+                <td id="t-income" class="r num"></td>
+                <td id="t-refunds" class="r num"></td>
+                <td id="t-net" class="r num"></td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+        <p class="mt-2 px-1 text-xs text-slate-500">
+          Recette nette = entrées − remboursements. Les dépenses ne sont pas comptées : ce total diffère donc de la carte « net de la période ».
+        </p>
+        </div>
+      </section>
+
+      <p class="text-xs text-slate-500">Tableau par portefeuille existant (inchangé) affiché ici.</p>
+    </div>
+
+    <aside class="h-fit rounded-xl border border-slate-300 p-4 shadow-md dark:border-slate-700 dark:shadow-none">
+      <h3 class="mb-1 text-sm font-semibold">Soldes disponibles</h3>
+      <p class="text-xs text-slate-500">Inchangé</p>
+    </aside>
+  </div>
+</div>
+
+<script>
+  var TODAY = 27; // 27 novembre 2026
+  var month = {
+    // day index 1..30 -> [income, refunds]
+    income:  [0, 185000, 120000, 98000, 240000, 310000, 145000, 0, 205000, 176000, 132000, 268000, 330000, 154000, 0, 0, 191000, 224000, 118000, 297000, 352000, 0, 0, 148000, 213000, 187000, 256000],
+    refunds: [0, 0, 30000, 0, 0, 15000, 0, 0, 0, 20000, 0, 0, 25000, 0, 0, 0, 0, 0, 0, 12000, 0, 0, 0, 0, 0, 38000, 0]
+  };
+  var year = {
+    labels: ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil', 'Aoû', 'Sep', 'Oct', 'Nov', 'Déc'],
+    income:  [3120000, 2840000, 3460000, 3010000, 3680000, 3390000, 3720000, 2950000, 3540000, 3810000, 4120000, 0],
+    refunds: [95000, 60000, 140000, 85000, 120000, 70000, 160000, 45000, 110000, 90000, 140000, 0]
+  };
+  var OUTFLOW_MONTH = 1420000, OUTFLOW_YEAR = 14850000;
+
+  var fmt = function (n) { return n.toLocaleString('fr-FR').replace(/ /g, ' '); };
+  var cap = function (s) { return s.charAt(0).toUpperCase() + s.slice(1); };
+  var dash = '<span class="text-slate-400 dark:text-slate-600">—</span>';
+
+  function dayLabel(d) {
+    return cap(new Date(2026, 10, d).toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric', month: 'short' }));
+  }
+
+  function netClass(net) { return net < 0 ? 'text-red-600 dark:text-red-400' : ''; }
+
+  function card(color, icon, value, label) {
+    var c = {
+      green: 'border-green-500 text-green-700 dark:text-green-400',
+      orange: 'border-orange-500 text-orange-700 dark:text-orange-400',
+      red: 'border-red-500 text-red-700 dark:text-red-400',
+      blue: 'border-blue-500 text-blue-700 dark:text-blue-400'
+    }[color];
+    return '<div class="min-w-44 flex-1 rounded-xl border-2 bg-white p-3 shadow-md dark:bg-slate-900 dark:shadow-none ' + c + '">' +
+      '<div class="text-xl font-bold num">' + value + ' Ar</div><div class="text-xs text-slate-600 dark:text-slate-400">' + icon + ' ' + label + '</div></div>';
+  }
+
+  function render(mode) {
+    var rows = [], inc = 0, ref = 0, bars = [];
+    var isMonth = mode === 'month';
+    var n = isMonth ? 30 : 12;
+    for (var i = 0; i < n; i++) {
+      var income = isMonth ? (month.income[i] || 0) : year.income[i];
+      var refunds = isMonth ? (month.refunds[i] || 0) : year.refunds[i];
+      var future = isMonth ? (i + 1 > TODAY) : (i > 10);
+      var isToday = isMonth && i + 1 === TODAY;
+      var empty = income === 0 && refunds === 0;
+      var net = income - refunds;
+      inc += income; ref += refunds;
+      bars.push(net);
+      var label = isMonth ? dayLabel(i + 1) : year.labels[i];
+      var muted = empty ? ' text-slate-400 dark:text-slate-600' : '';
+      var bg = isToday ? ' bg-sky-50 dark:bg-sky-950' : '';
+      rows.push('<tr class="' + bg + muted + '"' + (isToday ? ' aria-current="date"' : '') + '>' +
+        '<td>' + label + (isToday ? ' <span class="ml-1 rounded bg-sky-600 px-1.5 py-0.5 text-[10px] font-semibold uppercase text-white">Aujourd’hui</span>' : '') + '</td>' +
+        '<td class="r num">' + (income ? fmt(income) : dash) + '</td>' +
+        '<td class="r num">' + (refunds ? fmt(refunds) : dash) + '</td>' +
+        '<td class="r num font-semibold ' + netClass(net) + '">' + (net ? fmt(net) : dash) + '</td></tr>');
+    }
+    document.getElementById('rows').innerHTML = rows.join('');
+    document.getElementById('col-first').textContent = isMonth ? 'Jour' : 'Mois';
+    document.getElementById('chart-title').textContent = isMonth ? 'Recettes nettes par jour' : 'Recettes nettes par mois';
+    document.getElementById('period-label').textContent = isMonth ? 'Novembre 2026' : 'Année 2026';
+    document.getElementById('t-income').textContent = fmt(inc);
+    document.getElementById('t-refunds').textContent = fmt(ref);
+    var tn = document.getElementById('t-net');
+    tn.textContent = fmt(inc - ref);
+    tn.className = 'r num ' + netClass(inc - ref);
+
+    var outflow = isMonth ? OUTFLOW_MONTH : OUTFLOW_YEAR;
+    document.getElementById('cards').innerHTML =
+      card('green', '↙', '+ ' + fmt(inc), 'entrées') +
+      card('orange', '↺', '− ' + fmt(ref), 'remboursements') +
+      card('red', '↗', '− ' + fmt(outflow), 'sorties (dépenses)') +
+      card('blue', '▣', fmt(inc - ref - outflow), 'net de la période');
+
+    var max = Math.max.apply(null, bars.map(Math.abs).concat([1]));
+    document.getElementById('chart').innerHTML = bars.map(function (v) {
+      var h = Math.max(2, Math.round(Math.abs(v) / max * 100));
+      return '<div class="flex-1 rounded-t ' + (v < 0 ? 'bg-red-400' : 'bg-emerald-500') + '" style="height:' + h + '%"></div>';
+    }).join('');
+
+    document.getElementById('btn-month').setAttribute('aria-pressed', isMonth);
+    document.getElementById('btn-year').setAttribute('aria-pressed', !isMonth);
+    var on = 'bg-slate-900 text-white dark:bg-white dark:text-slate-900', off = 'text-slate-600 dark:text-slate-300';
+    document.getElementById('btn-month').className = 'px-4 py-2 text-sm font-medium ' + (isMonth ? on : off);
+    document.getElementById('btn-year').className = 'px-4 py-2 text-sm font-medium ' + (isMonth ? off : on);
+  }
+
+  function showTab(name) {
+    var isChart = name === 'chart';
+    document.getElementById('panel-chart').hidden = !isChart;
+    document.getElementById('panel-table').hidden = isChart;
+    var on = 'bg-slate-900 text-white dark:bg-white dark:text-slate-900', off = 'text-slate-600 dark:text-slate-300';
+    var c = document.getElementById('tab-chart'), t = document.getElementById('tab-table');
+    c.setAttribute('aria-selected', isChart); t.setAttribute('aria-selected', !isChart);
+    c.className = 'px-3 py-1.5 text-sm font-medium ' + (isChart ? on : off);
+    t.className = 'px-3 py-1.5 text-sm font-medium ' + (isChart ? off : on);
+  }
+  document.getElementById('tab-chart').addEventListener('click', function () { showTab('chart'); });
+  document.getElementById('tab-table').addEventListener('click', function () { showTab('table'); });
+  showTab('chart');
+
+  document.getElementById('btn-month').addEventListener('click', function () { render('month'); });
+  document.getElementById('btn-year').addEventListener('click', function () { render('year'); });
+  render('month');
+</script>

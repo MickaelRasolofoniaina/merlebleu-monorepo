@@ -154,8 +154,45 @@ describe('buildReceiptSummary', () => {
     );
 
     expect(summary.points).toHaveLength(30);
-    expect(summary.points[1]).toEqual({ label: '2', amount: 205000 });
-    expect(summary.points[2]).toEqual({ label: '3', amount: -30000 });
+    expect(summary.points[1]).toEqual({
+      label: '2',
+      date: '2026-11-02',
+      income: 205000,
+      refunds: 0,
+      outflow: 0,
+      amount: 205000,
+      net: 205000,
+    });
+    expect(summary.points[2]).toEqual({
+      label: '3',
+      date: '2026-11-03',
+      income: 0,
+      refunds: 30000,
+      outflow: 45000,
+      amount: -30000,
+      net: -75000,
+    });
+    expect(summary.points[3]).toMatchObject({ outflow: 12000, net: -12000 });
+    expect(summary.points[29].date).toBe('2026-11-30');
+  });
+
+  it('keeps the sum of the points equal to income minus refunds', () => {
+    for (const period of [ReceiptPeriod.MONTH, ReceiptPeriod.YEAR]) {
+      const summary = buildReceiptSummary(
+        period,
+        getReceiptRange(period, '2026-11-15'),
+        rows,
+        wallets,
+      );
+      const sum = (key: 'income' | 'refunds' | 'outflow' | 'amount' | 'net') =>
+        summary.points.reduce((total, point) => total + point[key], 0);
+
+      expect(sum('income')).toBe(summary.income);
+      expect(sum('refunds')).toBe(summary.refunds);
+      expect(sum('outflow')).toBe(summary.outflow);
+      expect(sum('amount')).toBe(summary.income - summary.refunds);
+      expect(sum('net')).toBe(summary.net);
+    }
   });
 
   it('builds twelve points for a year', () => {
@@ -167,7 +204,15 @@ describe('buildReceiptSummary', () => {
     );
 
     expect(summary.points).toHaveLength(12);
-    expect(summary.points[10]).toEqual({ label: 'Nov', amount: 175000 });
+    expect(summary.points[10]).toEqual({
+      label: 'Nov',
+      date: '2026-11-01',
+      income: 205000,
+      refunds: 30000,
+      outflow: 57000,
+      amount: 175000,
+      net: 118000,
+    });
   });
 
   it('builds one point per receipt for a day', () => {
@@ -179,8 +224,24 @@ describe('buildReceiptSummary', () => {
     );
 
     expect(summary.points).toEqual([
-      { label: 'Rakoto', amount: 60000 },
-      { label: 'Andry', amount: 145000 },
+      {
+        label: 'Rakoto',
+        date: '2026-11-02',
+        income: 60000,
+        refunds: 0,
+        outflow: 0,
+        amount: 60000,
+        net: 60000,
+      },
+      {
+        label: 'Andry',
+        date: '2026-11-02',
+        income: 145000,
+        refunds: 0,
+        outflow: 0,
+        amount: 145000,
+        net: 145000,
+      },
     ]);
   });
 });
