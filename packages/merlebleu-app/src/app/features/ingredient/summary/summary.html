@@ -61,9 +61,15 @@
   <ng-template #body let-row>
     <tr>
       <td class="font-semibold">{{ capitalizeFirstLetter(row.ingredient.label) }}</td>
-      <td class="text-right!">{{ row.entries | number: '1.0-2' }}</td>
-      <td class="text-right!">{{ row.consumed | number: '1.0-2' }}</td>
-      <td [class]="row.currentStock < 0 ? 'text-right! font-bold text-red-600 dark:text-red-400' : 'text-right!'">
+      <td class="text-right! font-semibold text-green-600 dark:text-green-400">{{ row.entries | number: '1.0-2' }}</td>
+      <td class="text-right! font-semibold text-red-600 dark:text-red-400">{{ row.consumed | number: '1.0-2' }}</td>
+      <td
+        [class]="
+          row.currentStock < 0
+            ? 'text-right! font-bold text-red-600 dark:text-red-400'
+            : 'text-right! font-semibold text-blue-600 dark:text-blue-400'
+        "
+      >
         {{ row.currentStock | number: '1.0-2' }}
         @if (entryUnitEquivalent(row); as equivalent) {
           <span class="block text-xs font-normal text-slate-500 dark:text-slate-400">{{ equivalent }}</span>
