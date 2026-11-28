@@ -1,10 +1,27 @@
 <div
-  class="min-h-screen flex items-center justify-center px-4 py-8 bg-gradient-to-br from-[#1b4fb6] via-[#2f7edb] to-[#3fa0ff]"
+  class="relative min-h-screen overflow-hidden flex items-center justify-center px-4 py-8 bg-[#1b4fb6] dark:bg-[#0b1630]"
 >
-  <div class="w-full max-w-[420px] bg-white dark:bg-slate-800 rounded-2xl p-8 shadow-[0_20px_40px_rgba(0,0,0,0.18)]">
-    <h1 class="text-[28px] font-bold text-[#0f1f3d] dark:text-slate-100 tracking-[0.3px] mb-6 text-center">
-      Merlebleu
-    </h1>
+  <div class="login-shapes" aria-hidden="true">
+    <span class="shape shape-circle-lg"></span>
+    <span class="shape shape-circle-xl"></span>
+    <span class="shape shape-square-light"></span>
+    <span class="shape shape-square-dark"></span>
+    <span class="shape shape-dot-light"></span>
+    <span class="shape shape-dot-white"></span>
+  </div>
+
+  <div class="relative w-full max-w-[420px] bg-white dark:bg-slate-800 rounded-2xl p-8 shadow-[0_24px_48px_rgba(15,31,61,0.35)]">
+    <div class="flex flex-col items-center gap-3.5 mb-7 text-center">
+      <div class="w-14 h-14 rounded-2xl bg-[#1b4fb6] flex items-center justify-center">
+        <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M4 19V6l8 9 8-9v13" />
+        </svg>
+      </div>
+      <div>
+        <h1 class="text-[28px] font-bold text-[#0f1f3d] dark:text-slate-100 tracking-[0.3px]">Merlebleu</h1>
+        <p class="mt-1.5 text-sm text-slate-600 dark:text-slate-400">Connectez-vous à votre espace de gestion</p>
+      </div>
+    </div>
     <div class="flex flex-col gap-5">
       <div class="flex flex-col gap-2">
         <label for="loginEmail" class="text-sm font-semibold text-[#1a2b4a] dark:text-slate-300">Email</label>
@@ -58,7 +75,12 @@
         <small class="text-red-500 -mt-1">{{ loginError }}</small>
       }
 
-      <p-button label="Se connecter" fluid (onClick)="signIn()" />
+      <p-button
+        label="Se connecter"
+        fluid
+        styleClass="!bg-[#1b4fb6] !border-[#1b4fb6] hover:!bg-[#123a8c] hover:!border-[#123a8c]"
+        (onClick)="signIn()"
+      />
     </div>
   </div>
 </div>

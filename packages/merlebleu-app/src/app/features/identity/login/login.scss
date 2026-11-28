@@ -1,1 +1,121 @@
+.login-shapes {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
 
+.shape {
+  position: absolute;
+  display: block;
+  will-change: transform;
+}
+
+.shape-circle-lg {
+  width: 480px;
+  height: 480px;
+  top: -140px;
+  left: -140px;
+  border-radius: 50%;
+  background: #2a63cc;
+  animation: drift-a 18s ease-in-out infinite;
+}
+
+.shape-circle-xl {
+  width: 600px;
+  height: 600px;
+  right: -180px;
+  bottom: -200px;
+  border-radius: 50%;
+  background: #143f96;
+  animation: drift-b 22s ease-in-out infinite;
+}
+
+.shape-square-light {
+  width: 220px;
+  height: 220px;
+  top: 8%;
+  right: 12%;
+  border-radius: 44px;
+  background: #5b8def;
+  opacity: 0.55;
+  animation: spin-slow 40s linear infinite;
+}
+
+.shape-square-dark {
+  width: 200px;
+  height: 200px;
+  left: 5%;
+  bottom: 6%;
+  border-radius: 40px;
+  background: #0f1f3d;
+  opacity: 0.55;
+  animation: spin-slow 50s linear infinite reverse;
+}
+
+.shape-dot-light {
+  width: 68px;
+  height: 68px;
+  left: 22%;
+  top: 58%;
+  border-radius: 50%;
+  background: #93b4f0;
+  opacity: 0.6;
+  animation: float 7s ease-in-out infinite;
+}
+
+.shape-dot-white {
+  width: 44px;
+  height: 44px;
+  right: 22%;
+  top: 52%;
+  border-radius: 50%;
+  background: #fff;
+  opacity: 0.35;
+  animation: float 9s ease-in-out infinite reverse;
+}
+
+@keyframes drift-a {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  50% {
+    transform: translate(70px, 50px) scale(1.08);
+  }
+}
+
+@keyframes drift-b {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  50% {
+    transform: translate(-80px, -60px) scale(1.06);
+  }
+}
+
+@keyframes spin-slow {
+  from {
+    transform: rotate(18deg);
+  }
+  to {
+    transform: rotate(378deg);
+  }
+}
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-28px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .shape {
+    animation: none;
+  }
+}
