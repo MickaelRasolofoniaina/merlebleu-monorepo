@@ -30,8 +30,28 @@ export class IngredientFormComponent {
   private readonly paymentService = inject(PaymentService);
   protected readonly paymentMethods = signal<PaymentMethod[]>([]);
 
+  /** Id of the "Espèces" payment method, preselected when creating an ingredient. */
+  private cashMethodId: string | null = null;
+
   constructor() {
-    this.paymentService.getAllPaymentMethods().subscribe({ next: (methods) => this.paymentMethods.set(methods) });
+    this.paymentService.getAllPaymentMethods().subscribe({
+      next: (methods) => {
+        this.paymentMethods.set(methods);
+        this.cashMethodId = methods.find((method) => this.isCash(method.name))?.id ?? null;
+        if (!this.itemData && !this.item.defaultPaymentMethodId) {
+          this.item = { ...this.item, defaultPaymentMethodId: this.cashMethodId };
+        }
+      },
+    });
+  }
+
+  private isCash(name: string): boolean {
+    return name
+      .normalize('NFD')
+      .replace(/[̀-ͯ]/g, '')
+      .trim()
+      .toLowerCase()
+      .startsWith('espece');
   }
 
   validationError: ReturnType<typeof createIngredientSchema.safeParse>['error'] | null = null;
@@ -42,6 +62,7 @@ export class IngredientFormComponent {
     if (changes['itemData']) {
       this.validationError = null;
       this.item = this.itemData ? { ...this.itemData } : this.createEmpty();
+      this.ngForm?.resetForm(this.item);
     }
   }
 
@@ -56,7 +77,10 @@ export class IngredientFormComponent {
     }
 
     this.itemSubmit.emit({ ...result.data });
-    this.resetForm();
+    // In edit mode the parent resets the form (itemData change) once the save succeeded.
+    if (!this.itemData) {
+      this.resetForm();
+    }
   }
 
   getFieldError(field: keyof CreateIngredientDto): string {
@@ -72,6 +96,6 @@ export class IngredientFormComponent {
   }
 
   private createEmpty(): CreateIngredientDto {
-    return { label: '', unitId: '', defaultPaymentMethodId: null };
+    return { label: '', unitId: '', defaultPaymentMethodId: this.cashMethodId };
   }
 }

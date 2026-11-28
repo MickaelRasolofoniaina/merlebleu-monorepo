@@ -1,113 +1,117 @@
-<div class="flex justify-between items-center mb-4">
-  <h2 class="text-2xl font-bold">Ingrédients</h2>
-</div>
-<div class="flex flex-wrap gap-3 items-center mb-4">
-  <input
-    type="text"
-    pInputText
-    placeholder="Rechercher par libellé..."
-    (input)="onSearchChange($event.target.value)"
-    class="w-64"
-  />
-  <p-select
-    [(ngModel)]="filterUnitId"
-    [options]="units()"
-    optionLabel="label"
-    optionValue="id"
-    placeholder="Toutes unités"
-    [showClear]="true"
-    (onChange)="onUnitFilter()"
-    class="w-44"
-  />
-  <p-button label="Ajouter" icon="pi pi-plus" (onClick)="openAddModal()" class="ml-auto" />
+<div class="flex flex-wrap items-center gap-3 mb-4">
+  <div>
+    <h2 class="text-2xl font-bold">Ingrédients</h2>
+    <div class="text-sm text-slate-500 dark:text-slate-400">{{ totalRecords() }} ingrédient(s) référencé(s)</div>
+  </div>
+  <div class="ml-auto flex flex-wrap items-center gap-3">
+    <input
+      type="text"
+      pInputText
+      placeholder="Rechercher par libellé..."
+      (input)="onSearchChange($event.target.value)"
+      class="w-64"
+    />
+    <p-select
+      [(ngModel)]="filterUnitId"
+      [options]="units()"
+      optionLabel="label"
+      optionValue="id"
+      placeholder="Toutes unités"
+      [showClear]="true"
+      (onChange)="onUnitFilter()"
+      class="w-44"
+    />
+  </div>
 </div>
 
-<p-table
-  [value]="ingredients()"
-  [loading]="isLoading()"
-  [tableStyle]="{ 'min-width': '50rem' }"
-  [stripedRows]="true"
-  [paginator]="true"
-  [rows]="rows"
-  [totalRecords]="totalRecords()"
-  [first]="first()"
-  (onPage)="onTablePage($event)"
->
-  <ng-template #header>
-    <tr>
-      <th>Libellé</th>
-      <th style="text-align: right">Stock</th>
-      <th>Unité</th>
-      <th style="width: 12rem" class="text-center!">Actions</th>
-    </tr>
-  </ng-template>
-  <ng-template #body let-ingredient>
-    <tr>
-      <td>{{ capitalizeFirstLetter(ingredient.label) }}</td>
-      <td style="text-align: right">{{ ingredient.stock }}</td>
-      <td>{{ capitalizeFirstLetter(ingredient.unit.label) }}</td>
-      <td class="text-center!">
+<div class="flex flex-wrap items-start gap-6">
+  <div class="flex-[999_1_560px] min-w-0">
+    <p-table
+      [value]="ingredients()"
+      [loading]="isLoading()"
+      [stripedRows]="true"
+      [paginator]="true"
+      [rows]="rows"
+      [totalRecords]="totalRecords()"
+      [first]="first()"
+      (onPage)="onTablePage($event)"
+    >
+      <ng-template #header>
+        <tr>
+          <th>Libellé</th>
+          <th class="text-right!">Unité</th>
+          <th style="width: 8rem" class="text-center!">Actions</th>
+        </tr>
+      </ng-template>
+      <ng-template #body let-ingredient>
+        <tr [class]="selectedIngredient?.id === ingredient.id ? 'bg-slate-200! dark:bg-slate-700!' : ''">
+          <td>{{ capitalizeFirstLetter(ingredient.label) }}</td>
+          <td class="text-right!">{{ capitalizeFirstLetter(ingredient.unit.label) }}</td>
+          <td class="text-center!">
+            <p-button
+              icon="pi pi-pencil"
+              size="small"
+              severity="warn"
+              class="mr-2"
+              (onClick)="openEditPanel(ingredient)"
+            />
+            <p-button
+              icon="pi pi-trash"
+              size="small"
+              severity="danger"
+              (onClick)="openDeleteModal(ingredient)"
+            />
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </div>
+
+  <!-- Add / Edit panel -->
+  <section
+    class="flex-[1_1_340px] max-w-[420px] sticky top-4 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900"
+  >
+    <div class="flex items-center justify-between gap-3 px-5 py-4 border-b border-slate-200 dark:border-slate-700">
+      <div>
+        <div class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+          {{ selectedIngredient ? 'Modification' : 'Création' }}
+        </div>
+        <h3 class="text-lg font-semibold">
+          {{ selectedIngredient ? capitalizeFirstLetter(selectedIngredient.label) : 'Nouvel ingrédient' }}
+        </h3>
+      </div>
+      @if (selectedIngredient) {
+        <p-button label="Nouveau" icon="pi pi-plus" size="small" severity="secondary" (onClick)="closeEditPanel()" />
+      }
+    </div>
+
+    <div class="p-5">
+      <mb-ingredient-form
+        [formId]="'ingredient-form'"
+        [itemData]="editDto"
+        [units]="units()"
+        (itemSubmit)="onFormSubmit($event)"
+      ></mb-ingredient-form>
+    </div>
+
+    <div class="flex items-center justify-between gap-2 px-5 py-4 border-t border-slate-200 dark:border-slate-700">
+      @if (selectedIngredient) {
         <p-button
-          icon="pi pi-pencil"
-          size="small"
-          severity="warn"
-          class="mr-2"
-          (onClick)="openEditModal(ingredient)"
-        />
-        <p-button
-          icon="pi pi-trash"
-          size="small"
+          label="Supprimer"
           severity="danger"
-          (onClick)="openDeleteModal(ingredient)"
+          [text]="true"
+          (onClick)="openDeleteModal(selectedIngredient)"
         />
-      </td>
-    </tr>
-  </ng-template>
-</p-table>
-
-<!-- Edit Modal -->
-<p-dialog
-  [(visible)]="showEditModal"
-  [modal]="true"
-  [style]="{ width: '450px' }"
-  header="Modifier un ingrédient"
-  (onHide)="closeEditModal()"
->
-  <mb-ingredient-form
-    [formId]="'edit-ingredient-form'"
-    [itemData]="editDto"
-    [units]="units()"
-    (itemSubmit)="selectedIngredient && editIngredient(selectedIngredient.id, $event)"
-  ></mb-ingredient-form>
-  <ng-template pTemplate="footer">
-    <div class="flex justify-end gap-2">
-      <p-button label="Annuler" severity="contrast" (onClick)="closeEditModal()" />
-      <button pButton type="submit" form="edit-ingredient-form">Enregistrer</button>
+        <div class="flex gap-2">
+          <p-button label="Annuler" severity="contrast" (onClick)="closeEditPanel()" />
+          <button pButton type="submit" form="ingredient-form">Enregistrer</button>
+        </div>
+      } @else {
+        <button pButton type="submit" form="ingredient-form" class="ml-auto">Ajouter</button>
+      }
     </div>
-  </ng-template>
-</p-dialog>
-
-<!-- Add Modal -->
-<p-dialog
-  [(visible)]="showModal"
-  [modal]="true"
-  [style]="{ width: '450px' }"
-  header="Ajouter un ingrédient"
-  (onClose)="closeAddModal()"
->
-  <mb-ingredient-form
-    [formId]="'add-ingredient-form'"
-    [itemData]="null"
-    [units]="units()"
-    (itemSubmit)="addIngredient($event)"
-  ></mb-ingredient-form>
-  <ng-template pTemplate="footer">
-    <div class="flex justify-end gap-2">
-      <p-button label="Annuler" severity="contrast" (onClick)="closeAddModal()" />
-      <button pButton type="submit" form="add-ingredient-form">Ajouter</button>
-    </div>
-  </ng-template>
-</p-dialog>
+  </section>
+</div>
 
 <!-- Delete Confirmation Modal -->
 <p-dialog
@@ -120,7 +124,7 @@
   <div class="flex flex-col gap-4">
     <p>
       Confirmer la suppression de l'ingrédient
-      <strong>{{ selectedIngredient?.label }}</strong> ?
+      <strong>{{ ingredientToDelete?.label }}</strong> ?
     </p>
   </div>
   <ng-template pTemplate="footer">
@@ -129,7 +133,7 @@
       <p-button
         label="Supprimer"
         severity="danger"
-        (onClick)="selectedIngredient && deleteIngredient(selectedIngredient.id)"
+        (onClick)="ingredientToDelete && deleteIngredient(ingredientToDelete.id)"
       />
     </div>
   </ng-template>

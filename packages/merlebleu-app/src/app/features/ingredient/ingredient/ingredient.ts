@@ -48,10 +48,9 @@ export class IngredientListComponent implements OnInit {
   searchLabel = '';
   filterUnitId: string | null = null;
 
-  showModal = false;
-  showEditModal = false;
   showDeleteModal = false;
   selectedIngredient: Ingredient | null = null;
+  ingredientToDelete: Ingredient | null = null;
   editDto: UpdateIngredientDto | null = null;
 
   private ingredientService = inject(IngredientService);
@@ -114,52 +113,53 @@ export class IngredientListComponent implements OnInit {
     };
   }
 
-  openAddModal() {
-    this.showModal = true;
-  }
-
-  openEditModal(ingredient: Ingredient) {
+  openEditPanel(ingredient: Ingredient) {
     this.selectedIngredient = ingredient;
     this.editDto = this.toDto(ingredient);
-    this.showEditModal = true;
   }
 
-  openDeleteModal(ingredient: Ingredient) {
-    this.selectedIngredient = ingredient;
-    this.showDeleteModal = true;
-  }
-
-  closeAddModal() {
-    this.showModal = false;
-  }
-
-  closeEditModal() {
-    this.showEditModal = false;
+  /** Leaves edit mode and goes back to the "create" form. */
+  closeEditPanel() {
     this.selectedIngredient = null;
     this.editDto = null;
   }
 
+  openDeleteModal(ingredient: Ingredient) {
+    this.ingredientToDelete = ingredient;
+    this.showDeleteModal = true;
+  }
+
   closeDeleteModal() {
     this.showDeleteModal = false;
-    this.selectedIngredient = null;
+    this.ingredientToDelete = null;
+  }
+
+  onFormSubmit(dto: CreateIngredientDto | UpdateIngredientDto) {
+    if (this.selectedIngredient) {
+      this.editIngredient(this.selectedIngredient.id, dto);
+    } else {
+      this.addIngredient(dto as CreateIngredientDto);
+    }
   }
 
   addIngredient(dto: CreateIngredientDto) {
     this.ingredientService.addIngredient(dto).subscribe(() => {
-      this.closeAddModal();
       this.fetchIngredients();
     });
   }
 
   editIngredient(id: string, dto: UpdateIngredientDto) {
     this.ingredientService.editIngredient(id, dto).subscribe(() => {
-      this.closeEditModal();
+      this.closeEditPanel();
       this.fetchIngredients();
     });
   }
 
   deleteIngredient(id: string) {
     this.ingredientService.deleteIngredient(id).subscribe(() => {
+      if (this.selectedIngredient?.id === id) {
+        this.closeEditPanel();
+      }
       this.closeDeleteModal();
       this.fetchIngredients();
     });
