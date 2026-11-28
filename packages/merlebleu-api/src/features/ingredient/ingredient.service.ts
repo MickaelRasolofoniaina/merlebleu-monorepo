@@ -1,9 +1,18 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { FindOptionsWhere, ILike, Repository } from 'typeorm';
 import { ResultPaged } from '@merlebleu/shared';
 import { getPaginationParams } from '@shared/pagination/pagination.utils';
 import { IngredientEntity, IngredientSchema } from './ingredient.entity';
+import { RecipeLineEntity, RecipeLineSchema } from './recipe/recipe.entity';
+import {
+  ProductionConsumptionEntity,
+  ProductionConsumptionSchema,
+} from './production/production.entity';
 import {
   CreateIngredientDto,
   UpdateIngredientDto,
@@ -15,6 +24,10 @@ export class IngredientService {
   constructor(
     @InjectRepository(IngredientSchema)
     private readonly repo: Repository<IngredientEntity>,
+    @InjectRepository(RecipeLineSchema)
+    private readonly recipeLineRepo: Repository<RecipeLineEntity>,
+    @InjectRepository(ProductionConsumptionSchema)
+    private readonly consumptionRepo: Repository<ProductionConsumptionEntity>,
   ) {}
 
   async findIngredients(
@@ -68,6 +81,18 @@ export class IngredientService {
   }
 
   async deleteIngredient(id: string): Promise<void> {
+    const [inRecipes, inProductions] = await Promise.all([
+      this.recipeLineRepo.count({ where: { ingredient: { id } } }),
+      this.consumptionRepo.count({ where: { ingredient: { id } } }),
+    ]);
+    if (inRecipes > 0)
+      throw new ConflictException(
+        'Cet ingrédient est utilisé dans une recette, retirez-le de la recette avant de le supprimer',
+      );
+    if (inProductions > 0)
+      throw new ConflictException(
+        'Cet ingrédient a déjà été consommé par une production, il ne peut plus être supprimé',
+      );
     const result = await this.repo.delete(id);
     if (!result.affected)
       throw new NotFoundException(`Ingrédient avec l'id ${id} introuvable`);

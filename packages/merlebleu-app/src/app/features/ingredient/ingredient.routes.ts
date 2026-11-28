@@ -10,11 +10,19 @@ export const INGREDIENT_ROUTES: Route[] = [
     loadChildren: () => import('./unit/unit.routes').then((m) => m.default),
   },
   {
-    path: 'purchase',
-    loadChildren: () => import('./purchase/purchase.routes').then((m) => m.default),
+    path: 'stock-entry',
+    loadChildren: () => import('./stock-entry/stock-entry.routes').then((m) => m.default),
   },
   {
-    path: 'inventory',
-    loadChildren: () => import('./inventory/inventory.routes').then((m) => m.default),
+    path: 'recipe',
+    loadChildren: () => import('./recipe/recipe.routes').then((m) => m.default),
+  },
+  {
+    path: 'production',
+    loadChildren: () => import('./production/production.routes').then((m) => m.default),
+  },
+  {
+    path: 'summary',
+    loadChildren: () => import('./summary/summary.routes').then((m) => m.default),
   },
 ];

@@ -1,8 +1,8 @@
 import { Ingredient } from "../ingredient";
 
-export interface IngredientPurchase {
+export interface StockEntry {
   id: string;
-  purchaseDate: string;
+  entryDate: string;
   ingredient: Ingredient;
   quantity: number;
 }

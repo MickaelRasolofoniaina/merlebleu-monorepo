@@ -1,0 +1,363 @@
+<title>Entrée de stock Merlebleu</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/* Layout: replica of the app shell (icon rail, section panel, top bar, white card). Main screen = batch entry card on top, history table below. Dialogs overlay the card. */
+:root {
+  --canvas: #e2e8f0; --page: #f1f5f9; --card: #ffffff; --rail: #1e293b; --rail-hover: #334155; --rail-active: #475569;
+  --brand: #3b82f6; --brand-ink: #1d4ed8; --brand-soft: #eff6ff;
+  --text: #0f172a; --muted: #64748b; --line: #e2e8f0; --stripe: #f8fafc;
+  --input-bg: #ffffff; --input-line: #cbd5e1;
+  --danger: #dc2626; --danger-soft: #fef2f2; --warn: #b45309; --warn-soft: #fffbeb; --ok: #15803d; --ok-soft: #f0fdf4;
+  --overlay: rgba(15, 23, 42, .45);
+  --font: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --canvas: #020617; --page: #0f172a; --card: #1e293b; --rail: #1e293b; --rail-hover: #334155; --rail-active: #475569;
+    --brand: #60a5fa; --brand-ink: #ffffff; --brand-soft: #334155;
+    --text: #e2e8f0; --muted: #94a3b8; --line: #334155; --stripe: #243247;
+    --input-bg: #0f172a; --input-line: #475569;
+    --danger: #f87171; --danger-soft: #3b1d22; --warn: #fbbf24; --warn-soft: #3a2e12; --ok: #4ade80; --ok-soft: #14301f;
+    --overlay: rgba(2, 6, 23, .65);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --canvas: #020617; --page: #0f172a; --card: #1e293b; --rail: #1e293b; --rail-hover: #334155; --rail-active: #475569;
+  --brand: #60a5fa; --brand-ink: #ffffff; --brand-soft: #334155;
+  --text: #e2e8f0; --muted: #94a3b8; --line: #334155; --stripe: #243247;
+  --input-bg: #0f172a; --input-line: #475569;
+  --danger: #f87171; --danger-soft: #3b1d22; --warn: #fbbf24; --warn-soft: #3a2e12; --ok: #4ade80; --ok-soft: #14301f;
+  --overlay: rgba(2, 6, 23, .65);
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { background: var(--canvas); color: var(--text); font-family: var(--font); font-size: 14px; line-height: 1.45; padding-block: 12px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+button, input, select { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
+svg.i { width: 1.1em; height: 1.1em; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+
+.mock-bar { max-width: 1280px; margin: 0 auto 10px; display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.mock-bar .lbl { font-size: 11px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); margin-right: 4px; }
+.mock-tab { border: 1px solid var(--input-line); background: var(--card); border-radius: 999px; padding: 5px 12px; cursor: pointer; font-size: 13px; }
+.mock-tab[aria-selected="true"] { background: var(--brand); border-color: var(--brand); color: #fff; font-weight: 600; }
+:root[data-theme="dark"] .mock-tab[aria-selected="true"], :root:not([data-theme="light"]) .mock-tab[aria-selected="true"] { color: #0f172a; }
+.theme-btn { margin-left: auto; }
+
+.shell { max-width: 1280px; margin: 0 auto; display: flex; min-height: 700px; background: var(--page); border-radius: 10px; overflow: hidden; border: 1px solid var(--line); }
+.rail { width: 68px; background: var(--rail); display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 12px 0; flex: none; }
+.logo { width: 36px; height: 36px; border-radius: 10px; background: #3b82f6; color: #fff; display: grid; place-items: center; font-weight: 600; margin-bottom: 10px; }
+.rail-btn { width: 54px; height: 54px; border-radius: 12px; display: flex; flex-direction: column; gap: 2px; align-items: center; justify-content: center; color: #cbd5e1; font-size: 9px; font-weight: 500; }
+.rail-btn svg { width: 20px; height: 20px; }
+.rail-btn.on { background: var(--rail-active); color: #fff; }
+.panel { width: 224px; background: var(--card); border-right: 1px solid var(--line); flex: none; }
+.panel-head { height: 56px; background: #3b82f6; color: #fff; font-weight: 600; display: flex; align-items: center; padding: 0 16px; }
+.panel-body { padding: 10px; display: flex; flex-direction: column; gap: 1px; }
+.nav { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-radius: 8px; font-weight: 500; background: none; border: 0; text-align: left; width: 100%; cursor: default; }
+.nav.on { background: var(--brand-soft); color: var(--brand-ink); }
+.nav .new { margin-left: auto; font-size: 10px; font-weight: 700; background: var(--brand); color: #fff; border-radius: 999px; padding: 1px 6px; }
+.main-col { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.topbar { height: 56px; background: #1e293b; color: #fff; display: flex; align-items: center; gap: 12px; padding: 0 20px; font-weight: 600; font-size: 17px; }
+.content { padding: 16px; flex: 1; min-width: 0; }
+.card { background: var(--card); border-radius: 12px; padding: 14px 16px; min-width: 0; position: relative; min-height: 640px; }
+
+.head { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-bottom: 14px; }
+.head h2 { margin: 0; font-size: 24px; font-weight: 700; }
+.head .sub { font-size: 13px; color: var(--muted); }
+.head .spacer { margin-left: auto; display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+
+.inp { height: 36px; border: 1px solid var(--input-line); background: var(--input-bg); border-radius: 6px; padding: 0 10px; min-width: 0; width: 100%; }
+.inp.num { text-align: right; font-variant-numeric: tabular-nums; }
+.inp.err { border-color: var(--danger); }
+.btn { height: 36px; display: inline-flex; align-items: center; gap: 6px; border-radius: 6px; padding: 0 14px; border: 1px solid transparent; cursor: pointer; font-weight: 500; background: #3b82f6; color: #fff; }
+.btn:hover { filter: brightness(.95); }
+.btn:disabled { opacity: .55; cursor: not-allowed; }
+.btn.sm { height: 30px; padding: 0 9px; font-size: 13px; }
+.btn.warn { background: #f97316; }
+.btn.danger { background: #ef4444; }
+.btn.contrast { background: #0f172a; color: #fff; }
+:root[data-theme="dark"] .btn.contrast, :root:not([data-theme="light"]) .btn.contrast { background: #e2e8f0; color: #0f172a; }
+.btn.text { background: transparent; color: var(--brand-ink); }
+
+/* Entry panel (new pattern: inline batch form; the existing Ingredient page already uses a bordered section panel) */
+.entry { border: 1px solid var(--line); border-radius: 12px; margin-bottom: 18px; background: var(--card); }
+.entry-head { display: flex; flex-wrap: wrap; align-items: end; gap: 16px; padding: 14px 18px; border-bottom: 1px solid var(--line); }
+.entry-head .t { font-size: 11px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+.entry-head h3 { margin: 0; font-size: 18px; font-weight: 600; }
+.date-field { margin-left: auto; width: 200px; display: flex; flex-direction: column; gap: 4px; }
+.date-field label { font-weight: 500; font-size: 13px; }
+.rows { padding: 10px 18px 4px; display: flex; flex-direction: column; gap: 8px; }
+.row, .row-head { display: grid; grid-template-columns: minmax(0, 2.4fr) 130px 70px 120px 34px; gap: 10px; align-items: center; }
+.row-head { font-size: 12px; font-weight: 600; color: var(--muted); padding-top: 4px; }
+.row .unit { color: var(--muted); }
+.row .stock { text-align: right; font-variant-numeric: tabular-nums; color: var(--muted); }
+.row .after { color: var(--ok); font-weight: 600; }
+.row-err { grid-column: 1 / -1; color: var(--danger); font-size: 12px; margin-top: -4px; }
+.x { height: 30px; width: 30px; border-radius: 6px; border: 0; background: transparent; color: var(--muted); cursor: pointer; display: grid; place-items: center; }
+.x:hover { background: var(--danger-soft); color: var(--danger); }
+.entry-foot { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; padding: 10px 18px 14px; }
+.entry-foot .hint { color: var(--muted); font-size: 12.5px; }
+.entry-foot .end { margin-left: auto; display: flex; align-items: center; gap: 10px; }
+.kbd { font-size: 11px; border: 1px solid var(--input-line); border-radius: 4px; padding: 0 5px; background: var(--page); }
+
+.filters { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 10px; }
+.filters .sect { font-weight: 600; font-size: 16px; margin-right: auto; }
+.filters .inp { width: 200px; }
+.tbl-wrap { overflow-x: auto; border-radius: 8px; }
+table { width: 100%; border-collapse: collapse; min-width: 640px; }
+th { text-align: left; font-weight: 600; padding: 10px 12px; border-bottom: 1px solid var(--line); background: var(--card); white-space: nowrap; }
+td { padding: 9px 12px; border-bottom: 1px solid var(--line); vertical-align: middle; }
+tbody tr:nth-child(even) { background: var(--stripe); }
+tbody tr.fresh { background: var(--ok-soft); }
+.r { text-align: right; font-variant-numeric: tabular-nums; }
+.c { text-align: center; }
+.pager { display: flex; justify-content: space-between; align-items: center; padding: 10px 4px 0; color: var(--muted); font-size: 13px; }
+
+.dialog-layer { position: absolute; inset: 0; background: var(--overlay); display: none; align-items: flex-start; justify-content: center; padding: 60px 12px; z-index: 5; border-radius: 12px; }
+.dialog-layer.on { display: flex; }
+.dialog { background: var(--card); border-radius: 10px; width: min(450px, 100%); box-shadow: 0 20px 50px rgba(0,0,0,.3); }
+.dialog header { padding: 16px 20px 8px; font-weight: 700; font-size: 18px; }
+.dialog .body { padding: 8px 20px 12px; display: flex; flex-direction: column; gap: 14px; }
+.dialog footer { padding: 12px 20px 16px; display: flex; justify-content: flex-end; gap: 8px; }
+.field { display: flex; flex-direction: column; gap: 4px; }
+.field label { font-weight: 500; }
+
+.toast { position: fixed; right: max(16px, env(safe-area-inset-right, 0px)); top: 16px; z-index: 20; background: var(--ok-soft); color: var(--text); border: 1px solid var(--ok); border-left-width: 4px; border-radius: 8px; padding: 10px 14px; box-shadow: 0 8px 24px rgba(0,0,0,.2); display: none; max-width: 340px; }
+.toast.on { display: block; }
+.toast b { color: var(--ok); }
+
+.notes { max-width: 1280px; margin: 12px auto 0; font-size: 12.5px; color: var(--muted); display: grid; gap: 4px; }
+.notes b { color: var(--text); }
+
+@media (max-width: 960px) { .panel { display: none; } }
+@media (max-width: 700px) {
+  .rail { display: none; }
+  .row-head { display: none; }
+  .row { grid-template-columns: minmax(0, 1fr) 110px 34px; }
+  .row .unit, .row .stock, .row .after { grid-column: 1 / -1; text-align: left; font-size: 12.5px; }
+  .date-field { margin-left: 0; width: 100%; }
+}
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-db" viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v6c0 1.7 3.6 3 8 3s8-1.3 8-3V5M4 11v6c0 1.7 3.6 3 8 3s8-1.3 8-3v-6"/></symbol>
+    <symbol id="i-cart" viewBox="0 0 24 24"><circle cx="9" cy="20" r="1.5"/><circle cx="18" cy="20" r="1.5"/><path d="M2 3h3l2.5 12h11L21 7H6"/></symbol>
+    <symbol id="i-wallet" viewBox="0 0 24 24"><path d="M3 7h16a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h12"/><circle cx="16.5" cy="13.5" r="1"/></symbol>
+    <symbol id="i-book" viewBox="0 0 24 24"><path d="M4 4h10a4 4 0 0 1 4 4v12H8a4 4 0 0 1-4-4z"/><path d="M8 4v16"/></symbol>
+    <symbol id="i-box" viewBox="0 0 24 24"><path d="M3 7l9-4 9 4-9 4zM3 7v10l9 4 9-4V7M12 11v10"/></symbol>
+    <symbol id="i-cal" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></symbol>
+    <symbol id="i-table" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M3 15h18M9 4v16"/></symbol>
+    <symbol id="i-flask" viewBox="0 0 24 24"><path d="M4 4h10a4 4 0 0 1 4 4v12H8a4 4 0 0 1-4-4z"/><path d="M8 4v16"/></symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+    <symbol id="i-pen" viewBox="0 0 24 24"><path d="M4 20l4-1 11-11-3-3L5 16z"/></symbol>
+    <symbol id="i-trash" viewBox="0 0 24 24"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></symbol>
+    <symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12l5 5 9-10"/></symbol>
+    <symbol id="i-menu" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></symbol>
+  </defs>
+</svg>
+
+<div class="mock-bar" role="tablist" aria-label="États de la maquette">
+  <span class="lbl">Maquette</span>
+  <button class="mock-tab" role="tab" data-go="main" aria-selected="true">1 · Saisie et historique</button>
+  <button class="mock-tab" role="tab" data-go="errors" aria-selected="false">2 · Erreurs de saisie</button>
+  <button class="mock-tab" role="tab" data-go="edit" aria-selected="false">3 · Modifier une entrée</button>
+  <button class="mock-tab" role="tab" data-go="delete" aria-selected="false">4 · Supprimer</button>
+  <button class="mock-tab theme-btn" id="themeBtn" type="button">Thème clair / sombre</button>
+</div>
+
+<div class="shell">
+  <nav class="rail" aria-label="Sections">
+    <div class="logo">M</div>
+    <div class="rail-btn"><svg class="i"><use href="#i-cart"/></svg>Cmd.</div>
+    <div class="rail-btn"><svg class="i"><use href="#i-wallet"/></svg>Tréso.</div>
+    <div class="rail-btn on"><svg class="i"><use href="#i-db"/></svg>Prod.</div>
+    <div class="rail-btn"><svg class="i"><use href="#i-wallet"/></svg>Dép.</div>
+  </nav>
+  <aside class="panel">
+    <div class="panel-head">Production</div>
+    <div class="panel-body">
+      <button class="nav" type="button"><svg class="i"><use href="#i-book"/></svg>Recettes</button>
+      <button class="nav" type="button"><svg class="i"><use href="#i-cal"/></svg>Production</button>
+      <button class="nav" type="button"><svg class="i"><use href="#i-table"/></svg>Récapitulatif</button>
+      <button class="nav on" type="button" aria-current="page"><svg class="i"><use href="#i-box"/></svg>Entrée de stock<span class="new">Renommé</span></button>
+      <button class="nav" type="button"><svg class="i"><use href="#i-db"/></svg>Ingrédients</button>
+      <button class="nav" type="button"><svg class="i"><use href="#i-book"/></svg>Unité</button>
+    </div>
+  </aside>
+  <div class="main-col">
+    <header class="topbar"><svg class="i"><use href="#i-menu"/></svg>GESTION PATISSERIE MERLEBLEU</header>
+    <main class="content">
+      <div class="card">
+        <div class="head">
+          <div><h2>Entrée de stock</h2><div class="sub">Ajoute des quantités au stock. Aucun impact sur la trésorerie.</div></div>
+        </div>
+
+        <section class="entry" aria-labelledby="entryTitle">
+          <div class="entry-head">
+            <div><div class="t">Nouvelle entrée</div><h3 id="entryTitle">Réception du jour</h3></div>
+            <div class="date-field">
+              <label for="entryDate">Date de l'entrée</label>
+              <input class="inp" id="entryDate" type="text" value="28/11/2026" aria-describedby="dateHelp">
+            </div>
+          </div>
+          <div class="rows" id="rows" aria-live="polite"></div>
+          <div class="entry-foot">
+            <button class="btn text" id="addRow" type="button"><svg class="i"><use href="#i-plus"/></svg>Ajouter une ligne</button>
+            <span class="hint" id="dateHelp">Astuce : <span class="kbd">Entrée</span> dans une quantité ajoute une ligne.</span>
+            <div class="end">
+              <span class="hint" id="summaryText"></span>
+              <button class="btn" id="saveBtn" type="button"><svg class="i"><use href="#i-check"/></svg><span id="saveLabel">Enregistrer l'entrée</span></button>
+            </div>
+          </div>
+        </section>
+
+        <div class="filters">
+          <span class="sect">Historique des entrées</span>
+          <input class="inp" type="text" placeholder="Filtrer par date" aria-label="Filtrer par date" value="">
+          <input class="inp" type="text" placeholder="Rechercher par libellé..." aria-label="Rechercher par libellé">
+        </div>
+        <div class="tbl-wrap">
+          <table>
+            <thead><tr><th>Date</th><th>Libellé</th><th>Unité</th><th class="r">Quantité</th><th class="c" style="width:12rem">Actions</th></tr></thead>
+            <tbody id="history"></tbody>
+          </table>
+        </div>
+        <div class="pager"><span id="pagerInfo"></span><span>Lignes par page : 10</span></div>
+
+        <!-- Edit dialog -->
+        <div class="dialog-layer" id="dlg-edit">
+          <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="editTitle">
+            <header id="editTitle">Modifier une entrée</header>
+            <div class="body">
+              <div class="field"><label for="eDate">Date de l'entrée</label><input class="inp" id="eDate" value="26/11/2026"></div>
+              <div class="field"><label for="eIng">Ingrédient</label><select class="inp" id="eIng"><option>Farine T55</option></select></div>
+              <div class="field"><label for="eQty">Quantité</label><input class="inp num" id="eQty" value="25"></div>
+            </div>
+            <footer><button class="btn contrast" data-close type="button">Annuler</button><button class="btn" data-close type="button">Enregistrer</button></footer>
+          </div>
+        </div>
+
+        <!-- Delete dialog -->
+        <div class="dialog-layer" id="dlg-delete">
+          <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="delTitle">
+            <header id="delTitle">Confirmer la suppression</header>
+            <div class="body"><p style="margin:0">Supprimer l'entrée de <strong>Farine T55</strong> du 26/11/2026 (25 kg) ? Le stock de cet ingrédient sera réduit de 25 kg.</p></div>
+            <footer><button class="btn contrast" data-close type="button">Annuler</button><button class="btn danger" data-close type="button">Supprimer</button></footer>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<div class="toast" id="toast" role="status"><b>Entrée enregistrée.</b> <span id="toastText"></span></div>
+
+<div class="notes">
+  <div><b>Parcours :</b> 1 date commune (aujourd'hui par défaut) → des lignes ingrédient + quantité → un seul clic sur « Enregistrer l'entrée ». Tout est enregistré en une transaction, sinon rien.</div>
+  <div><b>Nouveau pattern signalé :</b> le bloc de saisie en ligne au-dessus du tableau. Il reprend la section bordée de la page Ingrédients, mais l'app n'a pas encore de formulaire à lignes multiples.</div>
+  <div><b>Menu :</b> « Achat » devient « Entrée de stock » (le badge « Renommé » n'existe que dans cette maquette).</div>
+</div>
+
+<script>
+var ING = [
+  { id: 'farine', label: 'Farine T55', unit: 'kg', stock: 14 },
+  { id: 'sucre', label: 'Sucre en poudre', unit: 'kg', stock: 6.5 },
+  { id: 'beurre', label: 'Beurre doux', unit: 'kg', stock: 3 },
+  { id: 'oeufs', label: 'Oeufs', unit: 'unité', stock: 48 },
+  { id: 'lait', label: 'Lait entier', unit: 'L', stock: 9 },
+  { id: 'vanille', label: 'Gousse de vanille', unit: 'unité', stock: 12 },
+  { id: 'choco', label: 'Chocolat noir 70 %', unit: 'kg', stock: 2.5 }
+];
+var HISTORY = [
+  ['26/11/2026', 'Farine T55', 'kg', '25'], ['26/11/2026', 'Beurre doux', 'kg', '10'], ['26/11/2026', 'Oeufs', 'unité', '120'],
+  ['21/11/2026', 'Sucre en poudre', 'kg', '15'], ['21/11/2026', 'Lait entier', 'L', '24'], ['19/11/2026', 'Chocolat noir 70 %', 'kg', '5'],
+  ['14/11/2026', 'Gousse de vanille', 'unité', '20'], ['12/11/2026', 'Farine T55', 'kg', '25']
+];
+var rows = [
+  { ing: 'farine', qty: '25' }, { ing: 'beurre', qty: '10' }, { ing: '', qty: '' }
+];
+var showErrors = false, saved = 0;
+var $ = function (id) { return document.getElementById(id); };
+function fmt(n) { return String(Math.round(n * 100) / 100).replace('.', ','); }
+function renderRows() {
+  var used = rows.map(function (r) { return r.ing; });
+  var html = '<div class="row-head" aria-hidden="true"><span>Ingrédient</span><span class="r" style="text-align:right">Quantité reçue</span><span>Unité</span><span style="text-align:right">Stock après</span><span></span></div>';
+  rows.forEach(function (r, i) {
+    var ing = ING.filter(function (x) { return x.id === r.ing; })[0];
+    var qty = parseFloat(String(r.qty).replace(',', '.'));
+    var opts = '<option value="">Sélectionner un ingrédient</option>' + ING.filter(function (x) { return x.id === r.ing || used.indexOf(x.id) < 0; })
+      .map(function (x) { return '<option value="' + x.id + '"' + (x.id === r.ing ? ' selected' : '') + '>' + x.label + '</option>'; }).join('');
+    var errIng = showErrors && !r.ing && (r.qty !== '' || i === 0);
+    var errQty = showErrors && r.ing && !(qty > 0);
+    var after = ing && qty > 0 ? '<span class="after">' + fmt(ing.stock) + ' → ' + fmt(ing.stock + qty) + '</span>' : '<span class="stock">' + (ing ? 'Stock : ' + fmt(ing.stock) : '') + '</span>';
+    html += '<div class="row">' +
+      '<select class="inp' + (errIng ? ' err' : '') + '" data-i="' + i + '" data-f="ing" aria-label="Ingrédient ligne ' + (i + 1) + '">' + opts + '</select>' +
+      '<input class="inp num' + (errQty ? ' err' : '') + '" data-i="' + i + '" data-f="qty" inputmode="decimal" placeholder="0" value="' + r.qty + '" aria-label="Quantité ligne ' + (i + 1) + '">' +
+      '<span class="unit">' + (ing ? ing.unit : '') + '</span>' +
+      '<span style="text-align:right;font-variant-numeric:tabular-nums">' + after + '</span>' +
+      '<button class="x" type="button" data-del="' + i + '" aria-label="Retirer la ligne ' + (i + 1) + '"><svg class="i"><use href="#i-x"/></svg></button>' +
+      (errIng ? '<div class="row-err">Choisissez un ingrédient.</div>' : '') +
+      (errQty ? '<div class="row-err">La quantité doit être supérieure à 0.</div>' : '') +
+      '</div>';
+  });
+  $('rows').innerHTML = html;
+  var valid = rows.filter(function (r) { return r.ing && parseFloat(String(r.qty).replace(',', '.')) > 0; }).length;
+  $('summaryText').textContent = valid ? valid + ' ligne' + (valid > 1 ? 's' : '') + ' prête' + (valid > 1 ? 's' : '') : '';
+  $('saveBtn').disabled = valid === 0;
+}
+function renderHistory() {
+  var extra = saved ? [['28/11/2026', 'Farine T55', 'kg', '25', 1], ['28/11/2026', 'Beurre doux', 'kg', '10', 1]] : [];
+  var all = extra.concat(HISTORY);
+  $('history').innerHTML = all.map(function (h, i) {
+    return '<tr' + (h[4] ? ' class="fresh"' : '') + '><td>' + h[0] + '</td><td>' + h[1] + '</td><td>' + h[2] + '</td><td class="r">' + h[3] + '</td>' +
+      '<td class="c"><button class="btn sm warn" data-open="edit" type="button" aria-label="Modifier"><svg class="i"><use href="#i-pen"/></svg></button> ' +
+      '<button class="btn sm danger" data-open="delete" type="button" aria-label="Supprimer"><svg class="i"><use href="#i-trash"/></svg></button></td></tr>';
+  }).join('');
+  $('pagerInfo').textContent = all.length + ' entrées';
+}
+function closeDialogs() { $('dlg-edit').classList.remove('on'); $('dlg-delete').classList.remove('on'); }
+function go(name) {
+  closeDialogs();
+  if (name === 'main') { showErrors = false; rows = [{ ing: 'farine', qty: '25' }, { ing: 'beurre', qty: '10' }, { ing: '', qty: '' }]; saved = 0; }
+  if (name === 'errors') { showErrors = true; rows = [{ ing: 'farine', qty: '0' }, { ing: '', qty: '4' }, { ing: 'lait', qty: '12' }]; }
+  if (name === 'edit') $('dlg-edit').classList.add('on');
+  if (name === 'delete') $('dlg-delete').classList.add('on');
+  document.querySelectorAll('.mock-tab[data-go]').forEach(function (b) { b.setAttribute('aria-selected', String(b.dataset.go === name)); });
+  renderRows(); renderHistory();
+}
+document.addEventListener('click', function (e) {
+  var t = e.target.closest('button'); if (!t) return;
+  if (t.dataset.go) go(t.dataset.go);
+  else if (t.dataset.open) { closeDialogs(); $('dlg-' + t.dataset.open).classList.add('on'); }
+  else if (t.hasAttribute('data-close')) closeDialogs();
+  else if (t.dataset.del !== undefined) { rows.splice(+t.dataset.del, 1); if (!rows.length) rows.push({ ing: '', qty: '' }); renderRows(); }
+  else if (t.id === 'addRow') { rows.push({ ing: '', qty: '' }); renderRows(); }
+  else if (t.id === 'saveBtn') {
+    var ok = rows.every(function (r) { return !r.ing && r.qty === '' || r.ing && parseFloat(String(r.qty).replace(',', '.')) > 0; });
+    if (!ok) { showErrors = true; renderRows(); return; }
+    var n = rows.filter(function (r) { return r.ing; }).length;
+    saved = 1; showErrors = false; rows = [{ ing: '', qty: '' }];
+    $('toastText').textContent = n + ' ligne' + (n > 1 ? 's ajoutées' : ' ajoutée') + ' au stock.';
+    $('toast').classList.add('on'); setTimeout(function () { $('toast').classList.remove('on'); }, 3500);
+    renderRows(); renderHistory();
+  }
+  else if (t.id === 'themeBtn') {
+    var r = document.documentElement, dark = r.dataset.theme === 'dark' || (!r.dataset.theme && matchMedia('(prefers-color-scheme: dark)').matches);
+    r.dataset.theme = dark ? 'light' : 'dark';
+  }
+});
+document.addEventListener('input', function (e) {
+  var d = e.target.dataset; if (!d || d.i === undefined) return;
+  rows[+d.i][d.f] = e.target.value;
+  if (d.f === 'ing') renderRows();
+  else { var v = parseFloat(String(e.target.value).replace(',', '.')); var row = e.target.closest('.row'); var ing = ING.filter(function (x) { return x.id === rows[+d.i].ing; })[0]; if (ing) { row.children[3].innerHTML = v > 0 ? '<span class="after">' + fmt(ing.stock) + ' → ' + fmt(ing.stock + v) + '</span>' : '<span class="stock">Stock : ' + fmt(ing.stock) + '</span>'; } var valid = rows.filter(function (r) { return r.ing && parseFloat(String(r.qty).replace(',', '.')) > 0; }).length; $('summaryText').textContent = valid ? valid + ' ligne' + (valid > 1 ? 's' : '') + ' prête' + (valid > 1 ? 's' : '') : ''; $('saveBtn').disabled = valid === 0; }
+});
+document.addEventListener('keydown', function (e) {
+  if (e.key === 'Enter' && e.target.dataset && e.target.dataset.f === 'qty') { e.preventDefault(); rows.push({ ing: '', qty: '' }); renderRows(); var s = document.querySelectorAll('.row select'); s[s.length - 1].focus(); }
+  if (e.key === 'Escape') closeDialogs();
+});
+go('main');
+</script>

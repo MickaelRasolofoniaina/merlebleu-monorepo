@@ -1,0 +1,133 @@
+<section
+  class="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900"
+  aria-labelledby="stock-entry-batch-title"
+>
+  <div
+    class="flex flex-wrap items-end gap-4 px-5 py-4 border-b border-slate-200 dark:border-slate-700"
+  >
+    <div>
+      <div class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+        Nouvelle entrée
+      </div>
+      <h3 id="stock-entry-batch-title" class="text-lg font-semibold">Réception du jour</h3>
+    </div>
+    <div class="ml-auto flex w-full flex-col gap-1 sm:w-52">
+      <label for="batchEntryDate" class="font-semibold text-slate-900 dark:text-white">
+        Date de l'entrée
+      </label>
+      <p-datepicker
+        inputId="batchEntryDate"
+        [ngModel]="entryDate()"
+        (ngModelChange)="entryDate.set($event)"
+        dateFormat="dd/mm/yy"
+        [showIcon]="true"
+        placeholder="Sélectionner une date"
+        fluid
+      />
+      @if (errors()['entryDate']) {
+        <small class="text-red-500 block">{{ errors()['entryDate'] }}</small>
+      }
+    </div>
+  </div>
+
+  <div class="flex flex-col gap-2 px-5 pt-3 pb-1" aria-live="polite">
+    <div
+      class="hidden md:grid md:grid-cols-[minmax(0,2.4fr)_9rem_4.5rem_8rem_2.5rem] gap-3 text-xs font-semibold text-slate-500 dark:text-slate-400"
+      aria-hidden="true"
+    >
+      <span>Ingrédient</span>
+      <span class="text-right">Quantité reçue</span>
+      <span>Unité</span>
+      <span class="text-right">Stock après</span>
+      <span></span>
+    </div>
+
+    @for (line of lines(); track line.key; let i = $index) {
+      <div
+        class="grid grid-cols-[minmax(0,1fr)_8rem_2.5rem] md:grid-cols-[minmax(0,2.4fr)_9rem_4.5rem_8rem_2.5rem] items-center gap-3"
+      >
+        <p-select
+          [ngModel]="line.ingredientId"
+          (ngModelChange)="patchLine(line.key, { ingredientId: $event })"
+          [options]="optionsFor(line)"
+          optionLabel="label"
+          optionValue="id"
+          placeholder="Sélectionner un ingrédient"
+          [filter]="true"
+          filterPlaceholder="Rechercher un ingrédient..."
+          [invalid]="!!lineError(i, 'ingredientId')"
+          [attr.aria-label]="'Ingrédient ligne ' + (i + 1)"
+          fluid
+        />
+        <p-inputnumber
+          [ngModel]="line.quantity"
+          (ngModelChange)="patchLine(line.key, { quantity: $event })"
+          (keydown.enter)="onQuantityEnter($event)"
+          [minFractionDigits]="0"
+          [maxFractionDigits]="2"
+          [min]="0"
+          placeholder="0"
+          [invalid]="!!lineError(i, 'quantity')"
+          [ariaLabel]="'Quantité ligne ' + (i + 1)"
+          inputStyleClass="text-right w-full"
+          fluid
+        />
+        <span class="hidden md:block text-slate-500 dark:text-slate-400">
+          {{ ingredientOf(line)?.unit?.label }}
+        </span>
+        <span class="hidden md:block text-right tabular-nums">
+          @if (ingredientOf(line); as ingredient) {
+            @if (stockAfter(line) !== null) {
+              <span class="font-semibold text-green-700 dark:text-green-400">
+                {{ ingredient.stock | number: '1.0-2' }} → {{ stockAfter(line) | number: '1.0-2' }}
+              </span>
+            } @else {
+              <span class="text-slate-500 dark:text-slate-400">
+                Stock : {{ ingredient.stock | number: '1.0-2' }}
+              </span>
+            }
+          }
+        </span>
+        <p-button
+          icon="pi pi-times"
+          severity="secondary"
+          [text]="true"
+          size="small"
+          [attr.aria-label]="'Retirer la ligne ' + (i + 1)"
+          (onClick)="removeLine(line.key)"
+        />
+        @if (lineError(i, 'ingredientId') || lineError(i, 'quantity')) {
+          <small class="col-span-full -mt-1 text-red-500">
+            {{ lineError(i, 'ingredientId') || lineError(i, 'quantity') }}
+          </small>
+        }
+      </div>
+    }
+    @if (errors()['lines']) {
+      <small class="text-red-500">{{ errors()['lines'] }}</small>
+    }
+  </div>
+
+  <div class="flex flex-wrap items-center gap-3 px-5 pt-2 pb-4">
+    <p-button
+      label="Ajouter une ligne"
+      icon="pi pi-plus"
+      [text]="true"
+      size="small"
+      (onClick)="addLine()"
+    />
+    <span class="hidden text-xs text-slate-500 dark:text-slate-400 md:inline">
+      Astuce : Entrée dans une quantité ajoute une ligne.
+    </span>
+    <div class="ml-auto flex items-center gap-3">
+      <span class="text-xs text-slate-500 dark:text-slate-400">{{ summary() }}</span>
+      <p-button
+        label="Enregistrer l'entrée"
+        icon="pi pi-check"
+        [loading]="isSubmitting()"
+        [disabled]="readyCount() === 0 || isSubmitting()"
+        (onClick)="onSubmit()"
+      />
+    </div>
+  </div>
+</section>

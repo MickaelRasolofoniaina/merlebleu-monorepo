@@ -11,46 +11,40 @@ import {
   ParseIntPipe,
 } from '@nestjs/common';
 import { ApiQuery } from '@nestjs/swagger';
-import { IngredientPurchaseService } from './ingredient-purchase.service';
-import {
-  CreateIngredientPurchaseDto,
-  UpdateIngredientPurchaseDto,
-} from './ingredient-purchase.dto';
+import { StockEntryService } from './stock-entry.service';
+import { CreateStockEntriesDto, UpdateStockEntryDto } from './stock-entry.dto';
 
-@Controller('ingredient-purchase')
-export class IngredientPurchaseController {
-  constructor(private readonly purchaseService: IngredientPurchaseService) {}
+@Controller('stock-entry')
+export class StockEntryController {
+  constructor(private readonly stockEntryService: StockEntryService) {}
 
   @Get()
-  @ApiQuery({ name: 'purchaseDate', required: false, type: String })
+  @ApiQuery({ name: 'entryDate', required: false, type: String })
   @ApiQuery({ name: 'labelContains', required: false, type: String })
-  findPurchases(
+  findStockEntries(
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
     @Query('limit', new DefaultValuePipe(20), ParseIntPipe) limit: number,
-    @Query('purchaseDate') purchaseDate?: string,
+    @Query('entryDate') entryDate?: string,
     @Query('labelContains') labelContains?: string,
   ) {
-    return this.purchaseService.findPurchases(page, limit, {
-      purchaseDate,
+    return this.stockEntryService.findStockEntries(page, limit, {
+      entryDate,
       labelContains,
     });
   }
 
   @Post()
-  addPurchase(@Body() dto: CreateIngredientPurchaseDto) {
-    return this.purchaseService.addPurchase(dto);
+  addStockEntries(@Body() dto: CreateStockEntriesDto) {
+    return this.stockEntryService.addStockEntries(dto);
   }
 
   @Put(':id')
-  updatePurchase(
-    @Param('id') id: string,
-    @Body() dto: UpdateIngredientPurchaseDto,
-  ) {
-    return this.purchaseService.updatePurchase(id, dto);
+  updateStockEntry(@Param('id') id: string, @Body() dto: UpdateStockEntryDto) {
+    return this.stockEntryService.updateStockEntry(id, dto);
   }
 
   @Delete(':id')
-  deletePurchase(@Param('id') id: string) {
-    return this.purchaseService.deletePurchase(id);
+  deleteStockEntry(@Param('id') id: string) {
+    return this.stockEntryService.deleteStockEntry(id);
   }
 }

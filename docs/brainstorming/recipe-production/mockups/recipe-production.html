@@ -1,0 +1,498 @@
+<title>Recettes et production Merlebleu</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/* Layout: replica of the app shell (icon rail, section panel, top bar, white card) holding 4 mockup screens, switched from a toolbar that only exists in this mockup. */
+:root {
+  --canvas: #e2e8f0; --page: #f1f5f9; --card: #ffffff; --rail: #1e293b; --rail-hover: #334155; --rail-active: #475569;
+  --brand: #3b82f6; --brand-ink: #1d4ed8; --brand-soft: #eff6ff;
+  --text: #0f172a; --muted: #64748b; --line: #e2e8f0; --stripe: #f8fafc;
+  --input-bg: #ffffff; --input-line: #cbd5e1;
+  --danger: #dc2626; --danger-soft: #fef2f2; --warn: #b45309; --warn-soft: #fffbeb; --ok: #15803d; --ok-soft: #f0fdf4;
+  --overlay: rgba(15, 23, 42, .45);
+  --font: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --canvas: #020617; --page: #0f172a; --card: #1e293b; --rail: #1e293b; --rail-hover: #334155; --rail-active: #475569;
+    --brand: #60a5fa; --brand-ink: #ffffff; --brand-soft: #334155;
+    --text: #e2e8f0; --muted: #94a3b8; --line: #334155; --stripe: #243247;
+    --input-bg: #0f172a; --input-line: #475569;
+    --danger: #f87171; --danger-soft: #3b1d22; --warn: #fbbf24; --warn-soft: #3a2e12; --ok: #4ade80; --ok-soft: #14301f;
+    --overlay: rgba(2, 6, 23, .65);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --canvas: #020617; --page: #0f172a; --card: #1e293b; --rail: #1e293b; --rail-hover: #334155; --rail-active: #475569;
+  --brand: #60a5fa; --brand-ink: #ffffff; --brand-soft: #334155;
+  --text: #e2e8f0; --muted: #94a3b8; --line: #334155; --stripe: #243247;
+  --input-bg: #0f172a; --input-line: #475569;
+  --danger: #f87171; --danger-soft: #3b1d22; --warn: #fbbf24; --warn-soft: #3a2e12; --ok: #4ade80; --ok-soft: #14301f;
+  --overlay: rgba(2, 6, 23, .65);
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { background: var(--canvas); color: var(--text); font-family: var(--font); font-size: 14px; line-height: 1.45; padding-block: 12px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+button, input, select { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
+svg.i { width: 1.1em; height: 1.1em; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+
+/* Mockup toolbar (not part of the app) */
+.mock-bar { max-width: 1280px; margin: 0 auto 10px; display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.mock-bar .lbl { font-size: 11px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); margin-right: 4px; }
+.mock-tab { border: 1px solid var(--input-line); background: var(--card); border-radius: 999px; padding: 5px 12px; cursor: pointer; font-size: 13px; }
+.mock-tab[aria-selected="true"] { background: var(--brand); border-color: var(--brand); color: #fff; font-weight: 600; }
+:root[data-theme="dark"] .mock-tab[aria-selected="true"], :root:not([data-theme="light"]) .mock-tab[aria-selected="true"] { color: #0f172a; }
+.theme-btn { margin-left: auto; }
+
+/* App shell */
+.shell { max-width: 1280px; margin: 0 auto; display: flex; min-height: 640px; background: var(--page); border-radius: 10px; overflow: hidden; border: 1px solid var(--line); }
+.rail { width: 68px; background: var(--rail); display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 12px 0; flex: none; }
+.logo { width: 36px; height: 36px; border-radius: 10px; background: #3b82f6; color: #fff; display: grid; place-items: center; font-weight: 600; margin-bottom: 10px; }
+.rail-btn { width: 54px; height: 54px; border-radius: 12px; display: flex; flex-direction: column; gap: 2px; align-items: center; justify-content: center; color: #cbd5e1; font-size: 9px; font-weight: 500; background: transparent; }
+.rail-btn svg { width: 20px; height: 20px; }
+.rail-btn.on { background: var(--rail-active); color: #fff; }
+.panel { width: 224px; background: var(--card); border-right: 1px solid var(--line); flex: none; display: flex; flex-direction: column; }
+.panel-head { height: 56px; background: #3b82f6; color: #fff; font-weight: 600; display: flex; align-items: center; padding: 0 16px; }
+.panel-body { padding: 10px; display: flex; flex-direction: column; gap: 1px; }
+.nav { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-radius: 8px; font-size: 14px; font-weight: 500; color: var(--text); cursor: pointer; background: none; border: 0; text-align: left; width: 100%; }
+.nav:hover { background: var(--page); }
+.nav.on { background: var(--brand-soft); color: var(--brand-ink); }
+.nav .new { margin-left: auto; font-size: 10px; font-weight: 700; background: var(--brand); color: #fff; border-radius: 999px; padding: 1px 6px; }
+.main-col { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.topbar { height: 56px; background: #1e293b; color: #fff; display: flex; align-items: center; gap: 12px; padding: 0 20px; font-weight: 600; font-size: 17px; }
+.content { padding: 16px; flex: 1; min-width: 0; }
+.card { background: var(--card); border-radius: 12px; padding: 14px 16px; min-width: 0; position: relative; }
+.card:has(.dialog-layer.on) { min-height: 640px; }
+
+/* Screen heads */
+.screen { display: none; }
+.screen.on { display: block; }
+.head { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-bottom: 14px; }
+.head h2 { margin: 0; font-size: 24px; font-weight: 700; }
+.head .sub { font-size: 13px; color: var(--muted); }
+.head .spacer { margin-left: auto; display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+
+/* PrimeNG-like controls */
+.inp { height: 36px; border: 1px solid var(--input-line); background: var(--input-bg); border-radius: 6px; padding: 0 10px; min-width: 0; }
+.inp.w-search { width: 240px; }
+.inp.num { width: 96px; text-align: right; font-variant-numeric: tabular-nums; }
+.inp.err { border-color: var(--danger); }
+.btn { height: 36px; display: inline-flex; align-items: center; gap: 6px; border-radius: 6px; padding: 0 14px; border: 1px solid transparent; cursor: pointer; font-weight: 500; background: #3b82f6; color: #fff; }
+.btn:hover { filter: brightness(.95); }
+.btn.sm { height: 30px; padding: 0 9px; font-size: 13px; }
+.btn.warn { background: #f97316; }
+.btn.sec { background: #64748b; }
+.btn.danger { background: #ef4444; }
+.btn.contrast { background: #0f172a; color: #fff; }
+:root[data-theme="dark"] .btn.contrast, :root:not([data-theme="light"]) .btn.contrast { background: #e2e8f0; color: #0f172a; }
+.btn.ghost { background: transparent; color: var(--text); border-color: var(--input-line); }
+.btn.text { background: transparent; color: var(--brand-ink); }
+.tag { display: inline-block; font-size: 12px; font-weight: 600; border-radius: 6px; padding: 2px 8px; }
+.tag.ok { background: var(--ok-soft); color: var(--ok); }
+.tag.bad { background: var(--danger-soft); color: var(--danger); }
+.tag.warn { background: var(--warn-soft); color: var(--warn); }
+.tag.mute { background: var(--page); color: var(--muted); }
+.chip { display: inline-block; font-size: 12px; border-radius: 999px; padding: 1px 8px; background: var(--page); color: var(--text); margin: 1px 3px 1px 0; font-variant-numeric: tabular-nums; }
+
+/* Tables */
+.tbl-wrap { overflow-x: auto; border-radius: 8px; }
+table { width: 100%; border-collapse: collapse; min-width: 640px; }
+th { text-align: left; font-weight: 600; padding: 10px 12px; border-bottom: 1px solid var(--line); background: var(--card); white-space: nowrap; }
+td { padding: 9px 12px; border-bottom: 1px solid var(--line); vertical-align: middle; }
+tbody tr:nth-child(even) { background: var(--stripe); }
+.r { text-align: right; font-variant-numeric: tabular-nums; }
+.c { text-align: center; }
+.neg { color: var(--danger); font-weight: 700; }
+.muted { color: var(--muted); }
+.pager { display: flex; justify-content: space-between; align-items: center; padding: 10px 4px 0; color: var(--muted); font-size: 13px; }
+
+/* Production layout */
+.prod-grid { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(280px, 1fr); gap: 16px; align-items: start; }
+.banner { display: flex; gap: 10px; align-items: flex-start; border-radius: 8px; padding: 10px 12px; margin-bottom: 12px; border: 1px solid; }
+.banner.warn { background: var(--warn-soft); border-color: var(--warn); color: var(--text); }
+.banner.warn svg { color: var(--warn); margin-top: 2px; }
+.banner.info { background: var(--brand-soft); border-color: var(--brand); }
+.daynav { display: inline-flex; align-items: center; gap: 4px; }
+.sect-title { font-weight: 600; margin: 0 0 8px; font-size: 15px; }
+.empty { text-align: center; padding: 28px 12px; color: var(--muted); }
+.foot-actions { display: flex; flex-wrap: wrap; gap: 8px; justify-content: space-between; align-items: center; margin-top: 12px; }
+.small { font-size: 12px; color: var(--muted); }
+
+/* Dialog */
+.dialog-layer { position: absolute; inset: 0; background: var(--overlay); display: none; align-items: flex-start; justify-content: center; padding: 28px 12px; z-index: 5; border-radius: 12px; }
+.dialog-layer.on { display: flex; }
+.dialog { background: var(--card); border-radius: 10px; width: min(640px, 100%); box-shadow: 0 20px 50px rgba(0,0,0,.3); display: flex; flex-direction: column; max-height: 100%; }
+.dialog header { padding: 16px 20px 8px; font-weight: 700; font-size: 18px; display: flex; justify-content: space-between; align-items: center; }
+.dialog .body { padding: 8px 20px 12px; overflow: auto; display: flex; flex-direction: column; gap: 14px; }
+.dialog footer { padding: 12px 20px 16px; display: flex; justify-content: flex-end; gap: 8px; }
+.field { display: flex; flex-direction: column; gap: 4px; }
+.field label { font-weight: 500; }
+.err-msg { color: var(--danger); font-size: 12px; }
+.dose-row { display: grid; grid-template-columns: minmax(0, 1fr) 110px 70px 34px; gap: 8px; align-items: center; }
+.dose-row .unit { color: var(--muted); font-size: 13px; }
+.x { height: 30px; width: 30px; border-radius: 6px; border: 0; background: transparent; color: var(--muted); cursor: pointer; display: grid; place-items: center; }
+.x:hover { background: var(--danger-soft); color: var(--danger); }
+.dose-head { display: grid; grid-template-columns: minmax(0, 1fr) 110px 70px 34px; gap: 8px; font-size: 12px; color: var(--muted); font-weight: 600; }
+
+.notes { max-width: 1280px; margin: 12px auto 0; font-size: 12.5px; color: var(--muted); display: grid; gap: 4px; }
+.notes b { color: var(--text); }
+
+@media (max-width: 960px) {
+  .panel { display: none; }
+  .prod-grid { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 560px) {
+  .rail { display: none; }
+  .inp.w-search { width: 100%; }
+  .dose-row, .dose-head { grid-template-columns: minmax(0, 1fr) 90px 56px 30px; }
+}
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-db" viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v6c0 1.7 3.6 3 8 3s8-1.3 8-3V5M4 11v6c0 1.7 3.6 3 8 3s8-1.3 8-3v-6"/></symbol>
+    <symbol id="i-cart" viewBox="0 0 24 24"><circle cx="9" cy="20" r="1.5"/><circle cx="18" cy="20" r="1.5"/><path d="M2 3h3l2.5 12h11L21 7H6"/></symbol>
+    <symbol id="i-wallet" viewBox="0 0 24 24"><path d="M3 7h16a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h12"/><circle cx="16.5" cy="13.5" r="1"/></symbol>
+    <symbol id="i-book" viewBox="0 0 24 24"><path d="M4 4h10a4 4 0 0 1 4 4v12H8a4 4 0 0 1-4-4z"/><path d="M8 4v16"/></symbol>
+    <symbol id="i-clip" viewBox="0 0 24 24"><rect x="6" y="4" width="12" height="17" rx="2"/><path d="M9 4V3h6v1M9 11h6M9 15h6"/></symbol>
+    <symbol id="i-flask" viewBox="0 0 24 24"><path d="M9 3h6M10 3v6l-5 9a2 2 0 0 0 2 3h10a2 2 0 0 0 2-3l-5-9V3"/><path d="M7.5 15h9"/></symbol>
+    <symbol id="i-cal" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></symbol>
+    <symbol id="i-table" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M3 15h18M9 4v16"/></symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+    <symbol id="i-pen" viewBox="0 0 24 24"><path d="M4 20l4-1 11-11-3-3L5 16z"/></symbol>
+    <symbol id="i-copy" viewBox="0 0 24 24"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h8"/></symbol>
+    <symbol id="i-arch" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="4" rx="1"/><path d="M5 8v11a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8M10 12h4"/></symbol>
+    <symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol>
+    <symbol id="i-warn" viewBox="0 0 24 24"><path d="M12 3l10 18H2z"/><path d="M12 10v5M12 18h.01"/></symbol>
+    <symbol id="i-left" viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></symbol>
+    <symbol id="i-right" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></symbol>
+    <symbol id="i-menu" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></symbol>
+  </defs>
+</svg>
+
+<div class="mock-bar" role="tablist" aria-label="Écrans de la maquette">
+  <span class="lbl">Maquette</span>
+  <button class="mock-tab" role="tab" data-go="recipes" aria-selected="true">1 · Recettes</button>
+  <button class="mock-tab" role="tab" data-go="dialog" aria-selected="false">2 · Dialog recette</button>
+  <button class="mock-tab" role="tab" data-go="production" aria-selected="false">3 · Production du jour</button>
+  <button class="mock-tab" role="tab" data-go="summary" aria-selected="false">4 · Récapitulatif mensuel</button>
+  <button class="mock-tab theme-btn" id="themeBtn" type="button">Thème clair / sombre</button>
+</div>
+
+<div class="shell">
+  <nav class="rail" aria-label="Sections">
+    <div class="logo">M</div>
+    <div class="rail-btn"><svg class="i"><use href="#i-cart"/></svg>Cmd</div>
+    <div class="rail-btn"><svg class="i"><use href="#i-wallet"/></svg>Trés.</div>
+    <div class="rail-btn"><svg class="i"><use href="#i-wallet"/></svg>Dép.</div>
+    <div class="rail-btn on"><svg class="i"><use href="#i-db"/></svg>Ingr.</div>
+  </nav>
+  <aside class="panel">
+    <div class="panel-head">Ingrédients</div>
+    <div class="panel-body">
+      <button class="nav" data-go="recipes" id="nav-recipes"><svg class="i"><use href="#i-flask"/></svg>Recettes<span class="new">Nouveau</span></button>
+      <button class="nav" data-go="production" id="nav-production"><svg class="i"><use href="#i-cal"/></svg>Production<span class="new">Nouveau</span></button>
+      <button class="nav" data-go="summary" id="nav-summary"><svg class="i"><use href="#i-table"/></svg>Récapitulatif<span class="new">Nouveau</span></button>
+      <button class="nav" type="button"><svg class="i"><use href="#i-wallet"/></svg>Achat</button>
+      <button class="nav" type="button"><svg class="i"><use href="#i-clip"/></svg>Inventaire</button>
+      <button class="nav" type="button"><svg class="i"><use href="#i-db"/></svg>Liste</button>
+      <button class="nav" type="button"><svg class="i"><use href="#i-book"/></svg>Unité</button>
+    </div>
+  </aside>
+  <div class="main-col">
+    <header class="topbar"><svg class="i"><use href="#i-menu"/></svg>GESTION PATISSERIE MERLEBLEU</header>
+    <main class="content">
+      <div class="card">
+
+        <!-- 1. Recettes -->
+        <section class="screen on" id="screen-recipes" aria-labelledby="h-recipes">
+          <div class="head">
+            <div><h2 id="h-recipes">Recettes</h2><div class="sub" id="recipeCount"></div></div>
+            <div class="spacer">
+              <input class="inp w-search" id="recipeSearch" type="text" placeholder="Rechercher une recette..." aria-label="Rechercher une recette">
+              <select class="inp" id="recipeStatus" aria-label="Filtrer par statut">
+                <option value="active">Recettes actives</option>
+                <option value="archived">Archivées</option>
+                <option value="all">Toutes</option>
+              </select>
+              <button class="btn" id="addRecipe" type="button"><svg class="i"><use href="#i-plus"/></svg>Ajouter</button>
+            </div>
+          </div>
+          <div class="tbl-wrap">
+            <table>
+              <thead><tr><th>Recette</th><th>Doses pour 1 fournée</th><th class="c">Statut</th><th class="c" style="width:12rem">Actions</th></tr></thead>
+              <tbody id="recipeRows"></tbody>
+            </table>
+          </div>
+          <div class="pager"><span id="pagerInfo"></span><span>Lignes par page : 10</span></div>
+        </section>
+
+        <!-- 3. Production -->
+        <section class="screen" id="screen-production" aria-labelledby="h-prod">
+          <div class="head">
+            <div><h2 id="h-prod">Production du jour</h2><div class="sub" id="prodSub"></div></div>
+            <div class="spacer">
+              <div class="daynav">
+                <button class="btn sm ghost" id="prevDay" type="button" aria-label="Jour précédent"><svg class="i"><use href="#i-left"/></svg></button>
+                <input class="inp" id="prodDate" type="date" value="2026-10-15" aria-label="Date de production">
+                <button class="btn sm ghost" id="nextDay" type="button" aria-label="Jour suivant"><svg class="i"><use href="#i-right"/></svg></button>
+              </div>
+            </div>
+          </div>
+          <div id="stockBanner"></div>
+          <div class="prod-grid">
+            <div>
+              <h3 class="sect-title">Recettes produites</h3>
+              <div class="tbl-wrap">
+                <table style="min-width:520px">
+                  <thead><tr><th>Recette</th><th class="r">Fournées</th><th>Consommation</th><th style="width:3rem"></th></tr></thead>
+                  <tbody id="prodRows"></tbody>
+                </table>
+              </div>
+              <div class="foot-actions">
+                <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center">
+                  <select class="inp" id="addProdSelect" aria-label="Choisir une recette à ajouter"></select>
+                  <button class="btn ghost" id="addProd" type="button"><svg class="i"><use href="#i-plus"/></svg>Ajouter à la journée</button>
+                </div>
+                <button class="btn" id="saveProd" type="button">Enregistrer la journée</button>
+              </div>
+              <p class="small" style="margin:10px 0 0">Une seule ligne par recette et par jour. Pour changer une quantité, modifiez la ligne existante.</p>
+            </div>
+            <div>
+              <h3 class="sect-title">Consommation de la journée</h3>
+              <div class="tbl-wrap">
+                <table style="min-width:340px">
+                  <thead><tr><th>Ingrédient</th><th class="r">Consommé</th><th class="r">Restant après</th></tr></thead>
+                  <tbody id="usageRows"></tbody>
+                </table>
+              </div>
+              <p class="small" style="margin:8px 0 0">Le restant tient compte du stock actuel après enregistrement de la journée.</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- 4. Récapitulatif -->
+        <section class="screen" id="screen-summary" aria-labelledby="h-sum">
+          <div class="head">
+            <div><h2 id="h-sum">Récapitulatif mensuel</h2><div class="sub">Entrées (achats), consommation des productions et stock actuel</div></div>
+            <div class="spacer">
+              <div class="daynav">
+                <button class="btn sm ghost" type="button" aria-label="Mois précédent"><svg class="i"><use href="#i-left"/></svg></button>
+                <input class="inp" id="monthPick" type="month" value="2026-10" aria-label="Mois">
+                <button class="btn sm ghost" type="button" aria-label="Mois suivant"><svg class="i"><use href="#i-right"/></svg></button>
+              </div>
+              <select class="inp" id="sumFilter" aria-label="Filtrer par état">
+                <option value="all">Tous les ingrédients</option>
+                <option value="neg">En manque seulement</option>
+              </select>
+            </div>
+          </div>
+          <div class="banner info" id="sumNote"><svg class="i"><use href="#i-clip"/></svg><div><b>Stock actuel</b> est le stock d'aujourd'hui. Il n'est pas recalculé pour la fin du mois choisi.</div></div>
+          <div class="tbl-wrap">
+            <table>
+              <thead><tr><th>Ingrédient</th><th>Unité</th><th class="r">Entrées du mois</th><th class="r">Consommé du mois</th><th class="r">Stock actuel</th><th class="c">État</th></tr></thead>
+              <tbody id="sumRows"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- 2. Dialog recette -->
+        <div class="dialog-layer" id="recipeDialog" role="dialog" aria-modal="true" aria-labelledby="dlgTitle">
+          <div class="dialog">
+            <header><span id="dlgTitle">Ajouter une recette</span><button class="x" id="dlgClose" type="button" aria-label="Fermer"><svg class="i"><use href="#i-x"/></svg></button></header>
+            <form class="body" id="recipeForm" novalidate>
+              <div class="field">
+                <label for="rName">Nom de la recette</label>
+                <input class="inp" id="rName" type="text" placeholder="Ex. Biscuit nature" value="Biscuit nature">
+                <span class="err-msg" id="rNameErr" hidden>Veuillez saisir le nom de la recette</span>
+              </div>
+              <div>
+                <div class="dose-head" style="margin-bottom:6px"><span>Ingrédient</span><span style="text-align:right">Dose / fournée</span><span>Unité</span><span></span></div>
+                <div id="doseRows" style="display:flex; flex-direction:column; gap:8px"></div>
+                <span class="err-msg" id="doseErr" hidden></span>
+                <button class="btn text" id="addDose" type="button" style="margin-top:6px"><svg class="i"><use href="#i-plus"/></svg>Ajouter un ingrédient</button>
+              </div>
+              <p class="small" style="margin:0">Les doses sont exprimées dans l'unité de stock de l'ingrédient. Modifier une recette ne change pas les productions déjà enregistrées.</p>
+            </form>
+            <footer>
+              <button class="btn contrast" id="dlgCancel" type="button">Annuler</button>
+              <button class="btn" id="dlgSave" type="button">Enregistrer</button>
+            </footer>
+          </div>
+        </div>
+
+      </div>
+    </main>
+  </div>
+</div>
+
+<div class="notes">
+  <div><b>Réutilisé de l'application :</b> rail et panneau « Ingrédients », tableau rayé avec boutons crayon / corbeille, dialog avec pied Annuler / Enregistrer, étiquettes de statut, couleurs et thème sombre.</div>
+  <div><b>Nouveaux motifs :</b> bandeau d'avertissement de stock, sélecteur de jour avec flèches, bouton « Dupliquer ». Les 3 entrées marquées « Nouveau » s'ajoutent au menu Ingrédients.</div>
+  <div><b>Données fictives :</b> doses issues de l'onglet INGREDIENTS (ex. biscuit nature : 1250 g de farine, 950 g de sucre, 36 œufs). Les stocks sont inventés pour la démonstration.</div>
+</div>
+
+<script>
+(function () {
+  var ING = {
+    far: { n: 'Farine', u: 'g', stock: 12400, in: 20000 },
+    suc: { n: 'Sucre', u: 'g', stock: 9800, in: 20000 },
+    oeuf: { n: 'Œufs', u: 'nombre', stock: 140, in: 300 },
+    huile: { n: 'Huile', u: 'g', stock: 5812, in: 28800 },
+    levc: { n: 'Levure chimique', u: 'g', stock: 400, in: 500 },
+    levb: { n: 'Levure boulangère', u: 'g', stock: 300, in: 500 },
+    sel: { n: 'Sel', u: 'g', stock: 600, in: 1000 },
+    marg: { n: 'Margarine', u: 'g', stock: 2750, in: 10000 },
+    cac: { n: 'Cacao', u: 'g', stock: 1225, in: 2500 },
+    creme: { n: 'Crème UHT', u: 'nombre', stock: 24, in: 96 }
+  };
+  var RECIPES = [
+    { id: 'r1', name: 'Biscuit nature', active: true, d: { far: 1250, suc: 950, oeuf: 36, huile: 240, levc: 25 } },
+    { id: 'r2', name: 'Biscuit chocolat', active: true, d: { far: 1175, suc: 950, oeuf: 36, huile: 240, levc: 25, cac: 75 } },
+    { id: 'r3', name: 'Croissant', active: true, d: { far: 1000, suc: 100, huile: 50, sel: 20, levb: 30, marg: 500 } },
+    { id: 'r4', name: 'Cookie nature', active: true, d: { far: 1000, suc: 500, oeuf: 4, huile: 380, levc: 25 } },
+    { id: 'r5', name: 'Chantilly', active: true, d: { suc: 100, creme: 1 } },
+    { id: 'r6', name: 'Sandwich pizza', active: true, d: { far: 1000, suc: 80, oeuf: 1, huile: 80, sel: 20, levb: 30 } },
+    { id: 'r7', name: 'Ancien cake aux raisins', active: false, d: { far: 1000, suc: 600, oeuf: 12, huile: 375, levc: 25 } }
+  ];
+  var DAY = [{ rid: 'r1', qty: 3 }, { rid: 'r2', qty: 1 }, { rid: 'r5', qty: 3 }];
+  var $ = function (id) { return document.getElementById(id); };
+  var fmt = function (n) { return Number(n).toLocaleString('fr-FR', { maximumFractionDigits: 2 }); };
+  var byId = function (id) { return RECIPES.filter(function (r) { return r.id === id; })[0]; };
+
+  /* navigation */
+  var NAV = { recipes: 'recipes', dialog: 'recipes', production: 'production', summary: 'summary' };
+  function go(key) {
+    var scr = NAV[key];
+    ['recipes', 'production', 'summary'].forEach(function (s) { $('screen-' + s).classList.toggle('on', s === scr); $('nav-' + s).classList.toggle('on', s === scr); });
+    document.querySelectorAll('.mock-tab[data-go]').forEach(function (t) { t.setAttribute('aria-selected', String(t.getAttribute('data-go') === key)); });
+    if (key === 'dialog') openDialog(RECIPES[0]); else closeDialog();
+  }
+  document.querySelectorAll('[data-go]').forEach(function (el) { el.addEventListener('click', function () { go(el.getAttribute('data-go')); }); });
+  $('themeBtn').addEventListener('click', function () {
+    var r = document.documentElement, dark = r.getAttribute('data-theme') === 'dark' || (!r.getAttribute('data-theme') && matchMedia('(prefers-color-scheme: dark)').matches);
+    r.setAttribute('data-theme', dark ? 'light' : 'dark');
+  });
+
+  /* recipes list */
+  function renderRecipes() {
+    var q = $('recipeSearch').value.toLowerCase(), st = $('recipeStatus').value;
+    var list = RECIPES.filter(function (r) { return r.name.toLowerCase().indexOf(q) >= 0 && (st === 'all' || (st === 'active') === r.active); });
+    $('recipeCount').textContent = list.length + ' recette(s)';
+    $('pagerInfo').textContent = list.length ? '1 à ' + list.length + ' sur ' + list.length : '';
+    if (!list.length) { $('recipeRows').innerHTML = '<tr><td colspan="4" class="empty">Aucune recette ne correspond. Cliquez sur « Ajouter » pour créer la première.</td></tr>'; return; }
+    $('recipeRows').innerHTML = list.map(function (r) {
+      var chips = Object.keys(r.d).map(function (k) { return '<span class="chip">' + ING[k].n + ' ' + fmt(r.d[k]) + ' ' + (ING[k].u === 'nombre' ? '' : ING[k].u) + '</span>'; }).join('');
+      var acts = r.active
+        ? '<button class="btn sm warn" data-edit="' + r.id + '" aria-label="Modifier"><svg class="i"><use href="#i-pen"/></svg></button> <button class="btn sm sec" data-dup="' + r.id + '" aria-label="Dupliquer" title="Dupliquer"><svg class="i"><use href="#i-copy"/></svg></button> <button class="btn sm danger" data-arch="' + r.id + '" aria-label="Archiver" title="Archiver"><svg class="i"><use href="#i-arch"/></svg></button>'
+        : '<button class="btn sm ghost" data-arch="' + r.id + '">Réactiver</button>';
+      return '<tr><td><b>' + r.name + '</b></td><td>' + chips + '</td><td class="c"><span class="tag ' + (r.active ? 'ok' : 'mute') + '">' + (r.active ? 'Active' : 'Archivée') + '</span></td><td class="c" style="white-space:nowrap">' + acts + '</td></tr>';
+    }).join('');
+  }
+  $('recipeRows').addEventListener('click', function (e) {
+    var b = e.target.closest('button'); if (!b) return;
+    if (b.dataset.edit) openDialog(byId(b.dataset.edit));
+    if (b.dataset.dup) { var s = byId(b.dataset.dup); RECIPES.unshift({ id: 'n' + Date.now(), name: s.name + ' (copie)', active: true, d: JSON.parse(JSON.stringify(s.d)) }); renderRecipes(); renderProd(); }
+    if (b.dataset.arch) { var r = byId(b.dataset.arch); r.active = !r.active; renderRecipes(); renderProd(); }
+  });
+  ['input', 'change'].forEach(function (ev) { $('recipeSearch').addEventListener(ev, renderRecipes); $('recipeStatus').addEventListener(ev, renderRecipes); });
+  $('addRecipe').addEventListener('click', function () { openDialog(null); });
+
+  /* dialog */
+  var editing = null, lines = [];
+  function ingOptions(sel) { return Object.keys(ING).map(function (k) { return '<option value="' + k + '"' + (k === sel ? ' selected' : '') + '>' + ING[k].n + '</option>'; }).join(''); }
+  function renderLines() {
+    $('doseRows').innerHTML = lines.map(function (l, i) {
+      return '<div class="dose-row"><select class="inp" data-i="' + i + '" data-f="k" aria-label="Ingrédient ' + (i + 1) + '">' + ingOptions(l.k) + '</select>' +
+        '<input class="inp num" data-i="' + i + '" data-f="v" type="number" min="0" step="0.01" value="' + l.v + '" aria-label="Dose ' + (i + 1) + '"><span class="unit">' + ING[l.k].u + '</span>' +
+        '<button type="button" class="x" data-del="' + i + '" aria-label="Retirer la ligne"><svg class="i"><use href="#i-x"/></svg></button></div>';
+    }).join('');
+  }
+  function openDialog(r) {
+    editing = r;
+    $('dlgTitle').textContent = r ? 'Modifier la recette' : 'Ajouter une recette';
+    $('rName').value = r ? r.name : '';
+    lines = r ? Object.keys(r.d).map(function (k) { return { k: k, v: r.d[k] }; }) : [{ k: 'far', v: '' }];
+    $('rNameErr').hidden = true; $('doseErr').hidden = true; $('rName').classList.remove('err');
+    renderLines(); $('recipeDialog').classList.add('on');
+  }
+  function closeDialog() { $('recipeDialog').classList.remove('on'); }
+  $('doseRows').addEventListener('change', function (e) {
+    var t = e.target, i = +t.dataset.i; if (isNaN(i)) return;
+    lines[i][t.dataset.f] = t.dataset.f === 'v' ? t.value : t.value; if (t.dataset.f === 'k') renderLines();
+  });
+  $('doseRows').addEventListener('click', function (e) { var b = e.target.closest('[data-del]'); if (b) { lines.splice(+b.dataset.del, 1); renderLines(); } });
+  $('addDose').addEventListener('click', function () { var used = lines.map(function (l) { return l.k; }); var free = Object.keys(ING).filter(function (k) { return used.indexOf(k) < 0; })[0]; if (free) { lines.push({ k: free, v: '' }); renderLines(); } });
+  $('dlgClose').addEventListener('click', function () { go('recipes'); });
+  $('dlgCancel').addEventListener('click', function () { go('recipes'); });
+  $('dlgSave').addEventListener('click', function () {
+    var name = $('rName').value.trim(), keys = lines.map(function (l) { return l.k; }), ok = true;
+    $('rNameErr').hidden = !!name; $('rName').classList.toggle('err', !name); if (!name) ok = false;
+    var msg = '';
+    if (!lines.length) msg = 'Ajoutez au moins un ingrédient';
+    else if (keys.some(function (k, i) { return keys.indexOf(k) !== i; })) msg = 'Un ingrédient ne peut apparaître qu\'une seule fois';
+    else if (lines.some(function (l) { return !(parseFloat(l.v) > 0); })) msg = 'Chaque dose doit être supérieure à 0';
+    $('doseErr').hidden = !msg; $('doseErr').textContent = msg; if (msg) ok = false;
+    if (!ok) return;
+    var d = {}; lines.forEach(function (l) { d[l.k] = parseFloat(l.v); });
+    if (editing) { editing.name = name; editing.d = d; } else { RECIPES.unshift({ id: 'n' + Date.now(), name: name, active: true, d: d }); }
+    go('recipes'); renderRecipes(); renderProd(); renderSummary();
+  });
+
+  /* production */
+  function usage() {
+    var u = {};
+    DAY.forEach(function (l) { var r = byId(l.rid); Object.keys(r.d).forEach(function (k) { u[k] = (u[k] || 0) + r.d[k] * l.qty; }); });
+    return u;
+  }
+  function renderProd() {
+    var dt = new Date($('prodDate').value + 'T12:00:00');
+    $('prodSub').textContent = dt.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }) + ' · ' + DAY.length + ' recette(s)';
+    var act = RECIPES.filter(function (r) { return r.active; });
+    var used = DAY.map(function (l) { return l.rid; });
+    var avail = act.filter(function (r) { return used.indexOf(r.id) < 0; });
+    $('addProdSelect').innerHTML = avail.length ? avail.map(function (r) { return '<option value="' + r.id + '">' + r.name + '</option>'; }).join('') : '<option value="">Toutes les recettes sont ajoutées</option>';
+    $('addProdSelect').disabled = $('addProd').disabled = !avail.length;
+    $('prodRows').innerHTML = DAY.length ? DAY.map(function (l, i) {
+      var r = byId(l.rid);
+      var chips = Object.keys(r.d).map(function (k) { return '<span class="chip">' + ING[k].n + ' ' + fmt(r.d[k] * l.qty) + (ING[k].u === 'g' ? ' g' : '') + '</span>'; }).join('');
+      return '<tr><td><b>' + r.name + '</b></td><td class="r"><input class="inp num" type="number" min="0.01" step="0.01" value="' + l.qty + '" data-q="' + i + '" aria-label="Fournées de ' + r.name + '"></td><td>' + chips + '</td><td class="c"><button class="x" data-rm="' + i + '" aria-label="Retirer ' + r.name + '"><svg class="i"><use href="#i-x"/></svg></button></td></tr>';
+    }).join('') : '<tr><td colspan="4" class="empty">Aucune production ce jour. Choisissez une recette ci-dessous pour commencer.</td></tr>';
+    var u = usage(), short = [];
+    var keys = Object.keys(u);
+    $('usageRows').innerHTML = keys.length ? keys.map(function (k) {
+      var left = ING[k].stock - u[k], neg = left < 0; if (neg) short.push(ING[k].n);
+      return '<tr><td>' + ING[k].n + '</td><td class="r">' + fmt(u[k]) + ' ' + (ING[k].u === 'g' ? 'g' : '') + '</td><td class="r ' + (neg ? 'neg' : '') + '">' + fmt(left) + ' ' + (ING[k].u === 'g' ? 'g' : '') + '</td></tr>';
+    }).join('') : '<tr><td colspan="3" class="empty">Rien consommé pour le moment.</td></tr>';
+    $('stockBanner').innerHTML = short.length ? '<div class="banner warn" role="alert"><svg class="i"><use href="#i-warn"/></svg><div><b>Stock insuffisant : ' + short.join(', ') + '.</b> Vous pouvez enregistrer la journée, le stock passera en négatif. Pensez à saisir l\'achat manquant.</div></div>' : '';
+  }
+  $('prodRows').addEventListener('input', function (e) { var i = e.target.dataset.q; if (i === undefined) return; var v = parseFloat(e.target.value); DAY[+i].qty = v > 0 ? v : 0; renderUsageOnly(); });
+  function renderUsageOnly() { var f = document.activeElement; var id = f && f.dataset ? f.dataset.q : null; renderProd(); if (id !== null && id !== undefined) { var n = document.querySelector('[data-q="' + id + '"]'); if (n) { n.focus(); n.setSelectionRange && 0; } } }
+  $('prodRows').addEventListener('click', function (e) { var b = e.target.closest('[data-rm]'); if (b) { DAY.splice(+b.dataset.rm, 1); renderProd(); } });
+  $('addProd').addEventListener('click', function () { var v = $('addProdSelect').value; if (v) { DAY.push({ rid: v, qty: 1 }); renderProd(); } });
+  $('saveProd').addEventListener('click', function () { $('saveProd').textContent = 'Journée enregistrée ✓'; setTimeout(function () { $('saveProd').textContent = 'Enregistrer la journée'; }, 1800); });
+  function shiftDay(n) { var d = new Date($('prodDate').value + 'T12:00:00'); d.setDate(d.getDate() + n); $('prodDate').value = d.toISOString().slice(0, 10); renderProd(); }
+  $('prevDay').addEventListener('click', function () { shiftDay(-1); });
+  $('nextDay').addEventListener('click', function () { shiftDay(1); });
+  $('prodDate').addEventListener('change', renderProd);
+
+  /* summary */
+  var CONSUMED = { far: 111500, suc: 78461, oeuf: 2079, huile: 22988, levc: 1830, levb: 405, sel: 523, marg: 7250, cac: 1275, creme: 96 };
+  var STOCK_NOW = { far: -4250, suc: 25599, oeuf: 410, huile: 5812, levc: 400, levb: 300, sel: 600, marg: 2750, cac: 1225, creme: 0 };
+  var ENTRIES = { far: 107250, suc: 104060, oeuf: 2490, huile: 28800, levc: 2230, levb: 705, sel: 1123, marg: 10000, cac: 2500, creme: 96 };
+  function renderSummary() {
+    var only = $('sumFilter').value === 'neg';
+    var rows = Object.keys(ING).filter(function (k) { return !only || STOCK_NOW[k] <= 0; });
+    $('sumRows').innerHTML = rows.length ? rows.map(function (k) {
+      var s = STOCK_NOW[k], tag = s < 0 ? '<span class="tag bad">En manque</span>' : s === 0 ? '<span class="tag warn">Épuisé</span>' : '<span class="tag ok">En stock</span>';
+      return '<tr><td><b>' + ING[k].n + '</b></td><td>' + ING[k].u + '</td><td class="r">' + fmt(ENTRIES[k]) + '</td><td class="r">' + fmt(CONSUMED[k]) + '</td><td class="r ' + (s < 0 ? 'neg' : '') + '">' + fmt(s) + '</td><td class="c">' + tag + '</td></tr>';
+    }).join('') : '<tr><td colspan="6" class="empty">Aucun ingrédient en manque ce mois-ci.</td></tr>';
+  }
+  $('sumFilter').addEventListener('change', renderSummary);
+
+  renderRecipes(); renderProd(); renderSummary(); go('recipes');
+  var h = location.hash.replace('#', ''); if (NAV[h]) go(h);
+})();
+</script>

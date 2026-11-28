@@ -1,33 +1,32 @@
-import { IngredientPurchase } from '@merlebleu/shared';
+import { StockEntry } from '@merlebleu/shared';
 import { EntitySchema } from 'typeorm';
 import { IngredientEntity } from '../ingredient.entity';
 
-export class IngredientPurchaseEntity implements Omit<
-  IngredientPurchase,
-  'ingredient' | 'purchaseDate'
+export class StockEntryEntity implements Omit<
+  StockEntry,
+  'ingredient' | 'entryDate'
 > {
   id: string;
-  purchaseDate: Date;
+  entryDate: Date;
   quantity: number;
   ingredient: IngredientEntity;
 }
 
-export const IngredientPurchaseSchema =
-  new EntitySchema<IngredientPurchaseEntity>({
-    name: 'IngredientPurchaseEntity',
-    tableName: 'ingredient_purchases',
-    target: IngredientPurchaseEntity,
-    columns: {
-      id: { type: 'uuid', primary: true, generated: 'uuid' },
-      purchaseDate: { type: 'date' },
-      quantity: { type: 'decimal', precision: 10, scale: 2 },
+export const StockEntrySchema = new EntitySchema<StockEntryEntity>({
+  name: 'StockEntryEntity',
+  tableName: 'stock_entries',
+  target: StockEntryEntity,
+  columns: {
+    id: { type: 'uuid', primary: true, generated: 'uuid' },
+    entryDate: { type: 'date' },
+    quantity: { type: 'decimal', precision: 10, scale: 2 },
+  },
+  relations: {
+    ingredient: {
+      type: 'many-to-one',
+      target: () => IngredientEntity,
+      joinColumn: { name: 'ingredientId', referencedColumnName: 'id' },
+      eager: true,
     },
-    relations: {
-      ingredient: {
-        type: 'many-to-one',
-        target: () => IngredientEntity,
-        joinColumn: { name: 'ingredientId', referencedColumnName: 'id' },
-        eager: true,
-      },
-    },
-  });
+  },
+});

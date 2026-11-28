@@ -1,49 +1,49 @@
 import { Component, OnChanges, SimpleChanges, input, output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import {
-  CreateIngredientPurchaseDto,
   Ingredient,
-  UpdateIngredientPurchaseDto,
-  createIngredientPurchaseSchema,
-  updateIngredientPurchaseSchema,
+  UpdateStockEntryDto,
+  updateStockEntrySchema,
 } from '@merlebleu/shared';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { SelectModule } from 'primeng/select';
 import { DatePickerModule } from 'primeng/datepicker';
 import { parseDate } from '@shared/utils/date';
 
+/** Edits one existing stock entry (the batch entry is handled by StockEntryBatchComponent). */
 @Component({
-  selector: 'mb-purchase-form',
-  templateUrl: './purchase-form.component.html',
-  standalone: true,
+  selector: 'mb-stock-entry-form',
+  templateUrl: './stock-entry-form.component.html',
   imports: [FormsModule, InputNumberModule, SelectModule, DatePickerModule],
 })
-export class PurchaseFormComponent implements OnChanges {
-  itemData = input<CreateIngredientPurchaseDto | UpdateIngredientPurchaseDto | null>(null);
-  formId = input('purchase-form');
+export class StockEntryFormComponent implements OnChanges {
+  itemData = input<UpdateStockEntryDto | null>(null);
+  formId = input('stock-entry-form');
   ingredients = input<Ingredient[]>([]);
-  itemSubmit = output<CreateIngredientPurchaseDto | UpdateIngredientPurchaseDto>();
+  itemSubmit = output<UpdateStockEntryDto>();
 
-  validationError: ReturnType<typeof createIngredientPurchaseSchema.safeParse>['error'] | null =
-    null;
+  validationError: ReturnType<typeof updateStockEntrySchema.safeParse>['error'] | null = null;
 
-  item: { purchaseDate: Date | null; ingredientId: string; quantity: number } = this.createEmpty();
+  item: { entryDate: Date | null; ingredientId: string; quantity: number } = this.createEmpty();
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['itemData']) {
       this.validationError = null;
       const data = this.itemData();
       this.item = data
-        ? { purchaseDate: parseDate(data.purchaseDate), ingredientId: data.ingredientId, quantity: data.quantity }
+        ? {
+            entryDate: parseDate(data.entryDate),
+            ingredientId: data.ingredientId,
+            quantity: data.quantity,
+          }
         : this.createEmpty();
     }
   }
 
   onSubmit() {
     this.validationError = null;
-    const schema = this.itemData() ? updateIngredientPurchaseSchema : createIngredientPurchaseSchema;
-    const result = schema.safeParse({
-      purchaseDate: this.item.purchaseDate,
+    const result = updateStockEntrySchema.safeParse({
+      entryDate: this.item.entryDate,
       ingredientId: this.item.ingredientId,
       quantity: this.item.quantity,
     });
@@ -54,21 +54,13 @@ export class PurchaseFormComponent implements OnChanges {
     }
 
     this.itemSubmit.emit({ ...result.data });
-    this.resetForm();
   }
 
-  getFieldError(field: keyof CreateIngredientPurchaseDto): string {
-    return (
-      this.validationError?.issues.find((issue) => issue.path[0] === field)?.message ?? ''
-    );
-  }
-
-  private resetForm(): void {
-    this.validationError = null;
-    this.item = this.createEmpty();
+  getFieldError(field: keyof UpdateStockEntryDto): string {
+    return this.validationError?.issues.find((issue) => issue.path[0] === field)?.message ?? '';
   }
 
   private createEmpty() {
-    return { purchaseDate: null, ingredientId: '', quantity: 0 };
+    return { entryDate: null, ingredientId: '', quantity: 0 };
   }
 }

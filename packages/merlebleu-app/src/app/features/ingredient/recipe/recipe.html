@@ -1,0 +1,129 @@
+<div class="flex flex-wrap items-center gap-3 mb-4">
+  <div>
+    <h2 class="text-2xl font-bold">Recettes</h2>
+    <div class="text-sm text-slate-500 dark:text-slate-400">{{ totalRecords() }} recette(s)</div>
+  </div>
+  <div class="ml-auto flex flex-wrap items-center gap-3">
+    <input
+      type="text"
+      pInputText
+      placeholder="Rechercher une recette..."
+      aria-label="Rechercher une recette"
+      (input)="onSearchChange($any($event.target).value)"
+      class="w-64"
+    />
+    <p-select
+      [(ngModel)]="filterStatus"
+      [options]="statusOptions"
+      optionLabel="label"
+      optionValue="value"
+      ariaLabel="Filtrer par statut"
+      (onChange)="onStatusFilter()"
+      class="w-48"
+    />
+    <p-button label="Ajouter" icon="pi pi-plus" (onClick)="openAddModal()" />
+  </div>
+</div>
+
+<p-table
+  [value]="recipes()"
+  [loading]="isLoading()"
+  [tableStyle]="{ 'min-width': '50rem' }"
+  [stripedRows]="true"
+  [paginator]="true"
+  [rows]="rows"
+  [totalRecords]="totalRecords()"
+  [first]="first()"
+  [lazy]="true"
+  (onPage)="onTablePage($event)"
+>
+  <ng-template #header>
+    <tr>
+      <th>Recette</th>
+      <th>Doses pour 1 fournée</th>
+      <th class="text-center!">Statut</th>
+      <th style="width: 12rem" class="text-center!">Actions</th>
+    </tr>
+  </ng-template>
+  <ng-template #body let-recipe>
+    <tr>
+      <td class="font-semibold">{{ capitalizeFirstLetter(recipe.name) }}</td>
+      <td>
+        <div class="flex flex-wrap gap-1">
+          @for (line of recipe.lines; track line.id) {
+            <span class="rounded-full bg-slate-100 px-2 py-0.5 text-xs dark:bg-slate-700">
+              {{ capitalizeFirstLetter(line.ingredient.label) }}
+              {{ line.quantity | number: '1.0-2' }}
+              {{ line.ingredient.unit.label }}
+            </span>
+          }
+        </div>
+      </td>
+      <td class="text-center!">
+        <p-tag
+          [value]="recipe.isActive ? 'Active' : 'Archivée'"
+          [severity]="recipe.isActive ? 'success' : 'secondary'"
+        />
+      </td>
+      <td class="text-center!">
+        @if (recipe.isActive) {
+          <p-button
+            icon="pi pi-pencil"
+            size="small"
+            severity="warn"
+            class="mr-2"
+            ariaLabel="Modifier"
+            (onClick)="openEditModal(recipe)"
+          />
+          <p-button
+            icon="pi pi-copy"
+            size="small"
+            severity="secondary"
+            class="mr-2"
+            ariaLabel="Dupliquer"
+            (onClick)="duplicateRecipe(recipe)"
+          />
+          <p-button
+            icon="pi pi-inbox"
+            size="small"
+            severity="danger"
+            ariaLabel="Archiver"
+            (onClick)="confirmArchive(recipe)"
+          />
+        } @else {
+          <p-button label="Réactiver" size="small" severity="secondary" [outlined]="true" (onClick)="restoreRecipe(recipe)" />
+        }
+      </td>
+    </tr>
+  </ng-template>
+  <ng-template #emptymessage>
+    <tr>
+      <td colspan="4" class="text-center! text-slate-500 dark:text-slate-400">
+        Aucune recette. Cliquez sur « Ajouter » pour créer la première.
+      </td>
+    </tr>
+  </ng-template>
+</p-table>
+
+<p-confirmdialog [style]="{ width: '450px' }" />
+
+<p-dialog
+  [visible]="showModal"
+  (visibleChange)="!$event && closeModal()"
+  [modal]="true"
+  [style]="{ width: '640px' }"
+  [header]="selectedRecipe ? 'Modifier la recette' : 'Ajouter une recette'"
+>
+  <mb-recipe-form
+    formId="recipe-form"
+    [recipe]="selectedRecipe"
+    [ingredients]="ingredients()"
+    (recipeSubmit)="saveRecipe($event)"
+  />
+  <ng-template pTemplate="footer">
+    <div class="flex justify-end gap-2">
+      <p-button label="Annuler" severity="contrast" (onClick)="closeModal()" />
+      <button pButton type="submit" form="recipe-form">Enregistrer</button>
+    </div>
+  </ng-template>
+</p-dialog>

@@ -2,43 +2,43 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, map } from 'rxjs';
 import {
-  CreateIngredientPurchaseDto,
-  IngredientPurchase,
+  CreateStockEntriesDto,
   ResultPaged,
-  UpdateIngredientPurchaseDto,
+  StockEntry,
+  UpdateStockEntryDto,
 } from '@merlebleu/shared';
 import { environment } from '@merlebleu/app/environments/environment';
 
 @Injectable()
-export class IngredientPurchaseService {
+export class StockEntryService {
   private http = inject(HttpClient);
-  private readonly apiUrl = `${environment.apiBaseUrl}/ingredient-purchase`;
+  private readonly apiUrl = `${environment.apiBaseUrl}/stock-entry`;
 
-  getPurchases(
-    filters: { purchaseDate?: string; labelContains?: string },
+  getStockEntries(
+    filters: { entryDate?: string; labelContains?: string },
     page: number,
     pageSize: number,
-  ): Observable<{ items: IngredientPurchase[]; total: number }> {
+  ): Observable<{ items: StockEntry[]; total: number }> {
     const params = new URLSearchParams();
     params.set('page', String(page));
     params.set('limit', String(pageSize));
-    if (filters.purchaseDate) params.set('purchaseDate', filters.purchaseDate);
+    if (filters.entryDate) params.set('entryDate', filters.entryDate);
     if (filters.labelContains) params.set('labelContains', filters.labelContains);
 
     return this.http
-      .get<ResultPaged<IngredientPurchase>>(`${this.apiUrl}?${params.toString()}`)
+      .get<ResultPaged<StockEntry>>(`${this.apiUrl}?${params.toString()}`)
       .pipe(map(({ data, total }) => ({ items: data, total })));
   }
 
-  addPurchase(dto: CreateIngredientPurchaseDto): Observable<IngredientPurchase> {
-    return this.http.post<IngredientPurchase>(this.apiUrl, dto);
+  addStockEntries(dto: CreateStockEntriesDto): Observable<StockEntry[]> {
+    return this.http.post<StockEntry[]>(this.apiUrl, dto);
   }
 
-  editPurchase(id: string, dto: UpdateIngredientPurchaseDto): Observable<IngredientPurchase> {
-    return this.http.put<IngredientPurchase>(`${this.apiUrl}/${id}`, dto);
+  editStockEntry(id: string, dto: UpdateStockEntryDto): Observable<StockEntry> {
+    return this.http.put<StockEntry>(`${this.apiUrl}/${id}`, dto);
   }
 
-  deletePurchase(id: string): Observable<void> {
+  deleteStockEntry(id: string): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/${id}`);
   }
 }

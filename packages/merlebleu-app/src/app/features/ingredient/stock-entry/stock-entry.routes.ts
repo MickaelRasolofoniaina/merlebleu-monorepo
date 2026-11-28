@@ -1,9 +1,9 @@
 import { Route } from '@angular/router';
-import { PurchaseListComponent } from './purchase';
+import { StockEntryListComponent } from './stock-entry';
 
 export default [
   {
     path: '',
-    component: PurchaseListComponent,
+    component: StockEntryListComponent,
   },
 ] as Route[];

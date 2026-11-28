@@ -1,88 +1,95 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal, viewChild } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import {
-  CreateIngredientPurchaseDto,
+  CreateStockEntriesDto,
   DEFAULT_PAGE_SIZE,
   Ingredient,
-  IngredientPurchase,
-  UpdateIngredientPurchaseDto,
+  StockEntry,
+  UpdateStockEntryDto,
 } from '@merlebleu/shared';
 import { IngredientService } from '../ingredient/ingredient.service';
-import { IngredientPurchaseService } from './purchase.service';
-import { PurchaseFormComponent } from './components/purchase-form/purchase-form.component';
+import { StockEntryService } from './stock-entry.service';
+import { StockEntryFormComponent } from './components/stock-entry-form/stock-entry-form.component';
+import { StockEntryBatchComponent } from './components/stock-entry-batch/stock-entry-batch.component';
 import { FormsModule } from '@angular/forms';
 import { ButtonModule } from 'primeng/button';
 import { TableModule, TablePageEvent } from 'primeng/table';
 import { Dialog } from 'primeng/dialog';
 import { InputTextModule } from 'primeng/inputtext';
-import { SelectModule } from 'primeng/select';
 import { DatePickerModule } from 'primeng/datepicker';
+import { MessageService } from 'primeng/api';
 import { getPageFromFirstRows } from '@shared/utils/pagination';
 import { capitalizeFirstLetter } from '@shared/utils/text';
 import { formatDate } from '@shared/utils/date';
 import { finalize } from 'rxjs';
 
 @Component({
-  selector: 'mb-purchase-list',
-  templateUrl: './purchase.html',
-  styleUrls: ['./purchase.scss'],
-  providers: [IngredientPurchaseService, IngredientService],
+  selector: 'mb-stock-entry-list',
+  templateUrl: './stock-entry.html',
+  providers: [StockEntryService, IngredientService],
   imports: [
     DatePipe,
     ButtonModule,
     TableModule,
     Dialog,
     InputTextModule,
-    SelectModule,
     DatePickerModule,
     FormsModule,
-    PurchaseFormComponent,
+    StockEntryFormComponent,
+    StockEntryBatchComponent,
   ],
 })
-export class PurchaseListComponent implements OnInit {
+export class StockEntryListComponent implements OnInit {
   readonly capitalizeFirstLetter = capitalizeFirstLetter;
 
-  purchases = signal<IngredientPurchase[]>([]);
+  private readonly batch = viewChild(StockEntryBatchComponent);
+
+  entries = signal<StockEntry[]>([]);
   ingredients = signal<Ingredient[]>([]);
   isLoading = signal(false);
+  isSaving = signal(false);
   totalRecords = signal(0);
   page = signal(1);
   first = signal(0);
   rows = DEFAULT_PAGE_SIZE;
 
-  filterPurchaseDate: Date | null = null;
+  filterEntryDate: Date | null = null;
   filterLabelContains = '';
 
-  showModal = false;
   showEditModal = false;
   showDeleteModal = false;
-  selectedPurchase: IngredientPurchase | null = null;
-  editDto: UpdateIngredientPurchaseDto | null = null;
+  selectedEntry: StockEntry | null = null;
+  editDto: UpdateStockEntryDto | null = null;
 
-  private purchaseService = inject(IngredientPurchaseService);
+  private stockEntryService = inject(StockEntryService);
   private ingredientService = inject(IngredientService);
+  private messageService = inject(MessageService);
 
   ngOnInit() {
+    this.refreshIngredients();
+    this.fetchEntries();
+  }
+
+  private refreshIngredients() {
     this.ingredientService
       .getIngredients({}, 1, 1000)
       .subscribe(({ items }) => this.ingredients.set(items));
-    this.fetchPurchases();
   }
 
   private buildFilters() {
     return {
-      purchaseDate: this.filterPurchaseDate ? formatDate(this.filterPurchaseDate) : undefined,
+      entryDate: this.filterEntryDate ? formatDate(this.filterEntryDate) : undefined,
       labelContains: this.filterLabelContains || undefined,
     };
   }
 
-  fetchPurchases() {
+  fetchEntries() {
     this.isLoading.set(true);
-    this.purchaseService
-      .getPurchases(this.buildFilters(), this.page(), this.rows)
+    this.stockEntryService
+      .getStockEntries(this.buildFilters(), this.page(), this.rows)
       .pipe(finalize(() => this.isLoading.set(false)))
       .subscribe(({ items, total }) => {
-        this.purchases.set(items);
+        this.entries.set(items);
         this.totalRecords.set(total);
       });
   }
@@ -93,78 +100,87 @@ export class PurchaseListComponent implements OnInit {
     this.page.set(1);
     this.first.set(0);
     if (normalized.length > 0 && normalized.length < 3) return;
-    this.fetchPurchases();
+    this.fetchEntries();
   }
 
   onDateFilter() {
     this.page.set(1);
     this.first.set(0);
-    this.fetchPurchases();
+    this.fetchEntries();
   }
 
   onTablePage(event: TablePageEvent) {
     this.page.set(getPageFromFirstRows(event.first, event.rows));
     this.rows = event.rows;
     this.first.set(event.first);
-    this.fetchPurchases();
+    this.fetchEntries();
   }
 
-  toDto(purchase: IngredientPurchase): UpdateIngredientPurchaseDto {
+  toDto(entry: StockEntry): UpdateStockEntryDto {
     return {
-      purchaseDate: purchase.purchaseDate,
-      ingredientId: purchase.ingredient.id,
-      quantity: Number(purchase.quantity),
+      entryDate: entry.entryDate,
+      ingredientId: entry.ingredient.id,
+      quantity: Number(entry.quantity),
     };
   }
 
-  openAddModal() {
-    this.showModal = true;
-  }
-
-  openEditModal(purchase: IngredientPurchase) {
-    this.selectedPurchase = purchase;
-    this.editDto = this.toDto(purchase);
+  openEditModal(entry: StockEntry) {
+    this.selectedEntry = entry;
+    this.editDto = this.toDto(entry);
     this.showEditModal = true;
   }
 
-  openDeleteModal(purchase: IngredientPurchase) {
-    this.selectedPurchase = purchase;
+  openDeleteModal(entry: StockEntry) {
+    this.selectedEntry = entry;
     this.showDeleteModal = true;
-  }
-
-  closeAddModal() {
-    this.showModal = false;
   }
 
   closeEditModal() {
     this.showEditModal = false;
-    this.selectedPurchase = null;
+    this.selectedEntry = null;
     this.editDto = null;
   }
 
   closeDeleteModal() {
     this.showDeleteModal = false;
-    this.selectedPurchase = null;
+    this.selectedEntry = null;
   }
 
-  addPurchase(dto: CreateIngredientPurchaseDto) {
-    this.purchaseService.addPurchase(dto).subscribe(() => {
-      this.closeAddModal();
-      this.fetchPurchases();
-    });
+  addEntries(dto: CreateStockEntriesDto) {
+    this.isSaving.set(true);
+    this.stockEntryService
+      .addStockEntries(dto)
+      .pipe(finalize(() => this.isSaving.set(false)))
+      .subscribe({
+        next: (saved) => {
+          const count = saved.length;
+          this.messageService.add({
+            severity: 'success',
+            summary: 'Entrée enregistrée',
+            detail: `${count} ligne${count > 1 ? 's ajoutées' : ' ajoutée'} au stock.`,
+          });
+          this.batch()?.reset();
+          this.page.set(1);
+          this.first.set(0);
+          this.refreshIngredients();
+          this.fetchEntries();
+        },
+      });
   }
 
-  editPurchase(id: string, dto: UpdateIngredientPurchaseDto) {
-    this.purchaseService.editPurchase(id, dto).subscribe(() => {
+  editEntry(id: string, dto: UpdateStockEntryDto) {
+    this.stockEntryService.editStockEntry(id, dto).subscribe(() => {
       this.closeEditModal();
-      this.fetchPurchases();
+      this.refreshIngredients();
+      this.fetchEntries();
     });
   }
 
-  deletePurchase(id: string) {
-    this.purchaseService.deletePurchase(id).subscribe(() => {
+  deleteEntry(id: string) {
+    this.stockEntryService.deleteStockEntry(id).subscribe(() => {
       this.closeDeleteModal();
-      this.fetchPurchases();
+      this.refreshIngredients();
+      this.fetchEntries();
     });
   }
 }

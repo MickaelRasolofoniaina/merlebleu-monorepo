@@ -22,7 +22,7 @@ export class ReportGeneratorService {
       body: ingredients.map((i) => [
         capitalizeFirstLetter(i.label),
         capitalizeFirstLetter(i.unit.label),
-        '0',
+        Number(i.stock).toLocaleString('fr-FR', { maximumFractionDigits: 2 }),
       ]),
       styles: { font: 'helvetica' },
       headStyles: { fillColor: [41, 128, 185] },

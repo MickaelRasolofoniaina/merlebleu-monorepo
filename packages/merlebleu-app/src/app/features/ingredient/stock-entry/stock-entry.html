@@ -1,9 +1,22 @@
-<div class="flex justify-between items-center mb-4">
-  <h2 class="text-2xl font-bold">Achats d'ingrédients</h2>
+<div class="mb-4">
+  <h2 class="text-2xl font-bold">Entrée de stock</h2>
+  <div class="text-sm text-slate-500 dark:text-slate-400">
+    Ajoute des quantités au stock. Aucun impact sur la trésorerie.
+  </div>
 </div>
+
+<div class="mb-6">
+  <mb-stock-entry-batch
+    [ingredients]="ingredients()"
+    [isSubmitting]="isSaving()"
+    (batchSubmit)="addEntries($event)"
+  />
+</div>
+
 <div class="flex flex-wrap gap-3 items-center mb-4">
+  <h3 class="mr-auto text-lg font-semibold">Historique des entrées</h3>
   <p-datepicker
-    [(ngModel)]="filterPurchaseDate"
+    [(ngModel)]="filterEntryDate"
     dateFormat="dd/mm/yy"
     placeholder="Filtrer par date"
     [showIcon]="true"
@@ -19,11 +32,10 @@
     (input)="onSearchChange($event.target.value)"
     class="w-64"
   />
-  <p-button label="Ajouter" icon="pi pi-plus" (onClick)="openAddModal()" class="ml-auto" />
 </div>
 
 <p-table
-  [value]="purchases()"
+  [value]="entries()"
   [loading]="isLoading()"
   [tableStyle]="{ 'min-width': '60rem' }"
   [stripedRows]="true"
@@ -42,26 +54,35 @@
       <th style="width: 12rem" class="text-center!">Actions</th>
     </tr>
   </ng-template>
-  <ng-template #body let-purchase>
+  <ng-template #body let-entry>
     <tr>
-      <td>{{ purchase.purchaseDate | date: 'dd/MM/yyyy' }}</td>
-      <td>{{ capitalizeFirstLetter(purchase.ingredient.label) }}</td>
-      <td>{{ capitalizeFirstLetter(purchase.ingredient.unit.label) }}</td>
-      <td class="text-right!">{{ purchase.quantity }}</td>
+      <td>{{ entry.entryDate | date: 'dd/MM/yyyy' }}</td>
+      <td>{{ capitalizeFirstLetter(entry.ingredient.label) }}</td>
+      <td>{{ capitalizeFirstLetter(entry.ingredient.unit.label) }}</td>
+      <td class="text-right!">{{ entry.quantity }}</td>
       <td class="text-center!">
         <p-button
           icon="pi pi-pencil"
           size="small"
           severity="warn"
           class="mr-2"
-          (onClick)="openEditModal(purchase)"
+          ariaLabel="Modifier"
+          (onClick)="openEditModal(entry)"
         />
         <p-button
           icon="pi pi-trash"
           size="small"
           severity="danger"
-          (onClick)="openDeleteModal(purchase)"
+          ariaLabel="Supprimer"
+          (onClick)="openDeleteModal(entry)"
         />
+      </td>
+    </tr>
+  </ng-template>
+  <ng-template #emptymessage>
+    <tr>
+      <td colspan="5" class="text-center! text-slate-500 dark:text-slate-400">
+        Aucune entrée de stock.
       </td>
     </tr>
   </ng-template>
@@ -72,41 +93,19 @@
   [(visible)]="showEditModal"
   [modal]="true"
   [style]="{ width: '450px' }"
-  header="Modifier un achat"
+  header="Modifier une entrée"
   (onHide)="closeEditModal()"
 >
-  <mb-purchase-form
-    [formId]="'edit-purchase-form'"
+  <mb-stock-entry-form
+    [formId]="'edit-stock-entry-form'"
     [itemData]="editDto"
     [ingredients]="ingredients()"
-    (itemSubmit)="selectedPurchase && editPurchase(selectedPurchase.id, $event)"
+    (itemSubmit)="selectedEntry && editEntry(selectedEntry.id, $event)"
   />
   <ng-template pTemplate="footer">
     <div class="flex justify-end gap-2">
       <p-button label="Annuler" severity="contrast" (onClick)="closeEditModal()" />
-      <button pButton type="submit" form="edit-purchase-form">Enregistrer</button>
-    </div>
-  </ng-template>
-</p-dialog>
-
-<!-- Add Modal -->
-<p-dialog
-  [(visible)]="showModal"
-  [modal]="true"
-  [style]="{ width: '450px' }"
-  header="Ajouter un achat"
-  (onClose)="closeAddModal()"
->
-  <mb-purchase-form
-    [formId]="'add-purchase-form'"
-    [itemData]="null"
-    [ingredients]="ingredients()"
-    (itemSubmit)="addPurchase($event)"
-  />
-  <ng-template pTemplate="footer">
-    <div class="flex justify-end gap-2">
-      <p-button label="Annuler" severity="contrast" (onClick)="closeAddModal()" />
-      <button pButton type="submit" form="add-purchase-form">Ajouter</button>
+      <button pButton type="submit" form="edit-stock-entry-form">Enregistrer</button>
     </div>
   </ng-template>
 </p-dialog>
@@ -121,9 +120,11 @@
 >
   <div class="flex flex-col gap-4">
     <p>
-      Confirmer la suppression de l'achat de
-      <strong>{{ selectedPurchase?.ingredient?.label }}</strong>
-      du {{ selectedPurchase?.purchaseDate | date: 'dd/MM/yyyy' }} ?
+      Supprimer l'entrée de
+      <strong>{{ selectedEntry?.ingredient?.label }}</strong>
+      du {{ selectedEntry?.entryDate | date: 'dd/MM/yyyy' }} ({{ selectedEntry?.quantity }}
+      {{ selectedEntry?.ingredient?.unit?.label }}) ? Le stock de cet ingrédient sera réduit
+      d'autant.
     </p>
   </div>
   <ng-template pTemplate="footer">
@@ -132,7 +133,7 @@
       <p-button
         label="Supprimer"
         severity="danger"
-        (onClick)="selectedPurchase && deletePurchase(selectedPurchase.id)"
+        (onClick)="selectedEntry && deleteEntry(selectedEntry.id)"
       />
     </div>
   </ng-template>

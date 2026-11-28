@@ -24,8 +24,8 @@
   </div>
 </div>
 
-<div class="flex flex-wrap items-start gap-6">
-  <div class="flex-[999_1_560px] min-w-0">
+<div class="grid grid-cols-1 items-start gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(300px,380px)]">
+  <div class="min-w-0">
     <p-table
       [value]="ingredients()"
       [loading]="isLoading()"
@@ -69,7 +69,7 @@
 
   <!-- Add / Edit panel -->
   <section
-    class="flex-[1_1_340px] max-w-[420px] sticky top-4 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900"
+    class="lg:sticky lg:top-4 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900"
   >
     <div class="flex items-center justify-between gap-3 px-5 py-4 border-b border-slate-200 dark:border-slate-700">
       <div>

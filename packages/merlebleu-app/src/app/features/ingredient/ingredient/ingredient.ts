@@ -1,7 +1,6 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import {
   CreateIngredientDto,
-  DEFAULT_PAGE_SIZE,
   Ingredient,
   IngredientUnit,
   UpdateIngredientDto,
@@ -43,7 +42,7 @@ export class IngredientListComponent implements OnInit {
   totalRecords = signal(0);
   page = signal(1);
   first = signal(0);
-  rows = DEFAULT_PAGE_SIZE;
+  rows = 10;
 
   searchLabel = '';
   filterUnitId: string | null = null;

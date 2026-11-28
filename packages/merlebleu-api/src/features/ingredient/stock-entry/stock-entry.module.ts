@@ -1,15 +1,13 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { IngredientPurchaseSchema } from './ingredient-purchase.entity';
+import { StockEntrySchema } from './stock-entry.entity';
 import { IngredientSchema } from '../ingredient.entity';
-import { IngredientPurchaseService } from './ingredient-purchase.service';
-import { IngredientPurchaseController } from './ingredient-purchase.controller';
+import { StockEntryService } from './stock-entry.service';
+import { StockEntryController } from './stock-entry.controller';
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([IngredientPurchaseSchema, IngredientSchema]),
-  ],
-  providers: [IngredientPurchaseService],
-  controllers: [IngredientPurchaseController],
+  imports: [TypeOrmModule.forFeature([StockEntrySchema, IngredientSchema])],
+  providers: [StockEntryService],
+  controllers: [StockEntryController],
 })
-export class IngredientPurchaseModule {}
+export class StockEntryModule {}

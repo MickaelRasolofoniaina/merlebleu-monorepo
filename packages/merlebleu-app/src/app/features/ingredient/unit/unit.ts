@@ -1,10 +1,7 @@
-import { Component, signal, inject, computed } from '@angular/core';
+import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import {
-  CreateIngredientUnitDto,
-  DEFAULT_PAGE_SIZE,
   IngredientUnit,
-  UpdateIngredientUnitDto,
   createIngredientUnitSchema,
   updateIngredientUnitSchema,
 } from '@merlebleu/shared';
@@ -14,6 +11,7 @@ import { TableModule } from 'primeng/table';
 import { Dialog } from 'primeng/dialog';
 import { InputTextModule } from 'primeng/inputtext';
 import { capitalizeFirstLetter } from '@shared/utils/text';
+import { finalize } from 'rxjs';
 
 @Component({
   selector: 'mb-ingredient-unit',
@@ -22,7 +20,7 @@ import { capitalizeFirstLetter } from '@shared/utils/text';
   providers: [IngredientUnitService],
   imports: [ButtonModule, TableModule, Dialog, InputTextModule, FormsModule],
 })
-export class IngredientUnitComponent {
+export class IngredientUnitComponent implements OnInit {
   readonly capitalizeFirstLetter = capitalizeFirstLetter;
 
   allUnits = signal<IngredientUnit[]>([]);
@@ -32,17 +30,15 @@ export class IngredientUnitComponent {
     if (!search || search.length < 3) return this.allUnits();
     return this.allUnits().filter((u) => u.label.toLowerCase().includes(search));
   });
-  rows = DEFAULT_PAGE_SIZE;
+  rows = 10;
   isLoading = signal(false);
-  showAddModal = false;
-  showEditModal = false;
+
+  label = signal('');
+  validationError = signal('');
+
   showDeleteModal = false;
   selectedUnit: IngredientUnit | null = null;
-
-  addLabel = '';
-  editLabel = '';
-  addValidationError = '';
-  editValidationError = '';
+  unitToDelete: IngredientUnit | null = null;
 
   private unitService = inject(IngredientUnitService);
 
@@ -52,74 +48,58 @@ export class IngredientUnitComponent {
 
   fetchUnits() {
     this.isLoading.set(true);
-    this.unitService.getAll().subscribe((data) => {
-      this.allUnits.set(data);
-      this.isLoading.set(false);
-    });
+    this.unitService
+      .getAll()
+      .pipe(finalize(() => this.isLoading.set(false)))
+      .subscribe((data) => this.allUnits.set(data));
   }
 
-  openAddModal() {
-    this.addLabel = '';
-    this.addValidationError = '';
-    this.showAddModal = true;
-  }
-
-  openEditModal(unit: IngredientUnit) {
+  openEditPanel(unit: IngredientUnit) {
     this.selectedUnit = unit;
-    this.editLabel = unit.label;
-    this.editValidationError = '';
-    this.showEditModal = true;
+    this.label.set(unit.label);
+    this.validationError.set('');
+  }
+
+  /** Leaves edit mode and goes back to the "create" form. */
+  closeEditPanel() {
+    this.selectedUnit = null;
+    this.label.set('');
+    this.validationError.set('');
   }
 
   openDeleteModal(unit: IngredientUnit) {
-    this.selectedUnit = unit;
+    this.unitToDelete = unit;
     this.showDeleteModal = true;
-  }
-
-  closeAddModal() {
-    this.showAddModal = false;
-  }
-
-  closeEditModal() {
-    this.showEditModal = false;
-    this.selectedUnit = null;
   }
 
   closeDeleteModal() {
     this.showDeleteModal = false;
-    this.selectedUnit = null;
+    this.unitToDelete = null;
   }
 
-  submitAdd() {
-    const dto: CreateIngredientUnitDto = { label: this.addLabel };
-    const validation = createIngredientUnitSchema.safeParse(dto);
+  submit() {
+    const schema = this.selectedUnit ? updateIngredientUnitSchema : createIngredientUnitSchema;
+    const validation = schema.safeParse({ label: this.label() });
     if (!validation.success) {
-      this.addValidationError = validation.error.issues[0]?.message ?? '';
+      this.validationError.set(validation.error.issues[0]?.message ?? '');
       return;
     }
-    this.unitService.add(validation.data).subscribe(() => {
-      this.closeAddModal();
+    this.validationError.set('');
+
+    const request = this.selectedUnit
+      ? this.unitService.update(this.selectedUnit.id, validation.data)
+      : this.unitService.add(validation.data);
+    request.subscribe(() => {
+      this.closeEditPanel();
       this.fetchUnits();
     });
   }
 
-  submitEdit() {
-    if (!this.selectedUnit) return;
-    const dto: UpdateIngredientUnitDto = { label: this.editLabel };
-    const validation = updateIngredientUnitSchema.safeParse(dto);
-    if (!validation.success) {
-      this.editValidationError = validation.error.issues[0]?.message ?? '';
-      return;
-    }
-    this.unitService.update(this.selectedUnit.id, validation.data).subscribe(() => {
-      this.closeEditModal();
-      this.fetchUnits();
-    });
-  }
-
-  deleteUnit() {
-    if (!this.selectedUnit) return;
-    this.unitService.delete(this.selectedUnit.id).subscribe(() => {
+  deleteUnit(id: string) {
+    this.unitService.delete(id).subscribe(() => {
+      if (this.selectedUnit?.id === id) {
+        this.closeEditPanel();
+      }
       this.closeDeleteModal();
       this.fetchUnits();
     });
