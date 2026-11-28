@@ -1,5 +1,5 @@
-import { Component, Input, Output, EventEmitter, SimpleChanges, inject, signal } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { Component, Input, Output, EventEmitter, SimpleChanges, ViewChild, inject, signal } from '@angular/core';
+import { FormsModule, NgForm } from '@angular/forms';
 import {
   CreateIngredientDto,
   IngredientUnit,
@@ -24,6 +24,8 @@ export class IngredientFormComponent {
   @Input() formId = 'ingredient-form';
   @Input() units: IngredientUnit[] = [];
   @Output() itemSubmit = new EventEmitter<CreateIngredientDto | UpdateIngredientDto>();
+
+  @ViewChild(NgForm) private readonly ngForm?: NgForm;
 
   private readonly paymentService = inject(PaymentService);
   protected readonly paymentMethods = signal<PaymentMethod[]>([]);
@@ -64,6 +66,9 @@ export class IngredientFormComponent {
   private resetForm(): void {
     this.validationError = null;
     this.item = this.createEmpty();
+    // Reset the NgForm state (submitted/dirty/touched) so that the `required`
+    // controls do not appear invalid right after a successful submission.
+    this.ngForm?.resetForm(this.item);
   }
 
   private createEmpty(): CreateIngredientDto {
