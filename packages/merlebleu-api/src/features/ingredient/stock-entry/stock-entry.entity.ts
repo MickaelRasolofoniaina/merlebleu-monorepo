@@ -9,8 +9,16 @@ export class StockEntryEntity implements Omit<
   id: string;
   entryDate: Date;
   quantity: number;
+  enteredQuantity: number | null;
+  enteredUnitLabel: string | null;
+  conversionFactor: number | null;
   ingredient: IngredientEntity;
 }
+
+const nullableNumber = {
+  to: (value: number | null) => value,
+  from: (value: string | null) => (value === null ? null : Number(value)),
+};
 
 export const StockEntrySchema = new EntitySchema<StockEntryEntity>({
   name: 'StockEntryEntity',
@@ -20,6 +28,22 @@ export const StockEntrySchema = new EntitySchema<StockEntryEntity>({
     id: { type: 'uuid', primary: true, generated: 'uuid' },
     entryDate: { type: 'date' },
     quantity: { type: 'decimal', precision: 10, scale: 2 },
+    // Null when the entry was typed in the stock unit (and for entries saved before the entry units existed)
+    enteredQuantity: {
+      type: 'decimal',
+      precision: 10,
+      scale: 2,
+      nullable: true,
+      transformer: nullableNumber,
+    },
+    enteredUnitLabel: { type: 'varchar', nullable: true },
+    conversionFactor: {
+      type: 'decimal',
+      precision: 12,
+      scale: 4,
+      nullable: true,
+      transformer: nullableNumber,
+    },
   },
   relations: {
     ingredient: {

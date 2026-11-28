@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, jest } from '@jest/globals';
-import { NotFoundException } from '@nestjs/common';
+import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
@@ -26,7 +26,10 @@ describe('StockEntryService', () => {
       ingredient: { id: FLOUR },
     };
     manager = {
-      count: mockFn().mockResolvedValue(2),
+      find: mockFn().mockResolvedValue([
+        { id: FLOUR, label: 'Farine', entryUnit: null, entryUnitFactor: null },
+        { id: SUGAR, label: 'Sucre', entryUnit: null, entryUnitFactor: null },
+      ]),
       existsBy: mockFn().mockResolvedValue(true),
       save: mockFn().mockImplementation((_schema, value) =>
         Promise.resolve({ id: 'new', ...value }),
@@ -79,8 +82,106 @@ describe('StockEntryService', () => {
       );
     });
 
+    it('converts a quantity typed in the entry unit and keeps the factor', async () => {
+      manager.find.mockResolvedValue([
+        {
+          id: FLOUR,
+          label: 'Farine',
+          entryUnit: { id: 'u-bag', label: 'sac' },
+          entryUnitFactor: 50000,
+        },
+      ]);
+
+      await service.addStockEntries({
+        entryDate: DATE,
+        lines: [{ ingredientId: FLOUR, quantity: 3, unit: 'entry' }],
+      });
+
+      expect(manager.save).toHaveBeenCalledWith(
+        StockEntrySchema,
+        expect.objectContaining({
+          quantity: 150000,
+          enteredQuantity: 3,
+          enteredUnitLabel: 'sac',
+          conversionFactor: 50000,
+        }),
+      );
+      expect(manager.increment).toHaveBeenCalledWith(
+        IngredientSchema,
+        { id: FLOUR },
+        'stock',
+        150000,
+      );
+    });
+
+    it('keeps the typed quantity as is when the stock unit is chosen', async () => {
+      manager.find.mockResolvedValue([
+        {
+          id: FLOUR,
+          label: 'Farine',
+          entryUnit: { id: 'u-bag', label: 'sac' },
+          entryUnitFactor: 50000,
+        },
+      ]);
+
+      await service.addStockEntries({
+        entryDate: DATE,
+        lines: [{ ingredientId: FLOUR, quantity: 2500, unit: 'stock' }],
+      });
+
+      expect(manager.save).toHaveBeenCalledWith(
+        StockEntrySchema,
+        expect.objectContaining({
+          quantity: 2500,
+          enteredQuantity: null,
+          conversionFactor: null,
+        }),
+      );
+    });
+
+    it('rounds the converted quantity to 2 decimals', async () => {
+      manager.find.mockResolvedValue([
+        {
+          id: FLOUR,
+          label: 'Farine',
+          entryUnit: { id: 'u-box', label: 'boîte' },
+          entryUnitFactor: 0.333,
+        },
+      ]);
+
+      await service.addStockEntries({
+        entryDate: DATE,
+        lines: [{ ingredientId: FLOUR, quantity: 1, unit: 'entry' }],
+      });
+
+      expect(manager.increment).toHaveBeenCalledWith(
+        IngredientSchema,
+        { id: FLOUR },
+        'stock',
+        0.33,
+      );
+    });
+
+    it('refuses the entry unit when the ingredient has none, and writes nothing', async () => {
+      await expect(
+        service.addStockEntries({
+          entryDate: DATE,
+          lines: [
+            { ingredientId: FLOUR, quantity: 25 },
+            { ingredientId: SUGAR, quantity: 1, unit: 'entry' },
+          ],
+        }),
+      ).rejects.toBeInstanceOf(BadRequestException);
+      expect(manager.increment).not.toHaveBeenCalledWith(
+        IngredientSchema,
+        { id: SUGAR },
+        'stock',
+        expect.anything(),
+      );
+    });
+
     it('writes nothing when an ingredient is unknown', async () => {
-      manager.count.mockResolvedValue(1);
+      manager.find.mockResolvedValue([{ id: FLOUR }]);
 
       await expect(
         service.addStockEntries({
@@ -131,6 +232,73 @@ describe('StockEntryService', () => {
         { id: SUGAR },
         'stock',
         8,
+      );
+    });
+
+    it('applies the original factor when an entry typed in bags is corrected', async () => {
+      existingEntry = {
+        id: 'e1',
+        quantity: 150000,
+        enteredQuantity: 3,
+        enteredUnitLabel: 'sac',
+        conversionFactor: 50000,
+        ingredient: { id: FLOUR },
+      };
+
+      await service.updateStockEntry('e1', {
+        entryDate: DATE,
+        ingredientId: FLOUR,
+        quantity: 4,
+      });
+
+      expect(manager.update).toHaveBeenCalledWith(
+        StockEntrySchema,
+        'e1',
+        expect.objectContaining({
+          quantity: 200000,
+          enteredQuantity: 4,
+          enteredUnitLabel: 'sac',
+          conversionFactor: 50000,
+        }),
+      );
+      expect(manager.increment).toHaveBeenCalledWith(
+        IngredientSchema,
+        { id: FLOUR },
+        'stock',
+        50000,
+      );
+    });
+
+    it('drops the conversion when the entry is moved to another ingredient', async () => {
+      existingEntry = {
+        id: 'e1',
+        quantity: 150000,
+        enteredQuantity: 3,
+        enteredUnitLabel: 'sac',
+        conversionFactor: 50000,
+        ingredient: { id: FLOUR },
+      };
+
+      await service.updateStockEntry('e1', {
+        entryDate: DATE,
+        ingredientId: SUGAR,
+        quantity: 8,
+      });
+
+      expect(manager.update).toHaveBeenCalledWith(
+        StockEntrySchema,
+        'e1',
+        expect.objectContaining({
+          quantity: 8,
+          enteredQuantity: null,
+          conversionFactor: null,
+        }),
+      );
+      expect(manager.increment).toHaveBeenCalledWith(
+        IngredientSchema,
+        { id: FLOUR },
+        'stock',
+        -150000,
       );
     });
 

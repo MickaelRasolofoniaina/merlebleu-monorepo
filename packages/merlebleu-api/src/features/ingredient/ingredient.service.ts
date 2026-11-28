@@ -54,6 +54,8 @@ export class IngredientService {
     const entity = this.repo.create({
       label: dto.label,
       unit: { id: dto.unitId },
+      entryUnit: dto.entryUnitId ? { id: dto.entryUnitId } : null,
+      entryUnitFactor: dto.entryUnitId ? (dto.entryUnitFactor ?? null) : null,
       defaultPaymentMethod: dto.defaultPaymentMethodId
         ? { id: dto.defaultPaymentMethodId }
         : null,
@@ -68,6 +70,10 @@ export class IngredientService {
     await this.repo.update(id, {
       label: dto.label,
       unit: { id: dto.unitId },
+      ...(dto.entryUnitId !== undefined && {
+        entryUnit: dto.entryUnitId ? { id: dto.entryUnitId } : null,
+        entryUnitFactor: dto.entryUnitId ? (dto.entryUnitFactor ?? null) : null,
+      }),
       ...(dto.defaultPaymentMethodId !== undefined && {
         defaultPaymentMethod: dto.defaultPaymentMethodId
           ? { id: dto.defaultPaymentMethodId }

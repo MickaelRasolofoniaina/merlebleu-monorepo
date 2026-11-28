@@ -10,7 +10,8 @@ import { TagModule } from 'primeng/tag';
 import { TooltipModule } from 'primeng/tooltip';
 import { IngredientMonthSummary } from '@merlebleu/shared';
 import { ReportGeneratorService } from '@shared/services/report-generator.service';
-import { capitalizeFirstLetter } from '@shared/utils/text';
+import { formatQuantity } from '@shared/utils/number';
+import { capitalizeFirstLetter, pluralizeUnit } from '@shared/utils/text';
 import { finalize } from 'rxjs';
 import { IngredientSummaryService } from './summary.service';
 
@@ -99,6 +100,15 @@ export class SummaryComponent implements OnInit {
     this.reportGeneratorService
       .generateShoppingList(this.shoppingList())
       .finally(() => this.isPrinting.set(false));
+  }
+
+  /** Current stock expressed in the entry unit ("≈ 2,4 sacs"), or null when the ingredient has no entry unit. */
+  entryUnitEquivalent(row: IngredientMonthSummary): string | null {
+    const { entryUnit, entryUnitFactor } = row.ingredient;
+    const factor = Number(entryUnitFactor);
+    if (!entryUnit || !(factor > 0)) return null;
+    const quantity = Number(row.currentStock) / factor;
+    return `≈ ${formatQuantity(quantity)} ${pluralizeUnit(entryUnit.label, Math.abs(quantity))}`;
   }
 
   statusOf(row: IngredientMonthSummary): { label: string; severity: 'danger' | 'warn' | 'success' } {

@@ -8,7 +8,10 @@ import {
   createIngredientSchema,
   updateIngredientSchema,
 } from '@merlebleu/shared';
+import { DecimalPipe } from '@angular/common';
+import { InputNumberModule } from 'primeng/inputnumber';
 import { InputTextModule } from 'primeng/inputtext';
+import { MessageModule } from 'primeng/message';
 import { SelectModule } from 'primeng/select';
 import { PaymentService } from '../../../../sale/payment/payment.service';
 
@@ -17,7 +20,7 @@ import { PaymentService } from '../../../../sale/payment/payment.service';
   templateUrl: './ingredient-form.component.html',
   styleUrls: ['./ingredient-form.component.scss'],
   standalone: true,
-  imports: [FormsModule, InputTextModule, SelectModule],
+  imports: [DecimalPipe, FormsModule, InputNumberModule, InputTextModule, MessageModule, SelectModule],
 })
 export class IngredientFormComponent {
   @Input() itemData?: CreateIngredientDto | UpdateIngredientDto | null;
@@ -83,6 +86,29 @@ export class IngredientFormComponent {
     }
   }
 
+  /** Any unit except the stock unit can be the entry unit. */
+  entryUnitOptions(): IngredientUnit[] {
+    return this.units.filter((unit) => unit.id !== this.item.unitId);
+  }
+
+  unitLabel(unitId: string | null | undefined): string {
+    return this.units.find((unit) => unit.id === unitId)?.label ?? '';
+  }
+
+  onEntryUnitChange(): void {
+    // Without an entry unit there is no formula to keep
+    if (!this.item.entryUnitId) {
+      this.item = { ...this.item, entryUnitId: null, entryUnitFactor: null };
+    }
+  }
+
+  onStockUnitChange(): void {
+    // The entry unit must differ from the stock unit
+    if (this.item.entryUnitId && this.item.entryUnitId === this.item.unitId) {
+      this.item = { ...this.item, entryUnitId: null, entryUnitFactor: null };
+    }
+  }
+
   getFieldError(field: keyof CreateIngredientDto): string {
     return this.validationError?.issues.find((issue) => issue.path[0] === field)?.message ?? '';
   }
@@ -96,6 +122,12 @@ export class IngredientFormComponent {
   }
 
   private createEmpty(): CreateIngredientDto {
-    return { label: '', unitId: '', defaultPaymentMethodId: this.cashMethodId };
+    return {
+      label: '',
+      unitId: '',
+      entryUnitId: null,
+      entryUnitFactor: null,
+      defaultPaymentMethodId: this.cashMethodId,
+    };
   }
 }

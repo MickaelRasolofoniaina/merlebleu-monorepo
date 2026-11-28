@@ -4,10 +4,19 @@ import { StockEntryBatchComponent } from './stock-entry-batch.component';
 
 const FLOUR_ID = '11111111-1111-4111-8111-111111111111';
 const SUGAR_ID = '22222222-2222-4222-8222-222222222222';
+const BUTTER_ID = '33333333-3333-4333-8333-333333333333';
 
 const ingredients: Ingredient[] = [
   { id: FLOUR_ID, label: 'farine', stock: 14, unit: { id: 'u1', label: 'kg' } },
   { id: SUGAR_ID, label: 'sucre', stock: 6.5, unit: { id: 'u1', label: 'kg' } },
+  {
+    id: BUTTER_ID,
+    label: 'beurre',
+    stock: 3000,
+    unit: { id: 'u2', label: 'g' },
+    entryUnit: { id: 'u3', label: 'carton' },
+    entryUnitFactor: 10000,
+  },
 ];
 
 describe('StockEntryBatchComponent', () => {
@@ -47,14 +56,51 @@ describe('StockEntryBatchComponent', () => {
     component.patchLine(firstKey(), { ingredientId: FLOUR_ID });
     const second = component.lines()[1];
 
-    expect(component.optionsFor(second).map((i) => i.id)).toEqual([SUGAR_ID]);
-    expect(component.optionsFor(component.lines()[0]).length).toBe(2);
+    expect(component.optionsFor(second).map((i) => i.id)).toEqual([SUGAR_ID, BUTTER_ID]);
+    expect(component.optionsFor(component.lines()[0]).length).toBe(3);
   });
 
   it('computes the stock after the entry', () => {
     component.patchLine(firstKey(), { ingredientId: FLOUR_ID, quantity: 25 });
 
     expect(component.stockAfter(component.lines()[0])).toBe(39);
+  });
+
+  it('selects the entry unit by default when the ingredient has one', () => {
+    component.onIngredientChange(firstKey(), BUTTER_ID);
+    expect(component.lines()[0].unit).toBe('entry');
+
+    component.onIngredientChange(firstKey(), FLOUR_ID);
+    expect(component.lines()[0].unit).toBe('stock');
+  });
+
+  it('converts a quantity typed in the entry unit', () => {
+    component.onIngredientChange(firstKey(), BUTTER_ID);
+    component.patchLine(firstKey(), { quantity: 2 });
+    const line = component.lines()[0];
+
+    expect(component.isConverted(line)).toBeTrue();
+    expect(component.convertedQuantity(line)).toBe(20000);
+    expect(component.stockAfter(line)).toBe(23000);
+  });
+
+  it('adds the typed quantity as is when the stock unit is chosen', () => {
+    component.onIngredientChange(firstKey(), BUTTER_ID);
+    component.patchLine(firstKey(), { quantity: 2500, unit: 'stock' });
+    const line = component.lines()[0];
+
+    expect(component.isConverted(line)).toBeFalse();
+    expect(component.convertedQuantity(line)).toBe(2500);
+    expect(component.stockAfter(line)).toBe(5500);
+  });
+
+  it('sends the chosen unit with each line', () => {
+    component.onIngredientChange(firstKey(), BUTTER_ID);
+    component.patchLine(firstKey(), { quantity: 2 });
+
+    component.onSubmit();
+
+    expect(submitted[0].lines).toEqual([{ ingredientId: BUTTER_ID, quantity: 2, unit: 'entry' }]);
   });
 
   it('ignores blank lines and emits the filled ones', () => {
@@ -64,7 +110,7 @@ describe('StockEntryBatchComponent', () => {
     component.onSubmit();
 
     expect(submitted.length).toBe(1);
-    expect(submitted[0].lines).toEqual([{ ingredientId: FLOUR_ID, quantity: 25 }]);
+    expect(submitted[0].lines).toEqual([{ ingredientId: FLOUR_ID, quantity: 25, unit: 'stock' }]);
   });
 
   it('flags a missing quantity on the right line', () => {

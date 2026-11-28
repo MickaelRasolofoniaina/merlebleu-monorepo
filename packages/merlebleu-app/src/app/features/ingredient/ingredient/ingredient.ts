@@ -1,4 +1,5 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
+import { DecimalPipe } from '@angular/common';
 import {
   CreateIngredientDto,
   Ingredient,
@@ -24,6 +25,7 @@ import { finalize } from 'rxjs';
   styleUrls: ['./ingredient.scss'],
   providers: [IngredientService, IngredientUnitService],
   imports: [
+    DecimalPipe,
     ButtonModule,
     TableModule,
     Dialog,
@@ -108,6 +110,9 @@ export class IngredientListComponent implements OnInit {
     return {
       label: ingredient.label,
       unitId: ingredient.unit.id,
+      entryUnitId: ingredient.entryUnit?.id ?? null,
+      entryUnitFactor:
+        ingredient.entryUnitFactor != null ? Number(ingredient.entryUnitFactor) : null,
       defaultPaymentMethodId: ingredient.defaultPaymentMethod?.id ?? null,
     };
   }

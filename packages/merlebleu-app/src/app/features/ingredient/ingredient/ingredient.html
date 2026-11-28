@@ -30,6 +30,7 @@
       [value]="ingredients()"
       [loading]="isLoading()"
       [stripedRows]="true"
+      [lazy]="true"
       [paginator]="true"
       [rows]="rows"
       [totalRecords]="totalRecords()"
@@ -39,7 +40,8 @@
       <ng-template #header>
         <tr>
           <th>Libellé</th>
-          <th class="text-right!">Unité</th>
+          <th class="text-right!">Unité de stock</th>
+          <th class="text-right!">Unité d'entrée</th>
           <th style="width: 8rem" class="text-center!">Actions</th>
         </tr>
       </ng-template>
@@ -47,6 +49,14 @@
         <tr [class]="selectedIngredient?.id === ingredient.id ? 'bg-slate-200! dark:bg-slate-700!' : ''">
           <td>{{ capitalizeFirstLetter(ingredient.label) }}</td>
           <td class="text-right!">{{ capitalizeFirstLetter(ingredient.unit.label) }}</td>
+          <td class="text-right!">
+            @if (ingredient.entryUnit) {
+              1 {{ ingredient.entryUnit.label }} = {{ ingredient.entryUnitFactor | number: '1.0-4' }}
+              {{ ingredient.unit.label }}
+            } @else {
+              <span class="text-slate-400">—</span>
+            }
+          </td>
           <td class="text-center!">
             <p-button
               icon="pi pi-pencil"

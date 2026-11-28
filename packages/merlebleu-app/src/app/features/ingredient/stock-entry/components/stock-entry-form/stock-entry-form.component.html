@@ -38,19 +38,34 @@
   </div>
 
   <div class="flex flex-col gap-1">
-    <label for="quantity" class="font-semibold text-slate-900 dark:text-white">Quantité</label>
-    <p-inputnumber
-      inputId="quantity"
-      [(ngModel)]="item.quantity"
-      name="quantity"
-      [minFractionDigits]="0"
-      [maxFractionDigits]="2"
-      [min]="0"
-      placeholder="0"
-      fluid
-    />
+    <label for="quantity" class="font-semibold text-slate-900 dark:text-white">Quantité reçue</label>
+    <div class="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2">
+      <p-inputnumber
+        inputId="quantity"
+        [(ngModel)]="item.quantity"
+        name="quantity"
+        [minFractionDigits]="0"
+        [maxFractionDigits]="2"
+        [min]="0"
+        placeholder="0"
+        fluid
+      />
+      <span class="font-semibold text-slate-900 dark:text-white">
+        {{ keepsEntryUnit() ? enteredUnitLabel() : stockUnitLabel() }}
+      </span>
+    </div>
     @if (getFieldError('quantity')) {
       <small class="text-red-500 mt-1 block">{{ getFieldError('quantity') }}</small>
+    }
+    @if (keepsEntryUnit()) {
+      <small class="rounded-md bg-green-50 dark:bg-green-950 px-3 py-2 text-slate-900 dark:text-white block">
+        = <strong>{{ convertedQuantity() | number: '1.0-2' }} {{ stockUnitLabel() }}</strong> au stock (1
+        {{ enteredUnitLabel() }} = {{ conversionFactor() | number: '1.0-4' }} {{ stockUnitLabel() }}, équivalence
+        d'origine).
+      </small>
+      <small class="text-slate-500 mt-1 block">
+        Pour changer d'unité, supprimez l'entrée puis saisissez-la de nouveau.
+      </small>
     }
   </div>
 </form>

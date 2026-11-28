@@ -1,11 +1,53 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, FindOptionsWhere, ILike, In, Repository } from 'typeorm';
 import { ResultPaged } from '@merlebleu/shared';
 import { getPaginationParams } from '@shared/pagination/pagination.utils';
 import { StockEntryEntity, StockEntrySchema } from './stock-entry.entity';
 import { CreateStockEntriesDto, UpdateStockEntryDto } from './stock-entry.dto';
-import { IngredientSchema } from '../ingredient.entity';
+import { IngredientEntity, IngredientSchema } from '../ingredient.entity';
+
+type EntryAmounts = Pick<
+  StockEntryEntity,
+  'quantity' | 'enteredQuantity' | 'enteredUnitLabel' | 'conversionFactor'
+>;
+
+const round2 = (value: number) => Math.round(value * 100) / 100;
+
+/**
+ * Converts the typed quantity into the stock unit. The factor and the unit label are kept on the
+ * entry so that later changes of the ingredient formula never alter the history.
+ */
+function resolveAmounts(
+  ingredient: IngredientEntity,
+  quantity: number,
+  unit: 'entry' | 'stock' | undefined,
+): EntryAmounts {
+  if (unit !== 'entry') {
+    return {
+      quantity,
+      enteredQuantity: null,
+      enteredUnitLabel: null,
+      conversionFactor: null,
+    };
+  }
+  const factor = Number(ingredient.entryUnitFactor);
+  if (!ingredient.entryUnit || !(factor > 0)) {
+    throw new BadRequestException(
+      `L'ingrédient « ${ingredient.label} » n'a pas d'unité d'entrée`,
+    );
+  }
+  return {
+    quantity: round2(quantity * factor),
+    enteredQuantity: quantity,
+    enteredUnitLabel: ingredient.entryUnit.label,
+    conversionFactor: factor,
+  };
+}
 
 @Injectable()
 export class StockEntryService {
@@ -43,21 +85,29 @@ export class StockEntryService {
   addStockEntries(dto: CreateStockEntriesDto): Promise<StockEntryEntity[]> {
     return this.dataSource.transaction(async (manager) => {
       const ids = dto.lines.map((line) => line.ingredientId);
-      const found = await manager.count(IngredientSchema, {
+      const ingredients = await manager.find(IngredientSchema, {
         where: { id: In(ids) },
       });
-      if (found !== ids.length)
+      if (ingredients.length !== ids.length)
         throw new NotFoundException(
           'Au moins un ingrédient de la saisie est introuvable',
         );
+      const byId = new Map(
+        ingredients.map((ingredient) => [ingredient.id, ingredient]),
+      );
 
       const entryDate = new Date(dto.entryDate);
       const saved: StockEntryEntity[] = [];
       for (const line of dto.lines) {
+        const amounts = resolveAmounts(
+          byId.get(line.ingredientId)!,
+          line.quantity,
+          line.unit,
+        );
         saved.push(
           await manager.save(StockEntrySchema, {
             entryDate,
-            quantity: line.quantity,
+            ...amounts,
             ingredient: { id: line.ingredientId },
           } as StockEntryEntity),
         );
@@ -65,7 +115,7 @@ export class StockEntryService {
           IngredientSchema,
           { id: line.ingredientId },
           'stock',
-          line.quantity,
+          amounts.quantity,
         );
       }
       return saved;
@@ -87,9 +137,18 @@ export class StockEntryService {
         );
 
       const oldIngredientId = existing.ingredient.id;
+      // The typed quantity keeps the factor of the entry; moving it to another ingredient drops the conversion
+      const factor =
+        oldIngredientId === newIngredientId && existing.conversionFactor
+          ? Number(existing.conversionFactor)
+          : null;
+      const quantity = factor ? round2(dto.quantity * factor) : dto.quantity;
       await manager.update(StockEntrySchema, id, {
         entryDate: new Date(dto.entryDate),
-        quantity: dto.quantity,
+        quantity,
+        enteredQuantity: factor ? dto.quantity : null,
+        enteredUnitLabel: factor ? existing.enteredUnitLabel : null,
+        conversionFactor: factor,
         ingredient: { id: newIngredientId },
       });
 
@@ -104,10 +163,10 @@ export class StockEntryService {
           IngredientSchema,
           { id: newIngredientId },
           'stock',
-          dto.quantity,
+          quantity,
         );
       } else {
-        const delta = dto.quantity - Number(existing.quantity);
+        const delta = round2(quantity - Number(existing.quantity));
         if (delta !== 0) {
           await manager.increment(
             IngredientSchema,

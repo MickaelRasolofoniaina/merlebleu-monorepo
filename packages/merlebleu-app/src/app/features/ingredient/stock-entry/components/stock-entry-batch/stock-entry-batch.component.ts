@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import {
   CreateStockEntriesDto,
   Ingredient,
+  StockEntryUnit,
   createStockEntriesSchema,
 } from '@merlebleu/shared';
 import { ButtonModule } from 'primeng/button';
@@ -17,6 +18,8 @@ interface BatchLine {
   key: number;
   ingredientId: string | null;
   quantity: number | null;
+  /** Unit the quantity is typed in: the entry unit (bag) when the ingredient has one, else the stock unit. */
+  unit: StockEntryUnit;
 }
 
 /** Adds stock for several ingredients at once, with one date shared by every line. */
@@ -67,11 +70,44 @@ export class StockEntryBatchComponent {
     return this.ingredients().find((ingredient) => ingredient.id === line.ingredientId);
   }
 
+  /** True when the ingredient is received in another unit than the one of its stock (a bag of flour). */
+  hasEntryUnit(ingredient: Ingredient | undefined): boolean {
+    return !!ingredient?.entryUnit && Number(ingredient.entryUnitFactor) > 0;
+  }
+
+  unitOptions(ingredient: Ingredient): { value: StockEntryUnit; label: string }[] {
+    return [
+      { value: 'entry', label: ingredient.entryUnit?.label ?? '' },
+      { value: 'stock', label: ingredient.unit.label },
+    ];
+  }
+
+  /** True when the line is typed in the entry unit, so the converted quantity is worth showing. */
+  isConverted(line: BatchLine): boolean {
+    return line.unit === 'entry' && this.hasEntryUnit(this.ingredientOf(line));
+  }
+
+  /** Quantity added to the stock, in the stock unit. Null while the line has no usable quantity. */
+  convertedQuantity(line: BatchLine): number | null {
+    const ingredient = this.ingredientOf(line);
+    if (!ingredient || !line.quantity || line.quantity <= 0) return null;
+    const factor = this.isConverted(line) ? Number(ingredient.entryUnitFactor) : 1;
+    return Math.round(line.quantity * factor * 100) / 100;
+  }
+
   stockAfter(line: BatchLine): number | null {
     const ingredient = this.ingredientOf(line);
-    return ingredient && line.quantity && line.quantity > 0
-      ? Number(ingredient.stock) + line.quantity
-      : null;
+    const converted = this.convertedQuantity(line);
+    return ingredient && converted !== null ? Number(ingredient.stock) + converted : null;
+  }
+
+  /** Picking an ingredient selects its entry unit by default, when it has one. */
+  onIngredientChange(key: number, ingredientId: string | null) {
+    const ingredient = this.ingredients().find((item) => item.id === ingredientId);
+    this.patchLine(key, {
+      ingredientId,
+      unit: this.hasEntryUnit(ingredient) ? 'entry' : 'stock',
+    });
   }
 
   lineError(index: number, field: 'ingredientId' | 'quantity'): string {
@@ -108,6 +144,7 @@ export class StockEntryBatchComponent {
       lines: filled.map((line) => ({
         ingredientId: line.ingredientId ?? '',
         quantity: line.quantity,
+        unit: line.unit,
       })),
     });
 
@@ -142,6 +179,6 @@ export class StockEntryBatchComponent {
   }
 
   private createLine(): BatchLine {
-    return { key: this.nextKey++, ingredientId: null, quantity: null };
+    return { key: this.nextKey++, ingredientId: null, quantity: null, unit: 'stock' };
   }
 }

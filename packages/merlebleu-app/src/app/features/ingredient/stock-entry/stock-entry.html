@@ -39,6 +39,7 @@
   [loading]="isLoading()"
   [tableStyle]="{ 'min-width': '60rem' }"
   [stripedRows]="true"
+  [lazy]="true"
   [paginator]="true"
   [rows]="rows"
   [totalRecords]="totalRecords()"
@@ -49,8 +50,8 @@
     <tr>
       <th>Date</th>
       <th>Libellé</th>
-      <th>Unité</th>
-      <th class="text-right!">Quantité</th>
+      <th class="text-right!">Quantité saisie</th>
+      <th class="text-right!">Ajouté au stock</th>
       <th style="width: 12rem" class="text-center!">Actions</th>
     </tr>
   </ng-template>
@@ -58,8 +59,10 @@
     <tr>
       <td>{{ entry.entryDate | date: 'dd/MM/yyyy' }}</td>
       <td>{{ capitalizeFirstLetter(entry.ingredient.label) }}</td>
-      <td>{{ capitalizeFirstLetter(entry.ingredient.unit.label) }}</td>
-      <td class="text-right!">{{ entry.quantity }}</td>
+      <td class="text-right!">{{ enteredText(entry) }}</td>
+      <td [class]="isConverted(entry) ? 'text-right! font-semibold' : 'text-right! text-slate-500 dark:text-slate-400'">
+        {{ storedText(entry) }}
+      </td>
       <td class="text-center!">
         <p-button
           icon="pi pi-pencil"
@@ -100,6 +103,8 @@
     [formId]="'edit-stock-entry-form'"
     [itemData]="editDto"
     [ingredients]="ingredients()"
+    [enteredUnitLabel]="selectedEntry?.enteredUnitLabel ?? null"
+    [conversionFactor]="selectedEntry?.conversionFactor ?? null"
     (itemSubmit)="selectedEntry && editEntry(selectedEntry.id, $event)"
   />
   <ng-template pTemplate="footer">
@@ -122,9 +127,11 @@
     <p>
       Supprimer l'entrée de
       <strong>{{ selectedEntry?.ingredient?.label }}</strong>
-      du {{ selectedEntry?.entryDate | date: 'dd/MM/yyyy' }} ({{ selectedEntry?.quantity }}
-      {{ selectedEntry?.ingredient?.unit?.label }}) ? Le stock de cet ingrédient sera réduit
-      d'autant.
+      du {{ selectedEntry?.entryDate | date: 'dd/MM/yyyy' }} (@if (selectedEntry && isConverted(selectedEntry)) {
+        {{ enteredText(selectedEntry) }}, soit
+      }
+      {{ selectedEntry ? storedText(selectedEntry) : '' }}) ? Le stock de cet ingrédient sera réduit de
+      <strong>{{ selectedEntry ? storedText(selectedEntry) : '' }}</strong>.
     </p>
   </div>
   <ng-template pTemplate="footer">

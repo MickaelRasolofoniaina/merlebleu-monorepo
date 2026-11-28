@@ -15,10 +15,11 @@
     }
   </div>
   <div>
-    <label for="ingredientUnit" class="block mb-2">Unité</label>
+    <label for="ingredientUnit" class="block mb-2">Unité de stock</label>
     <p-select
       inputId="ingredientUnit"
       [(ngModel)]="item.unitId"
+      (onChange)="onStockUnitChange()"
       name="unitId"
       [options]="units"
       optionLabel="label"
@@ -31,7 +32,68 @@
     @if (getFieldError('unitId')) {
       <small class="text-red-500 mt-1 block">{{ getFieldError('unitId') }}</small>
     }
+    <small class="text-slate-500 mt-1 block">Unité des recettes et du calcul du stock.</small>
   </div>
+  <div>
+    <label for="ingredientEntryUnit" class="block mb-2">
+      Unité d'entrée <span class="text-slate-500">(facultatif)</span>
+    </label>
+    <p-select
+      inputId="ingredientEntryUnit"
+      [(ngModel)]="item.entryUnitId"
+      (onChange)="onEntryUnitChange()"
+      name="entryUnitId"
+      [options]="entryUnitOptions()"
+      optionLabel="label"
+      optionValue="id"
+      placeholder="Aucune (saisie en unité de stock)"
+      [showClear]="true"
+      fluid
+      appendTo="body"
+    />
+    @if (getFieldError('entryUnitId')) {
+      <small class="text-red-500 mt-1 block">{{ getFieldError('entryUnitId') }}</small>
+    } @else {
+      <small class="text-slate-500 mt-1 block">Unité dans laquelle vous recevez la marchandise.</small>
+    }
+  </div>
+  @if (item.entryUnitId) {
+    <div class="flex flex-col gap-2">
+      <label for="ingredientEntryUnitFactor" class="block">Équivalence</label>
+      <div
+        class="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 rounded-lg border border-dashed border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-800 p-3"
+      >
+        <span class="font-semibold whitespace-nowrap">1 {{ unitLabel(item.entryUnitId) }} =</span>
+        <p-inputnumber
+          inputId="ingredientEntryUnitFactor"
+          [(ngModel)]="item.entryUnitFactor"
+          name="entryUnitFactor"
+          [minFractionDigits]="0"
+          [maxFractionDigits]="4"
+          [min]="0"
+          placeholder="0"
+          [invalid]="!!getFieldError('entryUnitFactor')"
+          inputStyleClass="text-right w-full"
+          fluid
+        />
+        <span class="font-semibold whitespace-nowrap">{{ unitLabel(item.unitId) }}</span>
+      </div>
+      @if (getFieldError('entryUnitFactor')) {
+        <small class="text-red-500 block">{{ getFieldError('entryUnitFactor') }}</small>
+      } @else if (item.entryUnitFactor && item.entryUnitFactor > 0) {
+        <small class="rounded-md bg-green-50 dark:bg-green-950 px-3 py-2 text-slate-900 dark:text-white block">
+          Saisir <strong>3 {{ unitLabel(item.entryUnitId) }}</strong> ajoute
+          <strong>{{ 3 * item.entryUnitFactor | number: '1.0-2' }} {{ unitLabel(item.unitId) }}</strong> au stock.
+        </small>
+      }
+      @if (itemData) {
+        <p-message severity="warn" icon="pi pi-info-circle" size="small">
+          Modifier l'équivalence ne change ni le stock ni les entrées déjà enregistrées. Elle s'applique aux
+          prochaines saisies.
+        </p-message>
+      }
+    </div>
+  }
   <div>
     <label for="ingredientPayment" class="block mb-2">Méthode de paiement par défaut</label>
     <p-select

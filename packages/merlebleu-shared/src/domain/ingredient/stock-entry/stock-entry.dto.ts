@@ -11,9 +11,14 @@ const quantitySchema = z
   .number({ error: "La quantité doit être un nombre" })
   .positive("La quantité doit être positive");
 
+/** Which unit the typed quantity is expressed in: the entry unit (bag) or the stock unit (g). */
+export const stockEntryUnitSchema = z.enum(["entry", "stock"]);
+
 export const stockEntryLineSchema = z.object({
   ingredientId: z.uuid("L'ingrédient est requis"),
   quantity: quantitySchema,
+  /** Defaults to the stock unit when omitted. */
+  unit: stockEntryUnitSchema.optional(),
 });
 
 export const createStockEntriesSchema = z.object({
@@ -38,6 +43,7 @@ export const updateStockEntrySchema = z.object({
   quantity: quantitySchema,
 });
 
+export type StockEntryUnit = z.infer<typeof stockEntryUnitSchema>;
 export type StockEntryLineDto = z.infer<typeof stockEntryLineSchema>;
 export type CreateStockEntriesDto = z.infer<typeof createStockEntriesSchema>;
 export type UpdateStockEntryDto = z.infer<typeof updateStockEntrySchema>;

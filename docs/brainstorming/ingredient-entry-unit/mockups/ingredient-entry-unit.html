@@ -1,0 +1,464 @@
+<title>Unités d'entrée Merlebleu</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/* Layout: replica of the app shell (icon rail, section panel, top bar, white card). One card whose content swaps per screen; dialogs overlay the card. */
+:root {
+  --canvas: #e2e8f0; --page: #f1f5f9; --card: #ffffff; --rail: #1e293b; --rail-active: #475569;
+  --brand: #3b82f6; --brand-ink: #1d4ed8; --brand-soft: #eff6ff;
+  --text: #0f172a; --muted: #64748b; --line: #e2e8f0; --stripe: #f8fafc;
+  --input-bg: #ffffff; --input-line: #cbd5e1;
+  --danger: #dc2626; --danger-soft: #fef2f2; --warn: #b45309; --warn-soft: #fffbeb; --ok: #15803d; --ok-soft: #f0fdf4;
+  --info-soft: #eff6ff; --info-line: #bfdbfe;
+  --overlay: rgba(15, 23, 42, .45);
+  --font: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --canvas: #020617; --page: #0f172a; --card: #1e293b; --rail: #1e293b; --rail-active: #475569;
+    --brand: #60a5fa; --brand-ink: #ffffff; --brand-soft: #334155;
+    --text: #e2e8f0; --muted: #94a3b8; --line: #334155; --stripe: #243247;
+    --input-bg: #0f172a; --input-line: #475569;
+    --danger: #f87171; --danger-soft: #3b1d22; --warn: #fbbf24; --warn-soft: #3a2e12; --ok: #4ade80; --ok-soft: #14301f;
+    --info-soft: #1e3350; --info-line: #3b5b8a;
+    --overlay: rgba(2, 6, 23, .65);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --canvas: #020617; --page: #0f172a; --card: #1e293b; --rail: #1e293b; --rail-active: #475569;
+  --brand: #60a5fa; --brand-ink: #ffffff; --brand-soft: #334155;
+  --text: #e2e8f0; --muted: #94a3b8; --line: #334155; --stripe: #243247;
+  --input-bg: #0f172a; --input-line: #475569;
+  --danger: #f87171; --danger-soft: #3b1d22; --warn: #fbbf24; --warn-soft: #3a2e12; --ok: #4ade80; --ok-soft: #14301f;
+  --info-soft: #1e3350; --info-line: #3b5b8a;
+  --overlay: rgba(2, 6, 23, .65);
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { background: var(--canvas); color: var(--text); font-family: var(--font); font-size: 14px; line-height: 1.45; padding-block: 12px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+button, input, select { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
+svg.i { width: 1.1em; height: 1.1em; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+
+.mock-bar { max-width: 1280px; margin: 0 auto 10px; display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.mock-bar .lbl { font-size: 11px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); margin-right: 4px; }
+.mock-tab { border: 1px solid var(--input-line); background: var(--card); border-radius: 999px; padding: 5px 12px; cursor: pointer; font-size: 13px; }
+.mock-tab[aria-selected="true"] { background: var(--brand); border-color: var(--brand); color: #fff; font-weight: 600; }
+:root[data-theme="dark"] .mock-tab[aria-selected="true"], :root:not([data-theme="light"]) .mock-tab[aria-selected="true"] { color: #0f172a; }
+.theme-btn { margin-left: auto; }
+
+.shell { max-width: 1280px; margin: 0 auto; display: flex; min-height: 700px; background: var(--page); border-radius: 10px; overflow: hidden; border: 1px solid var(--line); }
+.rail { width: 68px; background: var(--rail); display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 12px 0; flex: none; }
+.logo { width: 36px; height: 36px; border-radius: 10px; background: #3b82f6; color: #fff; display: grid; place-items: center; font-weight: 600; margin-bottom: 10px; }
+.rail-btn { width: 54px; height: 54px; border-radius: 12px; display: flex; flex-direction: column; gap: 2px; align-items: center; justify-content: center; color: #cbd5e1; font-size: 9px; font-weight: 500; }
+.rail-btn svg { width: 20px; height: 20px; }
+.rail-btn.on { background: var(--rail-active); color: #fff; }
+.panel { width: 224px; background: var(--card); border-right: 1px solid var(--line); flex: none; }
+.panel-head { height: 56px; background: #3b82f6; color: #fff; font-weight: 600; display: flex; align-items: center; padding: 0 16px; }
+.panel-body { padding: 10px; display: flex; flex-direction: column; gap: 1px; }
+.nav { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-radius: 8px; font-weight: 500; background: none; border: 0; text-align: left; width: 100%; cursor: default; }
+.nav.on { background: var(--brand-soft); color: var(--brand-ink); }
+.main-col { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.topbar { height: 56px; background: #1e293b; color: #fff; display: flex; align-items: center; gap: 12px; padding: 0 20px; font-weight: 600; font-size: 17px; }
+.content { padding: 16px; flex: 1; min-width: 0; }
+.card { background: var(--card); border-radius: 12px; padding: 14px 16px; min-width: 0; position: relative; min-height: 640px; }
+
+.head { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-bottom: 14px; }
+.head h2 { margin: 0; font-size: 24px; font-weight: 700; }
+.head .sub { font-size: 13px; color: var(--muted); }
+.head .spacer { margin-left: auto; display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+
+.inp { height: 36px; border: 1px solid var(--input-line); background: var(--input-bg); border-radius: 6px; padding: 0 10px; min-width: 0; width: 100%; }
+.inp.num { text-align: right; font-variant-numeric: tabular-nums; }
+.inp.err { border-color: var(--danger); }
+.inp:disabled { opacity: .65; }
+.btn { height: 36px; display: inline-flex; align-items: center; gap: 6px; border-radius: 6px; padding: 0 14px; border: 1px solid transparent; cursor: pointer; font-weight: 500; background: #3b82f6; color: #fff; }
+.btn:hover { filter: brightness(.95); }
+.btn:disabled { opacity: .55; cursor: not-allowed; }
+.btn.sm { height: 30px; padding: 0 9px; font-size: 13px; }
+.btn.warn { background: #f97316; }
+.btn.danger { background: #ef4444; }
+.btn.contrast { background: #0f172a; color: #fff; }
+:root[data-theme="dark"] .btn.contrast, :root:not([data-theme="light"]) .btn.contrast { background: #e2e8f0; color: #0f172a; }
+.btn.text { background: transparent; color: var(--brand-ink); }
+.btn.text.red { color: var(--danger); }
+
+.field { display: flex; flex-direction: column; gap: 4px; }
+.field label { font-weight: 500; }
+.hint { color: var(--muted); font-size: 12.5px; }
+.err-t { color: var(--danger); font-size: 12.5px; }
+
+/* Ingredients screen */
+.split { display: grid; grid-template-columns: minmax(0, 1fr) minmax(300px, 380px); gap: 24px; align-items: start; }
+.sect { border: 1px solid var(--line); border-radius: 12px; background: var(--card); }
+.sect-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 18px; border-bottom: 1px solid var(--line); }
+.sect-head .t { font-size: 11px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+.sect-head h3 { margin: 0; font-size: 18px; font-weight: 600; }
+.sect-body { padding: 18px; display: flex; flex-direction: column; gap: 16px; }
+.sect-foot { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 14px 18px; border-top: 1px solid var(--line); }
+.equiv { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 10px; align-items: center; padding: 12px; border: 1px dashed var(--input-line); border-radius: 8px; background: var(--stripe); }
+.equiv .u { font-weight: 600; white-space: nowrap; }
+.preview { background: var(--ok-soft); color: var(--text); border-radius: 6px; padding: 8px 10px; font-size: 13px; }
+.preview b { color: var(--ok); }
+.msg { display: flex; gap: 8px; align-items: flex-start; background: var(--info-soft); border: 1px solid var(--info-line); border-radius: 6px; padding: 8px 10px; font-size: 13px; }
+.msg.warnm { background: var(--warn-soft); border-color: var(--warn); }
+.pill { display: inline-block; font-size: 12px; font-weight: 600; padding: 1px 8px; border-radius: 6px; }
+.pill.ok { background: var(--ok-soft); color: var(--ok); }
+.pill.warn { background: var(--warn-soft); color: var(--warn); }
+.pill.bad { background: var(--danger-soft); color: var(--danger); }
+
+/* Entry panel */
+.entry { border: 1px solid var(--line); border-radius: 12px; margin-bottom: 18px; background: var(--card); }
+.entry-head { display: flex; flex-wrap: wrap; align-items: end; gap: 16px; padding: 14px 18px; border-bottom: 1px solid var(--line); }
+.entry-head .t { font-size: 11px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+.entry-head h3 { margin: 0; font-size: 18px; font-weight: 600; }
+.date-field { margin-left: auto; width: 200px; display: flex; flex-direction: column; gap: 4px; }
+.date-field label { font-weight: 500; font-size: 13px; }
+.rows { padding: 10px 18px 4px; display: flex; flex-direction: column; gap: 10px; }
+.row, .row-head { display: grid; grid-template-columns: minmax(0, 2.2fr) 110px 118px minmax(0, 2fr) 34px; gap: 10px; align-items: center; }
+.row-head { font-size: 12px; font-weight: 600; color: var(--muted); padding-top: 4px; }
+.row .unit-static { color: var(--muted); padding-left: 10px; }
+.calc { text-align: right; font-variant-numeric: tabular-nums; line-height: 1.3; }
+.calc .conv { color: var(--text); }
+.calc .after { color: var(--ok); font-weight: 600; }
+.calc .stock { color: var(--muted); }
+.row-err { grid-column: 1 / -1; color: var(--danger); font-size: 12px; margin-top: -4px; }
+.x { height: 30px; width: 30px; border-radius: 6px; border: 0; background: transparent; color: var(--muted); cursor: pointer; display: grid; place-items: center; }
+.x:hover { background: var(--danger-soft); color: var(--danger); }
+.entry-foot { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; padding: 10px 18px 14px; }
+.entry-foot .end { margin-left: auto; display: flex; align-items: center; gap: 10px; }
+.kbd { font-size: 11px; border: 1px solid var(--input-line); border-radius: 4px; padding: 0 5px; background: var(--page); }
+
+.filters { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 10px; }
+.filters .sect-t { font-weight: 600; font-size: 16px; margin-right: auto; }
+.filters .inp { width: 200px; }
+.tbl-wrap { overflow-x: auto; border-radius: 8px; }
+table { width: 100%; border-collapse: collapse; min-width: 640px; }
+th { text-align: left; font-weight: 600; padding: 10px 12px; border-bottom: 1px solid var(--line); background: var(--card); white-space: nowrap; }
+td { padding: 9px 12px; border-bottom: 1px solid var(--line); vertical-align: middle; }
+tbody tr:nth-child(even) { background: var(--stripe); }
+tbody tr.fresh { background: var(--ok-soft); }
+.r { text-align: right; font-variant-numeric: tabular-nums; }
+.c { text-align: center; }
+.sub-cell { display: block; font-size: 12px; color: var(--muted); font-weight: 400; }
+.dim { color: var(--muted); }
+.pager { display: flex; justify-content: space-between; align-items: center; padding: 10px 4px 0; color: var(--muted); font-size: 13px; }
+
+.dialog-layer { position: absolute; inset: 0; background: var(--overlay); display: none; align-items: flex-start; justify-content: center; padding: 60px 12px; z-index: 5; border-radius: 12px; }
+.dialog-layer.on { display: flex; }
+.dialog { background: var(--card); border-radius: 10px; width: min(450px, 100%); box-shadow: 0 20px 50px rgba(0,0,0,.3); }
+.dialog header { padding: 16px 20px 8px; font-weight: 700; font-size: 18px; }
+.dialog .body { padding: 8px 20px 12px; display: flex; flex-direction: column; gap: 14px; }
+.dialog footer { padding: 12px 20px 16px; display: flex; justify-content: flex-end; gap: 8px; }
+.qty-line { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; align-items: center; }
+.chip { height: 36px; display: inline-flex; align-items: center; padding: 0 12px; border-radius: 6px; background: var(--stripe); border: 1px solid var(--line); font-weight: 600; }
+
+.toast { position: fixed; right: max(16px, env(safe-area-inset-right, 0px)); top: 16px; z-index: 20; background: var(--ok-soft); color: var(--text); border: 1px solid var(--ok); border-left-width: 4px; border-radius: 8px; padding: 10px 14px; box-shadow: 0 8px 24px rgba(0,0,0,.2); display: none; max-width: 340px; }
+.toast.on { display: block; }
+.toast b { color: var(--ok); }
+
+.notes { max-width: 1280px; margin: 12px auto 0; font-size: 12.5px; color: var(--muted); display: grid; gap: 4px; }
+.notes b { color: var(--text); }
+
+@media (max-width: 1000px) { .split { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 960px) { .panel { display: none; } }
+@media (max-width: 700px) {
+  .rail { display: none; }
+  .row-head { display: none; }
+  .row { grid-template-columns: minmax(0, 1fr) 100px 34px; }
+  .row .unit-cell { grid-column: 1 / 3; }
+  .row .calc { grid-column: 1 / -1; text-align: left; }
+  .date-field { margin-left: 0; width: 100%; }
+}
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-db" viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v6c0 1.7 3.6 3 8 3s8-1.3 8-3V5M4 11v6c0 1.7 3.6 3 8 3s8-1.3 8-3v-6"/></symbol>
+    <symbol id="i-cart" viewBox="0 0 24 24"><circle cx="9" cy="20" r="1.5"/><circle cx="18" cy="20" r="1.5"/><path d="M2 3h3l2.5 12h11L21 7H6"/></symbol>
+    <symbol id="i-wallet" viewBox="0 0 24 24"><path d="M3 7h16a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h12"/><circle cx="16.5" cy="13.5" r="1"/></symbol>
+    <symbol id="i-book" viewBox="0 0 24 24"><path d="M4 4h10a4 4 0 0 1 4 4v12H8a4 4 0 0 1-4-4z"/><path d="M8 4v16"/></symbol>
+    <symbol id="i-box" viewBox="0 0 24 24"><path d="M3 7l9-4 9 4-9 4zM3 7v10l9 4 9-4V7M12 11v10"/></symbol>
+    <symbol id="i-cal" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></symbol>
+    <symbol id="i-table" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M3 15h18M9 4v16"/></symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+    <symbol id="i-pen" viewBox="0 0 24 24"><path d="M4 20l4-1 11-11-3-3L5 16z"/></symbol>
+    <symbol id="i-trash" viewBox="0 0 24 24"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></symbol>
+    <symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12l5 5 9-10"/></symbol>
+    <symbol id="i-menu" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></symbol>
+    <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></symbol>
+  </defs>
+</svg>
+
+<div class="mock-bar" role="tablist" aria-label="Écrans de la maquette">
+  <span class="lbl">Maquette</span>
+  <button class="mock-tab" role="tab" data-go="ingredients" aria-selected="true">1 · Fiche ingrédient</button>
+  <button class="mock-tab" role="tab" data-go="entry" aria-selected="false">2 · Saisie</button>
+  <button class="mock-tab" role="tab" data-go="errors" aria-selected="false">3 · Erreurs de saisie</button>
+  <button class="mock-tab" role="tab" data-go="history" aria-selected="false">4 · Historique</button>
+  <button class="mock-tab" role="tab" data-go="edit" aria-selected="false">5 · Modifier</button>
+  <button class="mock-tab" role="tab" data-go="delete" aria-selected="false">6 · Supprimer</button>
+  <button class="mock-tab" role="tab" data-go="summary" aria-selected="false">7 · Récapitulatif</button>
+  <button class="mock-tab theme-btn" id="themeBtn" type="button">Thème clair / sombre</button>
+</div>
+
+<div class="shell">
+  <nav class="rail" aria-label="Sections">
+    <div class="logo">M</div>
+    <div class="rail-btn"><svg class="i"><use href="#i-cart"/></svg>Cmd.</div>
+    <div class="rail-btn"><svg class="i"><use href="#i-wallet"/></svg>Tréso.</div>
+    <div class="rail-btn on"><svg class="i"><use href="#i-db"/></svg>Prod.</div>
+    <div class="rail-btn"><svg class="i"><use href="#i-wallet"/></svg>Dép.</div>
+  </nav>
+  <aside class="panel">
+    <div class="panel-head">Production</div>
+    <div class="panel-body">
+      <button class="nav" type="button" data-nav="recipes"><svg class="i"><use href="#i-book"/></svg>Recettes</button>
+      <button class="nav" type="button" data-nav="production"><svg class="i"><use href="#i-cal"/></svg>Production</button>
+      <button class="nav" type="button" data-nav="summary"><svg class="i"><use href="#i-table"/></svg>Récapitulatif</button>
+      <button class="nav" type="button" data-nav="entry"><svg class="i"><use href="#i-box"/></svg>Entrée de stock</button>
+      <button class="nav" type="button" data-nav="ingredients"><svg class="i"><use href="#i-db"/></svg>Ingrédients</button>
+      <button class="nav" type="button" data-nav="units"><svg class="i"><use href="#i-book"/></svg>Unité</button>
+    </div>
+  </aside>
+  <div class="main-col">
+    <header class="topbar"><svg class="i"><use href="#i-menu"/></svg>GESTION PATISSERIE MERLEBLEU</header>
+    <main class="content">
+      <div class="card" id="card"></div>
+    </main>
+  </div>
+</div>
+
+<div class="toast" id="toast" role="status"><b>Entrée enregistrée.</b> <span id="toastText"></span></div>
+
+<div class="notes">
+  <div><b>Parcours de saisie :</b> on choisit l'ingrédient, on tape « 3 », l'unité par défaut est « sac » et l'écran affiche « = 150 000 g » avec le stock avant → après. Aucun clic en plus par rapport à aujourd'hui.</div>
+  <div><b>Nouveaux éléments signalés :</b> la ligne d'équivalence « 1 sac = [50 000] g » dans la fiche ingrédient, et un petit sélecteur d'unité dans la ligne de saisie. Le reste reprend les composants existants.</div>
+  <div><b>Hypothèses visibles :</b> H1 une ligne par ingrédient (pour 3 sacs + 2 kg, on saisit 3,04 sacs ou tout en grammes) ; H2 en modification, l'unité d'origine est figée.</div>
+</div>
+
+<script>
+var ING = {
+  farine: { label: 'Farine T55', unit: 'g', entry: 'sac', factor: 50000, stock: 120000 },
+  sucre:  { label: 'Sucre en poudre', unit: 'g', entry: 'sac', factor: 25000, stock: 6500 },
+  beurre: { label: 'Beurre doux', unit: 'g', entry: 'carton', factor: 10000, stock: 3000 },
+  oeufs:  { label: 'Oeufs', unit: 'unité', entry: null, factor: 1, stock: 48 },
+  choco:  { label: 'Chocolat noir 70 %', unit: 'g', entry: null, factor: 1, stock: 2500 }
+};
+var ORDER = ['farine', 'sucre', 'beurre', 'oeufs', 'choco'];
+var HISTORY = [
+  ['26/11/2026', 'Farine T55', '3 sacs', '150 000 g'], ['26/11/2026', 'Beurre doux', '2 cartons', '20 000 g'],
+  ['26/11/2026', 'Oeufs', '120 unité', '120 unité'], ['21/11/2026', 'Sucre en poudre', '2 sacs', '50 000 g'],
+  ['19/11/2026', 'Chocolat noir 70 %', '5 000 g', '5 000 g'], ['12/11/2026', 'Farine T55', '2,5 sacs', '125 000 g']
+];
+var NAV = { ingredients: 'ingredients', entry: 'entry', errors: 'entry', history: 'entry', edit: 'entry', delete: 'entry', summary: 'summary' };
+var $ = function (id) { return document.getElementById(id); };
+function fmt(n) { return (Math.round(n * 100) / 100).toLocaleString('fr-FR'); }
+function num(v) { return parseFloat(String(v).replace(/\s/g, '').replace(',', '.')); }
+function pl(label, q) { return q > 1 && !/s$/.test(label) ? label + 's' : label; }
+function factorOf(r, ing) { return r.unit === 'entry' && ing.entry ? ing.factor : 1; }
+
+/* ---------- screen 1 : ingredients ---------- */
+var ingState = { entry: 'sac', factor: '50000' };
+function ingredientsHtml() {
+  var rows = ORDER.map(function (k) {
+    var g = ING[k];
+    return '<tr' + (k === 'farine' ? ' style="background:var(--brand-soft)"' : '') + '><td>' + g.label + '</td><td class="r">' + g.unit + '</td>' +
+      '<td class="r">' + (g.entry ? '1 ' + g.entry + ' = ' + fmt(g.factor) + ' ' + g.unit : '<span class="dim">—</span>') + '</td>' +
+      '<td class="c"><button class="btn sm warn" type="button" aria-label="Modifier"><svg class="i"><use href="#i-pen"/></svg></button> ' +
+      '<button class="btn sm danger" type="button" aria-label="Supprimer"><svg class="i"><use href="#i-trash"/></svg></button></td></tr>';
+  }).join('');
+  return '<div class="head"><div><h2>Ingrédients</h2><div class="sub">5 ingrédient(s) référencé(s)</div></div>' +
+    '<div class="spacer"><input class="inp" style="width:256px" placeholder="Rechercher par libellé..." aria-label="Rechercher"></div></div>' +
+    '<div class="split"><div class="tbl-wrap"><table><thead><tr><th>Libellé</th><th class="r">Unité de stock</th><th class="r">Unité d\'entrée</th><th class="c" style="width:8rem">Actions</th></tr></thead><tbody>' + rows + '</tbody></table>' +
+    '<div class="pager"><span>5 ingrédients</span><span>Lignes par page : 10</span></div></div>' +
+    '<section class="sect" aria-labelledby="ingTitle">' +
+    '<div class="sect-head"><div><div class="t">Modification</div><h3 id="ingTitle">Farine T55</h3></div><button class="btn sm" style="background:#64748b" type="button"><svg class="i"><use href="#i-plus"/></svg>Nouveau</button></div>' +
+    '<div class="sect-body">' +
+    '<div class="field"><label for="fLabel">Libellé</label><input class="inp" id="fLabel" value="Farine T55"></div>' +
+    '<div class="field"><label for="fUnit">Unité de stock</label><select class="inp" id="fUnit"><option>g</option></select><span class="hint">Unité des recettes et du calcul du stock.</span></div>' +
+    '<div class="field"><label for="fEntry">Unité d\'entrée <span class="dim">(facultatif)</span></label><select class="inp" id="fEntry">' +
+    ['', 'sac', 'carton', 'boîte'].map(function (u) { return '<option value="' + u + '"' + (u === ingState.entry ? ' selected' : '') + '>' + (u || 'Aucune (saisie en unité de stock)') + '</option>'; }).join('') + '</select>' +
+    '<span class="hint">Unité dans laquelle vous recevez la marchandise.</span></div>' +
+    '<div id="equivBox">' + equivHtml() + '</div>' +
+    '<div class="field"><label for="fPay">Méthode de paiement par défaut</label><select class="inp" id="fPay"><option>Espèces</option></select><span class="hint">Utilisée pour les achats saisis dans la grille des dépenses.</span></div>' +
+    '</div>' +
+    '<div class="sect-foot"><button class="btn text red" type="button">Supprimer</button><div style="display:flex;gap:8px"><button class="btn contrast" type="button">Annuler</button><button class="btn" type="button">Enregistrer</button></div></div>' +
+    '</section></div>';
+}
+function equivHtml() {
+  if (!ingState.entry) return '';
+  var f = num(ingState.factor), bad = !(f > 0);
+  return '<div class="field"><label for="fFactor">Équivalence</label><div class="equiv"><span class="u">1 ' + ingState.entry + ' =</span>' +
+    '<input class="inp num' + (bad ? ' err' : '') + '" id="fFactor" inputmode="decimal" value="' + ingState.factor + '" aria-describedby="eqHelp"><span class="u">g</span></div>' +
+    (bad ? '<span class="err-t">L\'équivalence doit être supérieure à 0.</span>' : '<div class="preview" id="eqPreview">Saisir <b>3 ' + ingState.entry + 's</b> ajoute <b>' + fmt(3 * f) + ' g</b> au stock.</div>') +
+    '<div class="msg warnm" id="eqHelp"><svg class="i" style="margin-top:2px"><use href="#i-info"/></svg><span>Modifier l\'équivalence ne change ni le stock ni les entrées déjà enregistrées. Elle s\'applique aux prochaines saisies.</span></div></div>';
+}
+
+/* ---------- screens 2-3 : entry batch ---------- */
+var rows, showErrors, savedRows = [];
+function resetRows(mode) {
+  showErrors = mode === 'errors';
+  rows = mode === 'errors'
+    ? [{ ing: 'farine', qty: '0', unit: 'entry' }, { ing: '', qty: '4', unit: 'entry' }, { ing: 'oeufs', qty: '120', unit: 'stock' }]
+    : [{ ing: 'farine', qty: '3', unit: 'entry' }, { ing: 'beurre', qty: '2500', unit: 'stock' }, { ing: 'oeufs', qty: '120', unit: 'stock' }, { ing: '', qty: '', unit: 'entry' }];
+}
+function calcHtml(r) {
+  var g = ING[r.ing]; if (!g) return '';
+  var q = num(r.qty);
+  if (!(q > 0)) return '<span class="stock">Stock : ' + fmt(g.stock) + ' ' + g.unit + '</span>';
+  var c = q * factorOf(r, g);
+  return (r.unit === 'entry' && g.entry ? '<div class="conv"><b>= ' + fmt(c) + ' ' + g.unit + '</b></div>' : '') +
+    '<div class="after">' + fmt(g.stock) + ' → ' + fmt(g.stock + c) + ' ' + g.unit + '</div>';
+}
+function rowHtml(r, i, used) {
+  var g = ING[r.ing], q = num(r.qty);
+  var opts = '<option value="">Sélectionner un ingrédient</option>' + ORDER.filter(function (k) { return k === r.ing || used.indexOf(k) < 0; })
+    .map(function (k) { return '<option value="' + k + '"' + (k === r.ing ? ' selected' : '') + '>' + ING[k].label + '</option>'; }).join('');
+  var errIng = showErrors && !r.ing, errQty = showErrors && r.ing && !(q > 0);
+  var unitCell = !g ? '' : g.entry
+    ? '<select class="inp" data-i="' + i + '" data-f="unit" aria-label="Unité ligne ' + (i + 1) + '"><option value="entry"' + (r.unit === 'entry' ? ' selected' : '') + '>' + g.entry + '</option><option value="stock"' + (r.unit === 'stock' ? ' selected' : '') + '>' + g.unit + '</option></select>'
+    : '<span class="unit-static">' + g.unit + '</span>';
+  return '<div class="row">' +
+    '<select class="inp' + (errIng ? ' err' : '') + '" data-i="' + i + '" data-f="ing" aria-label="Ingrédient ligne ' + (i + 1) + '">' + opts + '</select>' +
+    '<input class="inp num' + (errQty ? ' err' : '') + '" data-i="' + i + '" data-f="qty" inputmode="decimal" placeholder="0" value="' + r.qty + '" aria-label="Quantité ligne ' + (i + 1) + '">' +
+    '<div class="unit-cell">' + unitCell + '</div>' +
+    '<div class="calc" data-calc="' + i + '">' + calcHtml(r) + '</div>' +
+    '<button class="x" type="button" data-del="' + i + '" aria-label="Retirer la ligne ' + (i + 1) + '"><svg class="i"><use href="#i-x"/></svg></button>' +
+    (errIng ? '<div class="row-err">Choisissez un ingrédient.</div>' : '') +
+    (errQty ? '<div class="row-err">La quantité doit être supérieure à 0.</div>' : '') + '</div>';
+}
+function entryBlockHtml() {
+  return '<section class="entry" aria-labelledby="entryTitle"><div class="entry-head"><div><div class="t">Nouvelle entrée</div><h3 id="entryTitle">Réception du jour</h3></div>' +
+    '<div class="date-field"><label for="entryDate">Date de l\'entrée</label><input class="inp" id="entryDate" value="28/11/2026"></div></div>' +
+    '<div class="rows" id="rows" aria-live="polite"></div>' +
+    '<div class="entry-foot"><button class="btn text" id="addRow" type="button"><svg class="i"><use href="#i-plus"/></svg>Ajouter une ligne</button>' +
+    '<span class="hint">Astuce : <span class="kbd">Entrée</span> dans une quantité ajoute une ligne.</span>' +
+    '<div class="end"><span class="hint" id="summaryText"></span><button class="btn" id="saveBtn" type="button"><svg class="i"><use href="#i-check"/></svg>Enregistrer l\'entrée</button></div></div></section>';
+}
+function renderRows() {
+  var used = rows.map(function (r) { return r.ing; });
+  $('rows').innerHTML = '<div class="row-head" aria-hidden="true"><span>Ingrédient</span><span style="text-align:right">Quantité reçue</span><span>Unité</span><span style="text-align:right">Ajouté au stock</span><span></span></div>' +
+    rows.map(function (r, i) { return rowHtml(r, i, used); }).join('');
+  updateSummary();
+}
+function validRows() { return rows.filter(function (r) { return r.ing && num(r.qty) > 0; }); }
+function updateSummary() {
+  var n = validRows().length;
+  $('summaryText').textContent = n ? n + ' ligne' + (n > 1 ? 's' : '') + ' prête' + (n > 1 ? 's' : '') : '';
+  $('saveBtn').disabled = n === 0;
+}
+
+/* ---------- history ---------- */
+function historyHtml() {
+  var all = savedRows.concat(HISTORY.map(function (h) { return h.concat([0]); }));
+  return '<div class="filters"><span class="sect-t">Historique des entrées</span><input class="inp" placeholder="Filtrer par date" aria-label="Filtrer par date"><input class="inp" placeholder="Rechercher par libellé..." aria-label="Rechercher par libellé"></div>' +
+    '<div class="tbl-wrap"><table><thead><tr><th>Date</th><th>Libellé</th><th class="r">Quantité saisie</th><th class="r">Ajouté au stock</th><th class="c" style="width:12rem">Actions</th></tr></thead><tbody>' +
+    all.map(function (h) {
+      return '<tr' + (h[4] ? ' class="fresh"' : '') + '><td>' + h[0] + '</td><td>' + h[1] + '</td><td class="r">' + h[2] + '</td><td class="r">' + (h[2] === h[3] ? '<span class="dim">' + h[3] + '</span>' : '<b>' + h[3] + '</b>') + '</td>' +
+        '<td class="c"><button class="btn sm warn" data-open="edit" type="button" aria-label="Modifier"><svg class="i"><use href="#i-pen"/></svg></button> ' +
+        '<button class="btn sm danger" data-open="delete" type="button" aria-label="Supprimer"><svg class="i"><use href="#i-trash"/></svg></button></td></tr>';
+    }).join('') + '</tbody></table></div><div class="pager"><span>' + all.length + ' entrées</span><span>Lignes par page : 10</span></div>';
+}
+var DIALOGS = '<div class="dialog-layer" id="dlg-edit"><div class="dialog" role="dialog" aria-modal="true" aria-labelledby="editTitle"><header id="editTitle">Modifier une entrée</header><div class="body">' +
+  '<div class="field"><label for="eDate">Date de l\'entrée</label><input class="inp" id="eDate" value="26/11/2026"></div>' +
+  '<div class="field"><label for="eIng">Ingrédient</label><select class="inp" id="eIng"><option>Farine T55</option></select></div>' +
+  '<div class="field"><label for="eQty">Quantité reçue</label><div class="qty-line"><input class="inp num" id="eQty" value="3"><span class="chip" title="Unité d\'origine, non modifiable">sac</span></div>' +
+  '<div class="preview" style="margin-top:4px">= <b>150 000 g</b> au stock (1 sac = 50 000 g, équivalence d\'origine).</div>' +
+  '<span class="hint">Pour changer d\'unité, supprimez l\'entrée puis saisissez-la de nouveau.</span></div></div>' +
+  '<footer><button class="btn contrast" data-close type="button">Annuler</button><button class="btn" data-close type="button">Enregistrer</button></footer></div></div>' +
+  '<div class="dialog-layer" id="dlg-delete"><div class="dialog" role="dialog" aria-modal="true" aria-labelledby="delTitle"><header id="delTitle">Confirmer la suppression</header>' +
+  '<div class="body"><p style="margin:0">Supprimer l\'entrée de <strong>Farine T55</strong> du 26/11/2026 (3 sacs, soit 150 000 g) ? Le stock de cet ingrédient sera réduit de <strong>150 000 g</strong>.</p></div>' +
+  '<footer><button class="btn contrast" data-close type="button">Annuler</button><button class="btn danger" data-close type="button">Supprimer</button></footer></div></div>';
+
+/* ---------- screen 7 : summary ---------- */
+function summaryHtml() {
+  var S = [['farine', 150000, 62500, 'ok'], ['sucre', 25000, 31000, 'warn'], ['beurre', 20000, 17000, 'warn'], ['oeufs', 120, 96, 'ok'], ['choco', 5000, 7500, 'bad']];
+  var tags = { ok: ['En stock', 'ok'], warn: ['En manque', 'warn'], bad: ['Épuisé', 'bad'] };
+  return '<div class="head"><div><h2>Récapitulatif mensuel</h2><div class="sub">Entrées de stock, consommation des productions et stock actuel</div></div>' +
+    '<div class="spacer"><button class="btn sm" style="background:#64748b" type="button">‹</button><input class="inp" style="width:170px" value="Novembre 2026" aria-label="Mois"><button class="btn sm" style="background:#64748b" type="button">›</button>' +
+    '<select class="inp" style="width:210px" aria-label="Filtrer par état"><option>Tous les ingrédients</option></select></div></div>' +
+    '<div class="msg" style="margin-bottom:14px"><svg class="i" style="margin-top:2px"><use href="#i-info"/></svg><span><b>Stock actuel</b> est le stock d\'aujourd\'hui. Quand l\'ingrédient a une unité d\'entrée, l\'équivalent y est indiqué à titre d\'information.</span></div>' +
+    '<div class="tbl-wrap"><table><thead><tr><th>Ingrédient</th><th>Unité</th><th class="r">Entrées du mois</th><th class="r">Consommé du mois</th><th class="r">Stock actuel</th><th class="c">État</th></tr></thead><tbody>' +
+    S.map(function (s) {
+      var g = ING[s[0]], t = tags[s[3]], stock = s[3] === 'bad' ? 0 : g.stock;
+      var approx = g.entry ? '<span class="sub-cell">≈ ' + fmt(stock / g.factor) + ' ' + pl(g.entry, stock / g.factor) + '</span>' : '';
+      return '<tr><td><b>' + g.label + '</b></td><td>' + g.unit + '</td><td class="r">' + fmt(s[1]) + '</td><td class="r">' + fmt(s[2]) + '</td><td class="r">' + fmt(stock) + approx + '</td><td class="c"><span class="pill ' + t[1] + '">' + t[0] + '</span></td></tr>';
+    }).join('') + '</tbody></table></div>';
+}
+
+/* ---------- routing ---------- */
+function pageHead() { return '<div class="head"><div><h2>Entrée de stock</h2><div class="sub">Ajoute des quantités au stock. Aucun impact sur la trésorerie.</div></div></div>'; }
+function go(name) {
+  if (!NAV[name]) name = 'ingredients';
+  var card = $('card');
+  if (name === 'ingredients') card.innerHTML = ingredientsHtml();
+  else if (name === 'summary') card.innerHTML = summaryHtml();
+  else {
+    if (name === 'errors') resetRows('errors'); else if (name === 'entry') resetRows('ok');
+    else if (!rows) resetRows('ok');
+    card.innerHTML = pageHead() + entryBlockHtml() + historyHtml() + DIALOGS;
+    renderRows();
+    if (name === 'edit') $('dlg-edit').classList.add('on');
+    if (name === 'delete') $('dlg-delete').classList.add('on');
+  }
+  document.querySelectorAll('.mock-tab[data-go]').forEach(function (b) { b.setAttribute('aria-selected', String(b.dataset.go === name)); });
+  document.querySelectorAll('.nav').forEach(function (n) { n.classList.toggle('on', n.dataset.nav === NAV[name]); });
+  if (location.hash !== '#' + name) history.replaceState(null, '', '#' + name);
+}
+function closeDialogs() { ['dlg-edit', 'dlg-delete'].forEach(function (id) { var d = $(id); if (d) d.classList.remove('on'); }); }
+
+document.addEventListener('click', function (e) {
+  var t = e.target.closest('button'); if (!t) return;
+  if (t.dataset.go) go(t.dataset.go);
+  else if (t.dataset.open) { closeDialogs(); $('dlg-' + t.dataset.open).classList.add('on'); }
+  else if (t.hasAttribute('data-close')) closeDialogs();
+  else if (t.dataset.del !== undefined) { rows.splice(+t.dataset.del, 1); if (!rows.length) rows.push({ ing: '', qty: '', unit: 'entry' }); renderRows(); }
+  else if (t.id === 'addRow') { rows.push({ ing: '', qty: '', unit: 'entry' }); renderRows(); }
+  else if (t.id === 'saveBtn') {
+    var ok = rows.every(function (r) { return (!r.ing && r.qty === '') || (r.ing && num(r.qty) > 0); });
+    if (!ok) { showErrors = true; renderRows(); return; }
+    var fresh = validRows().map(function (r) {
+      var g = ING[r.ing], q = num(r.qty), useEntry = r.unit === 'entry' && g.entry;
+      return ['28/11/2026', g.label, fmt(q) + ' ' + (useEntry ? pl(g.entry, q) : g.unit), fmt(q * factorOf(r, g)) + ' ' + g.unit, 1];
+    });
+    savedRows = fresh.concat(savedRows); showErrors = false; rows = [{ ing: '', qty: '', unit: 'entry' }];
+    $('toastText').textContent = fresh.length + ' ligne' + (fresh.length > 1 ? 's ajoutées' : ' ajoutée') + ' au stock.';
+    $('toast').classList.add('on'); setTimeout(function () { $('toast').classList.remove('on'); }, 3500);
+    go('history');
+  }
+  else if (t.id === 'themeBtn') {
+    var r = document.documentElement, dark = r.dataset.theme === 'dark' || (!r.dataset.theme && matchMedia('(prefers-color-scheme: dark)').matches);
+    r.dataset.theme = dark ? 'light' : 'dark';
+  }
+});
+document.addEventListener('input', function (e) {
+  var el = e.target, d = el.dataset;
+  if (el.id === 'fFactor') { ingState.factor = el.value; var f = num(el.value); if (f > 0) { var p = $('eqPreview'); if (p) p.innerHTML = 'Saisir <b>3 ' + ingState.entry + 's</b> ajoute <b>' + fmt(3 * f) + ' g</b> au stock.'; el.classList.remove('err'); } return; }
+  if (!d || d.i === undefined || d.f !== 'qty') return;
+  rows[+d.i].qty = el.value;
+  document.querySelector('[data-calc="' + d.i + '"]').innerHTML = calcHtml(rows[+d.i]);
+  updateSummary();
+});
+document.addEventListener('change', function (e) {
+  var el = e.target, d = el.dataset;
+  if (el.id === 'fEntry') { ingState.entry = el.value; $('equivBox').innerHTML = equivHtml(); return; }
+  if (el.id === 'fFactor') { $('equivBox').innerHTML = equivHtml(); var n = $('fFactor'); if (n) n.focus(); return; }
+  if (!d || d.i === undefined) return;
+  var r = rows[+d.i];
+  if (d.f === 'ing') { r.ing = el.value; r.unit = ING[r.ing] && ING[r.ing].entry ? 'entry' : 'stock'; renderRows(); }
+  else if (d.f === 'unit') { r.unit = el.value; renderRows(); }
+});
+document.addEventListener('keydown', function (e) {
+  if (e.key === 'Enter' && e.target.dataset && e.target.dataset.f === 'qty') {
+    e.preventDefault(); rows.push({ ing: '', qty: '', unit: 'entry' }); renderRows();
+    var s = document.querySelectorAll('.row select[data-f="ing"]'); s[s.length - 1].focus();
+  }
+  if (e.key === 'Escape') closeDialogs();
+});
+window.addEventListener('hashchange', function () { go(location.hash.slice(1)); });
+resetRows('ok');
+go(location.hash.slice(1) || 'ingredients');
+</script>

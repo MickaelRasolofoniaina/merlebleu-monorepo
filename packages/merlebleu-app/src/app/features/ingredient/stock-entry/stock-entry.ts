@@ -19,7 +19,8 @@ import { InputTextModule } from 'primeng/inputtext';
 import { DatePickerModule } from 'primeng/datepicker';
 import { MessageService } from 'primeng/api';
 import { getPageFromFirstRows } from '@shared/utils/pagination';
-import { capitalizeFirstLetter } from '@shared/utils/text';
+import { formatQuantity } from '@shared/utils/number';
+import { capitalizeFirstLetter, pluralizeUnit } from '@shared/utils/text';
 import { formatDate } from '@shared/utils/date';
 import { finalize } from 'rxjs';
 
@@ -120,8 +121,27 @@ export class StockEntryListComponent implements OnInit {
     return {
       entryDate: entry.entryDate,
       ingredientId: entry.ingredient.id,
-      quantity: Number(entry.quantity),
+      // The form edits the quantity in the unit it was typed in (bags), not the converted one
+      quantity: Number(entry.enteredQuantity ?? entry.quantity),
     };
+  }
+
+  /** "3 sacs" when typed in the entry unit, otherwise the quantity in the stock unit. */
+  enteredText(entry: StockEntry): string {
+    if (entry.enteredQuantity != null && entry.enteredUnitLabel) {
+      const quantity = Number(entry.enteredQuantity);
+      return `${formatQuantity(quantity)} ${pluralizeUnit(entry.enteredUnitLabel, quantity)}`;
+    }
+    return this.storedText(entry);
+  }
+
+  /** Quantity added to the stock, in the stock unit ("150 000 g"). */
+  storedText(entry: StockEntry): string {
+    return `${formatQuantity(Number(entry.quantity))} ${entry.ingredient.unit.label}`;
+  }
+
+  isConverted(entry: StockEntry): boolean {
+    return entry.enteredQuantity != null;
   }
 
   openEditModal(entry: StockEntry) {

@@ -44,29 +44,32 @@
 
 <p-message severity="info" icon="pi pi-info-circle" class="mb-4 block">
   <span class="font-semibold">Stock actuel</span> est le stock d'aujourd'hui. Il n'est pas recalculé pour la fin du
-  mois choisi.
+  mois choisi. Quand l'ingrédient a une unité d'entrée, son équivalent y est indiqué à titre d'information.
 </p-message>
 
 <p-table [value]="rows()" [loading]="isLoading()" [stripedRows]="true" [tableStyle]="{ 'min-width': '50rem' }">
   <ng-template #header>
     <tr>
       <th>Ingrédient</th>
-      <th>Unité</th>
       <th class="text-right!">Entrées du mois</th>
       <th class="text-right!">Consommé du mois</th>
       <th class="text-right!">Stock actuel</th>
+      <th>Unité</th>
       <th class="text-center!">État</th>
     </tr>
   </ng-template>
   <ng-template #body let-row>
     <tr>
       <td class="font-semibold">{{ capitalizeFirstLetter(row.ingredient.label) }}</td>
-      <td>{{ row.ingredient.unit.label }}</td>
       <td class="text-right!">{{ row.entries | number: '1.0-2' }}</td>
       <td class="text-right!">{{ row.consumed | number: '1.0-2' }}</td>
       <td [class]="row.currentStock < 0 ? 'text-right! font-bold text-red-600 dark:text-red-400' : 'text-right!'">
         {{ row.currentStock | number: '1.0-2' }}
+        @if (entryUnitEquivalent(row); as equivalent) {
+          <span class="block text-xs font-normal text-slate-500 dark:text-slate-400">{{ equivalent }}</span>
+        }
       </td>
+      <td>{{ row.ingredient.unit.label }}</td>
       <td class="text-center!">
         <p-tag [value]="statusOf(row).label" [severity]="statusOf(row).severity" />
       </td>
